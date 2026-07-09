@@ -120,9 +120,17 @@ probada de mini-timer y reemplazar solo el shell (app, navegación, ajustes, i18
 - [ ] Pendiente: verificación en dispositivo (historial y arrastre).
 
 ### Fase 8 — Build y verificación
-- [ ] Compilar (`compileReleaseKotlin`), corregir imports/paquete.
+- [x] Compilar debug (`:app:assembleDebug`) OK — BUILD SUCCESSFUL, APK `app-debug.apk` (~15 MB).
+- [x] **Smoke test en dispositivo** (Samsung SM-S948B, One UI; ADB Wi-Fi). Verificado en pantalla:
+      shell raíz (wordmark TIMES + trainings sembrados Master/Friki Niki), detalle de training
+      (workouts, iconos de ejercicio, variantes rotativas), arranque del player (máquina de pasos:
+      ejercicio + reps + Done) y modo inmersivo (tap oculta/muestra chrome).
+- [ ] Verificación funcional manual completa: avance de pasos (Done), countdown de ejercicios
+      cronometrados (p. ej. Cardio), pausa/reanudar, segundo plano y muerte de proceso, registro en
+      Historial y drag-reorder. (El `input tap` por ADB no acierta bien botones pegados a la barra de
+      navegación; se completa manualmente.)
 - [ ] Generar APK release + versionado.
-- [ ] Probar en dispositivo (instalación limpia por persistencia nueva).
+- [ ] Compilar release (`compileReleaseKotlin`/`assembleRelease`) con minify+shrink; revisar ProGuard.
 
 ## Riesgos y notas
 
