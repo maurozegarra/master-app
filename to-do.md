@@ -46,6 +46,20 @@ Material Design 3 antes de proponerlos.
   (long-press) vía `ui/Reorderable.kt`. Aplicado a la lista de trainings, editor de
   Training (workouts), lista de variantes y editor de Workout (ejercicios).
 
+### Selector de tono de alarma — HECHO (parcial)
+- `Ajustes → Alarm & sound → Alarm sound` abre el picker NATIVO filtrado a tonos de
+  **notificación** (`RingtoneManager.ACTION_RINGTONE_PICKER`, `TYPE_NOTIFICATION`).
+  Guarda `soundUri`/`soundName` en `AlarmConfig` (`SettingsViewModel.setSound`) y hace
+  un preview con `previewVolume()` al elegir. El player ya usa `config.soundUri`
+  (`AlarmPlayer.start`).
+- **Pendiente — preview de tonos in-app**: el picker nativo previsualiza al tocar cada
+  tono, pero conviene un preview propio consistente con "lo que pruebas es lo que suena"
+  (mismo `USAGE_ALARM`, volumen perceptual y ducking vía `AlarmPlayer.previewTone`).
+  Opciones: (a) botón "play" junto a la fila del tono que reproduzca el seleccionado; o
+  (b) lista de tonos in-app (cursor `RingtoneManager` TYPE_NOTIFICATION) con selección +
+  preview, sin salir de la app. Evaluar también el fallback por defecto: hoy si
+  `soundUri` es null cae a `TYPE_ALARM`; decidir si el default debe ser notificación.
+
 ## Extracción (ver docs/hoja-de-ruta.md)
 
 - Proyecto Android base (Gradle sin `gradlew`, Gradle 9.4.1 cacheado, JAVA_HOME jbr).
