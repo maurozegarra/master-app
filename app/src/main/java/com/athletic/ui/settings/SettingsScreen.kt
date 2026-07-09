@@ -1,5 +1,12 @@
 package com.athletic.ui.settings
 
+import android.app.Activity
+import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -85,6 +93,37 @@ fun SettingsScreen(vm: SettingsViewModel, t: Strings) {
 
         SettingsCard(t.groupAlarm) {
             val alarm = cfg.athlete.alarm
+            val context = LocalContext.current
+            val tonePicker = rememberLauncherForActivityResult(
+                ActivityResultContracts.StartActivityForResult(),
+            ) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val uri = pickedRingtone(result.data)
+                    val name = uri?.let { RingtoneManager.getRingtone(context, it)?.getTitle(context) }
+                    vm.setSound(uri?.toString(), name)
+                    vm.previewVolume()
+                }
+            }
+            ToneRow(
+                label = t.alarmSound,
+                value = alarm.soundName ?: t.defaultSound,
+                accent = accent,
+                onClick = {
+                    val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+                        putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION)
+                        putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, t.alarmSound)
+                        putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+                        putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                        putExtra(
+                            RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
+                            alarm.soundUri?.let { Uri.parse(it) },
+                        )
+                    }
+                    tonePicker.launch(intent)
+                },
+            )
+
+            Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(t.alarmVolume, color = AppTheme.colors.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
                 Text("${(alarm.volume * 100).toInt()}%", color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -231,6 +270,30 @@ private fun VibrationPatterns(selected: Int, accent: Color, onSelect: (Int) -> U
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ToneRow(label: String, value: String, accent: Color, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Dims.button))
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, color = AppTheme.colors.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        Text(value, color = accent, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Suppress("DEPRECATION")
+private fun pickedRingtone(data: Intent?): Uri? = data?.let {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        it.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri::class.java)
+    } else {
+        it.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
     }
 }
 

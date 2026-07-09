@@ -41,6 +41,8 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     private fun setAlarm(a: AlarmConfig) =
         update(config.copy(athlete = config.athlete.copy(alarm = a)))
 
+    fun setSound(uri: String?, name: String?) =
+        setAlarm(config.athlete.alarm.copy(soundUri = uri, soundName = name))
     fun setVolume(v: Float) = setAlarm(config.athlete.alarm.copy(volume = v))
     fun setVibrationEnabled(v: Boolean) = setAlarm(config.athlete.alarm.copy(vibrationEnabled = v))
     fun setVibrationPattern(i: Int) = setAlarm(config.athlete.alarm.copy(vibrationPattern = i))
