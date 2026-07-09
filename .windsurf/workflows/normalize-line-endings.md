@@ -51,7 +51,8 @@ Ajustar la lista de binarios segun los tipos de archivo del repo.
 git add .gitattributes; git add --renormalize .; git status --short
 ```
 
-3. Confirmar los cambios (solo si hay algo staged):
+3. Commit (solo si hay algo staged), siguiendo la **disciplina de commits del workflow `conventions`**
+   (se propone y se espera confirmacion; no marcar `// turbo`):
 
 ```powershell
 git commit -m "Add .gitattributes to normalize line endings (LF in repo, CRLF for Windows scripts)"
