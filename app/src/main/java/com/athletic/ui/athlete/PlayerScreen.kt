@@ -23,6 +23,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -117,9 +120,8 @@ private fun PreviewView(vm: AthleteViewModel, accent: Color, t: Strings) {
     val groups = remember(steps) { buildPreviewGroups(steps) }
     val totalExercises = groups.sumOf { it.exercises.size }
     val expanded = remember(steps) { mutableStateMapOf<Int, Boolean>() }
-    val firstIndex = groups.firstOrNull()?.index
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
@@ -134,7 +136,7 @@ private fun PreviewView(vm: AthleteViewModel, accent: Color, t: Strings) {
                 )
             }
             items(groups, key = { it.index }) { g ->
-                val open = expanded[g.index] ?: (g.index == firstIndex)
+                val open = expanded[g.index] ?: false
                 WorkoutGroupCard(g, open, accent, t) { expanded[g.index] = !open }
             }
         }
@@ -345,6 +347,7 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars)
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -521,7 +524,7 @@ private fun Controls(vm: AthleteViewModel, step: PlayerStep, accent: Color, t: S
 @Composable
 private fun FinishedView(vm: AthleteViewModel, accent: Color, t: Strings) {
     val suggestions = vm.weightSuggestions()
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp, 32.dp, 16.dp, 96.dp),
