@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ícono del splash (Android 12+). Sobre el fondo negro del splash: hexágono negro con
+  contorno rojo fino (strokeWidth 1, para distinguirlo del negro) y la "M" de Wallpoet
+  en ROJO SÓLIDO. Coincide con el ícono del launcher. Coordenadas ya "horneadas".
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#000000"
+        android:strokeColor="#FF5252"
+        android:strokeWidth="1"
+        android:pathData="M47.56,23.68L77.09,33.25L83.54,63.57L60.44,84.32L30.91,74.75L24.46,44.43Z" />
+    <path
+        android:fillColor="#FF5252"
+        android:pathData="M34.83,38L41.17,38L52.64,48.8L52.64,57.2L41.84,47.02L41.84,70L34.83,70Z M73.17,38L66.88,38L55.36,48.8L55.36,57.2L66.16,47.02L66.16,70L73.17,70Z" />
+</vector>
