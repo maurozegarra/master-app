@@ -14,3 +14,7 @@ build/
 
 # Herramientas/previews locales (no versionar)
 /tools/
+
+# Capturas temporales de pruebas en device (screencap)
+_*.png
+_*.svg
