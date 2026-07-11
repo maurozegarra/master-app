@@ -361,14 +361,25 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
             Spacer(Modifier.height(8.dp))
         }
         val repByRep = step.kind == StepKind.WORK && !step.timeBased && step.reps == 1 && step.totalSets > 1
-        Text(stageLabel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 48.sp, lineHeight = 52.sp, textAlign = TextAlign.Center)
+        val bigTitle = when (step.kind) {
+            StepKind.WORK -> step.title.ifBlank { t.exercise }
+            else -> ownerLabel.ifBlank { stageLabel }
+        }.uppercase()
+        val subStage = when (step.kind) {
+            StepKind.PREP -> t.prepare.uppercase()
+            StepKind.COOLDOWN -> t.cooldown.uppercase()
+            else -> ""
+        }
+        val showSeries = (step.kind == StepKind.WORK || step.kind == StepKind.REST) &&
+            step.totalSets > 1 && !repByRep
+        Text(bigTitle, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 48.sp, lineHeight = 52.sp, textAlign = TextAlign.Center)
         if (step.note.isNotBlank()) {
             Text(step.note.uppercase(), color = TEXT_DIM, fontWeight = FontWeight.Medium, fontSize = 14.sp, textAlign = TextAlign.Center)
         }
-        if (step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
-            Text(ownerLabel.uppercase(), color = TEXT_DIM, fontSize = 40.sp)
+        if (subStage.isNotBlank()) {
+            Text(subStage, color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
-        if (step.kind == StepKind.WORK && step.totalSets > 1 && !repByRep) {
+        if (showSeries) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
