@@ -374,7 +374,7 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
             step.totalSets > 1 && !repByRep
         Text(bigTitle, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 48.sp, lineHeight = 52.sp, textAlign = TextAlign.Center)
         if (step.note.isNotBlank()) {
-            Text(step.note.uppercase(), color = TEXT_DIM, fontWeight = FontWeight.Medium, fontSize = 14.sp, textAlign = TextAlign.Center)
+            Text(step.note.uppercase(), color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp, textAlign = TextAlign.Center)
         }
         if (subStage.isNotBlank()) {
             Text(subStage, color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
