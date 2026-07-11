@@ -1,6 +1,7 @@
 package com.athletic
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -27,7 +28,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContent {
             val settingsVm: SettingsViewModel = viewModel()
             val cfg = settingsVm.config
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
 private fun AthleticApp(settingsVm: SettingsViewModel) {
     val vm: AthleteViewModel = viewModel()
     val t = I18n.EN
-    val accent = Color(settingsVm.config.general.accent)
+    val accent = AppTheme.colors.accent
 
     var showSettings by remember { mutableStateOf(false) }
 

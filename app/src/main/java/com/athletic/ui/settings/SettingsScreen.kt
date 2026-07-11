@@ -67,7 +67,7 @@ import com.athletic.ui.theme.Dims
 @Composable
 fun SettingsScreen(vm: SettingsViewModel, t: Strings) {
     val cfg = vm.config
-    val accent = Color(cfg.general.accent)
+    val accent = AppTheme.colors.accent
     Column(
         modifier = Modifier
             .fillMaxWidth()

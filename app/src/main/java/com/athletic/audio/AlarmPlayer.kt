@@ -19,15 +19,13 @@ import kotlin.math.pow
 
 /**
  * Reproductor ÚNICO de alarma/sonido. Cada llamada recibe el [AlarmConfig] propio
- * de la pestaña, de modo que "lo que pruebas es lo que suena": mismo stream,
- * USAGE_ALARM, escalado perceptual en dB, ducking de la música y enrutamiento a
+ * de la pestaña, de modo que "lo que pruebas es lo que suena": USAGE_MEDIA, escalado perceptual en dB, ducking de la música y enrutamiento a
  * audífonos.
  */
 class AlarmPlayer(private val context: Context) {
 
     private val players = mutableListOf<MediaPlayer>()
     private var previewPlayer: MediaPlayer? = null
-    private var savedStreamVolume: Int? = null
     private var focus: AudioFocusRequest? = null
 
     private val audioManager: AudioManager
@@ -52,7 +50,6 @@ class AlarmPlayer(private val context: Context) {
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: return
 
-        boostStream()
         requestFocus()
         val vol = perceptualVolume(config.volume)
 
@@ -72,7 +69,7 @@ class AlarmPlayer(private val context: Context) {
     private fun play(uri: Uri, vol: Float, loop: Boolean, device: AudioDeviceInfo?) {
         try {
             val mp = MediaPlayer()
-            mp.setAudioAttributes(alarmAttrs())
+            mp.setAudioAttributes(mediaAttrs())
             mp.setDataSource(context, uri)
             mp.isLooping = loop
             mp.setVolume(vol, vol)
@@ -87,7 +84,6 @@ class AlarmPlayer(private val context: Context) {
                     players.remove(done)
                     if (players.isEmpty()) {
                         abandonFocus()
-                        restoreStream()
                         cancelVibration()
                     }
                 }
@@ -110,22 +106,20 @@ class AlarmPlayer(private val context: Context) {
         }
         players.clear()
         abandonFocus()
-        restoreStream()
     }
 
     // ---------- Previsualización (ajustes) ----------
 
     /**
      * Reproduce un tono como vista previa EXACTAMENTE como sonará la alarma real:
-     * stream de alarma al máximo + USAGE_ALARM + ducking + volumen perceptual.
+     * stream de media + USAGE_MEDIA + ducking + volumen perceptual.
      */
     fun previewTone(uriStr: String, volume: Float) {
         stopPreview()
         try {
-            boostStream()
             requestFocus()
             val mp = MediaPlayer()
-            mp.setAudioAttributes(alarmAttrs())
+            mp.setAudioAttributes(mediaAttrs())
             mp.setDataSource(context, Uri.parse(uriStr))
             val vol = perceptualVolume(volume)
             mp.setVolume(vol, vol)
@@ -134,7 +128,6 @@ class AlarmPlayer(private val context: Context) {
                 it.release()
                 if (previewPlayer === it) previewPlayer = null
                 abandonFocus()
-                restoreStream()
             }
             mp.prepareAsync()
             previewPlayer = mp
@@ -166,7 +159,6 @@ class AlarmPlayer(private val context: Context) {
         }
         previewPlayer = null
         abandonFocus()
-        restoreStream()
     }
 
     /** Vibra una vez con el patrón indicado, para previsualizarlo en ajustes. */
@@ -185,33 +177,12 @@ class AlarmPlayer(private val context: Context) {
         return 10.0.pow(db / 20.0).toFloat().coerceIn(0f, 1f)
     }
 
-    /** Sube el stream de alarma al máximo (guardando el valor original). */
-    private fun boostStream() {
-        if (savedStreamVolume != null) return
-        try {
-            val am = audioManager
-            savedStreamVolume = am.getStreamVolume(AudioManager.STREAM_ALARM)
-            val max = am.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            am.setStreamVolume(AudioManager.STREAM_ALARM, max, 0)
-        } catch (_: Exception) {
-        }
-    }
-
-    private fun restoreStream() {
-        val saved = savedStreamVolume ?: return
-        try {
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, saved, 0)
-        } catch (_: Exception) {
-        }
-        savedStreamVolume = null
-    }
-
     /** Foco transitorio con ducking: baja la música mientras suena la alarma. */
     private fun requestFocus() {
         if (focus != null) return
         try {
             val req = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-                .setAudioAttributes(alarmAttrs())
+                .setAudioAttributes(mediaAttrs())
                 .build()
             audioManager.requestAudioFocus(req)
             focus = req
@@ -228,8 +199,8 @@ class AlarmPlayer(private val context: Context) {
         focus = null
     }
 
-    private fun alarmAttrs() = AudioAttributes.Builder()
-        .setUsage(AudioAttributes.USAGE_ALARM)
+    private fun mediaAttrs() = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_MEDIA)
         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
         .build()
 
@@ -273,8 +244,8 @@ class AlarmPlayer(private val context: Context) {
     }
 
     private companion object {
-        /** Rango (dB) de la curva perceptual de volumen: 100% -> 0 dB, 0% -> -48 dB. */
-        const val VOLUME_DB_RANGE = 48f
+        /** Rango (dB) de la curva perceptual de volumen: 100% -> 0 dB, 0% -> -18 dB. */
+        const val VOLUME_DB_RANGE = 18f
 
         /**
          * Salidas de audífonos capaces de reproducir MEDIA, por preferencia. Se

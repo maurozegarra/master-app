@@ -51,7 +51,36 @@ private fun lightBase(accent: Color, onAccent: Color) = AppColors(
     isDark = false,
 )
 
+/** Tema especial "Barbie" (se activa con el acento rosa). */
+private val BarbieColors = AppColors(
+    bg = Color(0xFFFFE0F0),
+    surface = Color(0xFFFFF5FA),
+    track = Color(0xFFFFC2DE),
+    textPrimary = Color(0xFF2B0016),
+    textDim = Color(0xFF9A3D6D),
+    textFaded = Color(0xFFCF7BA8),
+    accent = Color(0xFFFF1FA5),
+    onAccent = Color.White,
+    isDark = false,
+)
+
 private val DEFAULT_DARK = darkBase(Color(DEFAULT_ACCENT), ON_ACCENT)
+
+private fun accentForLight(argb: Long): Color = when (argb) {
+    0xFF4AC0D6 -> Color(0xFF0E8FA3) // cian
+    0xFF4A90D6 -> Color(0xFF2B6CB0) // azul
+    0xFF3DDC84 -> Color(0xFF1E9E5A) // verde
+    0xFFA06CFF -> Color(0xFF6C3FE0) // morado
+    0xFF9E9E9E -> Color(0xFF5F6368) // plomo
+    0xFFFF5252 -> Color(0xFFE03B3B) // rojo
+    else -> Color(argb)
+}
+
+private fun appColorsFor(accentArgb: Long, dark: Boolean): AppColors = when {
+    accentArgb == PINK_ACCENT -> BarbieColors
+    dark -> darkBase(Color(accentArgb), ON_ACCENT)
+    else -> lightBase(accentForLight(accentArgb), Color.White)
+}
 
 val LocalAppColors = staticCompositionLocalOf { DEFAULT_DARK }
 
@@ -68,11 +97,7 @@ fun AthleticTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val appColors = if (darkTheme) {
-        darkBase(Color(accent), ON_ACCENT)
-    } else {
-        lightBase(Color(accent), Color.White)
-    }
+    val appColors = appColorsFor(accent, darkTheme)
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

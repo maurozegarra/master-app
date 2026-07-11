@@ -18,3 +18,4 @@ build/
 # Capturas temporales de pruebas en device (screencap)
 _*.png
 _*.svg
+*.log

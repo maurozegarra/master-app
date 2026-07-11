@@ -13,3 +13,6 @@ val ON_ACCENT = Color(0xFF001316)
 
 /** Acento por defecto (placeholder). */
 const val DEFAULT_ACCENT = 0xFFFF5252
+
+/** Acento rosa que activa el tema especial "Barbie". */
+const val PINK_ACCENT = 0xFFFF69B4
