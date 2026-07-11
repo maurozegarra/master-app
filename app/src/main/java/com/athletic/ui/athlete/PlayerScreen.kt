@@ -363,7 +363,7 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
         val repByRep = step.kind == StepKind.WORK && !step.timeBased && step.reps == 1 && step.totalSets > 1
         Text(stageLabel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 48.sp, lineHeight = 52.sp, textAlign = TextAlign.Center)
         if (step.note.isNotBlank()) {
-            Text(step.note.uppercase(), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 48.sp, lineHeight = 52.sp, textAlign = TextAlign.Center)
+            Text(step.note.uppercase(), color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 48.sp, lineHeight = 52.sp, textAlign = TextAlign.Center)
         }
         if (step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
             Text(ownerLabel.uppercase(), color = TEXT_DIM, fontSize = 40.sp)
