@@ -48,6 +48,37 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     private val customExercises = mutableStateListOf<ExerciseDef>()
     private var nextId = System.currentTimeMillis()
 
+    // ---------- Player state (debe ir antes del init para que restorePlayerState funcione) ----------
+
+    var playerTrainingId by mutableStateOf<Long?>(null)
+        private set
+    var playerSteps by mutableStateOf<List<PlayerStep>>(emptyList())
+        private set
+    var playerName by mutableStateOf("")
+        private set
+    var playerStarted by mutableStateOf(false)
+        private set
+    var playerFinished by mutableStateOf(false)
+        private set
+    var playerRunning by mutableStateOf(false)
+        private set
+    var playerIndex by mutableStateOf(0)
+        private set
+    var playerTotalSteps by mutableStateOf(0)
+        private set
+    var playerRemainingMs by mutableStateOf(0L)
+        private set
+    var playerStep by mutableStateOf<PlayerStep?>(null)
+        private set
+
+    /** OSD: si los controles del player están visibles (se auto-ocultan tras un tap). */
+    var playerControlsVisible by mutableStateOf(true)
+        private set
+
+    /** Se incrementa en cada interacción para re-armar el auto-ocultado del OSD. */
+    var osdNonce by mutableStateOf(0)
+        private set
+
     private fun newId(): Long = nextId++
 
     init {
@@ -79,6 +110,37 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
             if (changed) persist()
         }
         observePlayer()
+        restorePlayerState()
+    }
+
+    /** Reconecta la UI al player activo tras reabrir la app (estilo YouTube). */
+    fun restorePlayerState() {
+        val prefs = getApplication<Application>().getSharedPreferences("athlete_player", android.content.Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("active", false)) return
+        val steps = WorkoutPlayerService.decodeSteps(prefs.getString("steps", "[]") ?: "[]")
+        if (steps.isEmpty()) return
+        val trainingId = prefs.getLong("workoutId", 0L)
+        playerSteps = steps
+        playerTrainingId = trainingId
+        playerName = prefs.getString("name", "") ?: ""
+        playerStarted = true
+        playerFinished = false
+        playerRunning = prefs.getBoolean("running", false)
+        playerIndex = prefs.getInt("index", 0).coerceIn(0, steps.lastIndex)
+        playerTotalSteps = steps.size
+        val step = steps[playerIndex]
+        playerStep = step
+        val endAt = prefs.getLong("endAt", 0L)
+        playerRemainingMs = if (step.manual) {
+            0L
+        } else if (playerRunning && endAt > 0) {
+            (endAt - System.currentTimeMillis()).coerceAtLeast(0L)
+        } else {
+            prefs.getLong("remainingMs", step.durationSec * 1000L)
+        }
+        if (PlayerBus.state.value == null) {
+            WorkoutPlayerService.reconnect(getApplication())
+        }
     }
 
     private fun persist() = store.saveTrainings(trainings.toList())
@@ -569,36 +631,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         )
     }
 
-    // ---------- Player ----------
-
-    var playerTrainingId by mutableStateOf<Long?>(null)
-        private set
-    var playerSteps by mutableStateOf<List<PlayerStep>>(emptyList())
-        private set
-    var playerName by mutableStateOf("")
-        private set
-    var playerStarted by mutableStateOf(false)
-        private set
-    var playerFinished by mutableStateOf(false)
-        private set
-    var playerRunning by mutableStateOf(false)
-        private set
-    var playerIndex by mutableStateOf(0)
-        private set
-    var playerTotalSteps by mutableStateOf(0)
-        private set
-    var playerRemainingMs by mutableStateOf(0L)
-        private set
-    var playerStep by mutableStateOf<PlayerStep?>(null)
-        private set
-
-    /** OSD: si los controles del player están visibles (se auto-ocultan tras un tap). */
-    var playerControlsVisible by mutableStateOf(true)
-        private set
-
-    /** Se incrementa en cada interacción para re-armar el auto-ocultado del OSD. */
-    var osdNonce by mutableStateOf(0)
-        private set
+    // ---------- Player helpers ----------
 
     fun showPlayerControls() {
         playerControlsVisible = true

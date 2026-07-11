@@ -84,6 +84,10 @@ class WorkoutPlayerService : Service() {
             ACTION_RESUME -> resume()
             ACTION_NEXT -> advance()
             ACTION_STOP -> stopPlayer()
+            ACTION_RECONNECT -> {
+                if (steps.isEmpty()) { restore() }
+                if (steps.isNotEmpty()) { publish(); startTick() }
+            }
         }
         return START_STICKY
     }
@@ -499,6 +503,7 @@ class WorkoutPlayerService : Service() {
         private const val ACTION_RESUME = "com.athletic.player.RESUME"
         private const val ACTION_NEXT = "com.athletic.player.NEXT"
         private const val ACTION_STOP = "com.athletic.player.STOP"
+        private const val ACTION_RECONNECT = "com.athletic.player.RECONNECT"
         private const val EXTRA_STEPS = "steps"
         private const val EXTRA_WORKOUT_ID = "workoutId"
         private const val EXTRA_NAME = "name"
@@ -581,6 +586,15 @@ class WorkoutPlayerService : Service() {
             context.startService(
                 Intent(context, WorkoutPlayerService::class.java).setAction(ACTION_STOP),
             )
+        }
+
+        fun reconnect(context: Context) {
+            val intent = Intent(context, WorkoutPlayerService::class.java).setAction(ACTION_RECONNECT)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
         }
 
         private fun fmtClock(ms: Long): String {
