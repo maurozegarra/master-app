@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -317,6 +318,72 @@ private fun WorkoutProgressBar(step: PlayerStep, accent: Color, t: Strings) {
 }
 
 @Composable
+private fun RoutineProgressBar(vm: AthleteViewModel, accent: Color) {
+    val steps = vm.playerSteps
+    if (steps.isEmpty()) return
+    val idx = vm.playerIndex.coerceIn(0, steps.lastIndex)
+    val remainingMs = vm.playerRemainingMs
+
+    val totalSec = steps.sumOf { it.estimatedSec }
+    if (totalSec <= 0) return
+
+    val completedSec = steps.take(idx).sumOf { it.estimatedSec }
+    val cur = steps[idx]
+    val curPartial = if (cur.timeBased && cur.durationSec > 0) {
+        (cur.durationSec - remainingMs / 1000.0).coerceIn(0.0, cur.durationSec.toDouble())
+    } else 0.0
+    val elapsedSec = completedSec + curPartial
+    val rawFraction = (elapsedSec / totalSec).toFloat().coerceIn(0f, 1f)
+    val animatedFraction by animateFloatAsState(targetValue = rawFraction, label = "routineProgress")
+    val percent = (rawFraction * 100).toInt()
+
+    val totalExercises = steps.count { it.kind == StepKind.WORK }
+    val curExercise = steps.take(idx + 1).count { it.kind == StepKind.WORK }
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.systemBars)
+            .padding(horizontal = 20.dp, vertical = 6.dp),
+    ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                if (totalExercises > 0) "$curExercise / $totalExercises" else "",
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+            )
+            Text(
+                "$percent%",
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(3.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(Color.White.copy(alpha = 0.15f)),
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth(animatedFraction)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(accent),
+            )
+        }
+    }
+}
+
+@Composable
 private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
     val step = vm.playerStep ?: return
     val color = Color(step.colorArgb)
@@ -344,13 +411,15 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
             .background(bg)
             .pointerInput(Unit) { detectTapGestures { vm.togglePlayerControls() } },
     ) {
-    Column(
+        RoutineProgressBar(vm, accent)
+        Column(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.systemBars)
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Spacer(Modifier.height(12.dp))
         AnimatedVisibility(visible = vm.playerControlsVisible && step.totalWorkouts > 1) {
             WorkoutProgressBar(step, accent, t)
         }

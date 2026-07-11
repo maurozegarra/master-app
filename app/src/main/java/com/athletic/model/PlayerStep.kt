@@ -41,10 +41,16 @@ data class PlayerStep(
     val variantName: String = "",
     /** true si el workout es rotativo. */
     val rotating: Boolean = false,
+    /** Segundos estimados por repetición (solo WORK por reps): pondera la barra de progreso. */
+    val secPerRep: Int = 3,
 ) {
     /** La etapa requiere confirmación manual (TAP) para avanzar. */
     val manual: Boolean
         get() = (kind == StepKind.WORK && !timeBased) ||
             confirm == ConfirmMode.MANUAL ||
             display == DisplayMode.STATIC
+
+    /** Duración estimada en segundos para ponderar la barra de progreso. */
+    val estimatedSec: Int
+        get() = if (timeBased) durationSec else reps * secPerRep
 }

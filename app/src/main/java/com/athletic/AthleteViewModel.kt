@@ -485,6 +485,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
                                 weightTotal = if (e.isWeighted) e.weightTotal(ws) else 0.0,
                                 weightLabel = if (e.isWeighted) weightLabel(e, ws) else "",
                                 workoutBase = w.name, variant = wVariant, rotating = w.rotating,
+                                secPerRep = e.secPerRep,
                             ),
                         )
                     }
@@ -517,6 +518,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         workoutBase: String = "",
         variant: String = "",
         rotating: Boolean = false,
+        secPerRep: Int = 3,
     ): PlayerStep {
         val cfg = when (kind) {
             StepKind.PREP -> e.prepareCfg
@@ -548,6 +550,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
             workoutBaseName = workoutBase,
             variantName = variant,
             rotating = rotating,
+            secPerRep = secPerRep,
         )
     }
 
