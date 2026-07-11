@@ -95,6 +95,7 @@ class WorkoutPlayerService : Service() {
                     PlayerCommand.PAUSE -> pause()
                     PlayerCommand.RESUME -> resume()
                     PlayerCommand.NEXT -> advance()
+                    PlayerCommand.PREV -> goBack()
                     PlayerCommand.STOP -> stopPlayer()
                 }
             }
@@ -149,6 +150,13 @@ class WorkoutPlayerService : Service() {
             alarmCue()
             beginStep(next)
         }
+    }
+
+    private fun goBack() {
+        if (finished) return
+        val prev = index - 1
+        if (prev < 0) return
+        beginStep(prev)
     }
 
     private fun finishPlayer() {

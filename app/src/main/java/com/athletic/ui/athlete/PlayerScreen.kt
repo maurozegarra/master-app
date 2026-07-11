@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -394,6 +395,7 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
         StepKind.COOLDOWN -> t.cooldown.uppercase()
     }
 
+
     // Auto-oculta el OSD tras 4 s; se re-arma con cada interacción (osdNonce).
     LaunchedEffect(vm.playerControlsVisible, vm.osdNonce) {
         if (vm.playerControlsVisible) {
@@ -409,7 +411,26 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
         Modifier
             .fillMaxSize()
             .background(bg)
-            .pointerInput(Unit) { detectTapGestures { vm.togglePlayerControls() } },
+            .pointerInput(Unit) {
+                detectTapGestures { vm.togglePlayerControls() }
+            }
+            .pointerInput(Unit) {
+                var accumulated = 0f
+                detectHorizontalDragGestures(
+                    onDragStart = { accumulated = 0f },
+                    onDragEnd = {
+                        if (accumulated < -200f) {
+                            vm.showPlayerControls()
+                            vm.nextStep()
+                        } else if (accumulated > 200f) {
+                            vm.showPlayerControls()
+                            vm.prevStep()
+                        }
+                    },
+                ) { _, dragAmount ->
+                    accumulated += dragAmount
+                }
+            },
     ) {
         RoutineProgressBar(vm, accent)
         Column(

@@ -659,6 +659,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     fun pausePlayer() = PlayerBus.command.tryEmit(PlayerCommand.PAUSE)
     fun resumePlayer() = PlayerBus.command.tryEmit(PlayerCommand.RESUME)
     fun nextStep() = PlayerBus.command.tryEmit(PlayerCommand.NEXT)
+    fun prevStep() = PlayerBus.command.tryEmit(PlayerCommand.PREV)
 
     fun closePlayer() {
         WorkoutPlayerService.stop(getApplication())
