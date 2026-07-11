@@ -1,5 +1,6 @@
 package com.athletic.ui.athlete
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -61,7 +64,8 @@ import com.athletic.ui.theme.AppTheme
 fun ExerciseEditorScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
     val initial = vm.editingExercise() ?: return
     var ex by remember(initial.id) { mutableStateOf(initial) }
-    var tab by remember { mutableStateOf("simple") }
+    // Acordeon: una sola etapa abierta a la vez; null = todas colapsadas (por defecto).
+    var openStage by remember(initial.id) { mutableStateOf<StepKind?>(null) }
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
@@ -69,19 +73,18 @@ fun ExerciseEditorScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
             contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            item {
-                SegmentToggle(
-                    options = listOf("simple" to t.simple, "advanced" to t.advanced),
-                    selected = tab,
-                    accent = accent,
-                    onSelect = { tab = it },
-                )
-            }
-
-            if (tab == "simple") {
-                item { SimpleTab(ex, accent, t) { ex = it } }
-            } else {
-                item { AdvancedTab(ex, accent, t) { ex = it } }
+            item { GeneralCard(ex, accent, t) { ex = it } }
+            listOf(StepKind.PREP, StepKind.WORK, StepKind.REST, StepKind.COOLDOWN).forEach { kind ->
+                item(key = kind) {
+                    StageSection(
+                        kind = kind,
+                        ex = ex,
+                        expanded = openStage == kind,
+                        onToggle = { openStage = if (openStage == kind) null else kind },
+                        accent = accent,
+                        t = t,
+                    ) { ex = it }
+                }
             }
         }
 
@@ -113,53 +116,99 @@ fun ExerciseEditorScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
 }
 
 @Composable
-private fun SimpleTab(ex: Exercise, accent: Color, t: Strings, onChange: (Exercise) -> Unit) {
+private fun GeneralCard(ex: Exercise, accent: Color, t: Strings, onChange: (Exercise) -> Unit) {
     SectionCard {
         ExerciseNoteField(ex, accent, t, onChange)
         VSpace(14)
-        DurationWheelField(t.prepare, ex.prepareSec, accent, t, max = 1800) { onChange(ex.copy(prepareSec = it)) }
-        VSpace(14)
-        Stepper(t.setsLabel, ex.sets, accent, min = 1, max = 30) {
-            onChange(ex.copy(sets = it))
-        }
-        VSpace(14)
-        Text(t.work, color = AppTheme.colors.textDim, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-        VSpace(8)
-        SegmentToggle(
-            options = listOf("TIME" to t.secUnit, "REPS" to t.repsUnit),
-            selected = ex.workMode.name,
-            accent = accent,
-        ) { onChange(ex.copy(workMode = WorkMode.valueOf(it))) }
-        VSpace(10)
-        if (ex.workMode == WorkMode.TIME) {
-            DurationWheelField(t.secUnit, ex.workValue, accent, t, min = 1, max = 36000) { onChange(ex.copy(workValue = it)) }
-        } else {
-            Stepper(t.repsUnit, ex.workValue, accent, min = 1, max = 200) {
-                onChange(ex.copy(workValue = it))
-            }
-        }
-        VSpace(14)
-        DurationWheelField(t.rest, ex.restSec, accent, t, max = 1800) { onChange(ex.copy(restSec = it)) }
-        // Divulgacion progresiva: "skip rest on last set" solo aplica si hay descanso.
-        if (ex.restSec > 0) {
-            VSpace(10)
-            SwitchRow(t.restSkipLast, null, ex.restSkipOnLastSet, accent) {
-                onChange(ex.copy(restSkipOnLastSet = it))
-            }
-        }
-        VSpace(14)
-        DurationWheelField(t.cooldown, ex.cooldownSec, accent, t, max = 1800) { onChange(ex.copy(cooldownSec = it)) }
+        Stepper(t.setsLabel, ex.sets, accent, min = 1, max = 30) { onChange(ex.copy(sets = it)) }
     }
+}
 
-    if (ex.workMode == WorkMode.REPS) {
-        VSpace(14)
-        WeightSection(ex, accent, t, onChange)
+/** Tarjeta colapsable de una etapa: campos basicos + "Opciones avanzadas". */
+@Composable
+private fun StageSection(
+    kind: StepKind,
+    ex: Exercise,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    accent: Color,
+    t: Strings,
+    onChange: (Exercise) -> Unit,
+) {
+    val cfg = when (kind) {
+        StepKind.PREP -> ex.prepareCfg
+        StepKind.WORK -> ex.workCfg
+        StepKind.REST -> ex.restCfg
+        StepKind.COOLDOWN -> ex.cooldownCfg
+    }
+    val title = when (kind) {
+        StepKind.PREP -> t.prepare
+        StepKind.WORK -> t.work
+        StepKind.REST -> t.rest
+        StepKind.COOLDOWN -> t.cooldown
+    }
+    SectionCard {
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable { onToggle() },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ColorDot(color = cfg.color, size = 20)
+            Spacer(Modifier.width(10.dp))
+            Text(title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.weight(1f))
+            Icon(
+                if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = null,
+                tint = AppTheme.colors.textDim,
+            )
+        }
+        AnimatedVisibility(visible = expanded) {
+            Column {
+                VSpace(14)
+                StageBasics(kind, ex, accent, t, onChange)
+                VSpace(14)
+                StageAdvanced(kind, ex, cfg, accent, t, onChange)
+            }
+        }
+    }
+}
+
+/** Campos basicos de cada etapa (duracion / modo / reps / peso). */
+@Composable
+private fun StageBasics(kind: StepKind, ex: Exercise, accent: Color, t: Strings, onChange: (Exercise) -> Unit) {
+    when (kind) {
+        StepKind.PREP ->
+            DurationWheelField(t.secUnit, ex.prepareSec, accent, t, max = 1800) { onChange(ex.copy(prepareSec = it)) }
+        StepKind.WORK -> {
+            SegmentToggle(
+                options = listOf("TIME" to t.secUnit, "REPS" to t.repsUnit),
+                selected = ex.workMode.name,
+                accent = accent,
+            ) { onChange(ex.copy(workMode = WorkMode.valueOf(it))) }
+            VSpace(10)
+            if (ex.workMode == WorkMode.TIME) {
+                DurationWheelField(t.secUnit, ex.workValue, accent, t, min = 1, max = 36000) { onChange(ex.copy(workValue = it)) }
+            } else {
+                Stepper(t.repsUnit, ex.workValue, accent, min = 1, max = 200) { onChange(ex.copy(workValue = it)) }
+                VSpace(14)
+                WeightSection(ex, accent, t, onChange)
+            }
+        }
+        StepKind.REST -> {
+            DurationWheelField(t.secUnit, ex.restSec, accent, t, max = 1800) { onChange(ex.copy(restSec = it)) }
+            // Divulgacion progresiva: "skip rest on last set" solo aplica si hay descanso.
+            if (ex.restSec > 0) {
+                VSpace(10)
+                SwitchRow(t.restSkipLast, null, ex.restSkipOnLastSet, accent) { onChange(ex.copy(restSkipOnLastSet = it)) }
+            }
+        }
+        StepKind.COOLDOWN ->
+            DurationWheelField(t.secUnit, ex.cooldownSec, accent, t, max = 1800) { onChange(ex.copy(cooldownSec = it)) }
     }
 }
 
 @Composable
 private fun WeightSection(ex: Exercise, accent: Color, t: Strings, onChange: (Exercise) -> Unit) {
-    SectionCard {
+    Column {
         Text(t.weight, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         VSpace(10)
         SegmentToggle(
@@ -245,62 +294,83 @@ private fun WeightStepper(label: String, value: Double, accent: Color, onChange:
     }
 }
 
-@Composable
-private fun AdvancedTab(ex: Exercise, accent: Color, t: Strings, onChange: (Exercise) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        StageCard(t.prepare, ex.prepareCfg, StepKind.PREP, accent, t) { onChange(ex.copy(prepareCfg = it)) }
-        StageCard(t.work, ex.workCfg, StepKind.WORK, accent, t) { onChange(ex.copy(workCfg = it)) }
-        StageCard(t.rest, ex.restCfg, StepKind.REST, accent, t) { onChange(ex.copy(restCfg = it)) }
-        StageCard(t.cooldown, ex.cooldownCfg, StepKind.COOLDOWN, accent, t) { onChange(ex.copy(cooldownCfg = it)) }
-    }
-}
-
+/** Subseccion colapsable "Opciones avanzadas" dentro de cada etapa. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StageCard(
-    title: String,
-    cfg: StageConfig,
+private fun StageAdvanced(
     kind: StepKind,
+    ex: Exercise,
+    cfg: StageConfig,
     accent: Color,
     t: Strings,
-    onChange: (StageConfig) -> Unit,
+    onChange: (Exercise) -> Unit,
 ) {
+    var open by remember { mutableStateOf(false) }
     var showColors by remember { mutableStateOf(false) }
-    SectionCard {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.weight(1f))
-            ColorDot(
-                color = cfg.color,
-                size = 26,
-                modifier = Modifier.clip(CircleShape).clickable { showColors = true },
+    val onCfg: (StageConfig) -> Unit = { c ->
+        onChange(
+            when (kind) {
+                StepKind.PREP -> ex.copy(prepareCfg = c)
+                StepKind.WORK -> ex.copy(workCfg = c)
+                StepKind.REST -> ex.copy(restCfg = c)
+                StepKind.COOLDOWN -> ex.copy(cooldownCfg = c)
+            },
+        )
+    }
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable { open = !open },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(t.advancedOptions, color = AppTheme.colors.textDim, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+            Icon(
+                if (open) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = null,
+                tint = AppTheme.colors.textDim,
             )
         }
-        VSpace(12)
-        Text(t.displayLabel, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-        VSpace(6)
-        SegmentToggle(
-            options = listOf(
-                "COUNTDOWN" to t.displayCountdown,
-                "STATIC" to t.displayStatic,
-                "COUNTUP" to t.displayCountup,
-            ),
-            selected = cfg.display.name,
-            accent = accent,
-        ) { onChange(cfg.copy(display = DisplayMode.valueOf(it))) }
-        VSpace(12)
-        SwitchRow(t.alarmLabel, null, cfg.alarm, accent) { onChange(cfg.copy(alarm = it)) }
-        VSpace(10)
-        Stepper(t.finalCountLabel, cfg.finalCount, accent, min = 0, max = 10) {
-            onChange(cfg.copy(finalCount = it))
+        AnimatedVisibility(visible = open) {
+            Column {
+                VSpace(12)
+                // Solo Work por repeticiones: segundos estimados por rep (pondera la barra de progreso).
+                if (kind == StepKind.WORK && ex.workMode == WorkMode.REPS) {
+                    Stepper(t.secPerRepLabel, ex.secPerRep, accent, min = 1, max = 30) { onChange(ex.copy(secPerRep = it)) }
+                    VSpace(12)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(t.color, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                    ColorDot(
+                        color = cfg.color,
+                        size = 26,
+                        modifier = Modifier.clip(CircleShape).clickable { showColors = true },
+                    )
+                }
+                VSpace(12)
+                Text(t.displayLabel, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                VSpace(6)
+                SegmentToggle(
+                    options = listOf(
+                        "COUNTDOWN" to t.displayCountdown,
+                        "STATIC" to t.displayStatic,
+                        "COUNTUP" to t.displayCountup,
+                    ),
+                    selected = cfg.display.name,
+                    accent = accent,
+                ) { onCfg(cfg.copy(display = DisplayMode.valueOf(it))) }
+                VSpace(12)
+                SwitchRow(t.alarmLabel, null, cfg.alarm, accent) { onCfg(cfg.copy(alarm = it)) }
+                VSpace(10)
+                Stepper(t.finalCountLabel, cfg.finalCount, accent, min = 0, max = 10) { onCfg(cfg.copy(finalCount = it)) }
+                VSpace(12)
+                Text(t.advanceLabel, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                VSpace(6)
+                SegmentToggle(
+                    options = listOf("AUTO" to t.advanceAuto, "MANUAL" to t.advanceManual),
+                    selected = cfg.confirm.name,
+                    accent = accent,
+                ) { onCfg(cfg.copy(confirm = ConfirmMode.valueOf(it))) }
+            }
         }
-        VSpace(12)
-        Text(t.advanceLabel, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-        VSpace(6)
-        SegmentToggle(
-            options = listOf("AUTO" to t.advanceAuto, "MANUAL" to t.advanceManual),
-            selected = cfg.confirm.name,
-            accent = accent,
-        ) { onChange(cfg.copy(confirm = ConfirmMode.valueOf(it))) }
     }
 
     if (showColors) {
@@ -321,7 +391,7 @@ private fun StageCard(
                             .size(48.dp)
                             .clip(CircleShape)
                             .background(Color(c))
-                            .clickable { onChange(cfg.copy(color = c)); showColors = false },
+                            .clickable { onCfg(cfg.copy(color = c)); showColors = false },
                         contentAlignment = Alignment.Center,
                     ) {
                         if (c == cfg.color) {

@@ -145,6 +145,7 @@ class WorkoutStore(context: Context) {
             .put("sets", e.sets)
             .put("workMode", e.workMode.name)
             .put("workValue", e.workValue)
+            .put("secPerRep", e.secPerRep)
             .put("restSec", e.restSec)
             .put("restSkipOnLastSet", e.restSkipOnLastSet)
             .put("cooldownSec", e.cooldownSec)
@@ -174,6 +175,7 @@ class WorkoutStore(context: Context) {
             sets = o.optInt("sets", 1),
             workMode = runCatching { WorkMode.valueOf(o.optString("workMode")) }.getOrDefault(WorkMode.TIME),
             workValue = o.optInt("workValue", 30),
+            secPerRep = o.optInt("secPerRep", 3),
             restSec = o.optInt("restSec", 30),
             restSkipOnLastSet = o.optBoolean("restSkipOnLastSet", true),
             cooldownSec = o.optInt("cooldownSec", 0),

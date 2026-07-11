@@ -52,6 +52,8 @@ data class Exercise(
     val sets: Int = 1,
     val workMode: WorkMode = WorkMode.TIME,
     val workValue: Int = 30,
+    /** Segundos estimados por repetición (solo REPS): pondera la barra de progreso. */
+    val secPerRep: Int = 3,
     val restSec: Int = 30,
     val restSkipOnLastSet: Boolean = true,
     val cooldownSec: Int = 0,
