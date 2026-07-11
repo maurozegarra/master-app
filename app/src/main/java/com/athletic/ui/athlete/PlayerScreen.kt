@@ -471,9 +471,29 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
         AnimatedVisibility(visible = vm.playerControlsVisible) {
             Controls(vm, step, accent, t)
         }
+        NextExerciseLabel(vm, t)
+        Spacer(Modifier.height(8.dp))
     }
         AnimatedGlowBorder(cornerRadius = 0.dp, colors = glowColors(color), strokeWidth = 3.dp)
     }
+}
+
+@Composable
+private fun NextExerciseLabel(vm: AthleteViewModel, t: Strings) {
+    val steps = vm.playerSteps
+    if (steps.isEmpty()) return
+    val idx = vm.playerIndex
+    val nextWork = steps.drop(idx + 1).firstOrNull { it.kind == StepKind.WORK }
+    if (nextWork == null) return
+    val nextName = ExerciseCatalog.display(nextWork.ownerExerciseId, nextWork.title.ifBlank { nextWork.ownerName }, t.locale.language)
+    Text(
+        "${t.nextLabel}: $nextName".uppercase(),
+        color = TEXT_DIM,
+        fontSize = 13.sp,
+        fontWeight = FontWeight.Medium,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Start,
+    )
 }
 
 @Composable

@@ -64,7 +64,14 @@ data class Exercise(
     val workCfg: StageConfig = StageConfig(color = StageConfig.COLOR_WORK),
     val restCfg: StageConfig = StageConfig(color = StageConfig.COLOR_REST, finalCount = 3),
     val cooldownCfg: StageConfig = StageConfig(color = StageConfig.COLOR_COOLDOWN),
-)
+) {
+    fun withStageColor(kind: StepKind, color: Long): Exercise = when (kind) {
+        StepKind.PREP -> copy(prepareCfg = prepareCfg.copy(color = color))
+        StepKind.WORK -> copy(workCfg = workCfg.copy(color = color))
+        StepKind.REST -> copy(restCfg = restCfg.copy(color = color))
+        StepKind.COOLDOWN -> copy(cooldownCfg = cooldownCfg.copy(color = color))
+    }
+}
 
 /**
  * Variante de un workout rotativo: un conjunto con nombre propio de ejercicios

@@ -449,6 +449,21 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         editingExerciseId = null
     }
 
+    /** Aplica un color a una etapa (kind) en todos los ejercicios del training. */
+    fun applyColorToTraining(kind: StepKind, color: Long) {
+        val d = draft ?: return
+        updateDraft { t ->
+            t.copy(workouts = t.workouts.map { w ->
+                w.copy(
+                    exercises = w.exercises.map { e -> e.withStageColor(kind, color) },
+                    variants = w.variants.map { v ->
+                        v.copy(exercises = v.exercises.map { e -> e.withStageColor(kind, color) })
+                    },
+                )
+            })
+        }
+    }
+
     // ---------- Construcción de pasos del player ----------
 
     private fun fmtKg(d: Double): String {

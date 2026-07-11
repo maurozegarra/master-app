@@ -26,12 +26,15 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -83,6 +86,7 @@ fun ExerciseEditorScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
                         onToggle = { openStage = if (openStage == kind) null else kind },
                         accent = accent,
                         t = t,
+                        vm = vm,
                     ) { ex = it }
                 }
             }
@@ -125,6 +129,7 @@ private fun GeneralCard(ex: Exercise, accent: Color, t: Strings, onChange: (Exer
 }
 
 /** Tarjeta colapsable de una etapa: campos basicos + "Opciones avanzadas". */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StageSection(
     kind: StepKind,
@@ -133,6 +138,7 @@ private fun StageSection(
     onToggle: () -> Unit,
     accent: Color,
     t: Strings,
+    vm: AthleteViewModel,
     onChange: (Exercise) -> Unit,
 ) {
     val cfg = when (kind) {
@@ -147,12 +153,30 @@ private fun StageSection(
         StepKind.REST -> t.rest
         StepKind.COOLDOWN -> t.cooldown
     }
+    var showColors by remember { mutableStateOf(false) }
+    var pendingColor by remember { mutableStateOf<Long?>(null) }
+    val onCfg: (StageConfig) -> Unit = { c ->
+        onChange(
+            when (kind) {
+                StepKind.PREP -> ex.copy(prepareCfg = c)
+                StepKind.WORK -> ex.copy(workCfg = c)
+                StepKind.REST -> ex.copy(restCfg = c)
+                StepKind.COOLDOWN -> ex.copy(cooldownCfg = c)
+            },
+        )
+    }
     SectionCard {
         Row(
             modifier = Modifier.fillMaxWidth().clickable { onToggle() },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ColorDot(color = cfg.color, size = 20)
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(Color(cfg.color))
+                    .clickable { showColors = true },
+            )
             Spacer(Modifier.width(10.dp))
             Text(title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.weight(1f))
             Icon(
@@ -166,9 +190,91 @@ private fun StageSection(
                 VSpace(14)
                 StageBasics(kind, ex, accent, t, onChange)
                 VSpace(14)
-                StageAdvanced(kind, ex, cfg, accent, t, onChange)
+                StageAdvanced(kind, ex, cfg, accent, t, onChange, onColorClick = { showColors = true })
             }
         }
+    }
+
+    if (showColors) {
+        ModalBottomSheet(
+            onDismissRequest = { showColors = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = AppTheme.colors.bg,
+        ) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(5),
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(STAGE_COLORS) { c ->
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(Color(c))
+                            .clickable {
+                                pendingColor = c
+                                showColors = false
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (c == cfg.color) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White)
+                        }
+                    }
+                }
+            }
+            VSpace(16)
+        }
+    }
+
+    pendingColor?.let { color ->
+        AlertDialog(
+            onDismissRequest = { pendingColor = null },
+            title = { Text(t.applyColorTitle, fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                onCfg(cfg.copy(color = color))
+                                pendingColor = null
+                            }
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(Modifier.size(24.dp).clip(CircleShape).background(Color(color)))
+                        Spacer(Modifier.width(12.dp))
+                        Text(t.applyColorThisExercise, color = AppTheme.colors.textPrimary, fontSize = 15.sp)
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                onCfg(cfg.copy(color = color))
+                                vm.applyColorToTraining(kind, color)
+                                pendingColor = null
+                            }
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(Modifier.size(24.dp).clip(CircleShape).background(Color(color)))
+                        Spacer(Modifier.width(12.dp))
+                        Text(t.applyColorAllTraining, color = AppTheme.colors.textPrimary, fontSize = 15.sp)
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { pendingColor = null }) { Text("Cancel") }
+            },
+            containerColor = AppTheme.colors.surface,
+        )
     }
 }
 
@@ -304,9 +410,9 @@ private fun StageAdvanced(
     accent: Color,
     t: Strings,
     onChange: (Exercise) -> Unit,
+    onColorClick: () -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
-    var showColors by remember { mutableStateOf(false) }
     val onCfg: (StageConfig) -> Unit = { c ->
         onChange(
             when (kind) {
@@ -339,10 +445,12 @@ private fun StageAdvanced(
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(t.color, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                    ColorDot(
-                        color = cfg.color,
-                        size = 26,
-                        modifier = Modifier.clip(CircleShape).clickable { showColors = true },
+                    Box(
+                        modifier = Modifier
+                            .size(26.dp)
+                            .clip(CircleShape)
+                            .background(Color(cfg.color))
+                            .clickable { onColorClick() },
                     )
                 }
                 VSpace(12)
@@ -370,37 +478,6 @@ private fun StageAdvanced(
                     accent = accent,
                 ) { onCfg(cfg.copy(confirm = ConfirmMode.valueOf(it))) }
             }
-        }
-    }
-
-    if (showColors) {
-        ModalBottomSheet(
-            onDismissRequest = { showColors = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = AppTheme.colors.bg,
-        ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(5),
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                items(STAGE_COLORS) { c ->
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(Color(c))
-                            .clickable { onCfg(cfg.copy(color = c)); showColors = false },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (c == cfg.color) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White)
-                        }
-                    }
-                }
-            }
-            VSpace(16)
         }
     }
 }
