@@ -53,6 +53,20 @@ este equipo (no atados a una app concreta). Ajusta paquete, nombres y features a
 - Iconos vectoriales: **reutilizar paths canonicos de Material / extraer del APK del sistema**
   (no dibujar a mano). Ver workflow `add-vector-icon`.
 
+## UI: Divulgacion progresiva (LINEAMIENTO)
+- **Los controles aparecen solo cuando son necesarios.** Un ajuste con sub-opciones muestra esas
+  sub-opciones en linea (dentro de su fila/tarjeta) SOLO cuando aplican; el resto del tiempo NO se
+  dibujan. Es anidable (un sub-control revela otro). En Compose: emitir el composable dentro de un
+  `if (condicion) { ... }` (equivalente a `View.VISIBLE`/`GONE`), no dejarlo siempre presente.
+  - Ejemplo actual en Athletic: en `ui/settings/SettingsScreen.kt`, los chips de patron de vibracion
+    (`VibrationPatterns`) se emiten solo si `alarm.vibrationEnabled` es true.
+- **Distinguirlo del patron "atenuar"**: un ajuste ligado a su propio switch EN LA MISMA fila queda
+  VISIBLE pero ATENUADO (p. ej. `alpha 0.4` + deshabilitado) con el switch OFF. En divulgacion
+  progresiva, en cambio, DESAPARECE por completo.
+- **Regla al agregar un control con sub-opciones**: elegir UN patron y mantenerlo. Sub-opciones
+  dependientes de un estado -> divulgacion progresiva (mostrar/ocultar). Ajuste ligado a un switch de
+  su misma fila -> patron "atenuar". (Trasladado del proyecto hermano `niko`.)
+
 ## Device / capturas (gotchas)
 - Conexion ADB Wi-Fi: ver workflow `connect-phone`. La IP/puertos CAMBIAN por sesion; PC y telefono
   pueden estar en subredes distintas bajo el mismo SSID (aislamiento de clientes). Fallbacks: USB / hotspot.

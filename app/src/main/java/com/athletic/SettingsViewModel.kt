@@ -1,6 +1,7 @@
 package com.athletic
 
 import android.app.Application
+import android.media.RingtoneManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.athletic.audio.AlarmPlayer
 import com.athletic.data.SettingsStore
 import com.athletic.model.AlarmConfig
+import com.athletic.model.AlarmSound
 import com.athletic.model.AppConfig
 
 /**
@@ -54,7 +56,29 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     fun previewVibration() = alarmPlayer.previewVibration(config.athlete.alarm.vibrationPattern)
     fun stopPreview() = alarmPlayer.stopPreview()
 
+    fun previewTone(uri: String, volume: Float) = alarmPlayer.previewTone(uri, volume)
+
+    /** Lista de tonos de alarma disponibles en el dispositivo. */
+    fun loadAlarmSounds(): List<AlarmSound> {
+        val ctx = getApplication<Application>()
+        val result = mutableListOf<AlarmSound>()
+        try {
+            val rm = RingtoneManager(ctx).apply { setType(RingtoneManager.TYPE_NOTIFICATION) }
+            val cursor = rm.cursor
+            while (cursor.moveToNext()) {
+                val title = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX)
+                val uri = rm.getRingtoneUri(cursor.position)
+                if (title != null && uri != null) {
+                    result.add(AlarmSound(title, uri.toString()))
+                }
+            }
+        } catch (_: Exception) {
+        }
+        return result
+    }
+
     override fun onCleared() {
         alarmPlayer.stop()
+        alarmPlayer.stopPreview()
     }
 }

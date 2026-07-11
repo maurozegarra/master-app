@@ -11,9 +11,9 @@ distintas/aislamiento, y USB (fallback mas robusto).
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 if (-not (Test-Path $adb)) { Write-Host "[X] No hay adb; instala Android SDK platform-tools" -ForegroundColor Red }
 ```
-- Para *compilar* ademas hace falta `JAVA_HOME` (JBR) y Gradle 9.4.1 cacheado (ver `validate`).
-- Cualquier script/flujo de validacion recibe el serial (`<ip:puerto>`) como parametro; pasale el
-  serial ACTUAL cuando cambie la IP/puerto (no dependas de un default hardcodeado).
+- Para *compilar* ademas hace falta `JAVA_HOME` (JBR) y Gradle 9.4.1 cacheado (ver `validar-niko`).
+- El script `scripts/validar-niko.ps1` recibe `-Device <ip:puerto>`; el default esta hardcodeado y
+  hay que sobreescribirlo cuando cambie la IP/puerto.
 
 ## Requisitos en el telefono
 1. **Ajustes -> Opciones de desarrollador -> Depuracion inalambrica: ON** (o "Depuracion USB" si usas cable).
@@ -40,7 +40,7 @@ Sintoma: PC y telefono muestran IPs de subredes diferentes aunque el SSID sea el
 1. **Diagnostico de alcance** (ICMP):
 // turbo
 ```powershell
-ping -n 3 <IP-del-telefono>
+ping -n 3 192.168.8.147   # IP del telefono
 ```
 2. **Si el ping RESPONDE** (hay ruta): intenta ADB Wi-Fi directo igual que el Escenario A usando la
    IP real del telefono. Si el `connect` falla pese al ping, es que el puerto TCP de ADB esta
@@ -71,34 +71,9 @@ $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 & $adb -s <serial-o-ip:puerto> get-state   # debe imprimir: device
 ```
 
-## Capturas de pantalla (evitar PNG corrupto)
-**ADVERTENCIA:** en PowerShell **NUNCA** captures con redireccion `>` (p. ej.
-`adb exec-out screencap -p > shot.png`). El `>` de PowerShell aplica codificacion de texto
-(UTF-16/UTF-8) y traduce saltos de linea (LF->CRLF), lo que **corrompe el binario del PNG**; luego
-al leer la imagen falla con algo como *"Invalid argument: an internal error occurred"*.
-
-Metodo recomendado (bytes intactos): capturar en el device y traer con `pull`.
-// turbo
-```powershell
-$adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
-$dev = "<ip:puerto o serial>"
-& $adb -s $dev shell screencap -p /sdcard/_shot.png
-& $adb -s $dev pull /sdcard/_shot.png .\_shot.png
-& $adb -s $dev shell rm /sdcard/_shot.png
-```
-Si insistes en `exec-out`, escribe bytes crudos (no uses `>`):
-```powershell
-adb exec-out screencap -p | Set-Content .\_shot.png -AsByteStream   # PowerShell 7+
-adb exec-out screencap -p | Set-Content .\_shot.png -Encoding Byte  # PowerShell 5.1
-cmd /c "adb exec-out screencap -p > _shot.png"                      # redirect por cmd (crudo)
-```
-Nota: los `_*.png` estan en `.gitignore` (capturas temporales), asi que no ensucian el repo.
-
 ## Notas / troubleshooting
 - **IP y puertos cambian** (DHCP + puertos aleatorios): toma siempre los valores actuales de la
   pantalla de Depuracion inalambrica; el `PUERTO_PAIR` != `PUERTO_CONNECT`.
-- **PNG corrupto / "Invalid argument" al leer la captura**: se uso `>` de PowerShell (corrompe
-  binarios) -> recaptura con `screencap` + `pull` o `Set-Content -AsByteStream` (ver Capturas).
 - **`failed to authenticate`**: host no vinculado -> `adb pair`.
 - **`connection refused` / timeout con ping OK**: puerto TCP de ADB bloqueado por VLAN/firewall -> USB o hotspot.
 - **Latencia alta en ping local**: el trafico se enruta por el gateway (subredes distintas); suele

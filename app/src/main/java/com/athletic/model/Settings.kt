@@ -34,6 +34,9 @@ data class AlarmConfig(
     val headsetMode: Int = HEADSET_ONLY,
 )
 
+/** Un tono de alarma disponible para seleccionar. */
+data class AlarmSound(val name: String, val uri: String)
+
 /** Ajustes generales, comunes a toda la app. */
 data class GeneralConfig(
     val accent: Long = 0xFFFF5252,

@@ -140,9 +140,12 @@ private fun SimpleTab(ex: Exercise, accent: Color, t: Strings, onChange: (Exerci
         }
         VSpace(14)
         DurationWheelField(t.rest, ex.restSec, accent, t, max = 1800) { onChange(ex.copy(restSec = it)) }
-        VSpace(10)
-        SwitchRow(t.restSkipLast, null, ex.restSkipOnLastSet, accent) {
-            onChange(ex.copy(restSkipOnLastSet = it))
+        // Divulgacion progresiva: "skip rest on last set" solo aplica si hay descanso.
+        if (ex.restSec > 0) {
+            VSpace(10)
+            SwitchRow(t.restSkipLast, null, ex.restSkipOnLastSet, accent) {
+                onChange(ex.copy(restSkipOnLastSet = it))
+            }
         }
         VSpace(14)
         DurationWheelField(t.cooldown, ex.cooldownSec, accent, t, max = 1800) { onChange(ex.copy(cooldownSec = it)) }

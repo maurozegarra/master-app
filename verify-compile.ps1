@@ -1,11 +1,10 @@
 # Verifica que el proyecto COMPILA (sin generar APK, sin subir version, sin commit).
-# NOTA: en este repo NO existe gradlew; se usa el Gradle 9.4.1 cacheado.
+# Usa el wrapper (gradlew) -> Gradle 9.4.1.
 $ErrorActionPreference = 'Stop'
 
-$env:JAVA_HOME = 'C:\Users\mzegarra_ide\Downloads\android-studio\jbr'
-$gradle = (Resolve-Path "$env:USERPROFILE\.gradle\wrapper\dists\gradle-9.4.1-bin\*\gradle-9.4.1\bin\gradle.bat").Path
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
 
-& $gradle compileReleaseKotlin --no-daemon --console=plain
+& "$PSScriptRoot\gradlew.bat" compileReleaseKotlin --no-daemon --console=plain
 if ($LASTEXITCODE -ne 0) { throw "Gradle compileReleaseKotlin failed (exit $LASTEXITCODE)" }
 
 Write-Host ""

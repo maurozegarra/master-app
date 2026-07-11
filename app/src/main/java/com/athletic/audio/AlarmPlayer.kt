@@ -48,8 +48,8 @@ class AlarmPlayer(private val context: Context) {
             config.ignoreSilent || audio.ringerMode == AudioManager.RINGER_MODE_NORMAL
         if (!shouldPlaySound) return
         val uri = config.soundUri?.let { Uri.parse(it) }
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: return
 
         boostStream()
@@ -152,8 +152,8 @@ class AlarmPlayer(private val context: Context) {
             return
         }
         val uri = config.soundUri
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)?.toString()
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)?.toString()
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)?.toString()
             ?: return
         previewTone(uri, config.volume)
     }
