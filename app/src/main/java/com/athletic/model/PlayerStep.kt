@@ -31,6 +31,8 @@ data class PlayerStep(
     val display: DisplayMode = DisplayMode.COUNTDOWN,
     val confirm: ConfirmMode = ConfirmMode.AUTO,
     val finalCount: Int = 0,
+    val beepVolume: Float = 0.7f,
+    val beepSoundUri: String? = null,
     val colorArgb: Long = StageConfig.COLOR_WORK,
     val weighted: Boolean = false,
     val weightTotal: Double = 0.0,

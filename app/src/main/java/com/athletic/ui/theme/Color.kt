@@ -16,3 +16,6 @@ const val DEFAULT_ACCENT = 0xFFFF5252
 
 /** Acento rosa que activa el tema especial "Barbie". */
 const val PINK_ACCENT = 0xFFFF69B4
+
+/** Acento azul que activa el tema especial "Stitch". */
+const val STITCH_ACCENT = 0xFF4A90D6

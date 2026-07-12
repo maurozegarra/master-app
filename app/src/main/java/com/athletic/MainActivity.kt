@@ -240,9 +240,9 @@ private fun SettingsScaffold(title: String, onBack: () -> Unit, content: @Compos
 private fun titleFor(vm: AthleteViewModel, t: Strings): String = when {
     vm.showingHistory -> t.history
     vm.choosingExercise -> t.chooseExercise
-    vm.editingExerciseId != null -> t.exercise
-    vm.editingVariantId != null || vm.editingWorkoutId != null -> t.workout
-    vm.draft != null -> t.training
+    vm.editingExerciseId != null -> vm.editingExercise()?.name ?: t.exercise
+    vm.editingVariantId != null || vm.editingWorkoutId != null -> vm.editorName().ifBlank { t.workout }
+    vm.draft != null -> vm.draft?.name?.ifBlank { t.training } ?: t.training
     else -> "TIMES"
 }
 

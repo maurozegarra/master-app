@@ -64,11 +64,23 @@ private val BarbieColors = AppColors(
     isDark = false,
 )
 
+/** Tema especial "Stitch" (se activa con el acento azul). */
+private val StitchColors = AppColors(
+    bg = Color(0xFFD6E4F0),
+    surface = Color(0xFFEAF2FA),
+    track = Color(0xFFB8CFE0),
+    textPrimary = Color(0xFF0D2138),
+    textDim = Color(0xFF3D5A80),
+    textFaded = Color(0xFF7A9BC0),
+    accent = Color(0xFF5078A7),
+    onAccent = Color.White,
+    isDark = false,
+)
+
 private val DEFAULT_DARK = darkBase(Color(DEFAULT_ACCENT), ON_ACCENT)
 
 private fun accentForLight(argb: Long): Color = when (argb) {
     0xFF4AC0D6 -> Color(0xFF0E8FA3) // cian
-    0xFF4A90D6 -> Color(0xFF2B6CB0) // azul
     0xFF3DDC84 -> Color(0xFF1E9E5A) // verde
     0xFFA06CFF -> Color(0xFF6C3FE0) // morado
     0xFF9E9E9E -> Color(0xFF5F6368) // plomo
@@ -78,6 +90,7 @@ private fun accentForLight(argb: Long): Color = when (argb) {
 
 private fun appColorsFor(accentArgb: Long, dark: Boolean): AppColors = when {
     accentArgb == PINK_ACCENT -> BarbieColors
+    accentArgb == STITCH_ACCENT -> StitchColors
     dark -> darkBase(Color(accentArgb), ON_ACCENT)
     else -> lightBase(accentForLight(accentArgb), Color.White)
 }

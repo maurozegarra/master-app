@@ -8,10 +8,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.athletic.audio.AlarmPlayer
 import com.athletic.data.AthleteDefaults
 import com.athletic.data.ExerciseCatalog
 import com.athletic.data.SettingsStore
 import com.athletic.data.WorkoutStore
+import com.athletic.model.AlarmSound
 import com.athletic.model.ConfirmMode
 import com.athletic.model.DisplayMode
 import com.athletic.model.Exercise
@@ -43,6 +45,7 @@ import kotlinx.coroutines.launch
 class AthleteViewModel(app: Application) : AndroidViewModel(app) {
 
     private val store = WorkoutStore(app)
+    private val alarmPlayer = AlarmPlayer(app)
 
     val trainings = mutableStateListOf<Training>()
     private val customExercises = mutableStateListOf<ExerciseDef>()
@@ -625,6 +628,8 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
             display = cfg.display,
             confirm = cfg.confirm,
             finalCount = cfg.finalCount,
+            beepVolume = cfg.beepVolume,
+            beepSoundUri = cfg.beepSoundUri,
             colorArgb = cfg.color,
             weighted = weighted,
             weightTotal = weightTotal,
@@ -781,5 +786,34 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }
         }
+    }
+
+    // ---------- Beep sound picker helpers ----------
+
+    fun loadAlarmSounds(): List<AlarmSound> {
+        val ctx = getApplication<Application>()
+        val result = mutableListOf<AlarmSound>()
+        try {
+            val rm = android.media.RingtoneManager(ctx).apply { setType(android.media.RingtoneManager.TYPE_NOTIFICATION) }
+            val cursor = rm.cursor
+            while (cursor.moveToNext()) {
+                val title = cursor.getString(android.media.RingtoneManager.TITLE_COLUMN_INDEX)
+                val uri = rm.getRingtoneUri(cursor.position)
+                if (title != null && uri != null) {
+                    result.add(AlarmSound(title, uri.toString()))
+                }
+            }
+        } catch (_: Exception) {
+        }
+        return result
+    }
+
+    fun previewBeepTone(uri: String, volume: Float) = alarmPlayer.previewTone(uri, volume)
+    fun stopBeepPreview() = alarmPlayer.stopPreview()
+
+    override fun onCleared() {
+        super.onCleared()
+        alarmPlayer.stop()
+        alarmPlayer.stopPreview()
     }
 }

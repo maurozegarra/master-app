@@ -8,6 +8,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import com.athletic.MainActivity
@@ -42,6 +45,7 @@ class WorkoutPlayerService : Service() {
     private val scope = CoroutineScope(Dispatchers.Main.immediate)
     private var tickJob: Job? = null
     private val alarm by lazy { WorkoutAlarm(this) }
+    private var lastBeepSec = -1L
 
     private var steps: List<PlayerStep> = emptyList()
     private var index = 0
@@ -201,6 +205,7 @@ class WorkoutPlayerService : Service() {
 
     private fun startTick() {
         stopTick()
+        lastBeepSec = -1L
         tickJob = scope.launch {
             while (running) {
                 val left = (endAt - System.currentTimeMillis()).coerceAtLeast(0L)
@@ -214,6 +219,13 @@ class WorkoutPlayerService : Service() {
                 if (sec != lastShownSec) {
                     lastShownSec = sec
                     updateNotification()
+                    // Beep de cuenta final: suena una vez por segundo en los últimos N segundos.
+                    val step = steps.getOrNull(index)
+                    val fc = step?.finalCount ?: 0
+                    if (fc > 0 && sec <= fc && sec >= 1 && sec != lastBeepSec && step != null) {
+                        lastBeepSec = sec
+                        playBeep(step)
+                    }
                 }
                 delay(200)
             }
@@ -223,6 +235,34 @@ class WorkoutPlayerService : Service() {
     private fun stopTick() {
         tickJob?.cancel()
         tickJob = null
+    }
+
+    private fun playBeep(step: com.athletic.model.PlayerStep) {
+        val vol = step.beepVolume.coerceIn(0f, 1f)
+        if (vol <= 0f) return
+        val uri = step.beepSoundUri
+        try {
+            val mp = MediaPlayer()
+            mp.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            if (uri != null) {
+                mp.setDataSource(this, Uri.parse(uri))
+            } else {
+                val afd = resources.openRawResourceFd(R.raw.beep_second)
+                mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                afd.close()
+            }
+            mp.setVolume(vol, vol)
+            mp.setOnCompletionListener { it.release() }
+            mp.setOnErrorListener { mp2, _, _ -> mp2.release(); true }
+            mp.setOnPreparedListener { it.start() }
+            mp.prepareAsync()
+        } catch (_: Exception) {
+        }
     }
 
     private fun alarmCue() {
@@ -545,6 +585,8 @@ class WorkoutPlayerService : Service() {
                         .put("display", s.display.name)
                         .put("confirm", s.confirm.name)
                         .put("finalCount", s.finalCount)
+                        .put("beepVolume", s.beepVolume)
+                        .apply { if (s.beepSoundUri != null) put("beepSoundUri", s.beepSoundUri) }
                         .put("colorArgb", s.colorArgb)
                         .put("weighted", s.weighted)
                         .put("weightTotal", s.weightTotal)
@@ -575,6 +617,8 @@ class WorkoutPlayerService : Service() {
                     display = runCatching { DisplayMode.valueOf(o.optString("display")) }.getOrDefault(DisplayMode.COUNTDOWN),
                     confirm = runCatching { ConfirmMode.valueOf(o.optString("confirm")) }.getOrDefault(ConfirmMode.AUTO),
                     finalCount = o.optInt("finalCount", 0),
+                    beepVolume = o.optDouble("beepVolume", 0.7).toFloat(),
+                    beepSoundUri = o.optString("beepSoundUri", "").takeIf { it.isNotBlank() && it != "null" },
                     colorArgb = o.optLong("colorArgb", 0xFF2E9E5BL),
                     weighted = o.optBoolean("weighted", false),
                     weightTotal = o.optDouble("weightTotal", 0.0),

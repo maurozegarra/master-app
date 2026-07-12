@@ -23,6 +23,9 @@ data class StageConfig(
     val alarm: Boolean = true,
     val finalCount: Int = 0,
     val confirm: ConfirmMode = ConfirmMode.AUTO,
+    val beepVolume: Float = 0.7f,
+    val beepSoundUri: String? = null,
+    val beepSoundName: String? = null,
 ) {
     companion object {
         const val COLOR_PREPARE = 0xFFE2641EL

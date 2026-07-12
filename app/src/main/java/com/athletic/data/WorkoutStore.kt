@@ -189,12 +189,18 @@ class WorkoutStore(context: Context) {
         )
     }
 
-    private fun stageToJson(c: StageConfig): JSONObject = JSONObject()
-        .put("color", c.color)
-        .put("display", c.display.name)
-        .put("alarm", c.alarm)
-        .put("finalCount", c.finalCount)
-        .put("confirm", c.confirm.name)
+    private fun stageToJson(c: StageConfig): JSONObject {
+        val o = JSONObject()
+            .put("color", c.color)
+            .put("display", c.display.name)
+            .put("alarm", c.alarm)
+            .put("finalCount", c.finalCount)
+            .put("confirm", c.confirm.name)
+            .put("beepVolume", c.beepVolume)
+        if (c.beepSoundUri != null) o.put("beepSoundUri", c.beepSoundUri)
+        if (c.beepSoundName != null) o.put("beepSoundName", c.beepSoundName)
+        return o
+    }
 
     private fun stageFromJson(o: JSONObject?, defColor: Long, defFinal: Int): StageConfig {
         if (o == null) return StageConfig(color = defColor, finalCount = defFinal)
@@ -204,6 +210,9 @@ class WorkoutStore(context: Context) {
             alarm = o.optBoolean("alarm", true),
             finalCount = o.optInt("finalCount", defFinal),
             confirm = runCatching { ConfirmMode.valueOf(o.optString("confirm")) }.getOrDefault(ConfirmMode.AUTO),
+            beepVolume = o.optDouble("beepVolume", 0.7).toFloat(),
+            beepSoundUri = o.optString("beepSoundUri", "").takeIf { it.isNotBlank() && it != "null" },
+            beepSoundName = o.optString("beepSoundName", "").takeIf { it.isNotBlank() && it != "null" },
         )
     }
 

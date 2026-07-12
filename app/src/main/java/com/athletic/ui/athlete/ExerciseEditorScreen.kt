@@ -15,13 +15,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
@@ -29,10 +33,15 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -45,11 +54,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.athletic.AthleteViewModel
 import com.athletic.i18n.Strings
+import com.athletic.model.AlarmSound
 import com.athletic.model.ConfirmMode
 import com.athletic.model.DisplayMode
 import com.athletic.model.Exercise
@@ -190,7 +201,7 @@ private fun StageSection(
                 VSpace(14)
                 StageBasics(kind, ex, accent, t, onChange)
                 VSpace(14)
-                StageAdvanced(kind, ex, cfg, accent, t, onChange, onColorClick = { showColors = true })
+                StageAdvanced(kind, ex, cfg, accent, t, vm, onChange, onColorClick = { showColors = true })
             }
         }
     }
@@ -409,6 +420,7 @@ private fun StageAdvanced(
     cfg: StageConfig,
     accent: Color,
     t: Strings,
+    vm: AthleteViewModel,
     onChange: (Exercise) -> Unit,
     onColorClick: () -> Unit,
 ) {
@@ -469,6 +481,43 @@ private fun StageAdvanced(
                 SwitchRow(t.alarmLabel, null, cfg.alarm, accent) { onCfg(cfg.copy(alarm = it)) }
                 VSpace(10)
                 Stepper(t.finalCountLabel, cfg.finalCount, accent, min = 0, max = 10) { onCfg(cfg.copy(finalCount = it)) }
+                // Divulgacion progresiva: el control de volumen y sonido del beep
+                // solo aparece cuando finalCount > 0.
+                if (cfg.finalCount > 0) {
+                    VSpace(10)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(t.beepVolumeLabel, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                        Text("${(cfg.beepVolume * 100).toInt()}%", color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Slider(
+                        value = cfg.beepVolume,
+                        onValueChange = { onCfg(cfg.copy(beepVolume = it)) },
+                        colors = SliderDefaults.colors(
+                            thumbColor = accent,
+                            activeTrackColor = accent,
+                            inactiveTrackColor = AppTheme.colors.track,
+                        ),
+                    )
+                    VSpace(8)
+                    var showBeepPicker by remember { mutableStateOf(false) }
+                    BeepSoundRow(
+                        label = t.beepSoundLabel,
+                        value = cfg.beepSoundName ?: t.defaultSound,
+                        accent = accent,
+                        onClick = { showBeepPicker = true },
+                    )
+                    if (showBeepPicker) {
+                        BeepSoundPickerDialog(
+                            vm = vm,
+                            currentUri = cfg.beepSoundUri,
+                            volume = cfg.beepVolume,
+                            t = t,
+                            accent = accent,
+                            onDismiss = { showBeepPicker = false },
+                            onSelect = { uri, name -> onCfg(cfg.copy(beepSoundUri = uri, beepSoundName = name)); showBeepPicker = false },
+                        )
+                    }
+                }
                 VSpace(12)
                 Text(t.advanceLabel, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 VSpace(6)
@@ -497,5 +546,155 @@ private fun ExerciseNoteField(ex: Exercise, accent: Color, t: Strings, onChange:
             unfocusedTextColor = AppTheme.colors.textPrimary,
             cursorColor = accent,
         ),
+    )
+}
+
+@Composable
+private fun BeepSoundRow(label: String, value: String, accent: Color, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(AppTheme.colors.track)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            label,
+            color = AppTheme.colors.textPrimary,
+            fontSize = 14.sp,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            value,
+            color = accent,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Spacer(Modifier.width(8.dp))
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = AppTheme.colors.textDim,
+        )
+    }
+}
+
+@Composable
+private fun BeepSoundPickerDialog(
+    vm: AthleteViewModel,
+    currentUri: String?,
+    volume: Float,
+    t: Strings,
+    accent: Color,
+    onDismiss: () -> Unit,
+    onSelect: (uri: String?, name: String?) -> Unit,
+) {
+    val sounds = remember { vm.loadAlarmSounds() }
+    var selectedUri by remember { mutableStateOf(currentUri) }
+
+    fun stopAndDismiss() {
+        vm.stopBeepPreview()
+        onDismiss()
+    }
+
+    AlertDialog(
+        onDismissRequest = { stopAndDismiss() },
+        containerColor = AppTheme.colors.surface,
+        title = {
+            Text(t.beepSoundLabel, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.SemiBold)
+        },
+        text = {
+            LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                // Option: Default (built-in beep_second.ogg)
+                item {
+                    val selected = selectedUri == null
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { selectedUri = null }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = selected,
+                            onClick = { selectedUri = null },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = accent,
+                                unselectedColor = AppTheme.colors.textFaded,
+                            ),
+                        )
+                        Text(
+                            t.defaultSound,
+                            color = AppTheme.colors.textPrimary,
+                            fontSize = 15.sp,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+                items(sounds) { sound ->
+                    val selected = sound.uri == selectedUri
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                selectedUri = sound.uri
+                                vm.previewBeepTone(sound.uri, volume)
+                            }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = selected,
+                            onClick = {
+                                selectedUri = sound.uri
+                                vm.previewBeepTone(sound.uri, volume)
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = accent,
+                                unselectedColor = AppTheme.colors.textFaded,
+                            ),
+                        )
+                        Text(
+                            sound.name,
+                            color = AppTheme.colors.textPrimary,
+                            fontSize = 15.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                        IconButton(onClick = { vm.previewBeepTone(sound.uri, volume) }) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = t.previewTone,
+                                modifier = Modifier.size(24.dp),
+                                tint = accent,
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val name = sounds.firstOrNull { it.uri == selectedUri }?.name
+                    onSelect(selectedUri, name)
+                    vm.stopBeepPreview()
+                },
+            ) {
+                Text(t.select, color = accent, fontWeight = FontWeight.SemiBold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { stopAndDismiss() }) {
+                Text(t.cancel, color = AppTheme.colors.textDim)
+            }
+        },
     )
 }
