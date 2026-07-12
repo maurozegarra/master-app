@@ -33,6 +33,38 @@ Material Design 3 antes de proponerlos.
 
 ## Funcionalidad (heredada de Athlete, aún sin UI)
 
+### Volumen del beep por etapa — PENDIENTE
+- La UI ya existe: `Stepper` de "Beep volume" por etapa en `ExerciseEditorScreen`
+  (0-100%, step 5%), con progressive disclosure cuando `finalCount > 0`.
+- El valor se persiste correctamente en `StageConfig.beepVolume` y llega al servicio
+  (`PlayerStep.beepVolume`, verificado con logs ADB).
+- **Problema**: `MediaPlayer.setVolume()` no tiene efecto real en el dispositivo
+  (Samsung S24). El beep se reproduce a volumen del stream `USAGE_MEDIA` ignorando
+  el valor de `setVolume()`. El control del usuario solo sigue el volumen del
+  sistema, no el porcentaje configurado por etapa.
+- **Soluciones a evaluar**:
+  - (a) `VolumeShaper` (API 26+): aplica curva de volumen directamente en el
+    AudioTrack subyacente del MediaPlayer.
+  - (b) `AudioTrack` directo: decodificar OGG a PCM y atenuar muestras manualmente.
+  - (c) ExoPlayer/Media3: `SimpleExoPlayer.setVolume()` usa `AudioTrack.setVolume()`
+    que sí funciona (agrega dependencia).
+  - (d) Manipular `STREAM_MUSIC` temporalmente: guardar/restaurar volumen del
+    stream alrededor del beep (afecta a otras apps).
+
+### Cue de transición — HECHO (parcial) / refactor
+- **Antes**: `alarmCue()` usaba `WorkoutAlarm` → `AlarmPlayer.start()` con la
+  config global de alarma de Ajustes (`SettingsStore.athlete.alarm`). Sonaba
+  siempre, ignorando `StageConfig.alarm`.
+- **Ahora**: `alarmCue(step)` respeta `step.alarm` (switch por etapa) y usa
+  `step.beepSoundUri` / `step.beepVolume` con `beep_work.ogg` como sonido default.
+  No suena al finalizar el workout (no hay etapa destino).
+- **Huérfano**: `WorkoutAlarm.kt` y la config global de alarma de Ajustes
+  (`SettingsScreen → Alarm & sound`) ya no se usan en el player. Quedan activos
+  solo para el temporizador (timer tab). **Revisar**: la lógica de manejo de
+  sonido de `AlarmPlayer` (volumen perceptual, audio focus, ducking, headset
+  routing) puede servir para un proyecto de alarma separado. No eliminar hasta
+  revisar.
+
 ### Historial de sesiones — HECHO (Fase 7)
 - Se registra y persiste al completar un training (`WorkoutPlayerService.recordSession()`
   -> `WorkoutStore.saveSessions()`, `SessionLog{id, trainingId, trainingName, completedAt}`).

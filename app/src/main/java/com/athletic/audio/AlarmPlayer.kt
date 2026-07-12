@@ -136,6 +136,23 @@ class AlarmPlayer(private val context: Context) {
     }
 
     /**
+     * Reproduce un beep corto sin gestionar foco en cada llamada (evita ducking).
+     * Crea un MediaPlayer por beep y lo libera al completar.
+     */
+    fun beepTone(uriStr: String) {
+        try {
+            val mp = MediaPlayer()
+            mp.setAudioAttributes(mediaAttrs())
+            mp.setDataSource(context, Uri.parse(uriStr))
+            mp.setOnPreparedListener { it.start() }
+            mp.setOnCompletionListener { it.release() }
+            mp.setOnErrorListener { mp2, _, _ -> mp2.release(); true }
+            mp.prepareAsync()
+        } catch (_: Exception) {
+        }
+    }
+
+    /**
      * Reproduce el tono de [config] a su volumen, para oír el nivel mientras se
      * ajusta el volumen de esa pestaña. Si el volumen es 0, calla.
      */

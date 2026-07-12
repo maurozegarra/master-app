@@ -8,9 +8,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.media.AudioAttributes
-import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import com.athletic.MainActivity
@@ -44,7 +41,6 @@ class WorkoutPlayerService : Service() {
 
     private val scope = CoroutineScope(Dispatchers.Main.immediate)
     private var tickJob: Job? = null
-    private val alarm by lazy { WorkoutAlarm(this) }
     private var lastBeepSec = -1L
 
     private var steps: List<PlayerStep> = emptyList()
@@ -81,6 +77,7 @@ class WorkoutPlayerService : Service() {
                 if (steps.isNotEmpty()) {
                     finished = false
                     advancedWorkouts.clear()
+                    alarmCue(steps.getOrNull(0))
                     beginStep(0)
                 }
             }
@@ -155,7 +152,7 @@ class WorkoutPlayerService : Service() {
         if (next >= steps.size) {
             finishPlayer()
         } else {
-            alarmCue()
+            alarmCue(steps.getOrNull(next))
             beginStep(next)
         }
     }
@@ -190,7 +187,7 @@ class WorkoutPlayerService : Service() {
     private fun stopPlayer() {
         running = false
         stopTick()
-        alarm.stop()
+        beepPlayer.stopPreview()
         clearPersist()
         PlayerBus.state.value = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -237,40 +234,19 @@ class WorkoutPlayerService : Service() {
         tickJob = null
     }
 
+    private val beepPlayer by lazy { com.athletic.audio.AlarmPlayer(this) }
+
     private fun playBeep(step: com.athletic.model.PlayerStep) {
-        val vol = step.beepVolume.coerceIn(0f, 1f)
-        if (vol <= 0f) return
         val uri = step.beepSoundUri
-        try {
-            val mp = MediaPlayer()
-            mp.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
-            if (uri != null) {
-                mp.setDataSource(this, Uri.parse(uri))
-            } else {
-                val afd = resources.openRawResourceFd(R.raw.beep_second)
-                mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                afd.close()
-            }
-            mp.setVolume(vol, vol)
-            mp.setOnCompletionListener { it.release() }
-            mp.setOnErrorListener { mp2, _, _ -> mp2.release(); true }
-            mp.setOnPreparedListener { it.start() }
-            mp.prepareAsync()
-        } catch (_: Exception) {
-        }
+            ?: "android.resource://${packageName}/${R.raw.beep_second}"
+        beepPlayer.beepTone(uri)
     }
 
-    private fun alarmCue() {
-        alarm.playCue()
-        scope.launch {
-            delay(2000)
-            alarm.stop()
-        }
+    private fun alarmCue(step: com.athletic.model.PlayerStep? = null) {
+        if (step?.alarm == false) return
+        val uri = step?.beepSoundUri
+            ?: "android.resource://${packageName}/${R.raw.beep_work}"
+        beepPlayer.beepTone(uri)
     }
 
     /**
@@ -535,7 +511,7 @@ class WorkoutPlayerService : Service() {
         super.onDestroy()
         stopTick()
         scope.cancel()
-        alarm.stop()
+        beepPlayer.stopPreview()
     }
 
     companion object {
@@ -585,8 +561,8 @@ class WorkoutPlayerService : Service() {
                         .put("display", s.display.name)
                         .put("confirm", s.confirm.name)
                         .put("finalCount", s.finalCount)
-                        .put("beepVolume", s.beepVolume)
                         .apply { if (s.beepSoundUri != null) put("beepSoundUri", s.beepSoundUri) }
+                        .put("alarm", s.alarm)
                         .put("colorArgb", s.colorArgb)
                         .put("weighted", s.weighted)
                         .put("weightTotal", s.weightTotal)
@@ -617,8 +593,8 @@ class WorkoutPlayerService : Service() {
                     display = runCatching { DisplayMode.valueOf(o.optString("display")) }.getOrDefault(DisplayMode.COUNTDOWN),
                     confirm = runCatching { ConfirmMode.valueOf(o.optString("confirm")) }.getOrDefault(ConfirmMode.AUTO),
                     finalCount = o.optInt("finalCount", 0),
-                    beepVolume = o.optDouble("beepVolume", 0.7).toFloat(),
                     beepSoundUri = o.optString("beepSoundUri", "").takeIf { it.isNotBlank() && it != "null" },
+                    alarm = o.optBoolean("alarm", true),
                     colorArgb = o.optLong("colorArgb", 0xFF2E9E5BL),
                     weighted = o.optBoolean("weighted", false),
                     weightTotal = o.optDouble("weightTotal", 0.0),

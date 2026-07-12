@@ -196,7 +196,6 @@ class WorkoutStore(context: Context) {
             .put("alarm", c.alarm)
             .put("finalCount", c.finalCount)
             .put("confirm", c.confirm.name)
-            .put("beepVolume", c.beepVolume)
         if (c.beepSoundUri != null) o.put("beepSoundUri", c.beepSoundUri)
         if (c.beepSoundName != null) o.put("beepSoundName", c.beepSoundName)
         return o
@@ -210,7 +209,6 @@ class WorkoutStore(context: Context) {
             alarm = o.optBoolean("alarm", true),
             finalCount = o.optInt("finalCount", defFinal),
             confirm = runCatching { ConfirmMode.valueOf(o.optString("confirm")) }.getOrDefault(ConfirmMode.AUTO),
-            beepVolume = o.optDouble("beepVolume", 0.7).toFloat(),
             beepSoundUri = o.optString("beepSoundUri", "").takeIf { it.isNotBlank() && it != "null" },
             beepSoundName = o.optString("beepSoundName", "").takeIf { it.isNotBlank() && it != "null" },
         )

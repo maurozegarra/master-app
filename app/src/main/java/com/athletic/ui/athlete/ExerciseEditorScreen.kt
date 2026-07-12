@@ -40,8 +40,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -485,20 +483,6 @@ private fun StageAdvanced(
                 // solo aparece cuando finalCount > 0.
                 if (cfg.finalCount > 0) {
                     VSpace(10)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(t.beepVolumeLabel, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                        Text("${(cfg.beepVolume * 100).toInt()}%", color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Slider(
-                        value = cfg.beepVolume,
-                        onValueChange = { onCfg(cfg.copy(beepVolume = it)) },
-                        colors = SliderDefaults.colors(
-                            thumbColor = accent,
-                            activeTrackColor = accent,
-                            inactiveTrackColor = AppTheme.colors.track,
-                        ),
-                    )
-                    VSpace(8)
                     var showBeepPicker by remember { mutableStateOf(false) }
                     BeepSoundRow(
                         label = t.beepSoundLabel,
@@ -510,7 +494,6 @@ private fun StageAdvanced(
                         BeepSoundPickerDialog(
                             vm = vm,
                             currentUri = cfg.beepSoundUri,
-                            volume = cfg.beepVolume,
                             t = t,
                             accent = accent,
                             onDismiss = { showBeepPicker = false },
@@ -587,7 +570,6 @@ private fun BeepSoundRow(label: String, value: String, accent: Color, onClick: (
 private fun BeepSoundPickerDialog(
     vm: AthleteViewModel,
     currentUri: String?,
-    volume: Float,
     t: Strings,
     accent: Color,
     onDismiss: () -> Unit,
@@ -644,7 +626,7 @@ private fun BeepSoundPickerDialog(
                             .clip(RoundedCornerShape(12.dp))
                             .clickable {
                                 selectedUri = sound.uri
-                                vm.previewBeepTone(sound.uri, volume)
+                                vm.previewBeepTone(sound.uri)
                             }
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -653,7 +635,7 @@ private fun BeepSoundPickerDialog(
                             selected = selected,
                             onClick = {
                                 selectedUri = sound.uri
-                                vm.previewBeepTone(sound.uri, volume)
+                                vm.previewBeepTone(sound.uri)
                             },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = accent,
@@ -668,7 +650,7 @@ private fun BeepSoundPickerDialog(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f),
                         )
-                        IconButton(onClick = { vm.previewBeepTone(sound.uri, volume) }) {
+                        IconButton(onClick = { vm.previewBeepTone(sound.uri) }) {
                             Icon(
                                 imageVector = Icons.Filled.PlayArrow,
                                 contentDescription = t.previewTone,

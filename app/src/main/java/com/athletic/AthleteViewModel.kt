@@ -628,8 +628,8 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
             display = cfg.display,
             confirm = cfg.confirm,
             finalCount = cfg.finalCount,
-            beepVolume = cfg.beepVolume,
             beepSoundUri = cfg.beepSoundUri,
+            alarm = cfg.alarm,
             colorArgb = cfg.color,
             weighted = weighted,
             weightTotal = weightTotal,
@@ -808,7 +808,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         return result
     }
 
-    fun previewBeepTone(uri: String, volume: Float) = alarmPlayer.previewTone(uri, volume)
+    fun previewBeepTone(uri: String) = alarmPlayer.previewTone(uri, 1f)
     fun stopBeepPreview() = alarmPlayer.stopPreview()
 
     override fun onCleared() {
