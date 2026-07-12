@@ -663,6 +663,13 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     private var sessionReloaded = false
 
     fun openPlayer(trainingId: Long) {
+        // Si hay un player activo para este training, reconectar (estilo YouTube).
+        val prefs = getApplication<Application>()
+            .getSharedPreferences("athlete_player", android.content.Context.MODE_PRIVATE)
+        if (prefs.getBoolean("active", false) && prefs.getLong("workoutId", 0L) == trainingId) {
+            restorePlayerState()
+            return
+        }
         val t = trainings.firstOrNull { it.id == trainingId } ?: return
         val steps = buildSteps(t)
         if (steps.isEmpty()) return
@@ -706,6 +713,20 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         // El servicio ya avanzó la rotación de los workouts completados; refrescar en memoria.
         reload()
     }
+
+    /** Vuelve a la lista de trainings sin detener ni pausar el player (estilo YouTube). */
+    fun minimizePlayer() {
+        playerStarted = false
+        playerTrainingId = null
+    }
+
+    /** ID del training con un player en curso (para mostrar indicador en la lista). */
+    val activePlayerTrainingId: Long?
+        get() = getApplication<Application>()
+            .getSharedPreferences("athlete_player", android.content.Context.MODE_PRIVATE)
+            .takeIf { it.getBoolean("active", false) }
+            ?.getLong("workoutId", 0L)
+            ?.takeIf { it != 0L }
 
     private fun observePlayer() {
         viewModelScope.launch {

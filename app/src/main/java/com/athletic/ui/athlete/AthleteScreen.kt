@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,7 +18,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -45,12 +48,13 @@ import com.athletic.ui.ReorderableContentType
 import com.athletic.ui.dragContainer
 import com.athletic.ui.rememberDragDropState
 import com.athletic.ui.theme.AppTheme
+import com.athletic.util.formatRemaining
 
 /** Router de la sección Athlete según el estado de navegación del ViewModel. */
 @Composable
-fun AthleteScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
+fun AthleteScreen(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit = { vm.startPlayerRun() }) {
     when {
-        vm.playerTrainingId != null -> PlayerScreen(vm, accent, t)
+        vm.playerTrainingId != null -> PlayerScreen(vm, accent, t, onStart)
         vm.showingHistory -> HistoryScreen(vm, accent, t)
         vm.choosingExercise -> ChooseExerciseScreen(vm, accent, t)
         vm.editingExerciseId != null -> ExerciseEditorScreen(vm, accent, t)
@@ -95,6 +99,7 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings) {
                             training = tr,
                             accent = accent,
                             t = t,
+                            isActive = vm.activePlayerTrainingId == tr.id,
                             onPlay = { vm.openPlayer(tr.id) },
                             onEdit = { vm.startEditTraining(tr.id) },
                             onDuplicate = { vm.duplicateTraining(tr.id) },
@@ -103,6 +108,19 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings) {
                     }
                 }
             }
+        }
+
+        val activeId = vm.activePlayerTrainingId
+        if (activeId != null && vm.playerStep != null) {
+            MiniPlayer(
+                vm = vm,
+                accent = accent,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(16.dp, 0.dp, 16.dp, 80.dp),
+                onOpen = { vm.openPlayer(activeId) },
+            )
         }
 
         PrimaryButton(
@@ -122,6 +140,7 @@ private fun TrainingCard(
     training: Training,
     accent: Color,
     t: Strings,
+    isActive: Boolean,
     onPlay: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
@@ -143,12 +162,24 @@ private fun TrainingCard(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Text(
-                training.name.ifBlank { t.noName },
-                color = AppTheme.colors.textPrimary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    training.name.ifBlank { t.noName },
+                    color = AppTheme.colors.textPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                )
+                if (isActive) {
+                    Box(
+                        Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(accent.copy(alpha = 0.2f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Text("IN PROGRESS", color = accent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
             Text(
                 "${training.workouts.size} ${t.workout} · $exercises ${t.exercise}",
                 color = AppTheme.colors.textDim,
@@ -180,6 +211,52 @@ private fun TrainingCard(
                 contentDescription = t.start,
                 tint = if (canPlay) AppTheme.colors.onAccent else AppTheme.colors.textDim,
             )
+        }
+    }
+}
+
+@Composable
+private fun MiniPlayer(vm: AthleteViewModel, accent: Color, modifier: Modifier = Modifier, onOpen: () -> Unit) {
+    val step = vm.playerStep ?: return
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(AppTheme.colors.surface)
+            .clickable(onClick = onOpen)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(accent),
+        )
+        Column(Modifier.weight(1f).padding(start = 10.dp)) {
+            Text(
+                step.title.ifBlank { step.workoutName },
+                color = AppTheme.colors.textPrimary,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                maxLines = 1,
+            )
+            Text(
+                if (step.manual) "${step.reps} reps" else formatRemaining(vm.playerRemainingMs),
+                color = accent,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        IconButton(onClick = { if (vm.playerRunning) vm.pausePlayer() else vm.resumePlayer() }) {
+            Icon(
+                if (vm.playerRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                contentDescription = null,
+                tint = AppTheme.colors.textPrimary,
+            )
+        }
+        IconButton(onClick = { vm.closePlayer() }) {
+            Icon(Icons.Filled.Close, contentDescription = null, tint = AppTheme.colors.textDim)
         }
     }
 }

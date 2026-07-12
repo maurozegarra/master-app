@@ -1,11 +1,17 @@
 package com.athletic
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -48,10 +55,14 @@ import com.athletic.ui.theme.AthleticTheme
  * la pantalla correcta y aquí se resuelve el "back" cerrando el nivel más profundo.
  */
 class MainActivity : ComponentActivity() {
+
+    private val pendingWorkoutId = mutableStateOf<Long?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        pendingWorkoutId.value = intent?.getLongExtra("workoutId", -1L)?.takeIf { it >= 0 }
         setContent {
             val settingsVm: SettingsViewModel = viewModel()
             val cfg = settingsVm.config
@@ -62,21 +73,49 @@ class MainActivity : ComponentActivity() {
             }
             AthleticTheme(accent = cfg.general.accent, darkTheme = dark) {
                 Surface(color = AppTheme.colors.bg) {
-                    AthleticApp(settingsVm)
+                    AthleticApp(settingsVm, pendingWorkoutId)
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        pendingWorkoutId.value = intent.getLongExtra("workoutId", -1L).takeIf { it >= 0 }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AthleticApp(settingsVm: SettingsViewModel) {
+private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.compose.runtime.State<Long?>) {
     val vm: AthleteViewModel = viewModel()
     val t = I18n.EN
     val accent = AppTheme.colors.accent
 
     var showSettings by remember { mutableStateOf(false) }
+
+    // Deep link desde notificación: abrir el player del training activo.
+    LaunchedEffect(pendingWorkoutId.value) {
+        val id = pendingWorkoutId.value ?: return@LaunchedEffect
+        vm.openPlayer(id)
+    }
+
+    // Permisos de notificación (Android 13+) para el foreground service del player.
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val notifPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { _ -> vm.startPlayerRun() }
+
+    fun startTraining() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            vm.startPlayerRun()
+        }
+    }
 
     // Ajustes: pantalla propia por encima de la sección Athlete.
     if (showSettings) {
@@ -101,7 +140,7 @@ private fun AthleticApp(settingsVm: SettingsViewModel) {
     // El player ocupa toda la pantalla (controles propios); el resto usa Scaffold con
     // barra superior y botón atrás contextual.
     if (inPlayer) {
-        AthleteScreen(vm, accent, t)
+        AthleteScreen(vm, accent, t, ::startTraining)
         return
     }
 
@@ -160,7 +199,7 @@ private fun AthleticApp(settingsVm: SettingsViewModel) {
         },
     ) { pad ->
         Box(Modifier.fillMaxSize().padding(pad)) {
-            AthleteScreen(vm, accent, t)
+            AthleteScreen(vm, accent, t, ::startTraining)
         }
     }
 }
@@ -210,7 +249,7 @@ private fun titleFor(vm: AthleteViewModel, t: Strings): String = when {
 /** Cierra el nivel de navegación más profundo (mismo orden que el router de AthleteScreen). */
 private fun goBack(vm: AthleteViewModel) {
     when {
-        vm.playerTrainingId != null -> vm.closePlayer()
+        vm.playerTrainingId != null -> vm.minimizePlayer()
         vm.showingHistory -> vm.closeHistory()
         vm.choosingExercise -> vm.closeExercisePicker()
         vm.editingExerciseId != null -> vm.closeExerciseEditor()

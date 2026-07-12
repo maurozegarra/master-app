@@ -349,7 +349,10 @@ class WorkoutPlayerService : Service() {
         val pi = PendingIntent.getActivity(
             this,
             0,
-            Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP },
+            Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("workoutId", workoutId)
+            },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
@@ -417,9 +420,9 @@ class WorkoutPlayerService : Service() {
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Workout",
-            NotificationManager.IMPORTANCE_LOW,
+            NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
-            setShowBadge(false)
+            setShowBadge(true)
             setSound(null, null)
             enableVibration(false)
         }

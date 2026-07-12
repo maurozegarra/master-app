@@ -73,10 +73,10 @@ import com.athletic.util.formatRemaining
 import kotlinx.coroutines.delay
 
 @Composable
-fun PlayerScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
+fun PlayerScreen(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit = { vm.startPlayerRun() }) {
     when {
         vm.playerFinished -> FinishedView(vm, accent, t)
-        !vm.playerStarted -> PreviewView(vm, accent, t)
+        !vm.playerStarted -> PreviewView(vm, accent, t, onStart)
         else -> RunningView(vm, accent, t)
     }
 }
@@ -117,7 +117,7 @@ private fun buildPreviewGroups(steps: List<PlayerStep>): List<PreviewGroup> =
     }
 
 @Composable
-private fun PreviewView(vm: AthleteViewModel, accent: Color, t: Strings) {
+private fun PreviewView(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
     val steps = vm.playerSteps
     val groups = remember(steps) { buildPreviewGroups(steps) }
     val totalExercises = groups.sumOf { it.exercises.size }
@@ -149,7 +149,7 @@ private fun PreviewView(vm: AthleteViewModel, accent: Color, t: Strings) {
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(16.dp),
-            onClick = { vm.startPlayerRun() },
+            onClick = onStart,
         )
     }
 }
