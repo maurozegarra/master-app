@@ -79,6 +79,10 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     var osdNonce by mutableStateOf(0)
         private set
 
+    /** ID del training con un player en curso (para mostrar indicador en la lista). */
+    var activePlayerTrainingId by mutableStateOf<Long?>(null)
+        private set
+
     private fun newId(): Long = nextId++
 
     init {
@@ -122,6 +126,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         val trainingId = prefs.getLong("workoutId", 0L)
         playerSteps = steps
         playerTrainingId = trainingId
+        activePlayerTrainingId = trainingId
         playerName = prefs.getString("name", "") ?: ""
         playerStarted = true
         playerFinished = false
@@ -694,6 +699,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         playerStarted = true
         showPlayerControls()
         WorkoutPlayerService.start(getApplication(), id, playerName, playerSteps)
+        activePlayerTrainingId = id
     }
 
     fun pausePlayer() = PlayerBus.command.tryEmit(PlayerCommand.PAUSE)
@@ -710,6 +716,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         playerRunning = false
         playerFinished = false
         playerStep = null
+        activePlayerTrainingId = null
         // El servicio ya avanzó la rotación de los workouts completados; refrescar en memoria.
         reload()
     }
@@ -720,18 +727,24 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         playerTrainingId = null
     }
 
-    /** ID del training con un player en curso (para mostrar indicador en la lista). */
-    val activePlayerTrainingId: Long?
-        get() = getApplication<Application>()
+    private fun refreshActivePlayerId() {
+        val prefs = getApplication<Application>()
             .getSharedPreferences("athlete_player", android.content.Context.MODE_PRIVATE)
-            .takeIf { it.getBoolean("active", false) }
-            ?.getLong("workoutId", 0L)
-            ?.takeIf { it != 0L }
+        activePlayerTrainingId = if (prefs.getBoolean("active", false))
+            prefs.getLong("workoutId", 0L).takeIf { it != 0L } else null
+    }
 
     private fun observePlayer() {
         viewModelScope.launch {
             PlayerBus.state.collect { snap ->
-                if (snap == null) return@collect
+                if (snap == null) {
+                    // El servicio se detuvo (ej. desde la notificación). Limpiar UI.
+                    playerStep = null
+                    playerRunning = false
+                    playerRemainingMs = 0L
+                    activePlayerTrainingId = null
+                    return@collect
+                }
                 playerIndex = snap.index
                 playerTotalSteps = snap.totalSteps
                 playerRemainingMs = snap.remainingMs
