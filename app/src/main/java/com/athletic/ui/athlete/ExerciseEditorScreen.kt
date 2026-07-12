@@ -199,7 +199,7 @@ private fun StageSection(
                 VSpace(14)
                 StageBasics(kind, ex, accent, t, onChange)
                 VSpace(14)
-                StageAdvanced(kind, ex, cfg, accent, t, vm, onChange, onColorClick = { showColors = true })
+                StageAdvanced(kind, ex, cfg, accent, t, vm, onChange)
             }
         }
     }
@@ -420,7 +420,6 @@ private fun StageAdvanced(
     t: Strings,
     vm: AthleteViewModel,
     onChange: (Exercise) -> Unit,
-    onColorClick: () -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
     val onCfg: (StageConfig) -> Unit = { c ->
@@ -452,16 +451,6 @@ private fun StageAdvanced(
                 if (kind == StepKind.WORK && ex.workMode == WorkMode.REPS) {
                     Stepper(t.secPerRepLabel, ex.secPerRep, accent, min = 1, max = 30) { onChange(ex.copy(secPerRep = it)) }
                     VSpace(12)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(t.color, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-                    Box(
-                        modifier = Modifier
-                            .size(26.dp)
-                            .clip(CircleShape)
-                            .background(Color(cfg.color))
-                            .clickable { onColorClick() },
-                    )
                 }
                 VSpace(12)
                 Text(t.displayLabel, color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
