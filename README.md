@@ -64,6 +64,20 @@ Mismo entorno que `mini-timer` (equipo con CrowdStrike, sin descargas de red):
 El código ya está portado y compila con `verify-compile.ps1` (`compileReleaseKotlin`);
 falta la verificación en dispositivo y el APK release (ver hoja de ruta, Fase 8).
 
+## Audio
+
+Los beeps (`beep_second.ogg`, `beep_work.ogg`, `beep_finish.ogg`, `beep_rest.ogg`)
+están normalizados a **-14 LUFS** con `ffmpeg loudnorm` (true peak limit -1 dBTP),
+al mismo nivel de loudness percibido que Spotify. Esto asegura que los beeps no
+suennen invasivos cuando hay musica de fondo.
+
+- Originales respaldados en `app/src/main/res/raw/originals/`.
+- `MediaPlayer.setVolume()` no tiene efecto en el dispositivo (Samsung S26), por lo
+  que el control de volumen por etapa se removio. El volumen real lo determina la
+  normalizacion LUFS del archivo.
+- El cue de transicion respeta el switch "Alarm" por etapa (`StageConfig.alarm`) y
+  usa `beepSoundUri` de la etapa con `beep_work.ogg` como default.
+
 ## Fuente original
 
 `mini-timer` en `C:\Users\mzegarra_ide\code\mini-timer` (paquete

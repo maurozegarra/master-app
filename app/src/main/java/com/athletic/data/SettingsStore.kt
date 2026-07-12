@@ -1,16 +1,14 @@
 package com.athletic.data
 
 import android.content.Context
-import com.athletic.model.AlarmConfig
 import com.athletic.model.AppConfig
 import com.athletic.model.AthleteConfig
 import com.athletic.model.GeneralConfig
 import org.json.JSONObject
 
 /**
- * Persistencia MÍNIMA de ajustes de Athletic (general + player) con
- * SharedPreferences + JSON. Es la base para la pantalla de Ajustes de la Fase 5;
- * por ahora cubre lo que necesitan el player y su alarma.
+ * Persistencia de ajustes de Athletic (general + player) con
+ * SharedPreferences + JSON.
  */
 class SettingsStore(context: Context) {
 
@@ -40,8 +38,7 @@ class SettingsStore(context: Context) {
         .put(
             "athlete",
             JSONObject()
-                .put("padPlayerClock", cfg.athlete.padPlayerClock)
-                .put("alarm", alarmToJson(cfg.athlete.alarm)),
+                .put("padPlayerClock", cfg.athlete.padPlayerClock),
         )
 
     private fun configFromJson(o: JSONObject): AppConfig {
@@ -56,31 +53,7 @@ class SettingsStore(context: Context) {
             athlete = AthleteConfig(
                 padPlayerClock = a?.optBoolean("padPlayerClock", def.athlete.padPlayerClock)
                     ?: def.athlete.padPlayerClock,
-                alarm = alarmFromJson(a?.optJSONObject("alarm")),
             ),
-        )
-    }
-
-    private fun alarmToJson(c: AlarmConfig): JSONObject = JSONObject()
-        .put("soundUri", c.soundUri)
-        .put("soundName", c.soundName)
-        .put("volume", c.volume.toDouble())
-        .put("vibrationEnabled", c.vibrationEnabled)
-        .put("vibrationPattern", c.vibrationPattern)
-        .put("ignoreSilent", c.ignoreSilent)
-        .put("headsetMode", c.headsetMode)
-
-    private fun alarmFromJson(o: JSONObject?): AlarmConfig {
-        if (o == null) return AlarmConfig()
-        val def = AlarmConfig()
-        return AlarmConfig(
-            soundUri = if (o.isNull("soundUri")) null else o.optString("soundUri"),
-            soundName = if (o.isNull("soundName")) null else o.optString("soundName"),
-            volume = o.optDouble("volume", def.volume.toDouble()).toFloat(),
-            vibrationEnabled = o.optBoolean("vibrationEnabled", def.vibrationEnabled),
-            vibrationPattern = o.optInt("vibrationPattern", def.vibrationPattern),
-            ignoreSilent = o.optBoolean("ignoreSilent", def.ignoreSilent),
-            headsetMode = o.optInt("headsetMode", def.headsetMode),
         )
     }
 

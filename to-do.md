@@ -33,37 +33,21 @@ Material Design 3 antes de proponerlos.
 
 ## Funcionalidad (heredada de Athlete, aún sin UI)
 
-### Volumen del beep por etapa — PENDIENTE
-- La UI ya existe: `Stepper` de "Beep volume" por etapa en `ExerciseEditorScreen`
-  (0-100%, step 5%), con progressive disclosure cuando `finalCount > 0`.
-- El valor se persiste correctamente en `StageConfig.beepVolume` y llega al servicio
-  (`PlayerStep.beepVolume`, verificado con logs ADB).
-- **Problema**: `MediaPlayer.setVolume()` no tiene efecto real en el dispositivo
-  (Samsung S24). El beep se reproduce a volumen del stream `USAGE_MEDIA` ignorando
-  el valor de `setVolume()`. El control del usuario solo sigue el volumen del
-  sistema, no el porcentaje configurado por etapa.
-- **Soluciones a evaluar**:
-  - (a) `VolumeShaper` (API 26+): aplica curva de volumen directamente en el
-    AudioTrack subyacente del MediaPlayer.
-  - (b) `AudioTrack` directo: decodificar OGG a PCM y atenuar muestras manualmente.
-  - (c) ExoPlayer/Media3: `SimpleExoPlayer.setVolume()` usa `AudioTrack.setVolume()`
-    que sí funciona (agrega dependencia).
-  - (d) Manipular `STREAM_MUSIC` temporalmente: guardar/restaurar volumen del
-    stream alrededor del beep (afecta a otras apps).
+### Volumen del beep por etapa — RESUELTO
+- **Problema**: `MediaPlayer.setVolume()` no tiene efecto en el dispositivo
+  (Samsung S26). El beep se reproduce al volumen del stream `USAGE_MEDIA`.
+- **Solución aplicada**: los beeps se normalizaron a -14 LUFS (nivel Spotify)
+  con `ffmpeg loudnorm`. El volumen percibido lo determina el archivo.
+- Se eliminó `beepVolume` de `StageConfig`, `PlayerStep`, `WorkoutStore`,
+  `WorkoutPlayerService` y el Stepper de la UI.
 
-### Cue de transición — HECHO (parcial) / refactor
-- **Antes**: `alarmCue()` usaba `WorkoutAlarm` → `AlarmPlayer.start()` con la
-  config global de alarma de Ajustes (`SettingsStore.athlete.alarm`). Sonaba
-  siempre, ignorando `StageConfig.alarm`.
-- **Ahora**: `alarmCue(step)` respeta `step.alarm` (switch por etapa) y usa
-  `step.beepSoundUri` / `step.beepVolume` con `beep_work.ogg` como sonido default.
+### Cue de transición — HECHO
+- `alarmCue(step)` respeta `step.alarm` (switch por etapa) y usa
+  `step.beepSoundUri` con `beep_work.ogg` como sonido default.
   No suena al finalizar el workout (no hay etapa destino).
-- **Huérfano**: `WorkoutAlarm.kt` y la config global de alarma de Ajustes
-  (`SettingsScreen → Alarm & sound`) ya no se usan en el player. Quedan activos
-  solo para el temporizador (timer tab). **Revisar**: la lógica de manejo de
-  sonido de `AlarmPlayer` (volumen perceptual, audio focus, ducking, headset
-  routing) puede servir para un proyecto de alarma separado. No eliminar hasta
-  revisar.
+- Se eliminó `WorkoutAlarm.kt` y la config global de alarma de Ajustes
+  (`AlarmConfig` en `AthleteConfig`, card "Alarm & sound" en `SettingsScreen`).
+  `AlarmPlayer` se conserva para previews del exercise editor.
 
 ### Historial de sesiones — HECHO (Fase 7)
 - Se registra y persiste al completar un training (`WorkoutPlayerService.recordSession()`
@@ -78,19 +62,12 @@ Material Design 3 antes de proponerlos.
   (long-press) vía `ui/Reorderable.kt`. Aplicado a la lista de trainings, editor de
   Training (workouts), lista de variantes y editor de Workout (ejercicios).
 
-### Selector de tono de alarma — HECHO (parcial)
-- `Ajustes → Alarm & sound → Alarm sound` abre el picker NATIVO filtrado a tonos de
-  **notificación** (`RingtoneManager.ACTION_RINGTONE_PICKER`, `TYPE_NOTIFICATION`).
-  Guarda `soundUri`/`soundName` en `AlarmConfig` (`SettingsViewModel.setSound`) y hace
-  un preview con `previewVolume()` al elegir. El player ya usa `config.soundUri`
-  (`AlarmPlayer.start`).
-- **Pendiente — preview de tonos in-app**: el picker nativo previsualiza al tocar cada
-  tono, pero conviene un preview propio consistente con "lo que pruebas es lo que suena"
-  (mismo `USAGE_ALARM`, volumen perceptual y ducking vía `AlarmPlayer.previewTone`).
-  Opciones: (a) botón "play" junto a la fila del tono que reproduzca el seleccionado; o
-  (b) lista de tonos in-app (cursor `RingtoneManager` TYPE_NOTIFICATION) con selección +
-  preview, sin salir de la app. Evaluar también el fallback por defecto: hoy si
-  `soundUri` es null cae a `TYPE_ALARM`; decidir si el default debe ser notificación.
+### Selector de tono de beep — HECHO
+- El exercise editor tiene un picker in-app (`BeepSoundPickerDialog`) que lista
+  tonos de notificación del sistema (`RingtoneManager.TYPE_NOTIFICATION`) con
+  preview al seleccionar. Guarda `beepSoundUri`/`beepSoundName` en `StageConfig`.
+- El selector global de alarma en Ajustes fue eliminado junto con el card
+  "Alarm & sound".
 
 ## Extracción (ver docs/hoja-de-ruta.md)
 

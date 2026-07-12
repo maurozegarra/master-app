@@ -48,8 +48,6 @@ data class GeneralConfig(
 data class AthleteConfig(
     /** Reloj del player con ceros a la izquierda: "00:30" en vez de "30". */
     val padPlayerClock: Boolean = false,
-    /** Alarma propia del player. */
-    val alarm: AlarmConfig = AlarmConfig(),
 )
 
 /** Configuración completa de Athletic: bloque general + player. */
