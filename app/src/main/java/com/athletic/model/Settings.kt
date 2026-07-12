@@ -76,13 +76,15 @@ val VIBRATION_PATTERNS: List<VibrationPattern> = listOf(
     VibrationPattern("Gallop", longArrayOf(0, 80, 90, 80, 260, 500)),
 )
 
+/** Color de acento con etiqueta legible. */
+data class AccentColor(val argb: Long, val label: String)
+
 /** Paleta de colores de acento disponibles. */
-val ACCENT_COLORS: List<Long> = listOf(
-    0xFF4AC0D6,
-    0xFF4A90D6,
-    0xFF3DDC84,
-    0xFFA06CFF,
-    0xFF9E9E9E,
-    0xFFFF69B4,
-    0xFFFF5252,
+val ACCENT_COLORS: List<AccentColor> = listOf(
+    AccentColor(0xFF3DDC84, "Green"),
+    AccentColor(0xFFA06CFF, "Purple"),
+    AccentColor(0xFF9E9E9E, "Gray"),
+    AccentColor(0xFF4A90D6, "GALA"),
+    AccentColor(0xFFFF69B4, "NIKO"),
+    AccentColor(0xFFFF5252, "MASTER"),
 )

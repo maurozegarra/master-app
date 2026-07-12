@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +40,8 @@ import com.athletic.model.THEME_LIGHT
 import com.athletic.ui.SwitchRow
 import com.athletic.ui.theme.AppTheme
 import com.athletic.ui.theme.Dims
+import com.athletic.ui.theme.PINK_ACCENT
+import com.athletic.ui.theme.STITCH_ACCENT
 
 /** Pantalla de Ajustes: general y player. */
 @Composable
@@ -57,14 +60,24 @@ fun SettingsScreen(vm: SettingsViewModel, t: Strings) {
             Spacer(Modifier.height(10.dp))
             AccentPicker(cfg.general.accent) { vm.setAccent(it) }
             Spacer(Modifier.height(16.dp))
+            val themeLocked = cfg.general.accent == PINK_ACCENT || cfg.general.accent == STITCH_ACCENT
             Text(t.theme, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(10.dp))
             SegmentedRow(
                 options = listOf(THEME_AUTO to t.themeAuto, THEME_LIGHT to t.themeLight, THEME_DARK to t.themeDark),
                 selected = cfg.general.themeMode,
                 accent = accent,
+                enabled = !themeLocked,
                 onSelect = { vm.setThemeMode(it) },
             )
+            if (themeLocked) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    t.themeLockedByAccent,
+                    color = AppTheme.colors.textFaded,
+                    fontSize = 12.sp,
+                )
+            }
         }
 
         SettingsCard(t.groupPlayer) {
@@ -98,19 +111,28 @@ private fun SettingsCard(title: String, content: @Composable () -> Unit) {
 @Composable
 private fun AccentPicker(selected: Long, onSelect: (Long) -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        ACCENT_COLORS.forEach { argb ->
-            val c = Color(argb)
-            val isSel = argb == selected
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(c)
-                    .border(if (isSel) 3.dp else 0.dp, AppTheme.colors.textPrimary, CircleShape)
-                    .clickable { onSelect(argb) },
-                contentAlignment = Alignment.Center,
-            ) {
-                if (isSel) Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+        ACCENT_COLORS.forEach { ac ->
+            val c = Color(ac.argb)
+            val isSel = ac.argb == selected
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(c)
+                        .border(if (isSel) 3.dp else 0.dp, AppTheme.colors.textPrimary, CircleShape)
+                        .clickable { onSelect(ac.argb) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isSel) Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    ac.label,
+                    color = if (isSel) AppTheme.colors.textPrimary else AppTheme.colors.textFaded,
+                    fontSize = 10.sp,
+                    fontWeight = if (isSel) FontWeight.SemiBold else FontWeight.Normal,
+                )
             }
         }
     }
@@ -121,13 +143,15 @@ private fun SegmentedRow(
     options: List<Pair<Int, String>>,
     selected: Int,
     accent: Color,
+    enabled: Boolean = true,
     onSelect: (Int) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Dims.button))
-            .background(AppTheme.colors.track),
+            .background(AppTheme.colors.track)
+            .alpha(if (enabled) 1f else 0.4f),
     ) {
         options.forEach { (value, label) ->
             val isSel = value == selected
@@ -137,7 +161,7 @@ private fun SegmentedRow(
                     .height(44.dp)
                     .clip(RoundedCornerShape(Dims.button))
                     .background(if (isSel) accent else Color.Transparent)
-                    .clickable { onSelect(value) },
+                    .clickable(enabled = enabled) { onSelect(value) },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(

@@ -58,14 +58,15 @@ este equipo (no atados a una app concreta). Ajusta paquete, nombres y features a
   sub-opciones en linea (dentro de su fila/tarjeta) SOLO cuando aplican; el resto del tiempo NO se
   dibujan. Es anidable (un sub-control revela otro). En Compose: emitir el composable dentro de un
   `if (condicion) { ... }` (equivalente a `View.VISIBLE`/`GONE`), no dejarlo siempre presente.
-  - Ejemplo actual en Athletic: en `ui/settings/SettingsScreen.kt`, los chips de patron de vibracion
-    (`VibrationPatterns`) se emiten solo si `alarm.vibrationEnabled` es true.
+  - Ejemplo actual en Athletic: en `ui/athlete/ExerciseEditorScreen.kt`, el selector de beep sound
+    se emite solo si `cfg.finalCount > 0`.
 - **Distinguirlo del patron "atenuar"**: un ajuste ligado a su propio switch EN LA MISMA fila queda
   VISIBLE pero ATENUADO (p. ej. `alpha 0.4` + deshabilitado) con el switch OFF. En divulgacion
   progresiva, en cambio, DESAPARECE por completo.
 - **Regla al agregar un control con sub-opciones**: elegir UN patron y mantenerlo. Sub-opciones
   dependientes de un estado -> divulgacion progresiva (mostrar/ocultar). Ajuste ligado a un switch de
   su misma fila -> patron "atenuar". (Trasladado del proyecto hermano `niko`.)
+- Ver workflow `progressive-disclosure` para el principio completo.
 
 ## Device / capturas (gotchas)
 - Conexion ADB Wi-Fi: ver workflow `connect-phone`. La IP/puertos CAMBIAN por sesion; PC y telefono
@@ -86,5 +87,6 @@ este equipo (no atados a una app concreta). Ajusta paquete, nombres y features a
 ## Workflows disponibles
 - `validate`: build + install + captura + verificacion funcional + commit.
 - `connect-phone`: conectar el device (Wi-Fi/USB/hotspot, subredes distintas).
+- `progressive-disclosure`: principio de UI — mostrar controles solo cuando aplican.
 - `add-vector-icon`, `add-embedded-font`: tecnicas reutilizables de recursos.
 - `normalize-line-endings`: uniformar finales de linea (evitar la advertencia CRLF de Git).

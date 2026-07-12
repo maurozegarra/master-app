@@ -2,6 +2,7 @@ package com.athletic.ui.athlete
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.layout.heightIn
@@ -60,6 +62,7 @@ import com.athletic.AthleteViewModel
 import com.athletic.i18n.Strings
 import com.athletic.model.AlarmSound
 import com.athletic.model.ConfirmMode
+import com.athletic.model.ACCENT_COLORS
 import com.athletic.model.DisplayMode
 import com.athletic.model.Exercise
 import com.athletic.model.StageConfig
@@ -211,25 +214,28 @@ private fun StageSection(
             containerColor = AppTheme.colors.bg,
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(5),
+                columns = GridCells.Fixed(6),
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(STAGE_COLORS) { c ->
+                items(ACCENT_COLORS) { ac ->
+                    val isSel = ac.argb == cfg.color
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .wrapContentSize(Alignment.Center)
+                            .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(c))
+                            .background(Color(ac.argb))
+                            .border(2.dp, if (isSel) AppTheme.colors.textPrimary else AppTheme.colors.textFaded, CircleShape)
                             .clickable {
-                                pendingColor = c
+                                pendingColor = ac.argb
                                 showColors = false
                             },
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (c == cfg.color) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White)
+                        if (isSel) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                         }
                     }
                 }
