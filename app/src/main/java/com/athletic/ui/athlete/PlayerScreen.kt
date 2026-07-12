@@ -51,8 +51,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.athletic.AthleteViewModel
@@ -507,13 +510,22 @@ private fun NextExerciseLabel(vm: AthleteViewModel, t: Strings) {
     val nextWork = steps.drop(idx + 1).firstOrNull { it.kind == StepKind.WORK }
     if (nextWork == null) return
     val nextName = ExerciseCatalog.display(nextWork.ownerExerciseId, nextWork.title.ifBlank { nextWork.ownerName }, t.locale.language)
+    val text = "${t.nextLabel}: $nextName".uppercase()
+
     Text(
-        "${t.nextLabel}: $nextName".uppercase(),
-        color = TEXT_DIM,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Medium,
+        text,
+        color = Color.White,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
         modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Start,
+        style = LocalTextStyle.current.copy(
+            shadow = Shadow(
+                color = Color.Black.copy(alpha = 0.8f),
+                offset = Offset(2f, 2f),
+                blurRadius = 4f,
+            ),
+        ),
     )
 }
 
