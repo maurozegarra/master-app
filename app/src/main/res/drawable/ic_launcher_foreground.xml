@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Capa frontal del ícono: hexágono NEGRO con contorno rojo fino (strokeWidth 1, para
-  distinguirlo del fondo negro), rotado -12° para el look "en cursiva" (igual que el
-  ícono legacy de Athlete), con la "M" de Wallpoet en ROJO SÓLIDO. La M es el mismo
-  glifo del wordmark (path M_D de TimesWordmark, reescalado al lienzo 108). El hexágono
-  ya viene con la rotación -12° "horneada" en sus coordenadas.
+  Capa frontal del ícono: hexágono estilo Freeletics NEGRO con la "M" de Wallpoet
+  en ROJO SÓLIDO alineada al borde vertical izquierdo del hexágono.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -12,11 +9,9 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#000000"
-        android:strokeColor="#FF5252"
-        android:strokeWidth="1"
-        android:pathData="M47.56,23.68L77.09,33.25L83.54,63.57L60.44,84.32L30.91,74.75L24.46,44.43Z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M31.32,47.80L37.15,70.43L59.83,76.56L76.68,60.31L70.83,37.63L48.12,31.32Z" />
     <path
-        android:fillColor="#FF5252"
-        android:pathData="M34.83,38L41.17,38L52.64,48.8L52.64,57.2L41.84,47.02L41.84,70L34.83,70Z M73.17,38L66.88,38L55.36,48.8L55.36,57.2L66.16,47.02L66.16,70L73.17,70Z" />
+        android:fillColor="#000000"
+        android:pathData="M41,45L45.5,45L52.5,51.5L52.5,56.5L45.7,50.2L45.7,64L41,64Z M67,45L62.6,45L55.5,51.5L55.5,56.5L62.4,50.2L62.4,64L67,64Z" />
 </vector>
