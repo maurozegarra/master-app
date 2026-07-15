@@ -56,13 +56,13 @@ object AthleteDefaults {
             id = id(),
             name = if (lang == "es") "Calentamiento" else "Warmup",
             exercises = listOf(
-                reps("ex_neck_lr", 10),
+                reps("ex_neck_lr", 20),
                 reps("ex_neck_circle", 10, note = sideNote(lang)),
                 reps("ex_chest_opening", 20),
                 reps("ex_shoulder_rotation", 10, note = sideNote(lang)),
                 reps("ex_trunk_rotation", 20),
                 reps("ex_hip_rotation", 10, note = sideNote(lang)),
-                reps("ex_deep_squat", 20),
+                reps("ex_knee_rotation", 10, note = sideNote(lang)),
                 reps("ex_ankle_rotation", 10, note = sideNote(lang)),
             ),
         )
@@ -108,7 +108,7 @@ object AthleteDefaults {
         val lower = WorkoutVariant(
             id = id(), name = "Lower",
             exercises = listOf(
-                reps("ex_knee_rotation", 10, note = sideNote(lang)),
+                reps("ex_deep_squat", 20),
                 reps("ex_knee_stand", 20),
                 reps("ex_knee_jump", 20),
                 reps("ex_cossack_squat", 20),

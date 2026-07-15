@@ -44,6 +44,10 @@ class WorkoutStore(context: Context) {
     fun isMasterV2Seeded(): Boolean = prefs.getBoolean(KEY_MASTER_V2, false)
     fun setMasterV2Seeded() { prefs.edit().putBoolean(KEY_MASTER_V2, true).apply() }
 
+    /** Marca de migración: si ya se aplicó la versión v3 del training "Master". */
+    fun isMasterV3Seeded(): Boolean = prefs.getBoolean(KEY_MASTER_V3, false)
+    fun setMasterV3Seeded() { prefs.edit().putBoolean(KEY_MASTER_V3, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         return try {
@@ -277,5 +281,6 @@ class WorkoutStore(context: Context) {
         const val KEY_SESSIONS = "sessions_json"
         const val KEY_FRIKI_SEEDED = "friki_seeded"
         const val KEY_MASTER_V2 = "master_v2_seeded"
+        const val KEY_MASTER_V3 = "master_v3_seeded"
     }
 }

@@ -97,6 +97,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
             trainings.add(AthleteDefaults.frikiNikiTraining(lang()))
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
+            store.setMasterV3Seeded()
             persist()
         } else {
             var changed = false
@@ -112,6 +113,13 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
                 val master = AthleteDefaults.masterTraining(lang())
                 if (masterIdx >= 0) trainings[masterIdx] = master else trainings.add(0, master)
                 store.setMasterV2Seeded()
+                changed = true
+            }
+            if (!store.isMasterV3Seeded()) {
+                val masterIdx = trainings.indexOfFirst { it.name == "Master" }
+                val master = AthleteDefaults.masterTraining(lang())
+                if (masterIdx >= 0) trainings[masterIdx] = master else trainings.add(0, master)
+                store.setMasterV3Seeded()
                 changed = true
             }
             if (changed) persist()
