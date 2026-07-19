@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,9 @@ import com.athletic.i18n.Strings
 import com.athletic.model.THEME_DARK
 import com.athletic.model.THEME_LIGHT
 import com.athletic.ui.MasterWordmark
+import com.athletic.update.UpdateChecker
+import com.athletic.update.UpdateDialog
+import com.athletic.update.UpdateInfo
 import com.athletic.ui.athlete.AthleteScreen
 import com.athletic.ui.settings.SettingsScreen
 import com.athletic.ui.theme.AppTheme
@@ -95,6 +99,19 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
 
     var showSettings by remember { mutableStateOf(false) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // Check de actualizaciones al iniciar (fuera de Play Store).
+    var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+    var isForceUpdate by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        val info = UpdateChecker.checkForUpdate(context)
+        if (info != null) {
+            updateInfo = info
+            isForceUpdate = UpdateChecker.isForceUpdate(info, context)
+        }
+    }
+
     // Deep link desde notificación: abrir el player del training activo.
     LaunchedEffect(pendingWorkoutId.value) {
         val id = pendingWorkoutId.value ?: return@LaunchedEffect
@@ -102,7 +119,6 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
     }
 
     // Permisos de notificación (Android 13+) para el foreground service del player.
-    val context = androidx.compose.ui.platform.LocalContext.current
     val notifPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { _ -> vm.startPlayerRun() }
@@ -201,6 +217,14 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
         Box(Modifier.fillMaxSize().padding(pad)) {
             AthleteScreen(vm, accent, t, ::startTraining)
         }
+    }
+
+    updateInfo?.let { info ->
+        UpdateDialog(
+            updateInfo = info,
+            isForced = isForceUpdate,
+            onDismiss = { updateInfo = null },
+        )
     }
 }
 

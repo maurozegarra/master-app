@@ -33,6 +33,19 @@ Copy-Item $apkSrc $apkDst -Force
 Write-Host ""
 Write-Host "OK -> releases\athletic-$versionName.apk"
 
+# Generar update.json para el mecanismo de auto-update (GitHub raw).
+$updateJson = Join-Path $PSScriptRoot 'update.json'
+$apkUrl = "https://github.com/maurozegarra/master-app/releases/download/v$versionName/athletic-$versionName.apk"
+$json = @{
+    versionCode = $versionCode
+    versionName = $versionName
+    apkUrl = $apkUrl
+    changelog = if ($Message -ne '') { $Message } else { '' }
+    minVersionCode = 1
+} | ConvertTo-Json -Depth 3
+Set-Content $updateJson $json -NoNewline
+Write-Host "OK -> update.json (v$versionName)"
+
 $newVersionCode = $versionCode + 1
 $newVersionName = "1.0.$newVersionCode"
 $gc = [regex]::Replace($gc, '(versionCode\s*=\s*)\d+', "`${1}$newVersionCode")
