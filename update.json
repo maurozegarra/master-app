@@ -1,7 +1,7 @@
 {
-  "changelog": "feat: in-app self-update mechanism + auto GitHub Release upload",
-  "versionCode": 87,
-  "versionName": "1.0.87",
+  "changelog": "Test: verifying in-app update dialog",
+  "versionCode": 88,
+  "versionName": "1.0.88",
   "minVersionCode": 1,
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.87/athletic-1.0.87.apk"
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.88/athletic-1.0.88.apk"
 }
