@@ -1,6 +1,7 @@
 package com.athletic.ui.athlete
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
@@ -62,12 +64,12 @@ fun AthleteScreen(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -
         vm.editingWorkoutId != null && vm.editingWorkout()?.rotating == true -> VariantListScreen(vm, accent, t)
         vm.editingWorkoutId != null -> WorkoutEditorScreen(vm, accent, t)
         vm.draft != null -> TrainingEditorScreen(vm, accent, t)
-        else -> TrainingsList(vm, accent, t)
+        else -> TrainingsList(vm, accent, t, onStart)
     }
 }
 
 @Composable
-private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings) {
+private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
     Box(Modifier.fillMaxSize()) {
         if (vm.trainings.isEmpty()) {
             Column(
@@ -100,7 +102,7 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings) {
                             accent = accent,
                             t = t,
                             isActive = vm.activePlayerTrainingId == tr.id,
-                            onPlay = { vm.openPlayer(tr.id) },
+                            onPlay = { vm.openPlayer(tr.id); onStart() },
                             onEdit = { vm.startEditTraining(tr.id) },
                             onDuplicate = { vm.duplicateTraining(tr.id) },
                             onDelete = { vm.deleteTraining(tr.id) },
@@ -123,15 +125,24 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings) {
             )
         }
 
-        PrimaryButton(
-            label = "+  ${t.createTraining}",
-            accent = accent,
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp),
-            onClick = { vm.startNewTraining() },
-        )
+                .padding(16.dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(AppTheme.colors.bg)
+                .border(1.dp, accent, CircleShape)
+                .clickable { vm.startNewTraining() },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = t.createTraining,
+                tint = accent,
+                modifier = Modifier.size(28.dp),
+            )
+        }
     }
 }
 
@@ -157,9 +168,11 @@ private fun TrainingCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
             .background(AppTheme.colors.surface)
-            .clickable(enabled = canPlay, onClick = onPlay)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(18.dp))
+            .clickable(onClick = onEdit)
+            .padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -187,30 +200,37 @@ private fun TrainingCard(
             )
         }
 
-        Box {
-            IconButton(onClick = { menu = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim)
-            }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(t.edit) }, onClick = { menu = false; onEdit() })
-                DropdownMenuItem(text = { Text(t.duplicate) }, onClick = { menu = false; onDuplicate() })
-                DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
-            }
-        }
-
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(if (canPlay) accent else AppTheme.colors.surface)
+                .background(AppTheme.colors.bg)
+                .border(1.dp, accent, CircleShape)
                 .clickable(enabled = canPlay, onClick = onPlay),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 Icons.Filled.PlayArrow,
                 contentDescription = t.start,
-                tint = if (canPlay) AppTheme.colors.onAccent else AppTheme.colors.textDim,
+                tint = if (canPlay) accent else AppTheme.colors.textDim,
             )
+        }
+
+        Box(modifier = Modifier.size(32.dp)) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .clickable { menu = true },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim, modifier = Modifier.size(20.dp))
+            }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(text = { Text(t.edit) }, onClick = { menu = false; onEdit() })
+                DropdownMenuItem(text = { Text(t.duplicate) }, onClick = { menu = false; onDuplicate() })
+                DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
+            }
         }
     }
 }
