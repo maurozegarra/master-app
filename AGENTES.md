@@ -69,7 +69,7 @@ Compila release, sube APK a GitHub Releases, actualiza `update.json`, bumpea ver
 
 ## Dispositivo de prueba
 
-- Samsung Galaxy Tab A11
+- Samsung Galaxy S26 Ultra
 - Conexión ADB inalámbrica: `192.168.18.128:33201`
 - Densidad: 450 dpi
 - Resolución: 1080x2340
