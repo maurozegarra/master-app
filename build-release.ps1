@@ -46,6 +46,23 @@ $json = @{
 Set-Content $updateJson $json -NoNewline
 Write-Host "OK -> update.json (v$versionName)"
 
+# Subir APK a GitHub Releases (borra releases anteriores, guarda solo el ultimo).
+$repo = "maurozegarra/master-app"
+$tag = "v$versionName"
+$oldReleases = gh release list --repo $repo --limit 50 --json tagName 2>$null | ConvertFrom-Json
+foreach ($rel in $oldReleases) {
+    if ($rel.tagName -ne $tag) {
+        gh release delete $rel.tagName --repo $repo --yes --cleanup-tag 2>$null
+        Write-Host "Deleted old release -> $($rel.tagName)"
+    }
+}
+gh release create $tag $apkDst --repo $repo --title "v$versionName" --notes $Message 2>$null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "OK -> GitHub Release $tag uploaded"
+} else {
+    Write-Host "WARN -> No se pudo subir el release a GitHub (continuando)"
+}
+
 $newVersionCode = $versionCode + 1
 $newVersionName = "1.0.$newVersionCode"
 $gc = [regex]::Replace($gc, '(versionCode\s*=\s*)\d+', "`${1}$newVersionCode")
@@ -60,4 +77,10 @@ if ($Message -ne '') {
     git commit -m "$Message (v$versionName)"
     if ($LASTEXITCODE -ne 0) { throw "git commit failed (exit $LASTEXITCODE)" }
     Write-Host "Commit -> $Message (v$versionName)"
+    git push origin main 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Push -> origin/main (update.json live)"
+    } else {
+        Write-Host "WARN -> No se pudo hacer push (update.json no actualizado en GitHub raw)"
+    }
 }

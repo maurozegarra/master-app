@@ -1,7 +1,7 @@
 {
+  "changelog": "feat: in-app self-update mechanism + auto GitHub Release upload",
   "versionCode": 87,
   "versionName": "1.0.87",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.87/athletic-1.0.87.apk",
-  "changelog": "Wordmark MASTER with Wallpoet Athletic font",
-  "minVersionCode": 1
+  "minVersionCode": 1,
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.87/athletic-1.0.87.apk"
 }
