@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,7 +47,7 @@ import com.athletic.model.THEME_DARK
 import com.athletic.model.THEME_LIGHT
 import com.athletic.ui.MasterWordmark
 import com.athletic.update.UpdateChecker
-import com.athletic.update.UpdateDialog
+import com.athletic.update.UpdateBar
 import com.athletic.update.UpdateInfo
 import com.athletic.ui.athlete.AthleteScreen
 import com.athletic.ui.settings.SettingsScreen
@@ -220,11 +221,15 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
     }
 
     updateInfo?.let { info ->
-        UpdateDialog(
-            updateInfo = info,
-            isForced = isForceUpdate,
-            onDismiss = { updateInfo = null },
-        )
+        Box(Modifier.fillMaxSize()) {
+            Box(Modifier.align(Alignment.BottomCenter)) {
+                UpdateBar(
+                    updateInfo = info,
+                    isForced = isForceUpdate,
+                    onDismiss = { updateInfo = null },
+                )
+            }
+        }
     }
 }
 

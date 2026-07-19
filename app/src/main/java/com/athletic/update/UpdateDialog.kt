@@ -2,100 +2,151 @@ package com.athletic.update
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import androidx.annotation.OptIn
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.athletic.ui.theme.AppTheme
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpdateDialog(
+fun UpdateBar(
     updateInfo: UpdateInfo,
     isForced: Boolean,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val accent = AppTheme.colors.accent
     var downloading by remember { mutableStateOf(false) }
-    var progress by remember { mutableStateOf(0f) }
+    var progress by remember { mutableFloatStateOf(0f) }
     var downloaded by remember { mutableStateOf(false) }
     var apkFile by remember { mutableStateOf<File?>(null) }
 
-    AlertDialog(
-        onDismissRequest = {
-            if (!isForced && !downloading) onDismiss()
-        },
-        title = { Text("Update available${if (isForced) " (required)" else ""}") },
-        text = {
-            Column {
-                Text("Version ${updateInfo.versionName}")
-                if (updateInfo.changelog.isNotBlank()) {
-                    Text(
-                        updateInfo.changelog,
-                        modifier = Modifier.padding(top = 8.dp),
-                        color = AppTheme.colors.textPrimary,
-                    )
-                }
-                if (downloading && !downloaded) {
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                    )
-                }
+    fun startDownload() {
+        downloading = true
+        val file = File(context.cacheDir, "athletic-update.apk")
+        apkFile = file
+        Thread {
+            try {
+                downloadApk(updateInfo.apkUrl, file) { p -> progress = p }
+                downloaded = true
+            } catch (e: Exception) {
+                downloading = false
             }
-        },
-        confirmButton = {
-            if (downloaded && apkFile != null) {
-                TextButton(onClick = {
+        }.start()
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(accent)
+            .clickable(enabled = !downloading) {
+                if (downloaded && apkFile != null) {
                     installApk(context, apkFile!!)
-                }) {
-                    Text("Install")
-                }
-            } else if (!downloading) {
-                TextButton(onClick = {
-                    downloading = true
-                    val file = File(context.cacheDir, "athletic-update.apk")
-                    apkFile = file
-                    Thread {
-                        try {
-                            downloadApk(updateInfo.apkUrl, file) { p ->
-                                progress = p
-                            }
-                            downloaded = true
-                        } catch (e: Exception) {
-                            downloading = false
-                        }
-                    }.start()
-                }) {
-                    Text("Download")
+                } else if (!downloading) {
+                    startDownload()
                 }
             }
-        },
-        dismissButton = {
-            if (!isForced && !downloading) {
-                TextButton(onClick = onDismiss) {
-                    Text("Later")
-                }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(Color.White),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (downloading && !downloaded) {
+                CircularProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = accent,
+                )
+            } else if (downloaded) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier.size(20.dp),
+                )
+            } else {
+                Icon(
+                    Icons.Filled.ArrowDownward,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier.size(20.dp),
+                )
             }
-        },
-    )
+        }
+
+        Spacer(Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = if (downloaded) "Tap to install" else "Update Athletic",
+                color = Color.White,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            if (!downloading && !downloaded) {
+                Text(
+                    text = "v${updateInfo.versionName}",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 13.sp,
+                )
+            } else if (downloading && !downloaded) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    color = Color.White,
+                    trackColor = Color.White.copy(alpha = 0.3f),
+                )
+            }
+        }
+
+        if (!isForced && !downloading && !downloaded) {
+            Text(
+                text = "X",
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .clickable { onDismiss() }
+                    .padding(8.dp),
+            )
+        }
+    }
 }
 
 private fun downloadApk(url: String, file: File, onProgress: (Float) -> Unit) {
