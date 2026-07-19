@@ -82,7 +82,7 @@ fun UpdateBar(
                         startDownload()
                     }
                 }
-                .padding(horizontal = 16.dp, vertical = 2.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .padding(bottom = bottomInset),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -136,6 +136,7 @@ fun UpdateBar(
                 text = "v${updateInfo.versionName}",
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
             )
         } else if (downloading && !downloaded) {
             LinearProgressIndicator(
@@ -145,17 +146,6 @@ fun UpdateBar(
                     .padding(start = 8.dp),
                 color = Color.White,
                 trackColor = Color.White.copy(alpha = 0.3f),
-            )
-        }
-
-        if (!isForced && !downloading && !downloaded) {
-            Text(
-                text = "X",
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 18.sp,
-                modifier = Modifier
-                    .clickable { onDismiss() }
-                    .padding(8.dp),
             )
         }
     }

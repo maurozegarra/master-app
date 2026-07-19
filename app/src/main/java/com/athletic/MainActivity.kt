@@ -222,7 +222,18 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
                 .fillMaxSize()
                 .padding(top = pad.calculateTopPadding()),
         ) {
-            Box(Modifier.weight(1f).fillMaxWidth()) {
+            Box(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .then(
+                        if (updateInfo == null) {
+                            Modifier.padding(bottom = pad.calculateBottomPadding())
+                        } else {
+                            Modifier
+                        },
+                    ),
+            ) {
                 AthleteScreen(vm, accent, t, ::startTraining)
             }
             updateInfo?.let { info ->

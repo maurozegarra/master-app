@@ -2,6 +2,7 @@ package com.athletic.update
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -35,24 +36,27 @@ object UpdateChecker {
 
     suspend fun checkForUpdate(context: Context): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
-            val conn = (URL(UPDATE_URL).openConnection() as HttpURLConnection).apply {
+            val conn = (URL("$UPDATE_URL?t=${System.currentTimeMillis()}").openConnection() as HttpURLConnection).apply {
                 connectTimeout = 10000
                 readTimeout = 10000
                 useCaches = false
+                setRequestProperty("Cache-Control", "no-cache")
             }
-            conn.inputStream.bufferedReader().use { reader ->
-                val json = JSONObject(reader.readText())
-                val info = UpdateInfo(
-                    versionCode = json.getInt("versionCode"),
-                    versionName = json.getString("versionName"),
-                    apkUrl = json.getString("apkUrl"),
-                    changelog = json.optString("changelog", ""),
-                    minVersionCode = json.optInt("minVersionCode", 1),
-                )
-                val current = getCurrentVersionCode(context)
-                if (info.versionCode > current) info else null
-            }
+            val body = conn.inputStream.bufferedReader().use { it.readText() }
+            Log.d("UpdateChecker", "Response: $body")
+            val json = JSONObject(body)
+            val info = UpdateInfo(
+                versionCode = json.getInt("versionCode"),
+                versionName = json.getString("versionName"),
+                apkUrl = json.getString("apkUrl"),
+                changelog = json.optString("changelog", ""),
+                minVersionCode = json.optInt("minVersionCode", 1),
+            )
+            val current = getCurrentVersionCode(context)
+            Log.d("UpdateChecker", "remote=${info.versionCode} current=$current")
+            if (info.versionCode > current) info else null
         } catch (e: Exception) {
+            Log.e("UpdateChecker", "Error checking update", e)
             null
         }
     }
