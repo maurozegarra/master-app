@@ -61,6 +61,7 @@ fun UpdateBar(
             try {
                 downloadApk(updateInfo.apkUrl, file) { p -> progress = p }
                 downloaded = true
+                downloading = false
             } catch (e: Exception) {
                 downloading = false
             }
@@ -86,11 +87,8 @@ fun UpdateBar(
                 .padding(bottom = bottomInset),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-        Row(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+            Spacer(Modifier.weight(1f))
+
             Box(
                 modifier = Modifier
                     .size(24.dp)
@@ -125,13 +123,15 @@ fun UpdateBar(
             Spacer(Modifier.width(10.dp))
 
             Text(
-                text = "Update Athletic",
+                text = if (downloaded) "Tap to install" else "Update Athletic",
                 color = Color.White,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
             )
-        }
-        if (!downloading && !downloaded) {
+
+            Spacer(Modifier.weight(1f))
+
+            if (!downloading && !downloaded) {
             Text(
                 text = "v${updateInfo.versionName}",
                 color = Color.White.copy(alpha = 0.8f),
@@ -153,11 +153,12 @@ fun UpdateBar(
 }
 
 private fun downloadApk(url: String, file: File, onProgress: (Float) -> Unit) {
-    val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+    var conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
         connectTimeout = 30000
         readTimeout = 30000
+        instanceFollowRedirects = true
     }
-    val total = conn.contentLength.toFloat()
+    var total = conn.contentLength.toFloat()
     conn.inputStream.use { input ->
         file.outputStream().use { output ->
             val buffer = ByteArray(8192)

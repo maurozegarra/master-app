@@ -2,7 +2,6 @@ package com.athletic.update
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -43,7 +42,6 @@ object UpdateChecker {
                 setRequestProperty("Cache-Control", "no-cache")
             }
             val body = conn.inputStream.bufferedReader().use { it.readText() }
-            Log.d("UpdateChecker", "Response: $body")
             val json = JSONObject(body)
             val info = UpdateInfo(
                 versionCode = json.getInt("versionCode"),
@@ -53,10 +51,8 @@ object UpdateChecker {
                 minVersionCode = json.optInt("minVersionCode", 1),
             )
             val current = getCurrentVersionCode(context)
-            Log.d("UpdateChecker", "remote=${info.versionCode} current=$current")
             if (info.versionCode > current) info else null
         } catch (e: Exception) {
-            Log.e("UpdateChecker", "Error checking update", e)
             null
         }
     }
