@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.athletic.ui.theme.AppTheme
@@ -42,6 +44,7 @@ fun UpdateBar(
     updateInfo: UpdateInfo,
     isForced: Boolean,
     onDismiss: () -> Unit,
+    bottomInset: Dp = 0.dp,
 ) {
     val context = LocalContext.current
     val accent = AppTheme.colors.accent
@@ -64,76 +67,85 @@ fun UpdateBar(
         }.start()
     }
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(accent)
-            .clickable(enabled = !downloading) {
-                if (downloaded && apkFile != null) {
-                    installApk(context, apkFile!!)
-                } else if (!downloading) {
-                    startDownload()
+            .background(accent),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = !downloading) {
+                    if (downloaded && apkFile != null) {
+                        installApk(context, apkFile!!)
+                    } else if (!downloading) {
+                        startDownload()
+                    }
+                }
+                .padding(horizontal = 16.dp, vertical = 2.dp)
+                .padding(bottom = bottomInset),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(Color.White),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (downloading && !downloaded) {
+                    CircularProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = accent,
+                    )
+                } else if (downloaded) {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = accent,
+                        modifier = Modifier.size(16.dp),
+                    )
+                } else {
+                    Icon(
+                        Icons.Filled.ArrowDownward,
+                        contentDescription = null,
+                        tint = accent,
+                        modifier = Modifier.size(16.dp),
+                    )
                 }
             }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(Color.White),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (downloading && !downloaded) {
-                CircularProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = accent,
-                )
-            } else if (downloaded) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = accent,
-                    modifier = Modifier.size(20.dp),
-                )
-            } else {
-                Icon(
-                    Icons.Filled.ArrowDownward,
-                    contentDescription = null,
-                    tint = accent,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-        }
 
-        Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(10.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = if (downloaded) "Tap to install" else "Update Athletic",
+                text = "Update Athletic",
                 color = Color.White,
-                fontSize = 15.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
             )
-            if (!downloading && !downloaded) {
-                Text(
-                    text = "v${updateInfo.versionName}",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 13.sp,
-                )
-            } else if (downloading && !downloaded) {
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    color = Color.White,
-                    trackColor = Color.White.copy(alpha = 0.3f),
-                )
-            }
+        }
+        if (!downloading && !downloaded) {
+            Text(
+                text = "v${updateInfo.versionName}",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 14.sp,
+            )
+        } else if (downloading && !downloaded) {
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .width(80.dp)
+                    .padding(start = 8.dp),
+                color = Color.White,
+                trackColor = Color.White.copy(alpha = 0.3f),
+            )
         }
 
         if (!isForced && !downloading && !downloaded) {
@@ -146,6 +158,7 @@ fun UpdateBar(
                     .padding(8.dp),
             )
         }
+    }
     }
 }
 

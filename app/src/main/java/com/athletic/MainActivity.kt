@@ -14,7 +14,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -215,18 +217,20 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
             )
         },
     ) { pad ->
-        Box(Modifier.fillMaxSize().padding(pad)) {
-            AthleteScreen(vm, accent, t, ::startTraining)
-        }
-    }
-
-    updateInfo?.let { info ->
-        Box(Modifier.fillMaxSize()) {
-            Box(Modifier.align(Alignment.BottomCenter)) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(top = pad.calculateTopPadding()),
+        ) {
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                AthleteScreen(vm, accent, t, ::startTraining)
+            }
+            updateInfo?.let { info ->
                 UpdateBar(
                     updateInfo = info,
                     isForced = isForceUpdate,
                     onDismiss = { updateInfo = null },
+                    bottomInset = pad.calculateBottomPadding(),
                 )
             }
         }
