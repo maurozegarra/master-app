@@ -43,7 +43,7 @@ import com.athletic.i18n.I18n
 import com.athletic.i18n.Strings
 import com.athletic.model.THEME_DARK
 import com.athletic.model.THEME_LIGHT
-import com.athletic.ui.TimesWordmark
+import com.athletic.ui.MasterWordmark
 import com.athletic.ui.athlete.AthleteScreen
 import com.athletic.ui.settings.SettingsScreen
 import com.athletic.ui.theme.AppTheme
@@ -149,7 +149,7 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
         topBar = {
             TopAppBar(
                 title = {
-                    // En la raíz: wordmark TIMES; en niveles internos: título contextual.
+                    // En la raíz: wordmark MASTER; en niveles internos: título contextual.
                     if (canGoBack) {
                         Text(
                             titleFor(vm, t),
@@ -158,7 +158,7 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
                             fontSize = 20.sp,
                         )
                     } else {
-                        TimesWordmark(accent = accent, height = 22.dp)
+                        MasterWordmark(accent = accent, height = 28.dp)
                     }
                 },
                 navigationIcon = {
@@ -243,7 +243,7 @@ private fun titleFor(vm: AthleteViewModel, t: Strings): String = when {
     vm.editingExerciseId != null -> vm.editingExercise()?.name ?: t.exercise
     vm.editingVariantId != null || vm.editingWorkoutId != null -> vm.editorName().ifBlank { t.workout }
     vm.draft != null -> vm.draft?.name?.ifBlank { t.training } ?: t.training
-    else -> "TIMES"
+    else -> "MASTER"
 }
 
 /** Cierra el nivel de navegación más profundo (mismo orden que el router de AthleteScreen). */
