@@ -5,7 +5,9 @@
     android:viewportWidth="24"
     android:viewportHeight="24"
     android:tint="#FFFFFFFF">
+    <!-- Hexagon ring (outer + inner = thick outline) -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M9.71,1.24L20.17,4.64L22.46,15.40L14.29,22.76L3.83,19.36L1.54,8.60Z" />
+        android:fillType="evenOdd"
+        android:pathData="M12.0,1.0L21.53,6.5L21.53,17.5L12.0,23.0L2.47,17.5L2.47,6.5Z M12.0,4.5L5.5,8.25L5.5,15.75L12.0,19.5L18.5,15.75L18.5,8.25Z" />
 </vector>

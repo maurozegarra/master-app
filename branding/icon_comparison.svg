@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 1024" width="2048" height="1024">
+  <!-- Lado izquierdo: AppBlock original -->
+  <rect x="0" y="0" width="1024" height="1024" fill="#000000"/>
+  <g transform="translate(-119.5,-119.5) scale(13.796)">
+    <g transform="scale(0.6885) translate(26.46,26.46)">
+      <path fill="#ff2f96ff" d="M39.999,27.5238L5.7101,14.1885L11.3312,28.125L39.999,40.0262L68.6668,28.125L74.2879,14.1885L39.999,27.5238Z"/>
+      <path fill="#ff2577cb" d="M65.1342,10.1057L39.9989,0L14.8636,10.1057L22.1109,15.1368L39.9989,8.5664L57.8869,15.1368L65.1342,10.1057Z"/>
+      <path fill="#ff2f96ff" d="M40.0016,51.1075L18.2926,41.3521L21.8933,51.7077L39.9992,59.6882L58.1031,51.7086L61.7118,41.6879L40.0016,51.1075Z"/>
+      <path fill="#ff2f96ff" d="M39.9854,72.2338L28.5913,66.7446L25.6968,73.9211L39.9851,80L54.3015,73.9213L51.407,66.7449L39.9854,72.2338Z"/>
+      <path fill="#ff2577cb" d="M80.0001,39.0126L75.0822,27.168L70.0226,35.053L71.6898,39.0212L62.8633,61.7152L57.4198,64.4145L60.3002,71.5558L68.6689,68.0978L80.0001,39.0126Z"/>
+      <path fill="#ff2577cb" d="M0.0001,39.0104L4.9176,26.8184L9.9662,35.0437L8.633,39.0101L17.1369,61.7158L22.5783,64.414L19.7013,71.547L10.6667,68.1009L0.0001,39.0104Z"/>
+    </g>
+  </g>
+
+  <!-- Divisor -->
+  <line x1="1024" y1="0" x2="1024" y2="1024" stroke="#333" stroke-width="2"/>
+
+  <!-- Lado derecho: nuestro hexágono con M estilo Wallpoet (paths rellenos) -->
+  <rect x="1024" y="0" width="1024" height="1024" fill="#000000"/>
+  <!-- Hexagon edges in white -->
+  <g transform="translate(1024,0)" fill="#FFFFFF" fill-rule="evenodd">
+    <!-- Top-left edge with notch where M diagonal meets hexagon -->
+    <path d="M512,132 L234,292 L311,336 L512,220 Z"/>
+    <!-- Top-right edge with notch where M diagonal meets hexagon -->
+    <path d="M512,132 L790,292 L713,336 L512,220 Z"/>
+    <!-- Bottom-left diagonal with notch separating M leg from hexagon -->
+    <path d="M234,732 L512,892 L512,804 L311,688 Z"/>
+    <!-- Bottom-right diagonal with notch separating M leg from hexagon -->
+    <path d="M790,732 L512,892 L512,804 L713,688 Z"/>
+  </g>
+  <!-- M in red -->
+  <g transform="translate(1024,0)" fill="#E63946" fill-rule="evenodd">
+    <!-- M left half: leg + diagonal (Wallpoet style, with V-notch gap) -->
+    <path d="M182,322 L252,322 L500,450 L500,550 L259,429 L259,702 L182,702 Z"/>
+    <!-- M right half: leg + diagonal (Wallpoet style, with V-notch gap) -->
+    <path d="M842,322 L773,322 L524,450 L524,550 L765,429 L765,702 L842,702 Z"/>
+  </g>
+
+  <!-- Reference lines on top of everything -->
+  <line x1="0" y1="132" x2="2048" y2="132" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="8,4"/>
+  <line x1="0" y1="892" x2="2048" y2="892" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="8,4"/>
+</svg>

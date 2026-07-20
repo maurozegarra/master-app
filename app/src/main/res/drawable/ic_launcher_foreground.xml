@@ -1,17 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Capa frontal del ícono: hexágono estilo Freeletics NEGRO con la "M" de Wallpoet
-  en ROJO SÓLIDO alineada al borde vertical izquierdo del hexágono.
+  Capa frontal del ícono: hexágono con M estilo Wallpoet.
+  Hexágono en blanco con notches, M en rojo sólido.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Hexagon top-left edge (white) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M31.32,47.80L37.15,70.43L59.83,76.56L76.68,60.31L70.83,37.63L48.12,31.32Z" />
+        android:pathData="M54.00,26.50L33.89,38.08L39.46,41.26L54.00,32.86Z" />
+    <!-- Hexagon top-right edge (white) -->
     <path
-        android:fillColor="#000000"
-        android:pathData="M41,45L45.5,45L52.5,51.5L52.5,56.5L45.7,50.2L45.7,64L41,64Z M67,45L62.6,45L55.5,51.5L55.5,56.5L62.4,50.2L62.4,64L67,64Z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M54.00,26.50L74.11,38.08L68.54,41.26L54.00,32.86Z" />
+    <!-- Hexagon bottom-left edge (white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M33.89,69.92L54.00,81.50L54.00,75.14L39.46,66.74Z" />
+    <!-- Hexagon bottom-right edge (white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74.11,69.92L54.00,81.50L54.00,75.14L68.54,66.74Z" />
+    <!-- M left half (red) -->
+    <path
+        android:fillColor="#E63946"
+        android:pathData="M30.11,40.25L35.19,40.25L53.14,49.51L53.14,56.75L35.69,47.99L35.69,67.75L30.11,67.75Z" />
+    <!-- M right half (red) -->
+    <path
+        android:fillColor="#E63946"
+        android:pathData="M77.89,40.25L72.88,40.25L54.86,49.51L54.86,56.75L72.31,47.99L72.31,67.75L77.89,67.75Z" />
 </vector>
