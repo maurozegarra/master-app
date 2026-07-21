@@ -1,8 +1,13 @@
 package com.athletic.ui.athlete
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +60,13 @@ import com.athletic.ui.dragContainer
 import com.athletic.ui.rememberDragDropState
 import com.athletic.ui.theme.AppTheme
 import com.athletic.util.formatRemaining
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.TextStyle
+import java.time.temporal.TemporalAdjusters
+import java.util.Locale
 
 /** Router de la sección Athlete según el estado de navegación del ViewModel. */
 @Composable
@@ -70,15 +86,27 @@ fun AthleteScreen(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -
 
 @Composable
 private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
+    val zone = remember { ZoneId.systemDefault() }
+    val today = remember { LocalDate.now() }
+    val baseWeekStart = remember { today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }
+    var weekOffset by remember { mutableStateOf(0) }
+    val weekStart = remember(weekOffset) { baseWeekStart.plusWeeks(weekOffset.toLong()) }
+
+    val sessionDates = remember(vm.sessions.toList()) {
+        vm.sessions.map { Instant.ofEpochMilli(it.completedAt).atZone(zone).toLocalDate() }.toSet()
+    }
+
     Box(Modifier.fillMaxSize()) {
         if (vm.trainings.isEmpty()) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
+                modifier = Modifier.fillMaxSize().padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
             ) {
+                WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- })
+                Spacer(Modifier.weight(1f))
                 Text(t.emptyTrainings, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
                 Text(t.savedHint, color = AppTheme.colors.textDim, fontSize = 14.sp)
+                Spacer(Modifier.weight(1f))
             }
         } else {
             val listState = rememberLazyListState()
@@ -91,6 +119,9 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onSta
                 contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                item(key = "week_calendar") {
+                    WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- })
+                }
                 itemsIndexed(
                     vm.trainings,
                     key = { _, it -> it.id },
@@ -143,6 +174,94 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onSta
                 modifier = Modifier.size(28.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun WeekCalendar(
+    weekStart: LocalDate,
+    today: LocalDate,
+    sessionDates: Set<LocalDate>,
+    accent: Color,
+    onSwipeLeft: () -> Unit = {},
+    onSwipeRight: () -> Unit = {},
+) {
+    val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    var dragAccum by remember { mutableStateOf(0f) }
+    var direction by remember { mutableStateOf(1) }
+    AnimatedContent(
+        targetState = weekStart,
+        transitionSpec = {
+            if (direction > 0) {
+                slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
+            } else {
+                slideInHorizontally { -it } togetherWith slideOutHorizontally { it }
+            }
+        },
+        label = "week_slide",
+    ) { currentWeek ->
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onDragStart = { dragAccum = 0f },
+                    onDragEnd = {
+                        val threshold = 80f * density
+                        when {
+                            dragAccum > threshold -> { direction = -1; onSwipeRight() }
+                            dragAccum < -threshold -> { direction = 1; onSwipeLeft() }
+                        }
+                        dragAccum = 0f
+                    },
+                    onHorizontalDrag = { _, dragAmount -> dragAccum += dragAmount },
+                )
+            },
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        for (i in 0..6) {
+            val date = currentWeek.plusDays(i.toLong())
+            val isToday = date == today
+            val hasSession = date in sessionDates
+            Column(
+                modifier = Modifier.wrapContentSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = dayLabels[i],
+                    color = if (isToday) accent else AppTheme.colors.textDim,
+                    fontSize = 11.sp,
+                    fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                )
+                Spacer(Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(if (isToday) accent else Color.Transparent)
+                        .border(
+                            1.dp,
+                            if (isToday) accent else AppTheme.colors.track,
+                            CircleShape,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = date.dayOfMonth.toString(),
+                        color = if (isToday) AppTheme.colors.onAccent else AppTheme.colors.textPrimary,
+                        fontSize = 14.sp,
+                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.SemiBold,
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier.size(4.dp)
+                        .clip(CircleShape)
+                        .background(if (hasSession) accent else Color.Transparent),
+                )
+            }
+        }
+    }
     }
 }
 

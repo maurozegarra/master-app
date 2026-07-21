@@ -86,6 +86,11 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     var activePlayerTrainingId by mutableStateOf<Long?>(null)
         private set
 
+    // ---------- Historial de sesiones ----------
+
+    /** Sesiones completadas (las registra el servicio del player en el mismo store). */
+    val sessions = mutableStateListOf<SessionLog>()
+
     private fun newId(): Long = nextId++
 
     init {
@@ -126,6 +131,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         }
         observePlayer()
         restorePlayerState()
+        refreshSessions()
     }
 
     /** Reconecta la UI al player activo tras reabrir la app (estilo YouTube). */
@@ -246,9 +252,6 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     // ---------- Historial de sesiones ----------
-
-    /** Sesiones completadas (las registra el servicio del player en el mismo store). */
-    val sessions = mutableStateListOf<SessionLog>()
 
     /** Pantalla de historial abierta desde la raíz. */
     var showingHistory by mutableStateOf(false)
