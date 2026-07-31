@@ -1,0 +1,102 @@
+{
+  "_comment": "Fuente de verdad del to-do de Athletic. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'.",
+  "items": [
+    {
+      "id": "TD-001",
+      "title": "Tests del motor de pasos (StepEngine)",
+      "category": "Forge",
+      "status": "auto",
+      "test": ["com.athletic.model.StepEngineTest"]
+    },
+    {
+      "id": "TD-002",
+      "title": "Tests de rotacion idempotente",
+      "category": "Forge",
+      "status": "auto",
+      "test": ["com.athletic.model.RotationTest"]
+    },
+    {
+      "id": "TD-003",
+      "title": "Tests de dominio (Workout, PlayerStep)",
+      "category": "Forge",
+      "status": "auto",
+      "test": ["com.athletic.model.WorkoutTest", "com.athletic.model.PlayerStepTest"]
+    },
+    {
+      "id": "TD-004",
+      "title": "CI local integrado en scripts de build",
+      "category": "Forge",
+      "status": "done"
+    },
+    {
+      "id": "TD-005",
+      "title": "Verificacion funcional en dispositivo",
+      "category": "Testing",
+      "status": "pending",
+      "manual": "Avance de pasos (Done), countdown cronometrado, pausa/reanudar, segundo plano y muerte de proceso, registro en Historial, drag-reorder, weekly calendar, mini-player, self-update"
+    },
+    {
+      "id": "TD-006",
+      "title": "Limpieza de codigo muerto",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "manual": "AlarmConfig, VIBRATION_PATTERNS, VibrationPattern, HEADSET_ONLY, SPEAKER_AND_HEADSET en model/Settings.kt; AlarmPlayer.start(config) y previewVolume(config) en audio/AlarmPlayer.kt. Solo beepTone() y stopPreview() estan vivos."
+    },
+    {
+      "id": "TD-007",
+      "title": "Decidir sobre branding/icons.html sin trackear",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "manual": "Preview HTML del launcher icon. Commitear o agregar a .gitignore."
+    },
+    {
+      "id": "TD-008",
+      "title": "Rebrand del texto del wordmark (opcional)",
+      "category": "Branding",
+      "status": "pending",
+      "manual": "Decidir si se mantiene 'MASTER' o se regenera con glifos de 'ATHLETIC' usando branding/wordmark/tools/"
+    },
+    {
+      "id": "TD-009",
+      "title": "Respaldo/exportacion de trainings JSON (opcional)",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Evaluar export/import de trainings (JSON) via SAF, como mini-timer con BackupManager"
+    },
+    {
+      "id": "TD-010",
+      "title": "Catalogo de ejercicios expandido (opcional)",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Revisar/expandir ExerciseCatalog y ExerciseIcons pensando en el app independiente"
+    },
+    {
+      "id": "TD-011",
+      "title": "Animaciones de ejercicio (opcional)",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Placeholder para animacion por ejercicio; definir si entra en el roadmap (sin libs de red)"
+    },
+    {
+      "id": "TD-012",
+      "title": "Onboarding / estado vacio (opcional)",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Cuidar el primer arranque: seed de ejemplos vs vacio + tutorial breve"
+    },
+    {
+      "id": "TD-013",
+      "title": "Accesibilidad (opcional)",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "contentDescription en iconos del player y areas tactiles >=48dp"
+    },
+    {
+      "id": "TD-014",
+      "title": "Keep-screen-on durante la corrida (opcional)",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "El player a pantalla completa podria beneficiarse de keep-screen-on"
+    }
+  ]
+}
