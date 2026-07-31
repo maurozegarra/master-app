@@ -39,8 +39,7 @@
       "id": "TD-006",
       "title": "Limpieza de codigo muerto",
       "category": "Mantenimiento",
-      "status": "pending",
-      "manual": "AlarmConfig, VIBRATION_PATTERNS, VibrationPattern, HEADSET_ONLY, SPEAKER_AND_HEADSET en model/Settings.kt; AlarmPlayer.start(config) y previewVolume(config) en audio/AlarmPlayer.kt. Solo beepTone() y stopPreview() estan vivos."
+      "status": "done"
     },
     {
       "id": "TD-007",

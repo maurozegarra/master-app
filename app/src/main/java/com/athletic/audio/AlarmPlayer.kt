@@ -2,117 +2,34 @@ package com.athletic.audio
 
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
-import com.athletic.model.AlarmConfig
-import com.athletic.model.SPEAKER_AND_HEADSET
-import com.athletic.model.VIBRATION_PATTERNS
 import kotlin.math.pow
 
 /**
- * Reproductor ÚNICO de alarma/sonido. Cada llamada recibe el [AlarmConfig] propio
- * de la pestaña, de modo que "lo que pruebas es lo que suena": USAGE_MEDIA, escalado perceptual en dB, ducking de la música y enrutamiento a
- * audífonos.
+ * Reproductor de beeps del player y previews de tonos del exercise editor.
+ * USAGE_MEDIA, escalado perceptual en dB y ducking de la música.
  */
 class AlarmPlayer(private val context: Context) {
 
-    private val players = mutableListOf<MediaPlayer>()
     private var previewPlayer: MediaPlayer? = null
     private var focus: AudioFocusRequest? = null
 
     private val audioManager: AudioManager
         get() = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-    // ---------- Alarma ----------
-
-    /**
-     * Suena la alarma con [config]. [loop] = true para el temporizador (bucle
-     * hasta detenerlo); false para un "cue" breve (transiciones del player).
-     */
-    fun start(config: AlarmConfig, loop: Boolean) {
-        stop()
-        if (config.vibrationEnabled) vibrate(config.vibrationPattern, repeat = loop)
-        // Si "Ignorar modo silencio" está desactivado, respetar el modo del equipo.
-        val audio = audioManager
-        val shouldPlaySound =
-            config.ignoreSilent || audio.ringerMode == AudioManager.RINGER_MODE_NORMAL
-        if (!shouldPlaySound) return
-        val uri = config.soundUri?.let { Uri.parse(it) }
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            ?: return
-
-        requestFocus()
-        val vol = perceptualVolume(config.volume)
-
-        val outputs = audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-        val headset = findMediaHeadset(outputs)
-        val speaker = outputs.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
-        if (headset != null) {
-            play(uri, vol, loop, headset)
-            if (config.headsetMode == SPEAKER_AND_HEADSET && speaker != null) {
-                play(uri, vol, loop, speaker)
-            }
-        } else {
-            play(uri, vol, loop, null)
-        }
-    }
-
-    private fun play(uri: Uri, vol: Float, loop: Boolean, device: AudioDeviceInfo?) {
-        try {
-            val mp = MediaPlayer()
-            mp.setAudioAttributes(mediaAttrs())
-            mp.setDataSource(context, uri)
-            mp.isLooping = loop
-            mp.setVolume(vol, vol)
-            if (device != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                mp.setPreferredDevice(device)
-            }
-            if (!loop) {
-                // Cue breve: liberar al terminar y soltar foco/stream cuando ya no
-                // quede ningún reproductor activo.
-                mp.setOnCompletionListener { done ->
-                    done.release()
-                    players.remove(done)
-                    if (players.isEmpty()) {
-                        abandonFocus()
-                        cancelVibration()
-                    }
-                }
-            }
-            mp.setOnPreparedListener { it.start() }
-            mp.prepareAsync()
-            players.add(mp)
-        } catch (_: Exception) {
-        }
-    }
-
     fun stop() {
-        cancelVibration()
-        players.forEach { mp ->
-            try {
-                if (mp.isPlaying) mp.stop()
-            } catch (_: Exception) {
-            }
-            mp.release()
-        }
-        players.clear()
         abandonFocus()
     }
 
-    // ---------- Previsualización (ajustes) ----------
+    // ---------- Previsualización (exercise editor) ----------
 
     /**
-     * Reproduce un tono como vista previa EXACTAMENTE como sonará la alarma real:
-     * stream de media + USAGE_MEDIA + ducking + volumen perceptual.
+     * Reproduce un tono como vista previa: stream de media + USAGE_MEDIA + ducking
+     * + volumen perceptual.
      */
     fun previewTone(uriStr: String, volume: Float) {
         stopPreview()
@@ -152,22 +69,6 @@ class AlarmPlayer(private val context: Context) {
         }
     }
 
-    /**
-     * Reproduce el tono de [config] a su volumen, para oír el nivel mientras se
-     * ajusta el volumen de esa pestaña. Si el volumen es 0, calla.
-     */
-    fun previewVolume(config: AlarmConfig) {
-        if (config.volume <= 0f) {
-            stopPreview()
-            return
-        }
-        val uri = config.soundUri
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)?.toString()
-            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)?.toString()
-            ?: return
-        previewTone(uri, config.volume)
-    }
-
     fun stopPreview() {
         try {
             previewPlayer?.stop()
@@ -177,9 +78,6 @@ class AlarmPlayer(private val context: Context) {
         previewPlayer = null
         abandonFocus()
     }
-
-    /** Vibra una vez con el patrón indicado, para previsualizarlo en ajustes. */
-    fun previewVibration(patternIndex: Int) = vibrate(patternIndex, repeat = false)
 
     // ---------- Volumen / stream / foco ----------
 
@@ -221,63 +119,8 @@ class AlarmPlayer(private val context: Context) {
         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
         .build()
 
-    /** Primer audífono capaz de reproducir media (excluye Bluetooth SCO). */
-    private fun findMediaHeadset(outputs: Array<AudioDeviceInfo>): AudioDeviceInfo? {
-        for (type in MEDIA_HEADSET_TYPES) {
-            outputs.firstOrNull { it.type == type }?.let { return it }
-        }
-        return null
-    }
-
-    // ---------- Vibración ----------
-
-    private fun vibrator(): Vibrator =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager)
-                .defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-
-    private fun vibrate(patternIndex: Int, repeat: Boolean) {
-        val timings = VIBRATION_PATTERNS.getOrElse(patternIndex) { VIBRATION_PATTERNS[0] }.timings
-        val v = vibrator()
-        v.cancel()
-        val rep = if (repeat) 0 else -1
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(VibrationEffect.createWaveform(timings, rep))
-        } else {
-            @Suppress("DEPRECATION")
-            v.vibrate(timings, rep)
-        }
-    }
-
-    private fun cancelVibration() {
-        try {
-            vibrator().cancel()
-        } catch (_: Exception) {
-        }
-    }
-
     private companion object {
         /** Rango (dB) de la curva perceptual de volumen: 100% -> 0 dB, 0% -> -18 dB. */
         const val VOLUME_DB_RANGE = 18f
-
-        /**
-         * Salidas de audífonos capaces de reproducir MEDIA, por preferencia. Se
-         * excluye BLUETOOTH_SCO (canal de llamadas, mono): no reproduce media a
-         * menos que se active SCO explícitamente y dejaría la alarma en silencio.
-         */
-        val MEDIA_HEADSET_TYPES = listOf(
-            AudioDeviceInfo.TYPE_BLE_HEADSET,
-            AudioDeviceInfo.TYPE_BLE_SPEAKER,
-            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
-            AudioDeviceInfo.TYPE_USB_HEADSET,
-            AudioDeviceInfo.TYPE_USB_DEVICE,
-            AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
-            AudioDeviceInfo.TYPE_WIRED_HEADSET,
-            AudioDeviceInfo.TYPE_HEARING_AID,
-        )
     }
 }

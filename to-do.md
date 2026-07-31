@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **4 / 14** hechos, 10 pendientes.
+Progreso: **5 / 14** hechos, 9 pendientes.
 
 ## Pendientes
 
@@ -30,8 +30,6 @@ Progreso: **4 / 14** hechos, 10 pendientes.
 
 ### Mantenimiento
 
-- [ ] **TD-006** Limpieza de codigo muerto
-  - AlarmConfig, VIBRATION_PATTERNS, VibrationPattern, HEADSET_ONLY, SPEAKER_AND_HEADSET en model/Settings.kt; AlarmPlayer.start(config) y previewVolume(config) en audio/AlarmPlayer.kt. Solo beepTone() y stopPreview() estan vivos.
 - [ ] **TD-007** Decidir sobre branding/icons.html sin trackear
   - Preview HTML del launcher icon. Commitear o agregar a .gitignore.
 
@@ -48,3 +46,7 @@ Progreso: **4 / 14** hechos, 10 pendientes.
 - [x] **TD-002** Tests de rotacion idempotente - verificado por tests
 - [x] **TD-003** Tests de dominio (Workout, PlayerStep) - verificado por tests
 - [x] **TD-004** CI local integrado en scripts de build
+
+### Mantenimiento
+
+- [x] **TD-006** Limpieza de codigo muerto
