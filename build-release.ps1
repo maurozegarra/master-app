@@ -17,6 +17,8 @@ $mv = [regex]::Match($gc, 'versionName\s*=\s*"([^"]+)"')
 if (-not $mv.Success) { throw "No se pudo leer versionName de $gradleFile" }
 $versionName = $mv.Groups[1].Value
 
+& "$PSScriptRoot\run-tests.ps1"
+
 & "$PSScriptRoot\gradlew.bat" assembleRelease --no-daemon --console=plain
 if ($LASTEXITCODE -ne 0) { throw "Gradle assembleRelease failed (exit $LASTEXITCODE)" }
 

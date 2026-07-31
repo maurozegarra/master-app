@@ -19,6 +19,8 @@ $versionName = $mv.Groups[1].Value
 
 Write-Host "Building v$versionName (code $versionCode)..."
 
+& "$PSScriptRoot\run-tests.ps1"
+
 & "$PSScriptRoot\gradlew.bat" assembleRelease --no-daemon --console=plain
 if ($LASTEXITCODE -ne 0) { throw "Gradle assembleRelease failed (exit $LASTEXITCODE)" }
 
