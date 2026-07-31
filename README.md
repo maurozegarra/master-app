@@ -45,11 +45,13 @@ variantes que se alternan por corrida).
 
 ## Documentación
 
+- `docs/athletic-forge.md` — sistema de verificación y to-do (leer antes de cambiar).
+- `docs/forge-todo.json` — fuente de verdad del to-do (regenerar con `forge-status.ps1`).
 - `docs/hallazgos-athlete.md` — inventario detallado de lo que YA existe.
-- `docs/hoja-de-ruta.md` — roadmap del carve-out por fases + decisiones de producto.
+- `docs/hoja-de-ruta.md` — historial del carve-out por fases + decisiones de producto.
 - `branding/wordmark/` — wordmark **TIMES** completo (pipeline + `TimesWordmark.kt`
   + fuente Wallpoet + previews); el de Athlete queda en `legacy-athlete/`.
-- `to-do.md` — pendientes (incluye reubicar/rebrandizar el wordmark y sugerencias).
+- `to-do.md` — generado automáticamente por `forge-status.ps1` desde `forge-todo.json`.
 
 ## Entorno / build (heredado de mini-timer)
 
