@@ -20,6 +20,7 @@ import com.athletic.model.ConfirmMode
 import com.athletic.model.DisplayMode
 import com.athletic.model.PlayerStep
 import com.athletic.model.SessionLog
+import com.athletic.model.StepEngine
 import com.athletic.model.StepKind
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -255,10 +256,9 @@ class WorkoutPlayerService : Service() {
      * ese no avanza. [uptoExclusive] = todos los workouts con índice menor están completos.
      */
     private fun markCompletedWorkouts(uptoExclusive: Int) {
-        var wi = 0
-        while (wi < uptoExclusive) {
-            if (advancedWorkouts.add(wi)) advanceWorkoutRotation(wi)
-            wi++
+        for (wi in StepEngine.workoutsToRotate(advancedWorkouts, uptoExclusive)) {
+            advancedWorkouts.add(wi)
+            advanceWorkoutRotation(wi)
         }
         persist()
     }
@@ -271,10 +271,9 @@ class WorkoutPlayerService : Service() {
             if (ti < 0) return
             val t = trainings[ti]
             val w = t.workouts.getOrNull(workoutIndex) ?: return
-            if (!w.rotating || w.variants.isEmpty()) return
+            val nextIdx = StepEngine.nextRotationIndex(w) ?: return
             val updatedWorkouts = t.workouts.toMutableList()
-            updatedWorkouts[workoutIndex] =
-                w.copy(rotationIndex = (w.rotationIndex + 1) % w.variants.size)
+            updatedWorkouts[workoutIndex] = w.copy(rotationIndex = nextIdx)
             trainings[ti] = t.copy(workouts = updatedWorkouts, updatedAt = System.currentTimeMillis())
             store.saveTrainings(trainings)
         } catch (_: Exception) {
