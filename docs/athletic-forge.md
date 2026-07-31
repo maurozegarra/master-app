@@ -16,7 +16,7 @@ el estado real del código con el to-do.
 | Tiene | Le falta |
 |---|---|
 | Código que funciona y se publica (110+ releases) | Tests (cero) |
-| Documentación y convenciones (`AGENTES.md`, scripts) | CI / verificación automática |
+| Documentación y convenciones (`AGENTS.md`, scripts) | CI / verificación automática |
 | Build + install + release scripts | Feedback loop: cambio → verificación → to-do |
 | Verificación manual en dispositivo (parcial) | Observabilidad (crashes, telemetría) |
 
@@ -160,7 +160,7 @@ sigue estos pasos en orden.
 - **El agente NUNCA edita `to-do.md` directamente.** Siempre edita
   `docs/forge-todo.json` y regenera con `forge-status.ps1`.
 - **El agente NUNCA commitea sin autorización explícita del usuario** (regla del
-  `AGENTES.md`, sigue vigente).
+  `AGENTS.md`, sigue vigente).
 - **El agente SIEMPRE corre `verify-compile.ps1` antes de declarar done un item**
   que toque código. Si los tests fallan, el item queda pending.
 - **Si el usuario pide algo que no encaja en el sistema** (una pregunta, una
