@@ -4,14 +4,9 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **8 / 16** hechos, 8 pendientes.
+Progreso: **9 / 19** hechos, 10 pendientes.
 
 ## Pendientes
-
-### Branding
-
-- [ ] **TD-008** Rebrand del texto del wordmark (opcional)
-  - Decidir si se mantiene 'MASTER' o se regenera con glifos de 'ATHLETIC' usando branding/wordmark/tools/
 
 ### Feature
 
@@ -28,12 +23,25 @@ Progreso: **8 / 16** hechos, 8 pendientes.
 - [ ] **TD-014** Keep-screen-on durante la corrida (opcional)
   - El player a pantalla completa podria beneficiarse de keep-screen-on
 
+### Rebrand
+
+- [ ] **TD-017** Crear proyecto nuevo com.maurozegarra.master y migrar codigo
+  - Crear proyecto nuevo en C:\Users\MASTER\code\master con package com.maurozegarra.master. Migrar src, res, fonts, manifest, gradle, scripts, docs, branding. Ajustar imports, applicationId, namespace, scripts, URLs. Partir de cero en datos (no migrar SharedPreferences). Verificar compile + tests + dispositivo. Borrar athletic al final.
+- [ ] **TD-018** Renombrar repo de GitHub y actualizar URLs
+  - Renombrar repo en GitHub (si aplica). Actualizar URLs en build-release.ps1 (repo, tag, apkUrl), update.json, README.md. Verificar que el self-update apunta al repo correcto.
+- [ ] **TD-019** Actualizar documentacion del rebrand
+  - Actualizar AGENTS.md (paquete, estructura, scripts), README.md, docs/athletic-forge.md, docs/hoja-de-ruta.md. Reemplazar 'Athletic' por 'MASTER' donde corresponda.
+
 ### Testing
 
 - [ ] **TD-016** Verificar self-update en dispositivo
   - Pospuesto: necesita una version mas nueva en GitHub para que aparezca la barra de update. Probar deteccion, descarga e instalacion del APK.
 
 ## Hechos
+
+### Branding
+
+- [x] **TD-008** Rebrand del texto del wordmark (opcional)
 
 ### Bug
 

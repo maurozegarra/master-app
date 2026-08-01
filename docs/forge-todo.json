@@ -51,8 +51,8 @@
       "id": "TD-008",
       "title": "Rebrand del texto del wordmark (opcional)",
       "category": "Branding",
-      "status": "pending",
-      "manual": "Decidir si se mantiene 'MASTER' o se regenera con glifos de 'ATHLETIC' usando branding/wordmark/tools/"
+      "status": "done",
+      "manual": "Decision: mantener MASTER. Es la identidad personal/marca del usuario."
     },
     {
       "id": "TD-009",
@@ -108,6 +108,27 @@
       "category": "Testing",
       "status": "pending",
       "manual": "Pospuesto: necesita una version mas nueva en GitHub para que aparezca la barra de update. Probar deteccion, descarga e instalacion del APK."
+    },
+    {
+      "id": "TD-017",
+      "title": "Crear proyecto nuevo com.maurozegarra.master y migrar codigo",
+      "category": "Rebrand",
+      "status": "pending",
+      "manual": "Crear proyecto nuevo en C:\\Users\\MASTER\\code\\master con package com.maurozegarra.master. Migrar src, res, fonts, manifest, gradle, scripts, docs, branding. Ajustar imports, applicationId, namespace, scripts, URLs. Partir de cero en datos (no migrar SharedPreferences). Verificar compile + tests + dispositivo. Borrar athletic al final."
+    },
+    {
+      "id": "TD-018",
+      "title": "Renombrar repo de GitHub y actualizar URLs",
+      "category": "Rebrand",
+      "status": "pending",
+      "manual": "Renombrar repo en GitHub (si aplica). Actualizar URLs en build-release.ps1 (repo, tag, apkUrl), update.json, README.md. Verificar que el self-update apunta al repo correcto."
+    },
+    {
+      "id": "TD-019",
+      "title": "Actualizar documentacion del rebrand",
+      "category": "Rebrand",
+      "status": "pending",
+      "manual": "Actualizar AGENTS.md (paquete, estructura, scripts), README.md, docs/athletic-forge.md, docs/hoja-de-ruta.md. Reemplazar 'Athletic' por 'MASTER' donde corresponda."
     }
   ]
 }
