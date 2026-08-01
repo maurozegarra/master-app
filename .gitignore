@@ -15,6 +15,9 @@ build/
 # Herramientas/previews locales (no versionar)
 /tools/
 
+# Config local de Devin (auto-generado, no versionar)
+.devin/config.local.json
+
 # Capturas temporales de pruebas en device (screencap)
 _*.png
 _*.svg
