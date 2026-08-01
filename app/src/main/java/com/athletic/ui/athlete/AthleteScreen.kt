@@ -111,7 +111,7 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onSta
         } else {
             val listState = rememberLazyListState()
             val dragDropState = rememberDragDropState(listState) { from, to ->
-                vm.moveTraining(from, to)
+                vm.moveTraining(from - 1, to - 1)
             }
             LazyColumn(
                 state = listState,
@@ -127,7 +127,7 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onSta
                     key = { _, it -> it.id },
                     contentType = { _, _ -> ReorderableContentType },
                 ) { index, tr ->
-                    DraggableItem(dragDropState, index) { _ ->
+                    DraggableItem(dragDropState, index + 1) { _ ->
                         TrainingCard(
                             training = tr,
                             accent = accent,

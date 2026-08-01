@@ -32,8 +32,8 @@
       "id": "TD-005",
       "title": "Verificacion funcional en dispositivo",
       "category": "Testing",
-      "status": "pending",
-      "manual": "Avance de pasos (Done), countdown cronometrado, pausa/reanudar, segundo plano y muerte de proceso, registro en Historial, drag-reorder, weekly calendar, mini-player, self-update"
+      "status": "done",
+      "manual": "Verificado 7/8 flujos: avance de pasos, pausa/reanudar, segundo plano y muerte de proceso, historial, weekly calendar, mini-player. Bug encontrado: drag-reorder en lista de trainings (TD-015). Self-update pospuesto (TD-016)."
     },
     {
       "id": "TD-006",
@@ -45,8 +45,7 @@
       "id": "TD-007",
       "title": "Decidir sobre branding/icons.html sin trackear",
       "category": "Mantenimiento",
-      "status": "pending",
-      "manual": "Preview HTML del launcher icon. Commitear o agregar a .gitignore."
+      "status": "done"
     },
     {
       "id": "TD-008",
@@ -96,6 +95,19 @@
       "category": "Feature",
       "status": "pending",
       "manual": "El player a pantalla completa podria beneficiarse de keep-screen-on"
+    },
+    {
+      "id": "TD-015",
+      "title": "Fix drag-reorder en lista de trainings",
+      "category": "Bug",
+      "status": "done"
+    },
+    {
+      "id": "TD-016",
+      "title": "Verificar self-update en dispositivo",
+      "category": "Testing",
+      "status": "pending",
+      "manual": "Pospuesto: necesita una version mas nueva en GitHub para que aparezca la barra de update. Probar deteccion, descarga e instalacion del APK."
     }
   ]
 }

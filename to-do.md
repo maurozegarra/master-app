@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **5 / 14** hechos, 9 pendientes.
+Progreso: **8 / 16** hechos, 8 pendientes.
 
 ## Pendientes
 
@@ -28,17 +28,16 @@ Progreso: **5 / 14** hechos, 9 pendientes.
 - [ ] **TD-014** Keep-screen-on durante la corrida (opcional)
   - El player a pantalla completa podria beneficiarse de keep-screen-on
 
-### Mantenimiento
-
-- [ ] **TD-007** Decidir sobre branding/icons.html sin trackear
-  - Preview HTML del launcher icon. Commitear o agregar a .gitignore.
-
 ### Testing
 
-- [ ] **TD-005** Verificacion funcional en dispositivo
-  - Avance de pasos (Done), countdown cronometrado, pausa/reanudar, segundo plano y muerte de proceso, registro en Historial, drag-reorder, weekly calendar, mini-player, self-update
+- [ ] **TD-016** Verificar self-update en dispositivo
+  - Pospuesto: necesita una version mas nueva en GitHub para que aparezca la barra de update. Probar deteccion, descarga e instalacion del APK.
 
 ## Hechos
+
+### Bug
+
+- [x] **TD-015** Fix drag-reorder en lista de trainings
 
 ### Forge
 
@@ -50,3 +49,8 @@ Progreso: **5 / 14** hechos, 9 pendientes.
 ### Mantenimiento
 
 - [x] **TD-006** Limpieza de codigo muerto
+- [x] **TD-007** Decidir sobre branding/icons.html sin trackear
+
+### Testing
+
+- [x] **TD-005** Verificacion funcional en dispositivo
