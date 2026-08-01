@@ -13,9 +13,16 @@ $mc = [regex]::Match($gc, 'versionCode\s*=\s*(\d+)')
 if (-not $mc.Success) { throw "No se pudo leer versionCode de $gradleFile" }
 $versionCode = [int]$mc.Groups[1].Value
 
-$mv = [regex]::Match($gc, 'versionName\s*=\s*"([^"]+)"')
-if (-not $mv.Success) { throw "No se pudo leer versionName de $gradleFile" }
-$versionName = $mv.Groups[1].Value
+# Bump ANTES de compilar: el APK lleva la nueva version, y el bump va dentro
+# del commit del cambio que genera el APK (ver .windsurf/workflows/commit.md).
+$newVersionCode = $versionCode + 1
+$newVersionName = "1.0.$newVersionCode"
+$gc = [regex]::Replace($gc, '(versionCode\s*=\s*)\d+', "`${1}$newVersionCode")
+$gc = [regex]::Replace($gc, '(versionName\s*=\s*")[^"]+(")', "`${1}$newVersionName`${2}")
+Set-Content $gradleFile $gc -NoNewline
+
+$versionCode = $newVersionCode
+$versionName = $newVersionName
 
 & "$PSScriptRoot\run-tests.ps1"
 
@@ -64,14 +71,6 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Write-Host "WARN -> No se pudo subir el release a GitHub (continuando)"
 }
-
-$newVersionCode = $versionCode + 1
-$newVersionName = "1.0.$newVersionCode"
-$gc = [regex]::Replace($gc, '(versionCode\s*=\s*)\d+', "`${1}$newVersionCode")
-$gc = [regex]::Replace($gc, '(versionName\s*=\s*")[^"]+(")', "`${1}$newVersionName`${2}")
-Set-Content $gradleFile $gc -NoNewline
-
-Write-Host "Bumped -> $newVersionName"
 
 if ($Message -ne '') {
     git add -A

@@ -13,11 +13,15 @@ $mc = [regex]::Match($gc, 'versionCode\s*=\s*(\d+)')
 if (-not $mc.Success) { throw "No se pudo leer versionCode de $gradleFile" }
 $versionCode = [int]$mc.Groups[1].Value
 
-$mv = [regex]::Match($gc, 'versionName\s*=\s*"([^"]+)"')
-if (-not $mv.Success) { throw "No se pudo leer versionName de $gradleFile" }
-$versionName = $mv.Groups[1].Value
+# Bump ANTES de compilar: el APK lleva la nueva version, y el bump va dentro
+# del commit del cambio que genera el APK (ver .windsurf/workflows/commit.md).
+$newVersionCode = $versionCode + 1
+$newVersionName = "1.0.$newVersionCode"
+$gc = [regex]::Replace($gc, '(versionCode\s*=\s*)\d+', "`${1}$newVersionCode")
+$gc = [regex]::Replace($gc, '(versionName\s*=\s*")[^"]+(")', "`${1}$newVersionName`${2}")
+Set-Content $gradleFile $gc -NoNewline
 
-Write-Host "Building v$versionName (code $versionCode)..."
+Write-Host "Building v$newVersionName (code $newVersionCode)..."
 
 & "$PSScriptRoot\run-tests.ps1"
 
@@ -31,9 +35,9 @@ if (-not (Test-Path $apkSrc)) { throw "No se encontro el APK generado: $apkSrc" 
 $releasesDir = Join-Path $PSScriptRoot 'releases'
 if (-not (Test-Path $releasesDir)) { New-Item -ItemType Directory -Path $releasesDir | Out-Null }
 Remove-Item (Join-Path $releasesDir 'athletic-*.apk') -ErrorAction SilentlyContinue
-$apkDst = Join-Path $releasesDir "athletic-$versionName.apk"
+$apkDst = Join-Path $releasesDir "athletic-$newVersionName.apk"
 Copy-Item $apkSrc $apkDst -Force
-Write-Host "OK -> releases\athletic-$versionName.apk"
+Write-Host "OK -> releases\athletic-$newVersionName.apk"
 
 # Instalar en el device
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
@@ -51,19 +55,10 @@ if ($deviceLine) {
     & $adb -s $deviceLine shell am start -n com.athletic/.MainActivity
 
     # Copiar APK a la carpeta Download del telefono
-    & $adb -s $deviceLine push $apkSrc /sdcard/Download/athletic-$versionName.apk
-    Write-Host "OK -> Copied to Download/athletic-$versionName.apk on device"
+    & $adb -s $deviceLine push $apkSrc /sdcard/Download/athletic-$newVersionName.apk
+    Write-Host "OK -> Copied to Download/athletic-$newVersionName.apk on device"
 
     Write-Host "OK -> Installed and launched on $deviceLine"
 } else {
     Write-Host "WARN -> No device connected via adb"
 }
-
-# Bump versionCode
-$newVersionCode = $versionCode + 1
-$newVersionName = "1.0.$newVersionCode"
-$gc = [regex]::Replace($gc, '(versionCode\s*=\s*)\d+', "`${1}$newVersionCode")
-$gc = [regex]::Replace($gc, '(versionName\s*=\s*")[^"]+(")', "`${1}$newVersionName`${2}")
-Set-Content $gradleFile $gc -NoNewline
-
-Write-Host "Bumped -> $newVersionName"
