@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de Athletic. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-024",
+      "title": "Ripple solo en chevron de WorkoutGroupCard",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "En PreviewView (PlayerScreen.kt), el ripple al tap de un WorkoutGroupCard cubre todo el header. Mover el clickable al Icon del chevron (KeyboardArrowRight) para que el ripple sea solo sobre la flecha. El tap en el resto del header sigue expandiendo/colapsando pero sin ripple visual."
+    },
+    {
+      "id": "TD-023",
+      "title": "Fix: tap en card abre editor en vez de preview",
+      "category": "Fix",
+      "status": "done",
+      "manual": "El commit 99293ca cambio por error el clickable de la TrainingCard de onPlay a onEdit, haciendo que el tap abra el editor en vez de la PreviewView del player. Fix: el tap en la card abre el player sin arrancar (solo vm.openPlayer, sin onStart). El boton play sigue abriendo y arrancando. El menu de 3 puntos sigue yendo al editor. Comportamiento restaurado al del commit inicial b3b77e1."
+    },
+    {
       "id": "TD-022",
       "title": "AGENTS.md como gatekeeper del harness",
       "category": "Mantenimiento",

@@ -134,6 +134,7 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onSta
                             t = t,
                             isActive = vm.activePlayerTrainingId == tr.id,
                             onPlay = { vm.openPlayer(tr.id); onStart() },
+                            onOpen = { vm.openPlayer(tr.id) },
                             onEdit = { vm.startEditTraining(tr.id) },
                             onDuplicate = { vm.duplicateTraining(tr.id) },
                             onDelete = { vm.deleteTraining(tr.id) },
@@ -272,6 +273,7 @@ private fun TrainingCard(
     t: Strings,
     isActive: Boolean,
     onPlay: () -> Unit,
+    onOpen: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,
@@ -288,12 +290,16 @@ private fun TrainingCard(
             .clip(RoundedCornerShape(18.dp))
             .background(AppTheme.colors.surface)
             .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(18.dp))
-            .clickable(onClick = onEdit)
             .padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(Modifier.weight(1f)) {
+        Column(
+            Modifier
+                .weight(1f)
+                .clickable(onClick = onOpen)
+                .padding(end = 8.dp),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     training.name.ifBlank { t.noName },

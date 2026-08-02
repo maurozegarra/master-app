@@ -170,11 +170,16 @@ private fun WorkoutGroupCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(AppTheme.colors.surface)
-            .clickable(onClick = onToggle)
             .padding(14.dp)
             .animateContentSize(),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .clickable(onClick = onToggle),
+        ) {
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
