@@ -4,6 +4,10 @@ Guía para asistentes de IA (Devin, Cascade, Copilot, etc.) que trabajen en este
 
 ## Antes de empezar
 
+**Al iniciar una sesión de trabajo, corre `.\forge-status.ps1 -SkipTests`** y
+reporta el estado (N/M hechos, qué items siguen pendientes) antes de proponer
+trabajo. El to-do es la memoria del proyecto: úsalo para orientarte.
+
 **Lee `docs/athletic-forge.md` antes de hacer cualquier cambio rastreable.**
 El Forge es el sistema de verificación y to-do del proyecto. Define:
 
@@ -92,7 +96,9 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 
 ## Reglas de oro
 
+- **No implementar sin autorización explícita del usuario.** Registrar el TD, mostrar qué se va a hacer y esperar confirmación antes de tocar código.
 - **No hacer commit sin autorización explícita del usuario.**
+- **Nada se declara done sin `.\verify-compile.ps1` verde** (tests + compila release). Aplica a cualquier item que toque código.
 - **No crear archivos temporales** (screenshots, scripts de prueba) en el repo.
 - **Usar `build-debug.ps1`** para cada iteración: incrementa versión, instala, copia a Download.
 - **Minificar siempre**: el APK release pesa ~1.2MB vs ~16MB en debug.
@@ -103,6 +109,7 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 - **Preferir ediciones mínimas** sobre reescrituras grandes.
 - **Cada cambio de comportamiento va con test.** Si tocas el motor, agregas o actualizas el test correspondiente.
 - **Commits referencian el to-do**: `feat: TD-NNN ...`, `fix: TD-NNN ...`, `chore: TD-NNN ...`.
+- **Commits atómicos**: un commit = un cambio lógico (ver `.windsurf/workflows/commit.md`).
 - **No se borra un test para que pase el build.** Si un test falla, se arregla el código o se cambia el test con justificación explícita.
 
 ## Dispositivo de prueba
@@ -124,4 +131,5 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 - `docs/athletic-forge.md` — sistema de verificación y to-do (leer antes de cambiar).
 - `docs/forge-todo.json` — fuente de verdad del to-do (no editar `to-do.md` directamente).
 - `docs/hoja-de-ruta.md` — historial del proyecto (Fases 0–8).
+- `.windsurf/workflows/` — workflows operativos genéricos (commit atómico, validación, convenciones, build).
 - `.devin/workflows/` — workflows específicos del proyecto (foreground service, etc.).

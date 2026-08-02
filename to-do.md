@@ -4,12 +4,14 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **9 / 20** hechos, 11 pendientes.
+Progreso: **10 / 22** hechos, 12 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-021** Historial por ejercicio + sesiones parciales
+  - Plan detallado en ~/.devin/plans/plan-72c00d4e9caa1b7a.md. Registrar cada ejercicio completado (por serie: reps/kg/tiempo/feedback) aunque no se termine el training. Guardado silencioso al abandonar (status PARTIAL). SessionLog extiende con startedAt, durationSec, status, exercises. HistoryScreen expandible con badge Partial. Nueva ExerciseHistoryScreen: evolucion por ejercicio como lista cronologica. Migracion compatible de sessions_json. Tests de acumulacion y migracion.
 - [ ] **TD-014** Keep-screen-on durante la corrida (opcional)
   - El player a pantalla completa podria beneficiarse de keep-screen-on
 - [ ] **TD-013** Accesibilidad (opcional)
@@ -61,6 +63,7 @@ Progreso: **9 / 20** hechos, 11 pendientes.
 
 ### Mantenimiento
 
+- [x] **TD-022** AGENTS.md como gatekeeper del harness
 - [x] **TD-007** Decidir sobre branding/icons.html sin trackear
 - [x] **TD-006** Limpieza de codigo muerto
 

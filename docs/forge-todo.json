@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de Athletic. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-022",
+      "title": "AGENTS.md como gatekeeper del harness",
+      "category": "Mantenimiento",
+      "status": "done",
+      "manual": "Ajustes urgentes: prohibir implementar sin autorizacion explicita (E1), ritual de entrada con forge-status al iniciar sesion (E2), enlazar workflow de commits atomicos (E3), declarar los dos hogares de workflows (E4), regla de nada done sin verify-compile verde (E5). Origen: analisis del harness (seccion E de harness-analysis.md)."
+    },
+    {
+      "id": "TD-021",
+      "title": "Historial por ejercicio + sesiones parciales",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Plan detallado en ~/.devin/plans/plan-72c00d4e9caa1b7a.md. Registrar cada ejercicio completado (por serie: reps/kg/tiempo/feedback) aunque no se termine el training. Guardado silencioso al abandonar (status PARTIAL). SessionLog extiende con startedAt, durationSec, status, exercises. HistoryScreen expandible con badge Partial. Nueva ExerciseHistoryScreen: evolucion por ejercicio como lista cronologica. Migracion compatible de sessions_json. Tests de acumulacion y migracion."
+    },
+    {
       "id": "TD-020",
       "title": "Eliminar referencias a entorno corporativo y mini-timer",
       "category": "Mantenimiento",
