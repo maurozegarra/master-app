@@ -570,7 +570,7 @@ private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean) {
 
 @Composable
 private fun WeightFeedback(vm: AthleteViewModel, step: PlayerStep, accent: Color, t: Strings) {
-    val current = vm.weightFeedback[step.ownerName]?.second
+    val current = vm.weightFeedback[vm.feedbackKey(step.ownerExerciseId, step.workoutIndex)]?.third
     Column(
         Modifier
             .fillMaxWidth()
@@ -591,15 +591,15 @@ private fun WeightFeedback(vm: AthleteViewModel, step: PlayerStep, accent: Color
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FeedbackChip("${t.tooHeavy} ↓", current == -2.5, accent) {
                 vm.showPlayerControls()
-                vm.recordFeedback(step.ownerName, step.weightTotal, -2.5)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, -2.5)
             }
             FeedbackChip(t.justRight, current == 0.0, accent) {
                 vm.showPlayerControls()
-                vm.recordFeedback(step.ownerName, step.weightTotal, 0.0)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, 0.0)
             }
             FeedbackChip("${t.tooLight} ↑", current == 2.5, accent) {
                 vm.showPlayerControls()
-                vm.recordFeedback(step.ownerName, step.weightTotal, 2.5)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, 2.5)
             }
         }
     }

@@ -5,6 +5,7 @@ import com.athletic.model.ConfirmMode
 import com.athletic.model.DisplayMode
 import com.athletic.model.Exercise
 import com.athletic.model.ExerciseDef
+import com.athletic.model.SessionJson
 import com.athletic.model.SessionLog
 import com.athletic.model.StageConfig
 import com.athletic.model.WeightType
@@ -244,35 +245,19 @@ class WorkoutStore(context: Context) {
     // ---------- Historial de sesiones ----------
 
     fun saveSessions(items: List<SessionLog>) {
-        val arr = JSONArray()
-        items.forEach { s ->
-            arr.put(
-                JSONObject()
-                    .put("id", s.id)
-                    .put("trainingId", s.trainingId)
-                    .put("trainingName", s.trainingName)
-                    .put("completedAt", s.completedAt),
-            )
-        }
-        prefs.edit().putString(KEY_SESSIONS, arr.toString()).apply()
+        val trimmed = if (items.size > MAX_SESSIONS) items.take(MAX_SESSIONS) else items
+        prefs.edit().putString(KEY_SESSIONS, SessionJson.encode(trimmed)).apply()
+    }
+
+    fun addSession(log: SessionLog) {
+        val list = loadSessions().toMutableList()
+        list.add(0, log)
+        saveSessions(list)
     }
 
     fun loadSessions(): List<SessionLog> {
         val raw = prefs.getString(KEY_SESSIONS, null) ?: return emptyList()
-        return try {
-            val arr = JSONArray(raw)
-            (0 until arr.length()).map {
-                val o = arr.getJSONObject(it)
-                SessionLog(
-                    id = o.getLong("id"),
-                    trainingId = o.optLong("trainingId", 0L),
-                    trainingName = o.optString("trainingName", ""),
-                    completedAt = o.optLong("completedAt", 0L),
-                )
-            }
-        } catch (_: Exception) {
-            emptyList()
-        }
+        return SessionJson.decode(raw)
     }
 
     private companion object {
@@ -282,5 +267,6 @@ class WorkoutStore(context: Context) {
         const val KEY_FRIKI_SEEDED = "friki_seeded"
         const val KEY_MASTER_V2 = "master_v2_seeded"
         const val KEY_MASTER_V3 = "master_v3_seeded"
+        const val MAX_SESSIONS = 200
     }
 }

@@ -127,6 +127,10 @@ data class Strings(
     val clearHistory: String,
     val clearHistoryConfirm: String,
     val sessionsCount: String,
+    val partial: String,
+    val exerciseHistory: String,
+    val setsShort: String,
+    val noExercises: String,
 )
 
 object I18n {
@@ -248,5 +252,9 @@ object I18n {
         clearHistory = "Clear history",
         clearHistoryConfirm = "Delete all session history? This can\u2019t be undone.",
         sessionsCount = "sessions",
+        partial = "Partial",
+        exerciseHistory = "Exercise history",
+        setsShort = "sets",
+        noExercises = "No exercises recorded",
     )
 }

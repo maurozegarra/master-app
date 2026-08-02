@@ -20,6 +20,8 @@ import com.athletic.model.ConfirmMode
 import com.athletic.model.DisplayMode
 import com.athletic.model.PlayerStep
 import com.athletic.model.SessionLog
+import com.athletic.model.SessionRecorder
+import com.athletic.model.SessionStatus
 import com.athletic.model.StepEngine
 import com.athletic.model.StepKind
 import kotlinx.coroutines.CoroutineScope
@@ -53,6 +55,9 @@ class WorkoutPlayerService : Service() {
     private var name = ""
     private var workoutId = 0L
     private var lastShownSec = -1L
+    private var startedAt = 0L
+    private var lastPersistAt = 0L
+    private val recorder = SessionRecorder()
     /** Índices de workout cuya rotación ya se avanzó en esta corrida (rotación independiente). */
     private val advancedWorkouts = mutableSetOf<Int>()
 
@@ -78,6 +83,8 @@ class WorkoutPlayerService : Service() {
                 if (steps.isNotEmpty()) {
                     finished = false
                     advancedWorkouts.clear()
+                    recorder.clear()
+                    startedAt = System.currentTimeMillis()
                     alarmCue(steps.getOrNull(0))
                     beginStep(0)
                 }
@@ -103,6 +110,7 @@ class WorkoutPlayerService : Service() {
                     PlayerCommand.NEXT -> advance()
                     PlayerCommand.PREV -> goBack()
                     PlayerCommand.STOP -> stopPlayer()
+                    is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.deltaKg)
                 }
             }
         }
@@ -149,6 +157,7 @@ class WorkoutPlayerService : Service() {
 
     private fun advance() {
         if (finished) return
+        steps.getOrNull(index)?.let { if (it.kind == StepKind.WORK) recorder.onWorkStepCompleted(it) }
         val next = index + 1
         if (next >= steps.size) {
             finishPlayer()
@@ -171,7 +180,7 @@ class WorkoutPlayerService : Service() {
         stopTick()
         markCompletedWorkouts((steps.maxOfOrNull { it.workoutIndex } ?: -1) + 1)
         alarmCue()
-        recordSession()
+        recordSession(SessionStatus.COMPLETED)
         publish()
         clearPersist()
         // Notificación final no-ongoing y salir del primer plano.
@@ -189,6 +198,7 @@ class WorkoutPlayerService : Service() {
         running = false
         stopTick()
         beepPlayer.stopPreview()
+        if (!recorder.isEmpty()) recordSession(SessionStatus.PARTIAL)
         clearPersist()
         PlayerBus.state.value = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -280,12 +290,22 @@ class WorkoutPlayerService : Service() {
         }
     }
 
-    private fun recordSession() {
+    private fun recordSession(status: SessionStatus) {
         try {
             val store = WorkoutStore(this)
-            val list = store.loadSessions().toMutableList()
-            list.add(0, SessionLog(System.currentTimeMillis(), workoutId, name, System.currentTimeMillis()))
-            store.saveSessions(list)
+            val now = System.currentTimeMillis()
+            val durationSec = if (startedAt > 0L) ((now - startedAt) / 1000).toInt() else 0
+            val log = SessionLog(
+                id = now,
+                trainingId = workoutId,
+                trainingName = name,
+                completedAt = now,
+                startedAt = startedAt,
+                status = status,
+                exercises = recorder.build(),
+                durationSec = durationSec,
+            )
+            store.addSession(log)
         } catch (_: Exception) {
         }
     }
@@ -457,6 +477,7 @@ class WorkoutPlayerService : Service() {
     private fun prefs() = getSharedPreferences("athlete_player", Context.MODE_PRIVATE)
 
     private fun persist() {
+        lastPersistAt = System.currentTimeMillis()
         prefs().edit()
             .putBoolean("active", true)
             .putLong("workoutId", workoutId)
@@ -467,6 +488,16 @@ class WorkoutPlayerService : Service() {
             .putLong("remainingMs", remainingMs)
             .putBoolean("running", running)
             .putString("advancedWorkouts", advancedWorkouts.joinToString(","))
+            .putLong("startedAt", startedAt)
+            .putLong("lastPersistAt", lastPersistAt)
+            .putString("recorderJson", com.athletic.model.SessionJson.encode(
+                listOf(com.athletic.model.SessionLog(
+                    id = 0L, trainingId = 0L, trainingName = "",
+                    completedAt = 0L, startedAt = 0L,
+                    status = SessionStatus.PARTIAL,
+                    exercises = recorder.build(),
+                ))
+            ))
             .apply()
     }
 
@@ -477,6 +508,44 @@ class WorkoutPlayerService : Service() {
     private fun restore(): Boolean {
         val p = prefs()
         if (!p.getBoolean("active", false)) return false
+        val persistedAt = p.getLong("lastPersistAt", 0L)
+        if (persistedAt > 0L && System.currentTimeMillis() - persistedAt > ZOMBIE_TIMEOUT_MS) {
+            steps = decodeSteps(p.getString("steps", "[]") ?: "[]")
+            workoutId = p.getLong("workoutId", 0L)
+            name = p.getString("name", "") ?: ""
+            startedAt = p.getLong("startedAt", 0L)
+            recorder.clear()
+            p.getString("recorderJson", null)?.let { rj ->
+                com.athletic.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
+                    repeat(er.setsCompleted) { setIdx ->
+                        val sr = er.sets.getOrNull(setIdx)
+                        if (sr != null) recorder.onWorkStepCompleted(
+                            PlayerStep(
+                                kind = StepKind.WORK,
+                                title = er.name,
+                                ownerName = er.name,
+                                ownerExerciseId = er.exerciseId,
+                                workoutName = er.workoutName,
+                                workoutIndex = er.workoutIndex,
+                                setIndex = setIdx,
+                                totalSets = er.totalSets,
+                                reps = sr.reps,
+                                durationSec = sr.durationSec,
+                                timeBased = er.timeBased,
+                                weighted = sr.weightKg > 0,
+                                weightTotal = sr.weightKg,
+                            )
+                        )
+                    }
+                    if (er.feedbackDeltaKg != null) {
+                        recorder.setFeedback(er.exerciseId, er.workoutIndex, er.feedbackDeltaKg)
+                    }
+                }
+            }
+            if (!recorder.isEmpty()) recordSession(SessionStatus.PARTIAL)
+            clearPersist()
+            return false
+        }
         steps = decodeSteps(p.getString("steps", "[]") ?: "[]")
         if (steps.isEmpty()) {
             clearPersist()
@@ -490,6 +559,36 @@ class WorkoutPlayerService : Service() {
         advancedWorkouts.clear()
         p.getString("advancedWorkouts", "")?.split(",")?.forEach { s ->
             s.toIntOrNull()?.let { advancedWorkouts.add(it) }
+        }
+        startedAt = p.getLong("startedAt", 0L)
+        lastPersistAt = p.getLong("lastPersistAt", 0L)
+        recorder.clear()
+        p.getString("recorderJson", null)?.let { rj ->
+            com.athletic.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
+                repeat(er.setsCompleted) { setIdx ->
+                    val sr = er.sets.getOrNull(setIdx)
+                    if (sr != null) recorder.onWorkStepCompleted(
+                        PlayerStep(
+                            kind = StepKind.WORK,
+                            title = er.name,
+                            ownerName = er.name,
+                            ownerExerciseId = er.exerciseId,
+                            workoutName = er.workoutName,
+                            workoutIndex = er.workoutIndex,
+                            setIndex = setIdx,
+                            totalSets = er.totalSets,
+                            reps = sr.reps,
+                            durationSec = sr.durationSec,
+                            timeBased = er.timeBased,
+                            weighted = sr.weightKg > 0,
+                            weightTotal = sr.weightKg,
+                        )
+                    )
+                }
+                if (er.feedbackDeltaKg != null) {
+                    recorder.setFeedback(er.exerciseId, er.workoutIndex, er.feedbackDeltaKg)
+                }
+            }
         }
         val step = steps[index]
         if (step.manual) {
@@ -525,6 +624,7 @@ class WorkoutPlayerService : Service() {
         private const val EXTRA_STEPS = "steps"
         private const val EXTRA_WORKOUT_ID = "workoutId"
         private const val EXTRA_NAME = "name"
+        private const val ZOMBIE_TIMEOUT_MS = 12 * 60 * 60 * 1000L
 
         fun start(context: Context, trainingId: Long, name: String, steps: List<PlayerStep>) {
             val intent = Intent(context, WorkoutPlayerService::class.java)

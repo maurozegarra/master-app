@@ -26,7 +26,7 @@
       "id": "TD-021",
       "title": "Historial por ejercicio + sesiones parciales",
       "category": "Feature",
-      "status": "pending",
+      "status": "done",
       "manual": "Plan detallado en ~/.devin/plans/plan-72c00d4e9caa1b7a.md. Registrar cada ejercicio completado (por serie: reps/kg/tiempo/feedback) aunque no se termine el training. Guardado silencioso al abandonar (status PARTIAL). SessionLog extiende con startedAt, durationSec, status, exercises. HistoryScreen expandible con badge Partial. Nueva ExerciseHistoryScreen: evolucion por ejercicio como lista cronologica. Migracion compatible de sessions_json. Tests de acumulacion y migracion."
     },
     {

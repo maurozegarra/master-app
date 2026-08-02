@@ -1,6 +1,10 @@
 package com.athletic.ui.athlete
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,12 +13,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -37,7 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.athletic.AthleteViewModel
 import com.athletic.i18n.Strings
+import com.athletic.model.ExerciseRecord
 import com.athletic.model.SessionLog
+import com.athletic.model.SessionStatus
 import com.athletic.ui.theme.AppTheme
 import java.time.Instant
 import java.time.LocalDate
@@ -46,9 +55,10 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 /**
- * Historial de trainings completados. Lee `vm.sessions` (recargado al abrir desde el
- * store, ya que las escribe el servicio del player en otro contexto). Agrupa por día
- * con encabezados relativos (Today/Yesterday) y permite borrar una o todas.
+ * Historial de sesiones (completas y parciales). Lee `vm.sessions` (recargado al
+ * abrir desde el store). Agrupa por día con encabezados relativos (Today/Yesterday).
+ * Fila expandible con detalle de ejercicios y series. Badge Partial en sesiones
+ * incompletas. Tap en un ejercicio abre ExerciseHistoryScreen.
  */
 @Composable
 fun HistoryScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
@@ -107,8 +117,10 @@ fun HistoryScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
                     SessionRow(
                         session = s,
                         time = Instant.ofEpochMilli(s.completedAt).atZone(zone).format(timeFmt),
+                        accent = accent,
                         t = t,
                         onDelete = { vm.deleteSession(s.id) },
+                        onExerciseClick = { exerciseId -> vm.openExerciseHistory(exerciseId) },
                     )
                 }
             }
@@ -148,38 +160,138 @@ fun HistoryScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
 private fun SessionRow(
     session: SessionLog,
     time: String,
+    accent: Color,
     t: Strings,
     onDelete: () -> Unit,
+    onExerciseClick: (String) -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
-    Row(
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(AppTheme.colors.surface)
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                session.trainingName.ifBlank { t.noName },
-                color = AppTheme.colors.textPrimary,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp,
-            )
-            Text(time, color = AppTheme.colors.textDim, fontSize = 13.sp)
-        }
-        Spacer(Modifier.width(8.dp))
-        Box {
-            IconButton(onClick = { menu = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        session.trainingName.ifBlank { t.noName },
+                        color = AppTheme.colors.textPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                    )
+                    if (session.status == SessionStatus.PARTIAL) {
+                        Box(
+                            Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(accent.copy(alpha = 0.15f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                        ) {
+                            Text(t.partial, color = accent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+                Text(time, color = AppTheme.colors.textDim, fontSize = 13.sp)
             }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
+            if (session.exercises.isNotEmpty()) {
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                        contentDescription = null,
+                        tint = AppTheme.colors.textDim,
+                    )
+                }
+            }
+            Box {
+                IconButton(onClick = { menu = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim)
+                }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
+                }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = expanded && session.exercises.isNotEmpty(),
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                session.exercises.forEach { er ->
+                    ExerciseDetailRow(er, accent, t) { onExerciseClick(er.exerciseId) }
+                }
             }
         }
     }
 }
+
+@Composable
+private fun ExerciseDetailRow(er: ExerciseRecord, accent: Color, t: Strings, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(AppTheme.colors.bg)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                er.name,
+                color = AppTheme.colors.textPrimary,
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                "${er.setsCompleted}/${er.totalSets} ${t.setsShort}",
+                color = AppTheme.colors.textDim,
+                fontSize = 12.sp,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        er.sets.forEachIndexed { i, sr ->
+            val setLabel = "Set ${i + 1}"
+            val detail = if (er.timeBased) {
+                if (sr.weightKg > 0) "$setLabel  ·  ${sr.reps} reps  ·  ${fmtKgHistory(sr.weightKg)} ${t.kg}  ·  ${sr.durationSec}s"
+                else "$setLabel  ·  ${sr.reps} reps  ·  ${sr.durationSec}s"
+            } else {
+                if (sr.weightKg > 0) "$setLabel  ·  ${sr.reps} ${t.repLabel}  ·  ${fmtKgHistory(sr.weightKg)} ${t.kg}"
+                else "$setLabel  ·  ${sr.reps} ${t.repLabel}"
+            }
+            Text(detail, color = AppTheme.colors.textDim, fontSize = 12.sp)
+        }
+        if (er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {
+            Spacer(Modifier.height(2.dp))
+            val arrow = if (er.feedbackDeltaKg > 0) "\u2191" else "\u2193"
+            Text(
+                "Feedback: $arrow ${fmtKgHistory(kotlin.math.abs(er.feedbackDeltaKg))} ${t.kg}",
+                color = accent,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+    }
+}
+
+private fun fmtKgHistory(v: Double): String =
+    if (v == v.toLong().toDouble()) v.toLong().toString() else v.toString()
 
 /** Etiqueta relativa del día: Today/Yesterday o fecha larga localizada. */
 private fun dayLabel(date: LocalDate, zone: ZoneId, t: Strings): String {

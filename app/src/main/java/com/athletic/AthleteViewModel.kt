@@ -18,6 +18,7 @@ import com.athletic.model.ConfirmMode
 import com.athletic.model.DisplayMode
 import com.athletic.model.Exercise
 import com.athletic.model.ExerciseDef
+import com.athletic.model.ExerciseRecord
 import com.athletic.model.PlayerStep
 import com.athletic.model.SessionLog
 import com.athletic.model.StepEngine
@@ -250,6 +251,10 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     var showingHistory by mutableStateOf(false)
         private set
 
+    /** Ejercicio seleccionado para ver su historial (navegación desde HistoryScreen). */
+    var exerciseHistoryId by mutableStateOf<String?>(null)
+        private set
+
     fun openHistory() {
         // Se recargan al abrir porque las escribe el servicio (otro contexto) al terminar.
         refreshSessions()
@@ -258,7 +263,23 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
 
     fun closeHistory() {
         showingHistory = false
+        exerciseHistoryId = null
     }
+
+    fun openExerciseHistory(exerciseId: String) {
+        exerciseHistoryId = exerciseId
+    }
+
+    fun closeExerciseHistory() {
+        exerciseHistoryId = null
+    }
+
+    /** Sesiones que contienen un ejercicio específico (para ExerciseHistoryScreen). */
+    fun sessionsForExercise(exerciseId: String): List<Pair<SessionLog, ExerciseRecord>> =
+        sessions.mapNotNull { s ->
+            val er = s.exercises.firstOrNull { it.exerciseId == exerciseId }
+            if (er != null) s to er else null
+        }
 
     private fun refreshSessions() {
         sessions.clear()
@@ -553,18 +574,22 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         if (playerControlsVisible) hidePlayerControls() else showPlayerControls()
     }
 
-    /** Feedback de peso recogido durante el run: nombre ejercicio -> (peso, delta kg). */
-    val weightFeedback = mutableStateMapOf<String, Pair<Double, Double>>()
+    /** Feedback de peso recogido durante el run: "exerciseId:workoutIndex" -> (name, peso, delta kg). */
+    val weightFeedback = mutableStateMapOf<String, Triple<String, Double, Double>>()
 
-    fun recordFeedback(exerciseName: String, weight: Double, deltaKg: Double) {
-        weightFeedback[exerciseName] = weight to deltaKg
+    fun feedbackKey(exerciseId: String, workoutIndex: Int) = "$exerciseId:$workoutIndex"
+
+    fun recordFeedback(exerciseId: String, workoutIndex: Int, name: String, weight: Double, deltaKg: Double) {
+        val key = feedbackKey(exerciseId, workoutIndex)
+        weightFeedback[key] = Triple(name, weight, deltaKg)
+        sendFeedback(exerciseId, workoutIndex, deltaKg)
     }
 
     /** Sugerencias de ajuste para la próxima vez (solo las que cambian). */
     fun weightSuggestions(): List<Triple<String, Double, Double>> =
         weightFeedback.entries
-            .filter { it.value.second != 0.0 }
-            .map { Triple(it.key, it.value.first, it.value.first + it.value.second) }
+            .filter { it.value.third != 0.0 }
+            .map { Triple(it.value.first, it.value.second, it.value.second + it.value.third) }
 
     /** Evita recargar los índices de rotación más de una vez por corrida (finished puede repetir). */
     private var sessionReloaded = false
@@ -608,6 +633,8 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     fun resumePlayer() = PlayerBus.command.tryEmit(PlayerCommand.RESUME)
     fun nextStep() = PlayerBus.command.tryEmit(PlayerCommand.NEXT)
     fun prevStep() = PlayerBus.command.tryEmit(PlayerCommand.PREV)
+    fun sendFeedback(exerciseId: String, workoutIndex: Int, deltaKg: Double) =
+        PlayerBus.command.tryEmit(PlayerCommand.FEEDBACK(exerciseId, workoutIndex, deltaKg))
 
     fun closePlayer() {
         WorkoutPlayerService.stop(getApplication())

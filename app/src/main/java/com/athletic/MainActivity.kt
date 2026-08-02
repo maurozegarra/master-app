@@ -148,6 +148,7 @@ private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: android
     val inPlayer = vm.playerTrainingId != null
     val canGoBack = inPlayer ||
         vm.showingHistory ||
+        vm.exerciseHistoryId != null ||
         vm.choosingExercise ||
         vm.editingExerciseId != null ||
         vm.editingVariantId != null ||
@@ -282,6 +283,7 @@ private fun SettingsScaffold(title: String, onBack: () -> Unit, content: @Compos
 
 /** Título contextual según el nivel de navegación activo. */
 private fun titleFor(vm: AthleteViewModel, t: Strings): String = when {
+    vm.exerciseHistoryId != null -> t.exerciseHistory
     vm.showingHistory -> t.history
     vm.choosingExercise -> t.chooseExercise
     vm.editingExerciseId != null -> vm.editingExercise()?.name ?: t.exercise
@@ -294,6 +296,7 @@ private fun titleFor(vm: AthleteViewModel, t: Strings): String = when {
 private fun goBack(vm: AthleteViewModel) {
     when {
         vm.playerTrainingId != null -> vm.minimizePlayer()
+        vm.exerciseHistoryId != null -> vm.closeExerciseHistory()
         vm.showingHistory -> vm.closeHistory()
         vm.choosingExercise -> vm.closeExercisePicker()
         vm.editingExerciseId != null -> vm.closeExerciseEditor()

@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.athletic.AthleteViewModel
 import com.athletic.i18n.Strings
+import com.athletic.model.SessionStatus
 import com.athletic.model.Training
 import com.athletic.model.hasContent
 import com.athletic.ui.DraggableItem
@@ -73,6 +74,7 @@ import java.util.Locale
 fun AthleteScreen(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit = { vm.startPlayerRun() }) {
     when {
         vm.playerTrainingId != null -> PlayerScreen(vm, accent, t, onStart)
+        vm.exerciseHistoryId != null -> ExerciseHistoryScreen(vm, accent, t)
         vm.showingHistory -> HistoryScreen(vm, accent, t)
         vm.choosingExercise -> ChooseExerciseScreen(vm, accent, t)
         vm.editingExerciseId != null -> ExerciseEditorScreen(vm, accent, t)
@@ -93,7 +95,12 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onSta
     val weekStart = remember(weekOffset) { baseWeekStart.plusWeeks(weekOffset.toLong()) }
 
     val sessionDates = remember(vm.sessions.toList()) {
-        vm.sessions.map { Instant.ofEpochMilli(it.completedAt).atZone(zone).toLocalDate() }.toSet()
+        vm.sessions
+            .groupBy { Instant.ofEpochMilli(it.completedAt).atZone(zone).toLocalDate() }
+            .mapValues { (_, sessions) ->
+                if (sessions.any { it.status == SessionStatus.COMPLETED })
+                    SessionStatus.COMPLETED else SessionStatus.PARTIAL
+            }
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -182,7 +189,7 @@ private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onSta
 private fun WeekCalendar(
     weekStart: LocalDate,
     today: LocalDate,
-    sessionDates: Set<LocalDate>,
+    sessionDates: Map<LocalDate, SessionStatus>,
     accent: Color,
     onSwipeLeft: () -> Unit = {},
     onSwipeRight: () -> Unit = {},
@@ -223,7 +230,6 @@ private fun WeekCalendar(
         for (i in 0..6) {
             val date = currentWeek.plusDays(i.toLong())
             val isToday = date == today
-            val hasSession = date in sessionDates
             Column(
                 modifier = Modifier.wrapContentSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -255,10 +261,20 @@ private fun WeekCalendar(
                     )
                 }
                 Spacer(Modifier.height(4.dp))
+                val sessionStatus = sessionDates[date]
                 Box(
                     modifier = Modifier.size(4.dp)
                         .clip(CircleShape)
-                        .background(if (hasSession) accent else Color.Transparent),
+                        .background(
+                            if (sessionStatus == SessionStatus.COMPLETED) accent
+                            else Color.Transparent
+                        )
+                        .border(
+                            1.dp,
+                            if (sessionStatus == SessionStatus.PARTIAL) accent
+                            else Color.Transparent,
+                            CircleShape,
+                        ),
                 )
             }
         }

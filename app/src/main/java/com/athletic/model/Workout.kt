@@ -149,10 +149,37 @@ data class ExerciseDef(
     val custom: Boolean = false,
 )
 
-/** Registro de un training completado. */
+/** Estado de una sesión registrada. */
+enum class SessionStatus { COMPLETED, PARTIAL }
+
+/** Una serie completada: reps, peso (kg) y duración (s) según corresponda. */
+data class SetRecord(
+    val reps: Int = 0,
+    val weightKg: Double = 0.0,
+    val durationSec: Int = 0,
+)
+
+/** Registro de un ejercicio dentro de una sesión (series completadas). */
+data class ExerciseRecord(
+    val exerciseId: String,
+    val name: String,
+    val workoutName: String,
+    val workoutIndex: Int,
+    val setsCompleted: Int,
+    val totalSets: Int,
+    val sets: List<SetRecord>,
+    val timeBased: Boolean,
+    val feedbackDeltaKg: Double? = null,
+)
+
+/** Registro de una sesión de entrenamiento (completa o parcial). */
 data class SessionLog(
     val id: Long,
     val trainingId: Long,
     val trainingName: String,
     val completedAt: Long,
+    val startedAt: Long = 0L,
+    val status: SessionStatus = SessionStatus.COMPLETED,
+    val exercises: List<ExerciseRecord> = emptyList(),
+    val durationSec: Int = 0,
 )

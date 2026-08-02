@@ -6,7 +6,14 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Comandos enviados al [com.athletic.notify.WorkoutPlayerService]. */
-enum class PlayerCommand { PAUSE, RESUME, NEXT, PREV, STOP }
+sealed class PlayerCommand {
+    data object PAUSE : PlayerCommand()
+    data object RESUME : PlayerCommand()
+    data object NEXT : PlayerCommand()
+    data object PREV : PlayerCommand()
+    data object STOP : PlayerCommand()
+    data class FEEDBACK(val exerciseId: String, val workoutIndex: Int, val deltaKg: Double) : PlayerCommand()
+}
 
 /**
  * Instantánea del estado del player publicada por el servicio para que la UI la
