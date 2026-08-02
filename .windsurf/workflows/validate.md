@@ -15,18 +15,17 @@ $pkg = "<tu.paquete>"                 # applicationId de la app
 $dev = "<serial-o-ip:puerto>"         # ver workflow connect-phone; o resolver dinamicamente (T3)
 ```
 
-## Entorno de build (equipo corporativo: Netskope + JFrog)
-- **JDK**: JBR de Android Studio -> `JAVA_HOME=C:\Users\mzegarra_ide\Downloads\android-studio\jbr`
-  (tambien en `gradle.properties` como `org.gradle.java.home`; su cacerts confia en el CA de Netskope).
+## Entorno de build
+- **JDK**: JBR de Android Studio -> `JAVA_HOME=C:\Program Files\Android\Android Studio\jbr`
+  (tambien en `gradle.properties` como `org.gradle.java.home`).
 - **Gradle 9.4.1** cacheado (no hay wrapper jar; se invoca el `gradle.bat` cacheado).
-- **Repos**: JFrog `scp-gradle-public` con Bearer token leido de `~/.npmrc` (plugins.gradle.org y
-  repo1 dan 403 detras de Netskope). Configurado en `settings.gradle.kts`.
+- **Repos**: `google()` + `mavenCentral()` en `settings.gradle.kts`.
 - **Device**: telefono por ADB (inalambrico o USB); ver workflow `connect-phone`.
 
 ## T0 - Compilar
 // turbo
 ```powershell
-$env:JAVA_HOME='C:\Users\mzegarra_ide\Downloads\android-studio\jbr'
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
 $gradle=(Resolve-Path "$env:USERPROFILE\.gradle\wrapper\dists\gradle-9.4.1-bin\*\gradle-9.4.1\bin\gradle.bat").Path
 & $gradle :app:assembleDebug --no-daemon --console=plain *> "$env:TEMP\build.log"
 (Get-Content "$env:TEMP\build.log" | Select-String "BUILD SUCCESSFUL|BUILD FAILED|error:|e: ").Line | Select-Object -First 20

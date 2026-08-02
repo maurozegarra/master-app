@@ -1,8 +1,7 @@
 package com.athletic.model
 
-// Modelo de ajustes REDUCIDO para Athletic (carve-out): solo lo que usa el player
-// y su alarma. El monolito de mini-timer (Timer/Clock/Water) se descarta; la UI de
-// Ajustes se completa en la Fase 5.
+// Modelo de ajustes para Athletic: solo lo que usa el player y su alarma.
+// La UI de Ajustes se completa en la Fase 5.
 
 /** Modo de tema de la app. */
 const val THEME_AUTO = 0

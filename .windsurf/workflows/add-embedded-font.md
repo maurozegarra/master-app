@@ -2,9 +2,9 @@
 description: Descargar y empaquetar una fuente (TTF) en res/font y usarla en la app Android (p. ej. fuente monoespaciada con cero diferenciado 0 != O)
 ---
 
-Procedimiento verificado en este equipo corporativo (Netskope + JFrog, sin permisos de admin)
-para incrustar una fuente en la app en vez de depender de la fuente del sistema. Caso típico:
-necesitar un **monoespaciado con cero punteado/tachado** para diferenciar `0` de `O`.
+Procedimiento para incrustar una fuente en la app en vez de depender de la fuente del
+sistema. Caso típico: necesitar un **monoespaciado con cero punteado/tachado** para
+diferenciar `0` de `O`.
 
 Fuentes recomendadas (licencia permisiva, cero diferenciado):
 - **Roboto Mono** (Apache-2.0) — cero punteado.
@@ -12,8 +12,7 @@ Fuentes recomendadas (licencia permisiva, cero diferenciado):
 - **DejaVu Sans Mono** — cero tachado.
 
 ## 1. Descargar el TTF a res/font
-`curl.exe` funciona aunque `Invoke-WebRequest` falle o quede bloqueado: usa el almacén de
-certificados de Windows, que ya confía en el CA corporativo de Netskope. SIEMPRE usar `-L`
+`curl.exe` funciona aunque `Invoke-WebRequest` falle o quede bloqueado. SIEMPRE usar `-L`
 (GitHub redirige a la CDN). El nombre del archivo en `res/font` debe ser **minúsculas,
 sin guiones ni versiones** (solo `[a-z0-9_]`).
 
@@ -33,10 +32,9 @@ URLs verificadas:
 Notas:
 - `Invoke-WebRequest` puede devolver "Exit code could not be determined / No output" o quedar
   pendiente de aprobación; `curl.exe -L` fue lo que funcionó de forma fiable.
-- **`--ssl-no-revoke` puede ser necesario**: algunos hosts/CDN (p. ej. el raw de `github.com/JetBrains`)
-  al ser interceptados por Netskope fallan con `schannel: CRYPT_E_NO_REVOCATION_CHECK (0x80092012)`
-  porque schannel no puede comprobar la revocación del certificado. `--ssl-no-revoke` la omite.
-  (La descarga de `github.com/google` funcionó sin esa bandera.)
+- **`--ssl-no-revoke` puede ser necesario**: algunos hosts/CDN fallan con
+  `schannel: CRYPT_E_NO_REVOCATION_CHECK (0x80092012)` porque schannel no puede comprobar
+  la revocación del certificado. `--ssl-no-revoke` la omite.
 - La descarga es una petición externa: NO auto-ejecutar sin criterio; confirmar la URL/licencia.
 
 ## 2. Referenciar la fuente en código
@@ -56,7 +54,7 @@ Opcional para números: `textView.fontFeatureSettings = "tnum"` (dígitos tabula
 ## 3. Compilar y verificar
 // turbo
 ```powershell
-$env:JAVA_HOME = 'C:\Users\mzegarra_ide\Downloads\android-studio\jbr'
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
 & "$env:USERPROFILE\.gradle\wrapper\dists\gradle-9.4.1-bin\*\gradle-9.4.1\bin\gradle.bat" assembleDebug --no-daemon --console=plain 2>&1 | Select-Object -Last 5
 ```
 Instalar por ADB (ver workflows `connect-phone` y `validate`) y confirmar en pantalla que `0` se

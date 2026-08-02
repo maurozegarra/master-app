@@ -1,22 +1,20 @@
 ---
-description: Convenciones y hallazgos reutilizables para apps Android en este equipo - entorno de build, git, idioma, estilo/tema, iconos y gotchas de device
+description: Convenciones y hallazgos reutilizables para apps Android - entorno de build, git, idioma, estilo/tema, iconos y gotchas de device
 ---
 
 # Convenciones para apps Android (reutilizables)
 
-Lineamientos y hallazgos que aplican de forma transversal a los proyectos Android en
-este equipo (no atados a una app concreta). Ajusta paquete, nombres y features al proyecto.
+Lineamientos y hallazgos que aplican de forma transversal a los proyectos Android
+(no atados a una app concreta). Ajusta paquete, nombres y features al proyecto.
 
-## Entorno de build (equipo corporativo: Netskope + JFrog)
-- **JAVA_HOME** = JBR de Android Studio: `C:\Users\mzegarra_ide\Downloads\android-studio\jbr`
-  (su cacerts confia en el CA de Netskope). Tambien en `gradle.properties` (`org.gradle.java.home`).
+## Entorno de build
+- **JAVA_HOME** = JBR de Android Studio: `C:\Program Files\Android\Android Studio\jbr`.
+  Tambien en `gradle.properties` (`org.gradle.java.home`).
 - **Gradle 9.4.1** cacheado en `~/.gradle/wrapper/dists`. No hay wrapper jar: se invoca ese `gradle.bat`.
 - **AGP 9.2.x**, Kotlin integrado (built-in). Java/Kotlin target 17.
-- **Repos**: solo JFrog virtual `scp-gradle-public` con `Authorization: Bearer <token>` leido de
-  `~/.npmrc` (`_authToken=`). plugins.gradle.org / repo1 dan 403 detras de Netskope. Ver `settings.gradle.kts`.
+- **Repos**: `google()` + `mavenCentral()` en `settings.gradle.kts`.
 - **SDK**: `%LOCALAPPDATA%\Android\Sdk`; `adb` en `platform-tools\adb.exe`.
-- Descargas web: usar `curl.exe -L --ssl-no-revoke` (Invoke-WebRequest suele fallar/bloquearse
-  detras de Netskope).
+- Descargas web: usar `curl.exe -L`.
 
 ## Git / disciplina de commits
 - **PROPONER el commit, NO ejecutarlo por iniciativa propia.** Tras hacer los cambios, presenta el
@@ -25,7 +23,7 @@ este equipo (no atados a una app concreta). Ajusta paquete, nombres y features a
 - Commit **atomico** por cambio, tras validar (build OK, idealmente en device). Historico granular
   para poder volver a versiones funcionales (`git reset --hard <hash>` o `git revert`).
 - Conventional commits: `feat/fix/refactor/chore/docs/test/style(scope): resumen`.
-- Fija la identidad LOCAL del repo si no debe usarse la global corporativa
+- Fija la identidad LOCAL del repo si es distinta a la global
   (`git config user.name` / `git config user.email`).
 - `.gitignore` debe excluir `build/`, `.gradle/`, `local.properties` y capturas temporales (`_*.png`/`_*.svg`).
 - Finales de linea: ver workflow `normalize-line-endings`.

@@ -1,4 +1,4 @@
-package com.minitimer.ui
+package com.athletic.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio
@@ -12,9 +12,10 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.minitimer.ui.theme.AppTheme
+import com.athletic.ui.theme.AppTheme
 
-// Wordmark "TIMES" derivado de la fuente Wallpoet:
+// Wordmark "TIMES" derivado de la fuente Wallpoet (referencia; el wordmark actual
+// de la app es MASTER en ui/MasterWordmark.kt):
 // - T y M sin cambios; E = M rotada 90 ccw; S con el corte vertical puenteado.
 // - I como barra inclinada "\" a altura de mayuscula.
 // Coordenadas en el viewport VW x VH (y-down). Generado con tools/wordmark_build.py.

@@ -1,9 +1,9 @@
-# Hoja de ruta: carve-out de Athlete -> Athletic
+# Hoja de ruta: Athletic
 
-Estrategia: **extraer y podar** (no reescribir de cero). Preservar la lógica
-probada de mini-timer y reemplazar solo el shell (app, navegación, ajustes, i18n).
+Estrategia: **preservar la lógica probada** y reemplazar solo el shell
+(app, navegación, ajustes, i18n).
 
-> Estado general: **carve-out completado, compilando y publicando releases**.
+> Estado general: **compilando y publicando releases**.
 > Fases 0–8 ejecutadas; hay 110+ releases en GitHub (última v1.0.110, código en
 > `versionCode 111`). Quedan pendientes de verificación funcional y limpieza
 > (ver "Pendientes" al final).
@@ -20,22 +20,22 @@ probada de mini-timer y reemplazar solo el shell (app, navegación, ajustes, i18
    **definidos** (ver Fase 6).
 3. **Idioma**: **solo inglés** (se descarta el bilingüe; `Strings` se simplifica a EN).
 4. **Alcance del MVP**: **todo**. Entran todas las features actuales de Athlete
-   (ver sección 5 de `hallazgos-athlete.md`), más los pendientes de `to-do.md`.
+   (ver `to-do.md` para pendientes).
 
 ## Fases de extracción
 
 ### Fase 0 — Scaffold (HECHA)
 - [x] Repo `athletic` + git init.
-- [x] Documentación de hallazgos + hoja de ruta.
+- [x] Documentación de hoja de ruta.
 - [x] Traer wordmark TIMES completo (pipeline + `TimesWordmark.kt` + fuente) a
       `branding/wordmark/` como referencia. El wordmark final usado en la app es
       "MASTER" (`ui/MasterWordmark.kt`), ver Fase 6.
 - [x] Definir decisiones de producto (arriba).
 
 ### Fase 1 — Proyecto Android base (HECHA — compila)
-- [x] Estructura Gradle (sin `gradlew`, Gradle 9.4.1 cacheado, JAVA_HOME jbr; proxy
-      JFrog + token de `~/.npmrc` en `settings.gradle.kts`). `verify-compile.ps1` incluido.
-- [x] `build.gradle.kts` con Compose + Material3 (mismas versiones que mini-timer).
+- [x] Estructura Gradle (sin `gradlew`, Gradle 9.4.1 cacheado, JAVA_HOME jbr).
+      `verify-compile.ps1` incluido.
+- [x] `build.gradle.kts` con Compose + Material3.
 - [x] Paquete **`com.athletic`** + `AndroidManifest` (permisos foreground service
       specialUse, notificaciones, vibrate, wake_lock). Ícono de launcher adaptativo
       agregado en la Fase 6.
@@ -152,7 +152,7 @@ probada de mini-timer y reemplazar solo el shell (app, navegación, ajustes, i18
       Historial y drag-reorder. (El `input tap` por ADB no acierta bien botones pegados a la barra de
       navegación; se completa manualmente.)
 
-### Post-Fase 8 — Features agregadas tras el carve-out (HECHAS)
+### Post-Fase 8 — Features agregadas tras las fases principales (HECHAS)
 - [x] Weekly calendar con swipe + slide animation (`WeekCalendar` en `AthleteScreen`):
       muestra los días de la semana con las sesiones completadas marcadas; navegación
       entre semanas por swipe horizontal (commit `7699836`).
@@ -179,7 +179,7 @@ probada de mini-timer y reemplazar solo el shell (app, navegación, ajustes, i18
 
 ## Riesgos y notas
 
-- El punto más delicado del carve-out es **partir `i18n.Strings`** sin perder claves.
+- El punto más delicado de la extracción es **partir `i18n.Strings`** sin perder claves.
 - El servicio y la rotación son la lógica de mayor valor: **no tocar** su
   comportamiento durante la copia; solo ajustar paquete/imports.
-- Persistencia: es un **clean break** (datos nuevos); no migrar prefs de mini-timer.
+- Persistencia: es un **clean break** (datos nuevos).

@@ -1,11 +1,10 @@
-// REFERENCIA (no compila tal cual): código del wordmark/ícono de Athlete extraído
-// de mini-timer (ui/TimerApp.kt). Se conserva aquí como base para reubicar/rebrandizar
-// el wordmark en Athletic. Ver branding/wordmark/README.md.
+// REFERENCIA (no compila tal cual): código del wordmark/ícono de Athlete.
+// Se conserva aquí como base. Ver branding/wordmark/README.md.
 //
 // Wordmark de Athlete = título "ATHLETE" en Neuropol + este ícono hexagonal con
 // una "M" en Wallpoet recortada por BlendMode.DstOut.
 
-package com.minitimer.ui
+package com.athletic.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
@@ -21,7 +20,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.material3.LocalContentColor
-import com.minitimer.ui.theme.Wallpoet
+import com.athletic.ui.theme.AppTheme
 
 @Composable
 private fun AthleteTabIcon(modifier: Modifier = Modifier) {
@@ -50,7 +49,7 @@ private fun AthleteTabIcon(modifier: Modifier = Modifier) {
         val layout = measurer.measure(
             text = "M",
             style = TextStyle(
-                fontFamily = Wallpoet,
+                fontFamily = AppTheme.brandFont,
                 fontSize = (size.height * 0.5f).toSp(),
             ),
         )

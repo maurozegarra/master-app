@@ -123,6 +123,5 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 
 - `docs/athletic-forge.md` — sistema de verificación y to-do (leer antes de cambiar).
 - `docs/forge-todo.json` — fuente de verdad del to-do (no editar `to-do.md` directamente).
-- `docs/hoja-de-ruta.md` — historial del carve-out Athlete → Athletic (Fases 0–8).
-- `docs/hallazgos-athlete.md` — inventario de lo que existía en mini-timer.
+- `docs/hoja-de-ruta.md` — historial del proyecto (Fases 0–8).
 - `.devin/workflows/` — workflows específicos del proyecto (foreground service, etc.).

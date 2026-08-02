@@ -138,7 +138,7 @@ Ejemplo real, tal como se usa el engranaje en el header (`activity_main.xml`):
 1. Compilar:
 
 ```powershell
-$env:JAVA_HOME='C:\Users\mzegarra_ide\Downloads\android-studio\jbr'
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
 $gradle=(Resolve-Path "$env:USERPROFILE\.gradle\wrapper\dists\gradle-9.4.1-bin\*\gradle-9.4.1\bin\gradle.bat").Path
 & $gradle :app:assembleDebug --no-daemon --console=plain
 ```

@@ -5,9 +5,8 @@ import java.util.Locale
 /**
  * Cadenas de la app en INGLÉS (decisión de producto: Athletic es English-only).
  *
- * Carve-out de mini-timer PODADO: se conservan solo las claves que usa la UI de
- * Athlete (Training > Workout > Exercise + player) y la pantalla de Ajustes. Las
- * claves de Timer/Clock/Backup del monolito original se descartaron.
+ * Se conservan solo las claves que usa la UI de Athlete (Training > Workout >
+ * Exercise + player) y la pantalla de Ajustes.
  */
 data class Strings(
     val locale: Locale,

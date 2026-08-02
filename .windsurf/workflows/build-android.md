@@ -16,8 +16,7 @@ Android con Gradle + Kotlin + Compose.
 - **AGP 9.2.1**, **Kotlin 2.2.10** (declarados en `build.gradle.kts` del root).
 - **Java/Kotlin target**: 17 (aunque el JDK es 21).
 - **Android SDK**: `%LOCALAPPDATA%\Android\Sdk`. Ruta en `local.properties` (`sdk.dir`).
-- **Repos**: `google()` + `mavenCentral()` en `settings.gradle.kts`. Si hay proxy
-  corporativo (Netskope), usar JFrog con Bearer token de `~/.npmrc` (ver `conventions.md`).
+- **Repos**: `google()` + `mavenCentral()` en `settings.gradle.kts`.
 - Flag `--no-daemon` para evitar procesos background de Gradle.
 
 ## Archivos minimos para replicar el build
@@ -61,7 +60,7 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ```
 
-**`settings.gradle.kts`** (sin proxy corporativo):
+**`settings.gradle.kts`**:
 ```kotlin
 pluginManagement {
     repositories {

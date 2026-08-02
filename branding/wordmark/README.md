@@ -1,12 +1,10 @@
-# Wordmark — TIMES (custom, elegido para Athletic)
+# Wordmark — MASTER (custom, vectorial)
 
-El wordmark elegido para Athletic es el de **TIMES** (custom, vectorial), NO el de
-Athlete. Athlete era "solo una fuente" (Neuropol) con un ícono hexagonal; TIMES es
-un wordmark **construido a mano** derivando y transformando los glifos de la fuente
-**Wallpoet**. Aquí está TODO el flujo de cómo se hizo, para poder regenerarlo y/o
-adaptarlo (p. ej. rebrandizar el texto a "ATHLETIC").
+El wordmark de la app es **MASTER** (custom, vectorial), construido a mano
+derivando y transformando los glifos de la fuente **Wallpoet**. Aquí está TODO el
+flujo de cómo se hizo, para poder regenerarlo y/o adaptarlo.
 
-> El branding de Athlete (Neuropol + `AthleteTabIcon`) se conserva solo como
+> El branding anterior (Neuropol + `AthleteTabIcon`) se conserva solo como
 > referencia en `legacy-athlete/`.
 
 ## Contenido
@@ -17,7 +15,7 @@ adaptarlo (p. ej. rebrandizar el texto a "ATHLETIC").
   proporción con `aspectRatio(VW/VH)` (VW≈3432.86, VH=575).
 - `wallpoet_regular.ttf` — fuente **fuente-origen** de los glifos (solo necesaria
   para REGENERAR el wordmark, no en runtime).
-- `tools/` — pipeline offline (solo stdlib de Python, sin pip/red por CrowdStrike):
+- `tools/` — pipeline offline (solo stdlib de Python):
   - `wallpoet_extract.py` — parser TrueType mínimo (stdlib `struct`, sin `fonttools`).
     Lee `head`/`maxp`/`hhea`/`cmap`(fmt 4)/`loca`/`glyf`/`hmtx` y extrae el contorno
     SVG de cada glifo (T, I, M, E, S, `\`). Salida: `wallpoet_glyphs.json`.
@@ -32,7 +30,7 @@ adaptarlo (p. ej. rebrandizar el texto a "ATHLETIC").
 - `legacy-athlete/` — branding anterior de Athlete (Neuropol + `AthleteTabIcon.kt`),
   solo referencia.
 
-## Cómo se construyó TIMES (flujo offline, sin descargas)
+## Cómo se construyó (flujo offline)
 
 1. **Extraer contornos** (`tools/wallpoet_extract.py`): parser TrueType con stdlib
    puro. Glifos simples (flags con REPEAT, curvas cuadráticas con on-curve
@@ -82,11 +80,9 @@ python tools/wordmark_build.py        # -> tools/wordmark_paths.txt + previews H
 Luego copiar `WIDTH`/`HEIGHT` y los path `REST`/`M` de `wordmark_paths.txt` a las
 constantes de `TimesWordmark.kt`.
 
-## Al integrar en Athletic
+## Notas
 
-1. Portar `TimesWordmark.kt` al paquete/UI de Athletic (ajustar `import` de `AppTheme`).
-2. Si se quiere el texto "ATHLETIC" (no "TIMES"), regenerar con los glifos
-   A-T-H-L-E-T-I-C aplicando las mismas técnicas (puentear cortes, `\` como I, etc.)
-   — ver `to-do.md` (reubicar/rebrandizar wordmark).
-3. La fuente Wallpoet solo se necesita para regenerar; en runtime basta el `.kt`.
+- El wordmark actual es **MASTER** (`ui/MasterWordmark.kt`), derivado de Wallpoet
+  con las mismas técnicas (E = M rotada, I = barra `\`, S puenteada).
+- La fuente Wallpoet solo se necesita para regenerar; en runtime basta el `.kt`.
 
