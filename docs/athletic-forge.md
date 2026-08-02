@@ -113,11 +113,12 @@ sigue estos pasos en orden.
 
 ### Escenario A — "Necesito la feature X" (feature nueva)
 
-1. **Asignar ID**: el agente lee `docs/forge-todo.json`, encuentra el último
-   `TD-NNN` y asigna el siguiente (`TD-015`, `TD-016`, etc.).
-2. **Agregar el item al JSON**: el agente edita `docs/forge-todo.json` con el
-   nuevo item, `status: "pending"`, categoría apropiada, y un campo `manual`
-   que describa qué hay que hacer.
+1. **Asignar ID**: el agente lee `docs/forge-todo.json`, encuentra el `TD-NNN`
+   con el número más alto y asigna el siguiente.
+2. **Agregar el item al JSON**: el agente edita `docs/forge-todo.json`
+   **insertando el nuevo item al inicio del array `items`** (orden: más recientes
+   primero). `status: "pending"`, categoría apropiada, y un campo `manual` que
+   describa qué hay que hacer.
 3. **Regenerar to-do**: `.\forge-status.ps1 -SkipTests` para que el item aparezca.
 4. **Confirmar con el usuario**: mostrar el item agregado y esperar confirmación
    antes de implementar (salvo que el usuario ya haya dicho "hazlo").
