@@ -2,6 +2,41 @@
   "_comment": "Fuente de verdad del to-do de Athletic. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-029",
+      "title": "Regla: TD es done solo cuando el usuario aprueba tras probar en dispositivo",
+      "category": "Mantenimiento",
+      "status": "done",
+      "manual": "Agregar a las reglas de oro de AGENTS.md: un TD es done cuando el usuario lo aprueba tras probar en el dispositivo, no cuando compila. Mientras este pending, los ajustes (fixes y refinements de forma) son parte del mismo TD. Cambios posteriores a la aprobacion = nuevo TD."
+    },
+    {
+      "id": "TD-028",
+      "title": "Analisis: skip por ejercicio en el player",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Analizar la viabilidad de un comando SKIP_EXERCISE que salte todos los pasos restantes del ejercicio actual (prepare + sets de work + rests + cooldown) al siguiente ejercicio. Implicaciones: modelo (ExerciseRecord.skipped), servicio (PlayerCommand.SKIP_EXERCISE busca el siguiente ownerExerciseId distinto), UI (boton Skip junto a Next/Prev), historial (indicador visual para ejercicios saltados), rotacion (si se salta el ultimo ejercicio de un workout, no cuenta como completado). Entregar analisis detallado para decision del usuario."
+    },
+    {
+      "id": "TD-027",
+      "title": "Historial agrupado por workout con badge parcial/total",
+      "category": "Fix",
+      "status": "done",
+      "manual": "HistoryScreen agrupa ExerciseRecord por workoutIndex en secciones colapsables (cerradas por defecto). Badge por workout: verde Complete si exercises.size == totalExercisesInWorkout y todas las series completas, rojo Partial si no. Badge por training: verde Complete si COMPLETED, rojo Partial si PARTIAL. Agregado campo totalExercisesInWorkout a ExerciseRecord, inyectado por SessionRecorder desde steps al iniciar el player. Encode/decode en SessionJson con default 0 para migracion. Tests en SessionRecorderTest y SessionJsonTest."
+    },
+    {
+      "id": "TD-026",
+      "title": "Fix: WeekCalendar no se actualiza en vivo tras terminar training",
+      "category": "Fix",
+      "status": "done",
+      "manual": "refreshSessions() solo se llama en init y openHistory(). Cuando el player termina (observePlayer detecta snap.finished), se llama reload() pero no refreshSessions(). Igual en closePlayer(). Fix: agregar refreshSessions() en closePlayer() y cuando snap.finished pasa a true en observePlayer()."
+    },
+    {
+      "id": "TD-025",
+      "title": "Fix: circulo indicador de WeekCalendar muy pequeno",
+      "category": "Fix",
+      "status": "done",
+      "manual": "El indicador en AthleteScreen.kt usa Modifier.size(4.dp) con border 1.dp. Aumentar a 6.dp y border 1.5.dp para que sea visible. Punto solido para COMPLETED, hueco para PARTIAL."
+    },
+    {
       "id": "TD-024",
       "title": "Ripple solo en chevron de WorkoutGroupCard",
       "category": "Fix",

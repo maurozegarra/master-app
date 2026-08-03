@@ -4,12 +4,14 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **12 / 24** hechos, 12 pendientes.
+Progreso: **16 / 29** hechos, 13 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-028** Analisis: skip por ejercicio en el player
+  - Analizar la viabilidad de un comando SKIP_EXERCISE que salte todos los pasos restantes del ejercicio actual (prepare + sets de work + rests + cooldown) al siguiente ejercicio. Implicaciones: modelo (ExerciseRecord.skipped), servicio (PlayerCommand.SKIP_EXERCISE busca el siguiente ownerExerciseId distinto), UI (boton Skip junto a Next/Prev), historial (indicador visual para ejercicios saltados), rotacion (si se salta el ultimo ejercicio de un workout, no cuenta como completado). Entregar analisis detallado para decision del usuario.
 - [ ] **TD-014** Keep-screen-on durante la corrida (opcional)
   - El player a pantalla completa podria beneficiarse de keep-screen-on
 - [ ] **TD-013** Accesibilidad (opcional)
@@ -63,6 +65,9 @@ Progreso: **12 / 24** hechos, 12 pendientes.
 
 ### Fix
 
+- [x] **TD-027** Historial agrupado por workout con badge parcial/total
+- [x] **TD-026** Fix: WeekCalendar no se actualiza en vivo tras terminar training
+- [x] **TD-025** Fix: circulo indicador de WeekCalendar muy pequeno
 - [x] **TD-023** Fix: tap en card abre editor en vez de preview
 
 ### Forge
@@ -74,6 +79,7 @@ Progreso: **12 / 24** hechos, 12 pendientes.
 
 ### Mantenimiento
 
+- [x] **TD-029** Regla: TD es done solo cuando el usuario aprueba tras probar en dispositivo
 - [x] **TD-022** AGENTS.md como gatekeeper del harness
 - [x] **TD-007** Decidir sobre branding/icons.html sin trackear
 - [x] **TD-006** Limpieza de codigo muerto
