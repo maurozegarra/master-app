@@ -593,6 +593,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Evita recargar los índices de rotación más de una vez por corrida (finished puede repetir). */
     private var sessionReloaded = false
+    private var pendingSessionRefresh = false
 
     fun openPlayer(trainingId: Long) {
         // Si hay un player activo para este training, reconectar (estilo YouTube).
@@ -637,8 +638,8 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         PlayerBus.command.tryEmit(PlayerCommand.FEEDBACK(exerciseId, workoutIndex, deltaKg))
 
     fun closePlayer() {
+        pendingSessionRefresh = true
         WorkoutPlayerService.stop(getApplication())
-        PlayerBus.state.value = null
         playerTrainingId = null
         playerSteps = emptyList()
         playerStarted = false
@@ -646,7 +647,6 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         playerFinished = false
         playerStep = null
         activePlayerTrainingId = null
-        // El servicio ya avanzó la rotación de los workouts completados; refrescar en memoria.
         reload()
     }
 
@@ -667,11 +667,18 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             PlayerBus.state.collect { snap ->
                 if (snap == null) {
-                    // El servicio se detuvo (ej. desde la notificación). Limpiar UI.
+                    val hadPlayer = playerStep != null || activePlayerTrainingId != null
                     playerStep = null
                     playerRunning = false
                     playerRemainingMs = 0L
                     activePlayerTrainingId = null
+                    playerTrainingId = null
+                    playerStarted = false
+                    playerFinished = false
+                    if (hadPlayer || pendingSessionRefresh) {
+                        refreshSessions()
+                        pendingSessionRefresh = false
+                    }
                     return@collect
                 }
                 playerIndex = snap.index
@@ -706,6 +713,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
                     if (!sessionReloaded) {
                         sessionReloaded = true
                         reload()
+                        refreshSessions()
                     }
                 }
             }
