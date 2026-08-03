@@ -99,6 +99,7 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 - **No implementar sin autorización explícita del usuario.** Registrar el TD, mostrar qué se va a hacer y esperar confirmación antes de tocar código.
 - **No hacer commit sin autorización explícita del usuario.**
 - **Nada se declara done sin `.\verify-compile.ps1` verde** (tests + compila release). Aplica a cualquier item que toque código.
+- **Un TD es `done` cuando el usuario lo aprueba tras probar en el dispositivo**, no cuando compila. Mientras esté `pending`, los ajustes (fixes y refinements de forma) son parte del mismo TD. Cambios posteriores a la aprobación = nuevo TD.
 - **No crear archivos temporales** (screenshots, scripts de prueba) en el repo.
 - **Usar `build-debug.ps1`** para cada iteración: incrementa versión, instala, copia a Download.
 - **Minificar siempre**: el APK release pesa ~1.2MB vs ~16MB en debug.
