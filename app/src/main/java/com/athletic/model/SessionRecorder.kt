@@ -11,11 +11,17 @@ class SessionRecorder {
 
     private val records = mutableMapOf<ExerciseKey, ExerciseRecord>()
     private val sets = mutableMapOf<ExerciseKey, MutableList<SetRecord>>()
+    private var totalExercisesByWorkout = mutableMapOf<Int, Int>()
 
     private data class ExerciseKey(
         val exerciseId: String,
         val workoutIndex: Int,
     )
+
+    fun setTotalExercisesByWorkout(map: Map<Int, Int>) {
+        totalExercisesByWorkout.clear()
+        totalExercisesByWorkout.putAll(map)
+    }
 
     fun onWorkStepCompleted(step: PlayerStep) {
         if (step.kind != StepKind.WORK) return
@@ -35,6 +41,7 @@ class SessionRecorder {
             totalSets = step.totalSets,
             sets = sets[key]!!.toList(),
             timeBased = step.timeBased,
+            totalExercisesInWorkout = totalExercisesByWorkout[step.workoutIndex] ?: 0,
         )
     }
 

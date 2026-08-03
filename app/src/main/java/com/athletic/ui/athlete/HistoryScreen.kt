@@ -187,15 +187,20 @@ private fun SessionRow(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp,
                     )
-                    if (session.status == SessionStatus.PARTIAL) {
-                        Box(
-                            Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(accent.copy(alpha = 0.15f))
-                                .padding(horizontal = 6.dp, vertical = 2.dp),
-                        ) {
-                            Text(t.partial, color = accent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                        }
+                    val isPartial = session.status == SessionStatus.PARTIAL
+                    val trainingBadgeColor = if (isPartial) accent else Color(0xFF4CAF50)
+                    Box(
+                        Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(trainingBadgeColor.copy(alpha = 0.15f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            if (isPartial) t.partial else t.complete,
+                            color = trainingBadgeColor,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
                     }
                 }
                 Text(time, color = AppTheme.colors.textDim, fontSize = 13.sp)
@@ -228,9 +233,86 @@ private fun SessionRow(
                 Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                session.exercises.forEach { er ->
+                val workoutGroups = session.exercises.groupBy { it.workoutIndex }
+                    .toSortedMap()
+                workoutGroups.forEach { (workoutIndex, exs) ->
+                    WorkoutGroupSection(
+                        exercises = exs,
+                        accent = accent,
+                        t = t,
+                        onExerciseClick = onExerciseClick,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WorkoutGroupSection(
+    exercises: List<ExerciseRecord>,
+    accent: Color,
+    t: Strings,
+    onExerciseClick: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val workoutName = exercises.firstOrNull()?.workoutName?.ifBlank { t.workout } ?: t.workout
+    val allComplete = exercises.size == (exercises.firstOrNull()?.totalExercisesInWorkout ?: exercises.size) &&
+        exercises.all { it.setsCompleted == it.totalSets }
+    val badgeColor = if (allComplete) Color(0xFF4CAF50) else accent
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(AppTheme.colors.bg)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { expanded = !expanded }
+                .padding(vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                workoutName,
+                color = AppTheme.colors.textPrimary,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                modifier = Modifier.weight(1f),
+            )
+            Box(
+                Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(badgeColor.copy(alpha = 0.15f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            ) {
+                Text(
+                    if (allComplete) t.complete else t.partial,
+                    color = badgeColor,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Icon(
+                if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = null,
+                tint = AppTheme.colors.textDim,
+            )
+        }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                exercises.forEach { er ->
                     ExerciseDetailRow(er, accent, t) { onExerciseClick(er.exerciseId) }
                 }
             }
@@ -243,10 +325,9 @@ private fun ExerciseDetailRow(er: ExerciseRecord, accent: Color, t: Strings, onC
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(AppTheme.colors.bg)
+            .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .padding(12.dp),
+            .padding(10.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

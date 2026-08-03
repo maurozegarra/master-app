@@ -29,6 +29,7 @@ class SessionJsonTest {
         setsCompleted: Int = 3,
         totalSets: Int = 3,
         timeBased: Boolean = true,
+        totalExercisesInWorkout: Int = 1,
         feedbackDeltaKg: Double? = null,
     ) = ExerciseRecord(
         exerciseId = exerciseId,
@@ -43,6 +44,7 @@ class SessionJsonTest {
             SetRecord(reps = 8, weightKg = 45.0, durationSec = 30),
         ),
         timeBased = timeBased,
+        totalExercisesInWorkout = totalExercisesInWorkout,
         feedbackDeltaKg = feedbackDeltaKg,
     )
 
@@ -71,6 +73,7 @@ class SessionJsonTest {
         assertEquals(40.0, er.sets[0].weightKg, 0.001)
         assertEquals(30, er.sets[0].durationSec)
         assertEquals(-2.5, er.feedbackDeltaKg!!, 0.001)
+        assertEquals(1, er.totalExercisesInWorkout)
     }
 
     @Test
@@ -130,6 +133,22 @@ class SessionJsonTest {
         assertEquals(1L, decoded[0].id)
         assertEquals(2L, decoded[1].id)
         assertEquals(SessionStatus.PARTIAL, decoded[1].status)
+    }
+
+    @Test
+    fun `round-trip preserves totalExercisesInWorkout`() {
+        val original = listOf(sampleSession(exercises = listOf(
+            sampleExercise(totalExercisesInWorkout = 8),
+        )))
+        val decoded = SessionJson.decode(SessionJson.encode(original))
+        assertEquals(8, decoded[0].exercises[0].totalExercisesInWorkout)
+    }
+
+    @Test
+    fun `migration from old format without totalExercisesInWorkout defaults to 0`() {
+        val oldJson = """[{"id":1,"trainingId":1,"trainingName":"X","completedAt":100,"exercises":[{"exerciseId":"squat","name":"Squat","workoutName":"Lower","workoutIndex":0,"setsCompleted":3,"totalSets":3,"sets":[],"timeBased":true}]}]"""
+        val decoded = SessionJson.decode(oldJson)
+        assertEquals(0, decoded[0].exercises[0].totalExercisesInWorkout)
     }
 
     @Test

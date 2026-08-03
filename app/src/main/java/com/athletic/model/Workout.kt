@@ -169,6 +169,7 @@ data class ExerciseRecord(
     val totalSets: Int,
     val sets: List<SetRecord>,
     val timeBased: Boolean,
+    val totalExercisesInWorkout: Int = 0,
     val feedbackDeltaKg: Double? = null,
 )
 

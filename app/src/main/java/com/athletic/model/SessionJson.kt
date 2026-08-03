@@ -30,6 +30,7 @@ object SessionJson {
                     .put("totalSets", er.totalSets)
                     .put("sets", setsArr)
                     .put("timeBased", er.timeBased)
+                    .put("totalExercisesInWorkout", er.totalExercisesInWorkout)
                 if (er.feedbackDeltaKg != null) erObj.put("feedbackDeltaKg", er.feedbackDeltaKg)
                 exercises.put(erObj)
             }
@@ -74,6 +75,7 @@ object SessionJson {
                         totalSets = eo.optInt("totalSets", sets.size),
                         sets = sets,
                         timeBased = eo.optBoolean("timeBased", true),
+                        totalExercisesInWorkout = eo.optInt("totalExercisesInWorkout", 0),
                         feedbackDeltaKg = if (eo.has("feedbackDeltaKg"))
                             eo.optDouble("feedbackDeltaKg", 0.0) else null,
                     ))

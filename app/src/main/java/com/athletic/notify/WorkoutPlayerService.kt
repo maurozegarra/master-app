@@ -84,6 +84,11 @@ class WorkoutPlayerService : Service() {
                     finished = false
                     advancedWorkouts.clear()
                     recorder.clear()
+                    recorder.setTotalExercisesByWorkout(
+                        steps.filter { it.kind == StepKind.WORK }
+                            .groupBy { it.workoutIndex }
+                            .mapValues { it.value.map { ex -> ex.ownerExerciseId }.distinct().size }
+                    )
                     startedAt = System.currentTimeMillis()
                     alarmCue(steps.getOrNull(0))
                     beginStep(0)

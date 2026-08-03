@@ -166,4 +166,23 @@ class SessionRecorderTest {
         assertEquals("Squat", records[1].name)
         assertEquals(1, records[2].workoutIndex)
     }
+
+    @Test
+    fun `totalExercisesInWorkout is injected from setTotalExercisesByWorkout`() {
+        val r = SessionRecorder()
+        r.setTotalExercisesByWorkout(mapOf(0 to 8, 1 to 5))
+        r.onWorkStepCompleted(workStep(exerciseId = "squat", workoutIndex = 0))
+        r.onWorkStepCompleted(workStep(exerciseId = "press", workoutIndex = 1))
+        val records = r.build()
+        assertEquals(8, records[0].totalExercisesInWorkout)
+        assertEquals(5, records[1].totalExercisesInWorkout)
+    }
+
+    @Test
+    fun `totalExercisesInWorkout defaults to 0 when not set`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(exerciseId = "squat", workoutIndex = 0))
+        val records = r.build()
+        assertEquals(0, records[0].totalExercisesInWorkout)
+    }
 }
