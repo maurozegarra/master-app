@@ -102,6 +102,7 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 - **Un TD es `done` cuando el usuario lo aprueba tras probar en el dispositivo**, no cuando compila. Mientras esté `pending`, los ajustes (fixes y refinements de forma) son parte del mismo TD. Cambios posteriores a la aprobación = nuevo TD.
 - **No crear archivos temporales** (screenshots, scripts de prueba) en el repo.
 - **Usar `build-debug.ps1`** para cada iteración: incrementa versión, instala, copia a Download.
+- **Push = GitHub Release.** Cuando el usuario pida "push", proponer `build-release.ps1` (sube APK a GitHub Releases + actualiza `update.json` + commit + push), no `git push` solo.
 - **Minificar siempre**: el APK release pesa ~1.2MB vs ~16MB en debug.
 - **Firma estable**: el release se firma con la clave debug para permitir updates sin desinstalar.
 - **Versionado**: +1 por cada APK generado. `versionCode` y `versionName` en `app/build.gradle.kts`.
