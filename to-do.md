@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **21 / 31** hechos, 10 pendientes.
+Progreso: **22 / 31** hechos, 9 pendientes.
 
 ## Pendientes
 
@@ -24,11 +24,6 @@ Progreso: **21 / 31** hechos, 10 pendientes.
   - Revisar/expandir ExerciseCatalog y ExerciseIcons pensando en el app independiente
 - [ ] **TD-009** Respaldo/exportacion de trainings JSON (opcional)
   - Evaluar export/import de trainings (JSON) via SAF con BackupManager
-
-### Fix
-
-- [ ] **TD-024** Ripple solo en chevron de WorkoutGroupCard
-  - En PreviewView (PlayerScreen.kt), el ripple al tap de un WorkoutGroupCard cubre todo el header. Mover el clickable al Icon del chevron (KeyboardArrowRight) para que el ripple sea solo sobre la flecha. El tap en el resto del header sigue expandiendo/colapsando pero sin ripple visual.
 
 ### Mantenimiento
 
@@ -60,6 +55,7 @@ Progreso: **21 / 31** hechos, 10 pendientes.
 - [x] **TD-027** Historial agrupado por workout con badge parcial/total
 - [x] **TD-026** Fix: WeekCalendar no se actualiza en vivo tras terminar training
 - [x] **TD-025** Fix: circulo indicador de WeekCalendar muy pequeno
+- [x] **TD-024** Ripple solo en chevron de WorkoutGroupCard
 - [x] **TD-023** Fix: tap en card abre editor en vez de preview
 
 ### Forge

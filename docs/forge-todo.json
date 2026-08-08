@@ -54,7 +54,7 @@
       "id": "TD-024",
       "title": "Ripple solo en chevron de WorkoutGroupCard",
       "category": "Fix",
-      "status": "pending",
+      "status": "done",
       "manual": "En PreviewView (PlayerScreen.kt), el ripple al tap de un WorkoutGroupCard cubre todo el header. Mover el clickable al Icon del chevron (KeyboardArrowRight) para que el ripple sea solo sobre la flecha. El tap en el resto del header sigue expandiendo/colapsando pero sin ripple visual."
     },
     {

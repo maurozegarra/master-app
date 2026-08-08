@@ -177,10 +177,13 @@ private fun WorkoutGroupCard(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .clickable(onClick = onToggle),
+                .clip(RoundedCornerShape(8.dp)),
         ) {
-            Column(Modifier.weight(1f)) {
+            Column(
+                Modifier
+                    .weight(1f)
+                    .pointerInput(Unit) { detectTapGestures(onTap = { onToggle() }) },
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         g.title.ifBlank { t.workout },
@@ -214,7 +217,10 @@ private fun WorkoutGroupCard(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = AppTheme.colors.textDim,
-                modifier = Modifier.rotate(if (open) 90f else 0f),
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(onClick = onToggle)
+                    .rotate(if (open) 90f else 0f),
             )
         }
         if (open) {
