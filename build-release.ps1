@@ -1,5 +1,6 @@
 param(
-    [string]$Message = ''
+    [string]$Message = '',
+    [switch]$Bump
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,16 +14,19 @@ $mc = [regex]::Match($gc, 'versionCode\s*=\s*(\d+)')
 if (-not $mc.Success) { throw "No se pudo leer versionCode de $gradleFile" }
 $versionCode = [int]$mc.Groups[1].Value
 
-# Bump ANTES de compilar: el APK lleva la nueva version, y el bump va dentro
-# del commit del cambio que genera el APK (ver .windsurf/workflows/commit.md).
-$newVersionCode = $versionCode + 1
-$newVersionName = "1.0.$newVersionCode"
-$gc = [regex]::Replace($gc, '(versionCode\s*=\s*)\d+', "`${1}$newVersionCode")
-$gc = [regex]::Replace($gc, '(versionName\s*=\s*")[^"]+(")', "`${1}$newVersionName`${2}")
-Set-Content $gradleFile $gc -NoNewline
-
-$versionCode = $newVersionCode
-$versionName = $newVersionName
+# Por defecto NO bumpea: publica la version actual (la que se probo con build-debug).
+# Usar -Bump solo para release directo sin build-debug previo.
+if ($Bump) {
+    $versionCode = $versionCode + 1
+    $versionName = "1.0.$versionCode"
+    $gc = [regex]::Replace($gc, '(versionCode\s*=\s*)\d+', "`${1}$versionCode")
+    $gc = [regex]::Replace($gc, '(versionName\s*=\s*")[^"]+(")', "`${1}$versionName`${2}")
+    Set-Content $gradleFile $gc -NoNewline
+    Write-Host "Bumped to v$versionName"
+} else {
+    $versionName = "1.0.$versionCode"
+    Write-Host "Publishing v$versionName (no bump)"
+}
 
 & "$PSScriptRoot\run-tests.ps1"
 
