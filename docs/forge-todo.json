@@ -117,7 +117,7 @@
       "id": "TD-016",
       "title": "Verificar self-update en dispositivo",
       "category": "Testing",
-      "status": "pending",
+      "status": "done",
       "manual": "Pospuesto: necesita una version mas nueva en GitHub para que aparezca la barra de update. Probar deteccion, descarga e instalacion del APK."
     },
     {

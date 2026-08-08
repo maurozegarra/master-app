@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **24 / 32** hechos, 8 pendientes.
+Progreso: **25 / 32** hechos, 7 pendientes.
 
 ## Pendientes
 
@@ -27,11 +27,6 @@ Progreso: **24 / 32** hechos, 8 pendientes.
 
 - [ ] **TD-030** Mejorar arquitectura: extraer use-cases y Repository del MasterViewModel
   - AthleteViewModel.kt (751 lineas) es un god object que mezcla estado de UI, logica de negocio, acceso a Stores y coordinacion con el Service. El dominio (model/) ya esta aislado y testeado, pero la capa de presentacion no sigue clean architecture. Plan: (1) Introducir Repository pattern entre ViewModels y Stores (WorkoutRepository, SettingsRepository) para abstraer SharedPreferences. (2) Extraer use-cases del AthleteViewModel: seeding, restauracion del player, manejo de drafts, logica de sesiones. (3) Reducir AthleteViewModel a estado de UI + delegacion a use-cases. (4) Inyeccion manual por constructor (sin framework DI). (5) Tests de use-cases y Repository. Consideracion: para una app sin red ni DI framework, evaluar si el costo/valor justifica el refactor completo o si basta con extraer los use-cases mas grandes y dejar los Stores como estan. Decidir alcance antes de implementar.
-
-### Testing
-
-- [ ] **TD-016** Verificar self-update en dispositivo
-  - Pospuesto: necesita una version mas nueva en GitHub para que aparezca la barra de update. Probar deteccion, descarga e instalacion del APK.
 
 ## Hechos
 
@@ -81,4 +76,5 @@ Progreso: **24 / 32** hechos, 8 pendientes.
 
 ### Testing
 
+- [x] **TD-016** Verificar self-update en dispositivo
 - [x] **TD-005** Verificacion funcional en dispositivo
