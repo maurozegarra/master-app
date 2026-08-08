@@ -63,7 +63,7 @@ Lineamientos y hallazgos que aplican de forma transversal a los proyectos Androi
   progresiva, en cambio, DESAPARECE por completo.
 - **Regla al agregar un control con sub-opciones**: elegir UN patron y mantenerlo. Sub-opciones
   dependientes de un estado -> divulgacion progresiva (mostrar/ocultar). Ajuste ligado a un switch de
-  su misma fila -> patron "atenuar". (Trasladado del proyecto hermano `niko`.)
+  su misma fila -> patron "atenuar".
 - Ver workflow `progressive-disclosure` para el principio completo.
 
 ## Device / capturas (gotchas)

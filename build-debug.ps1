@@ -42,7 +42,7 @@ Write-Host "OK -> releases\master-$newVersionName.apk"
 # Instalar en el device
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 $devices = & $adb devices
-$deviceLine = ($devices | Select-String "\b\d+\.\d+\.\d+\.\d+:\d+\b").Matches.Value
+$deviceLine = ($devices | Select-String "\bdevice$").Line -replace "\s+device$", ""
 if ($deviceLine) {
     Write-Host "Installing on $deviceLine..."
     & $adb -s $deviceLine install -r $apkSrc

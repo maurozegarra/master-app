@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **18 / 29** hechos, 11 pendientes.
+Progreso: **21 / 31** hechos, 10 pendientes.
 
 ## Pendientes
 
@@ -32,13 +32,8 @@ Progreso: **18 / 29** hechos, 11 pendientes.
 
 ### Mantenimiento
 
-- [ ] **TD-020** Eliminar referencias a entorno corporativo y mini-timer
-  - Eliminar todas las refs a entorno corporativo (CrowdStrike, Netskope, JFrog, 'equipo corporativo', 'sin descargas de red', mzegarra_ide) y a mini-timer (proyecto origen) de docs, workflows y comentarios de codigo. Borrar docs/hallazgos-athlete.md (obsoleto) y .windsurf/workflows/conectar-telefono.md (duplicado con refs a otro proyecto).
-
-### Rebrand
-
-- [ ] **TD-018** Renombrar repo de GitHub y actualizar URLs
-  - Renombrar repo en GitHub (si aplica). Actualizar URLs en build-release.ps1 (repo, tag, apkUrl), update.json, README.md. Verificar que el self-update apunta al repo correcto.
+- [ ] **TD-030** Mejorar arquitectura: extraer use-cases y Repository del AthleteViewModel
+  - AthleteViewModel.kt (751 lineas) es un god object que mezcla estado de UI, logica de negocio, acceso a Stores y coordinacion con el Service. El dominio (model/) ya esta aislado y testeado, pero la capa de presentacion no sigue clean architecture. Plan: (1) Introducir Repository pattern entre ViewModels y Stores (WorkoutRepository, SettingsRepository) para abstraer SharedPreferences. (2) Extraer use-cases del AthleteViewModel: seeding, restauracion del player, manejo de drafts, logica de sesiones. (3) Reducir AthleteViewModel a estado de UI + delegacion a use-cases. (4) Inyeccion manual por constructor (sin framework DI). (5) Tests de use-cases y Repository. Consideracion: para una app sin red ni DI framework, evaluar si el costo/valor justifica el refactor completo o si basta con extraer los use-cases mas grandes y dejar los Stores como estan. Decidir alcance antes de implementar.
 
 ### Testing
 
@@ -61,6 +56,7 @@ Progreso: **18 / 29** hechos, 11 pendientes.
 
 ### Fix
 
+- [x] **TD-031** Mover Clear history al TopAppBar de History
 - [x] **TD-027** Historial agrupado por workout con badge parcial/total
 - [x] **TD-026** Fix: WeekCalendar no se actualiza en vivo tras terminar training
 - [x] **TD-025** Fix: circulo indicador de WeekCalendar muy pequeno
@@ -77,12 +73,14 @@ Progreso: **18 / 29** hechos, 11 pendientes.
 
 - [x] **TD-029** Regla: TD es done solo cuando el usuario aprueba tras probar en dispositivo
 - [x] **TD-022** AGENTS.md como gatekeeper del harness
+- [x] **TD-020** Eliminar referencias a entorno corporativo y mini-timer
 - [x] **TD-007** Decidir sobre branding/icons.html sin trackear
 - [x] **TD-006** Limpieza de codigo muerto
 
 ### Rebrand
 
 - [x] **TD-019** Actualizar documentacion del rebrand
+- [x] **TD-018** Renombrar repo de GitHub y actualizar URLs
 - [x] **TD-017** Crear proyecto nuevo com.maurozegarra.master y migrar codigo
 
 ### Testing

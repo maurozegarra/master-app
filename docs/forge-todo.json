@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-031",
+      "title": "Mover Clear history al TopAppBar de History",
+      "category": "Fix",
+      "status": "done",
+      "manual": "Acciones destructivas en History sin proteccion adecuada. (1) Mover 'Clear history' del TextButton al pie al menu de 3 puntos (MoreVert) del TopAppBar en MainActivity.kt, visible solo cuando showingHistory. (2) Agregar AlertDialog de confirmacion al delete de sesion individual en HistoryScreen.kt (hoy no tiene). (3) Usar color error (MaterialTheme.colorScheme.error) para botones destructivos en vez del accent. Sacar el TextButton y el bloque confirmClear de HistoryScreen.kt. Plan: (1) MainActivity.kt actions: MoreVert + DropdownMenu con 'Clear history' cuando vm.showingHistory + AlertDialog con estado local. (2) HistoryScreen.kt: agregar confirmClear por sesion en SessionRow, sacar TextButton y confirmClear del scope de HistoryScreen. (3) Verificar compile + probar en dispositivo."
+    },
+    {
+      "id": "TD-030",
+      "title": "Mejorar arquitectura: extraer use-cases y Repository del AthleteViewModel",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "manual": "AthleteViewModel.kt (751 lineas) es un god object que mezcla estado de UI, logica de negocio, acceso a Stores y coordinacion con el Service. El dominio (model/) ya esta aislado y testeado, pero la capa de presentacion no sigue clean architecture. Plan: (1) Introducir Repository pattern entre ViewModels y Stores (WorkoutRepository, SettingsRepository) para abstraer SharedPreferences. (2) Extraer use-cases del AthleteViewModel: seeding, restauracion del player, manejo de drafts, logica de sesiones. (3) Reducir AthleteViewModel a estado de UI + delegacion a use-cases. (4) Inyeccion manual por constructor (sin framework DI). (5) Tests de use-cases y Repository. Consideracion: para una app sin red ni DI framework, evaluar si el costo/valor justifica el refactor completo o si basta con extraer los use-cases mas grandes y dejar los Stores como estan. Decidir alcance antes de implementar."
+    },
+    {
       "id": "TD-029",
       "title": "Regla: TD es done solo cuando el usuario aprueba tras probar en dispositivo",
       "category": "Mantenimiento",
@@ -68,7 +82,7 @@
       "id": "TD-020",
       "title": "Eliminar referencias a entorno corporativo y mini-timer",
       "category": "Mantenimiento",
-      "status": "pending",
+      "status": "done",
       "manual": "Eliminar todas las refs a entorno corporativo (CrowdStrike, Netskope, JFrog, 'equipo corporativo', 'sin descargas de red', mzegarra_ide) y a mini-timer (proyecto origen) de docs, workflows y comentarios de codigo. Borrar docs/hallazgos-athlete.md (obsoleto) y .windsurf/workflows/conectar-telefono.md (duplicado con refs a otro proyecto)."
     },
     {
@@ -82,7 +96,7 @@
       "id": "TD-018",
       "title": "Renombrar repo de GitHub y actualizar URLs",
       "category": "Rebrand",
-      "status": "pending",
+      "status": "done",
       "manual": "Renombrar repo en GitHub (si aplica). Actualizar URLs en build-release.ps1 (repo, tag, apkUrl), update.json, README.md. Verificar que el self-update apunta al repo correcto."
     },
     {
