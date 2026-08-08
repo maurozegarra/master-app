@@ -33,8 +33,8 @@
       "id": "TD-028",
       "title": "Skip por ejercicio en el player",
       "category": "Feature",
-      "status": "pending",
-      "manual": "Comando SKIP_EXERCISE que salta todos los pasos restantes del ejercicio actual al siguiente. Plan: (1) PlayerCommand.SKIP_EXERCISE en PlayerBus. (2) skipExercise() en WorkoutPlayerService: busca primer step con ownerExerciseId distinto o workoutIndex distinto, hace beginStep(nextIndex) o finishPlayer(). (3) AthleteViewModel.skipExercise(). (4) Boton Skip en PlayerScreen junto a Next/Prev. (5) Edge case rotacion: si se salta el ultimo ejercicio de un workout, NO marcar ese workout como completado (no rotar). Requiere ajustar markCompletedWorkouts o pasar flag. (6) Sesion: el ejercicio saltado no aparece en ExerciseRecord (igual que hoy). El badge Partial ya indica que faltan ejercicios. (7) Decision pendiente: saltar ultimo ejercicio del ultimo workout = COMPLETED o PARTIAL? (8) Tests: skipExercise con steps simulados, rotacion al saltar ultimo ejercicio. Complejidad: media. Archivos: ~5 codigo + 2 tests."
+      "status": "done",
+      "manual": "Skip simple (tap) registra set como skipped con valores planificados (reps/peso/duracion). Skip largo (long press) marca sets restantes del ejercicio como skipped. Historial siempre muestra todos los sets con badge 'skipped' en ambar por set. Controles rediseñados estilo YouTube con glassmorphism (boton principal 72dp, secundarios 48dp). Check centrado en modo reps con spacer balance. SetRecord.skipped + SessionRecorder.onWorkStepSkipped. Sets se keyean por setIndex para soportar go-back (completed reemplaza skipped). Restore tras muerte del proceso replaya sets skipped. Tests: 95/95."
     },
     {
       "id": "TD-027",

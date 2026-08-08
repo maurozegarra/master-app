@@ -4,14 +4,12 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **23 / 32** hechos, 9 pendientes.
+Progreso: **24 / 32** hechos, 8 pendientes.
 
 ## Pendientes
 
 ### Feature
 
-- [ ] **TD-028** Skip por ejercicio en el player
-  - Comando SKIP_EXERCISE que salta todos los pasos restantes del ejercicio actual al siguiente. Plan: (1) PlayerCommand.SKIP_EXERCISE en PlayerBus. (2) skipExercise() en WorkoutPlayerService: busca primer step con ownerExerciseId distinto o workoutIndex distinto, hace beginStep(nextIndex) o finishPlayer(). (3) AthleteViewModel.skipExercise(). (4) Boton Skip en PlayerScreen junto a Next/Prev. (5) Edge case rotacion: si se salta el ultimo ejercicio de un workout, NO marcar ese workout como completado (no rotar). Requiere ajustar markCompletedWorkouts o pasar flag. (6) Sesion: el ejercicio saltado no aparece en ExerciseRecord (igual que hoy). El badge Partial ya indica que faltan ejercicios. (7) Decision pendiente: saltar ultimo ejercicio del ultimo workout = COMPLETED o PARTIAL? (8) Tests: skipExercise con steps simulados, rotacion al saltar ultimo ejercicio. Complejidad: media. Archivos: ~5 codigo + 2 tests.
 - [ ] **TD-014** Keep-screen-on durante la corrida (opcional)
   - El player a pantalla completa podria beneficiarse de keep-screen-on
 - [ ] **TD-013** Accesibilidad (opcional)
@@ -47,6 +45,7 @@ Progreso: **23 / 32** hechos, 9 pendientes.
 
 ### Feature
 
+- [x] **TD-028** Skip por ejercicio en el player
 - [x] **TD-021** Historial por ejercicio + sesiones parciales
 
 ### Fix
