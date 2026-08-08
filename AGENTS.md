@@ -118,7 +118,9 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 ## Dispositivo de prueba
 
 - Samsung Galaxy S26 Ultra
-- Conexión ADB inalámbrica: `192.168.18.128:33201`
+- ADB inalámbrico vía mDNS: descubrir con `adb mdns services` y conectar con
+  `adb connect <host:puerto>` reportado ahí. El puerto cambia entre reinicios;
+  no hardcodear IP ni puerto.
 - Densidad: 450 dpi
 - Resolución: 1080x2340
 
