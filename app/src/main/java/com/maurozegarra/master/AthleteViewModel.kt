@@ -169,7 +169,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         customExercises.addAll(store.loadCustomExercises())
     }
 
-    // Athletic es English-only (decisión de producto): el idioma del catálogo y de
+    // MASTER es English-only (decisión de producto): el idioma del catálogo y de
     // los defaults es siempre inglés, sin depender de ajustes.
     private fun lang(): String = "en"
 

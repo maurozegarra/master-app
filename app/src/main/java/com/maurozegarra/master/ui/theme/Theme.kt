@@ -105,7 +105,7 @@ object AppTheme {
 }
 
 @Composable
-fun AthleticTheme(
+fun MasterTheme(
     accent: Long = DEFAULT_ACCENT,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,

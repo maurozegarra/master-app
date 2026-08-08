@@ -1,10 +1,10 @@
-# To-Do - Athletic
+# To-Do - MASTER
 
 > Generado automaticamente por `forge-status.ps1` desde `docs/forge-todo.json`.
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **16 / 29** hechos, 13 pendientes.
+Progreso: **18 / 29** hechos, 11 pendientes.
 
 ## Pendientes
 
@@ -37,12 +37,8 @@ Progreso: **16 / 29** hechos, 13 pendientes.
 
 ### Rebrand
 
-- [ ] **TD-019** Actualizar documentacion del rebrand
-  - Actualizar AGENTS.md (paquete, estructura, scripts), README.md, docs/athletic-forge.md, docs/hoja-de-ruta.md. Reemplazar 'Athletic' por 'MASTER' donde corresponda.
 - [ ] **TD-018** Renombrar repo de GitHub y actualizar URLs
   - Renombrar repo en GitHub (si aplica). Actualizar URLs en build-release.ps1 (repo, tag, apkUrl), update.json, README.md. Verificar que el self-update apunta al repo correcto.
-- [ ] **TD-017** Crear proyecto nuevo com.maurozegarra.master y migrar codigo
-  - Crear proyecto nuevo en C:\Users\MASTER\code\master con package com.maurozegarra.master. Migrar src, res, fonts, manifest, gradle, scripts, docs, branding. Ajustar imports, applicationId, namespace, scripts, URLs. Partir de cero en datos (no migrar SharedPreferences). Verificar compile + tests + dispositivo. Borrar athletic al final.
 
 ### Testing
 
@@ -83,6 +79,11 @@ Progreso: **16 / 29** hechos, 13 pendientes.
 - [x] **TD-022** AGENTS.md como gatekeeper del harness
 - [x] **TD-007** Decidir sobre branding/icons.html sin trackear
 - [x] **TD-006** Limpieza de codigo muerto
+
+### Rebrand
+
+- [x] **TD-019** Actualizar documentacion del rebrand
+- [x] **TD-017** Crear proyecto nuevo com.maurozegarra.master y migrar codigo
 
 ### Testing
 

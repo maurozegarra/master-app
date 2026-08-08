@@ -3,7 +3,7 @@ package com.maurozegarra.master.i18n
 import java.util.Locale
 
 /**
- * Cadenas de la app en INGLÉS (decisión de producto: Athletic es English-only).
+ * Cadenas de la app en INGLÉS (decisión de producto: MASTER es English-only).
  *
  * Se conservan solo las claves que usa la UI de Athlete (Training > Workout >
  * Exercise + player) y la pantalla de Ajustes.
@@ -135,7 +135,7 @@ data class Strings(
 )
 
 object I18n {
-    /** Athletic es English-only: siempre devuelve [EN]. */
+    /** MASTER es English-only: siempre devuelve [EN]. */
     fun get(): Strings = EN
 
     val EN = Strings(

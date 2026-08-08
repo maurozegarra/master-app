@@ -1,6 +1,6 @@
 package com.maurozegarra.master.model
 
-// Modelo de ajustes para Athletic: solo lo que usa el player y su alarma.
+// Modelo de ajustes para MASTER: solo lo que usa el player y su alarma.
 // La UI de Ajustes se completa en la Fase 5.
 
 /** Modo de tema de la app. */
@@ -24,7 +24,7 @@ data class AthleteConfig(
     val padPlayerClock: Boolean = false,
 )
 
-/** Configuración completa de Athletic: bloque general + player. */
+/** Configuración completa de MASTER: bloque general + player. */
 data class AppConfig(
     val general: GeneralConfig = GeneralConfig(),
     val athlete: AthleteConfig = AthleteConfig(),

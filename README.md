@@ -28,7 +28,7 @@ rutinas de entrenamiento con un player tipo timer con intervalos.
 ## Documentación
 
 - `AGENTS.md` — guía para asistentes de IA (stack, estructura, reglas, scripts)
-- `docs/athletic-forge.md` — sistema de verificación y to-do
+- `docs/master-forge.md` — sistema de verificación y to-do
 - `docs/forge-todo.json` — fuente de verdad del to-do
 - `to-do.md` — generado por `forge-status.ps1` (no editar directamente)
 - `.windsurf/workflows/` — workflows operativos (commit, build, diagnose, etc.)

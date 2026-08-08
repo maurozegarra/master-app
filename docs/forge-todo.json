@@ -1,5 +1,5 @@
 {
-  "_comment": "Fuente de verdad del to-do de Athletic. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
+  "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
       "id": "TD-029",
@@ -75,8 +75,8 @@
       "id": "TD-019",
       "title": "Actualizar documentacion del rebrand",
       "category": "Rebrand",
-      "status": "pending",
-      "manual": "Actualizar AGENTS.md (paquete, estructura, scripts), README.md, docs/athletic-forge.md, docs/hoja-de-ruta.md. Reemplazar 'Athletic' por 'MASTER' donde corresponda."
+      "status": "done",
+      "manual": "Actualizar AGENTS.md (paquete, estructura, scripts), README.md, docs/master-forge.md. Reemplazar 'Athletic' por 'MASTER' donde corresponda. Renombrar docs/athletic-forge.md -> docs/master-forge.md y actualizar refs en AGENTS.md y README.md."
     },
     {
       "id": "TD-018",
@@ -89,8 +89,8 @@
       "id": "TD-017",
       "title": "Crear proyecto nuevo com.maurozegarra.master y migrar codigo",
       "category": "Rebrand",
-      "status": "pending",
-      "manual": "Crear proyecto nuevo en C:\\Users\\MASTER\\code\\master con package com.maurozegarra.master. Migrar src, res, fonts, manifest, gradle, scripts, docs, branding. Ajustar imports, applicationId, namespace, scripts, URLs. Partir de cero en datos (no migrar SharedPreferences). Verificar compile + tests + dispositivo. Borrar athletic al final."
+      "status": "done",
+      "manual": "Crear proyecto nuevo en C:\\Users\\MASTER\\code\\master con package com.maurozegarra.master. Migrar src, res, fonts, manifest, gradle, scripts, docs, branding. Ajustar imports, applicationId, namespace, scripts, URLs. Partir de cero en datos (no migrar SharedPreferences). Verificar compile + tests + dispositivo. Borrar athletic al final. PENDIENTE: el commit 8373df6 migro package/namespace/imports pero dejo refs residuales a 'athletic' en codigo (AthleticTheme, AthleticApp, athletic-update.apk, athletic_workout_v1, 'Update Athletic', comentarios) — limpiar como parte de TD-017/019."
     },
     {
       "id": "TD-016",

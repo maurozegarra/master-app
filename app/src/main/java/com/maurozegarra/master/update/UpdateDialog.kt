@@ -55,7 +55,7 @@ fun UpdateBar(
 
     fun startDownload() {
         downloading = true
-        val file = File(context.cacheDir, "athletic-update.apk")
+        val file = File(context.cacheDir, "master-update.apk")
         apkFile = file
         Thread {
             try {
@@ -123,7 +123,7 @@ fun UpdateBar(
             Spacer(Modifier.width(10.dp))
 
             Text(
-                text = if (downloaded) "Tap to install" else "Update Athletic",
+                text = if (downloaded) "Tap to install" else "Update MASTER",
                 color = Color.White,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,

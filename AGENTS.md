@@ -8,7 +8,7 @@ Guía para asistentes de IA (Devin, Cascade, Copilot, etc.) que trabajen en este
 reporta el estado (N/M hechos, qué items siguen pendientes) antes de proponer
 trabajo. El to-do es la memoria del proyecto: úsalo para orientarte.
 
-**Lee `docs/athletic-forge.md` antes de hacer cualquier cambio rastreable.**
+**Lee `docs/master-forge.md` antes de hacer cualquier cambio rastreable.**
 El Forge es el sistema de verificación y to-do del proyecto. Define:
 
 - El workflow del agente (4 escenarios: feature, fix, mantenimiento, estado).
@@ -131,7 +131,7 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 
 ## Documentación
 
-- `docs/athletic-forge.md` — sistema de verificación y to-do (leer antes de cambiar).
+- `docs/master-forge.md` — sistema de verificación y to-do (leer antes de cambiar).
 - `docs/forge-todo.json` — fuente de verdad del to-do (no editar `to-do.md` directamente).
 - `docs/hoja-de-ruta.md` — historial del proyecto (Fases 0–8).
 - `.windsurf/workflows/` — workflows operativos genéricos (commit atómico, validación, convenciones, build).

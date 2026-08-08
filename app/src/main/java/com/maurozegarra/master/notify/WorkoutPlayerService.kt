@@ -364,13 +364,13 @@ class WorkoutPlayerService : Service() {
         getSystemService(NotificationManager::class.java).notify(NOTIF_ID, buildNotification())
     }
 
-    // Textos de notificación en inglés (Athletic es solo-EN; ver hoja de ruta).
+    // Textos de notificación en inglés (MASTER es solo-EN; ver hoja de ruta).
     private fun stepTitleText(step: PlayerStep?): String = when (step?.kind) {
         StepKind.PREP -> "Get ready"
         StepKind.REST -> "Rest"
         StepKind.COOLDOWN -> "Cooldown"
         StepKind.WORK -> step.title.ifBlank { "Exercise" }
-        null -> "Athletic"
+        null -> "MASTER"
     }
 
     private fun buildNotification(): Notification {
@@ -618,7 +618,7 @@ class WorkoutPlayerService : Service() {
     }
 
     companion object {
-        private const val CHANNEL_ID = "athletic_workout_v1"
+        private const val CHANNEL_ID = "master_workout_v1"
         private const val NOTIF_ID = 43
         private const val ACTION_START = "com.maurozegarra.master.player.START"
         private const val ACTION_PAUSE = "com.maurozegarra.master.player.PAUSE"

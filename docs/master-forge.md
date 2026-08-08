@@ -76,7 +76,7 @@ dispositivo, sin servicio real: se extrae la lógica testeable y se prueba pura.
    con `step == null` (fin de workout) sí suena `beep_work.ogg`.
 
 ### Cómo
-- Tests en `app/src/test/java/com/athletic/` (carpeta estándar de unit tests de
+- Tests en `app/src/test/java/com/maurozegarra/master/` (carpeta estándar de unit tests de
   Android, corre con `./gradlew test` o el Gradle cacheado).
 - Framework: JUnit 4 (ya viene con `androidx.test` en el setup de Compose) +
   assertions fluidas. Sin Robolectric ni instrumentación para la lógica pura.

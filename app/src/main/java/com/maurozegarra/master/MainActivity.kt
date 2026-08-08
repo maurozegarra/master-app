@@ -54,10 +54,10 @@ import com.maurozegarra.master.update.UpdateInfo
 import com.maurozegarra.master.ui.athlete.AthleteScreen
 import com.maurozegarra.master.ui.settings.SettingsScreen
 import com.maurozegarra.master.ui.theme.AppTheme
-import com.maurozegarra.master.ui.theme.AthleticTheme
+import com.maurozegarra.master.ui.theme.MasterTheme
 
 /**
- * Punto de entrada del app y shell de navegación de Athletic. La sección Athlete se
+ * Punto de entrada del app y shell de navegación de MASTER. La sección Athlete se
  * navega por estado del [AthleteViewModel] (no hay NavHost): [AthleteScreen] enruta a
  * la pantalla correcta y aquí se resuelve el "back" cerrando el nivel más profundo.
  */
@@ -78,9 +78,9 @@ class MainActivity : ComponentActivity() {
                 THEME_DARK -> true
                 else -> isSystemInDarkTheme()
             }
-            AthleticTheme(accent = cfg.general.accent, darkTheme = dark) {
+            MasterTheme(accent = cfg.general.accent, darkTheme = dark) {
                 Surface(color = AppTheme.colors.bg) {
-                    AthleticApp(settingsVm, pendingWorkoutId)
+                    MasterApp(settingsVm, pendingWorkoutId)
                 }
             }
         }
@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AthleticApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.compose.runtime.State<Long?>) {
+private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.compose.runtime.State<Long?>) {
     val vm: AthleteViewModel = viewModel()
     val t = I18n.EN
     val accent = AppTheme.colors.accent

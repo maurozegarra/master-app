@@ -7,7 +7,7 @@ import com.maurozegarra.master.model.GeneralConfig
 import org.json.JSONObject
 
 /**
- * Persistencia de ajustes de Athletic (general + player) con
+ * Persistencia de ajustes de MASTER (general + player) con
  * SharedPreferences + JSON.
  */
 class SettingsStore(context: Context) {
