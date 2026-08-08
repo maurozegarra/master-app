@@ -1,4 +1,4 @@
-package com.maurozegarra.master.ui.athlete
+package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

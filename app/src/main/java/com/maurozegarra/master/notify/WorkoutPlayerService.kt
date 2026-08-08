@@ -479,7 +479,7 @@ class WorkoutPlayerService : Service() {
 
     // ---------- Persistencia (restauración tras muerte del proceso) ----------
 
-    private fun prefs() = getSharedPreferences("athlete_player", Context.MODE_PRIVATE)
+    private fun prefs() = getSharedPreferences("master_restore", Context.MODE_PRIVATE)
 
     private fun persist() {
         lastPersistAt = System.currentTimeMillis()

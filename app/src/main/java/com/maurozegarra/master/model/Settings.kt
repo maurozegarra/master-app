@@ -18,8 +18,8 @@ data class GeneralConfig(
     val themeMode: Int = THEME_AUTO,
 )
 
-/** Ajustes específicos del player (pestaña Athlete). */
-data class AthleteConfig(
+/** Ajustes específicos del player. */
+data class MasterConfig(
     /** Reloj del player con ceros a la izquierda: "00:30" en vez de "30". */
     val padPlayerClock: Boolean = false,
 )
@@ -27,7 +27,7 @@ data class AthleteConfig(
 /** Configuración completa de MASTER: bloque general + player. */
 data class AppConfig(
     val general: GeneralConfig = GeneralConfig(),
-    val athlete: AthleteConfig = AthleteConfig(),
+    val masterConfig: MasterConfig = MasterConfig(),
 )
 
 /** Color de acento con etiqueta legible. */

@@ -1,4 +1,4 @@
-package com.maurozegarra.master.ui.athlete
+package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maurozegarra.master.AthleteViewModel
+import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ExerciseRecord
 import com.maurozegarra.master.model.SessionLog
@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @Composable
-fun ExerciseHistoryScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
+fun ExerciseHistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val exerciseId = vm.exerciseHistoryId ?: return
     val entries = remember(vm.sessions.toList(), exerciseId) {
         vm.sessionsForExercise(exerciseId)

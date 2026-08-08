@@ -57,14 +57,14 @@ import com.maurozegarra.master.ui.MasterWordmark
 import com.maurozegarra.master.update.UpdateChecker
 import com.maurozegarra.master.update.UpdateBar
 import com.maurozegarra.master.update.UpdateInfo
-import com.maurozegarra.master.ui.athlete.AthleteScreen
+import com.maurozegarra.master.ui.master.MasterScreen
 import com.maurozegarra.master.ui.settings.SettingsScreen
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.MasterTheme
 
 /**
- * Punto de entrada del app y shell de navegación de MASTER. La sección Athlete se
- * navega por estado del [AthleteViewModel] (no hay NavHost): [AthleteScreen] enruta a
+ * Punto de entrada del app y shell de navegación de MASTER. La sección principal se
+ * navega por estado del [MasterViewModel] (no hay NavHost): [MasterScreen] enruta a
  * la pantalla correcta y aquí se resuelve el "back" cerrando el nivel más profundo.
  */
 class MainActivity : ComponentActivity() {
@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.compose.runtime.State<Long?>) {
-    val vm: AthleteViewModel = viewModel()
+    val vm: MasterViewModel = viewModel()
     val t = I18n.EN
     val accent = AppTheme.colors.accent
 
@@ -144,7 +144,7 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
         }
     }
 
-    // Ajustes: pantalla propia por encima de la sección Athlete.
+    // Ajustes: pantalla propia por encima de la sección principal.
     if (showSettings) {
         BackHandler { showSettings = false }
         SettingsScaffold(title = t.settings, onBack = { showSettings = false }) {
@@ -168,7 +168,7 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
     // El player ocupa toda la pantalla (controles propios); el resto usa Scaffold con
     // barra superior y botón atrás contextual.
     if (inPlayer) {
-        AthleteScreen(vm, accent, t, ::startTraining)
+        MasterScreen(vm, accent, t, ::startTraining)
         return
     }
 
@@ -260,7 +260,7 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                         },
                     ),
             ) {
-                AthleteScreen(vm, accent, t, ::startTraining)
+                MasterScreen(vm, accent, t, ::startTraining)
             }
             updateInfo?.let { info ->
                 UpdateBar(
@@ -328,7 +328,7 @@ private fun SettingsScaffold(title: String, onBack: () -> Unit, content: @Compos
 }
 
 /** Título contextual según el nivel de navegación activo. */
-private fun titleFor(vm: AthleteViewModel, t: Strings): String = when {
+private fun titleFor(vm: MasterViewModel, t: Strings): String = when {
     vm.exerciseHistoryId != null -> t.exerciseHistory
     vm.showingHistory -> t.history
     vm.choosingExercise -> t.chooseExercise
@@ -338,8 +338,8 @@ private fun titleFor(vm: AthleteViewModel, t: Strings): String = when {
     else -> "MASTER"
 }
 
-/** Cierra el nivel de navegación más profundo (mismo orden que el router de AthleteScreen). */
-private fun goBack(vm: AthleteViewModel) {
+/** Cierra el nivel de navegación más profundo (mismo orden que el router de MasterScreen). */
+private fun goBack(vm: MasterViewModel) {
     when {
         vm.playerTrainingId != null -> vm.minimizePlayer()
         vm.exerciseHistoryId != null -> vm.closeExerciseHistory()

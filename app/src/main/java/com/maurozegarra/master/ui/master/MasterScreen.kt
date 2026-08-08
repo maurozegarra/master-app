@@ -1,4 +1,4 @@
-package com.maurozegarra.master.ui.athlete
+package com.maurozegarra.master.ui.master
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
@@ -50,7 +50,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maurozegarra.master.AthleteViewModel
+import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.Training
@@ -69,9 +69,9 @@ import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
-/** Router de la sección Athlete según el estado de navegación del ViewModel. */
+/** Router de la sección principal según el estado de navegación del ViewModel. */
 @Composable
-fun AthleteScreen(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit = { vm.startPlayerRun() }) {
+fun MasterScreen(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> Unit = { vm.startPlayerRun() }) {
     when {
         vm.playerTrainingId != null -> PlayerScreen(vm, accent, t, onStart)
         vm.exerciseHistoryId != null -> ExerciseHistoryScreen(vm, accent, t)
@@ -87,7 +87,7 @@ fun AthleteScreen(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -
 }
 
 @Composable
-private fun TrainingsList(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
+private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
     val zone = remember { ZoneId.systemDefault() }
     val today = remember { LocalDate.now() }
     val baseWeekStart = remember { today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }
@@ -379,7 +379,7 @@ private fun TrainingCard(
 }
 
 @Composable
-private fun MiniPlayer(vm: AthleteViewModel, accent: Color, modifier: Modifier = Modifier, onOpen: () -> Unit) {
+private fun MiniPlayer(vm: MasterViewModel, accent: Color, modifier: Modifier = Modifier, onOpen: () -> Unit) {
     val step = vm.playerStep ?: return
     Row(
         modifier = modifier

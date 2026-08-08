@@ -5,7 +5,7 @@ import java.util.Locale
 /**
  * Cadenas de la app en INGLÉS (decisión de producto: MASTER es English-only).
  *
- * Se conservan solo las claves que usa la UI de Athlete (Training > Workout >
+ * Se conservan solo las claves que usa la UI (Training > Workout >
  * Exercise + player) y la pantalla de Ajustes.
  */
 data class Strings(
@@ -41,7 +41,7 @@ data class Strings(
     val padPlayerClockDesc: String,
     val defaultSound: String,
     val previewTone: String,
-    // Athlete: listas y editores
+    // Listas y editores
     val savedHint: String,
     val createWorkout: String,
     val workoutNameHint: String,
@@ -118,7 +118,7 @@ data class Strings(
     val variantNameHint: String,
     val makeRotating: String,
     val makeSimple: String,
-    // Athlete: historial de sesiones
+    // Historial de sesiones
     val history: String,
     val historyEmpty: String,
     val historyEmptyHint: String,

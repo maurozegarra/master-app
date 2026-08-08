@@ -31,5 +31,5 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---------- Player ----------
     fun setPadPlayerClock(v: Boolean) =
-        update(config.copy(athlete = config.athlete.copy(padPlayerClock = v)))
+        update(config.copy(masterConfig = config.masterConfig.copy(padPlayerClock = v)))
 }

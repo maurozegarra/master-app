@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **22 / 31** hechos, 9 pendientes.
+Progreso: **23 / 32** hechos, 9 pendientes.
 
 ## Pendientes
 
@@ -27,7 +27,7 @@ Progreso: **22 / 31** hechos, 9 pendientes.
 
 ### Mantenimiento
 
-- [ ] **TD-030** Mejorar arquitectura: extraer use-cases y Repository del AthleteViewModel
+- [ ] **TD-030** Mejorar arquitectura: extraer use-cases y Repository del MasterViewModel
   - AthleteViewModel.kt (751 lineas) es un god object que mezcla estado de UI, logica de negocio, acceso a Stores y coordinacion con el Service. El dominio (model/) ya esta aislado y testeado, pero la capa de presentacion no sigue clean architecture. Plan: (1) Introducir Repository pattern entre ViewModels y Stores (WorkoutRepository, SettingsRepository) para abstraer SharedPreferences. (2) Extraer use-cases del AthleteViewModel: seeding, restauracion del player, manejo de drafts, logica de sesiones. (3) Reducir AthleteViewModel a estado de UI + delegacion a use-cases. (4) Inyeccion manual por constructor (sin framework DI). (5) Tests de use-cases y Repository. Consideracion: para una app sin red ni DI framework, evaluar si el costo/valor justifica el refactor completo o si basta con extraer los use-cases mas grandes y dejar los Stores como estan. Decidir alcance antes de implementar.
 
 ### Testing
@@ -75,6 +75,7 @@ Progreso: **22 / 31** hechos, 9 pendientes.
 
 ### Rebrand
 
+- [x] **TD-032** Rebrand residual: eliminar todas las referencias a Athlete
 - [x] **TD-019** Actualizar documentacion del rebrand
 - [x] **TD-018** Renombrar repo de GitHub y actualizar URLs
 - [x] **TD-017** Crear proyecto nuevo com.maurozegarra.master y migrar codigo

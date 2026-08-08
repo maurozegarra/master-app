@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-032",
+      "title": "Rebrand residual: eliminar todas las referencias a Athlete",
+      "category": "Rebrand",
+      "status": "done",
+      "manual": "Quedan 83 referencias a 'Athlete' en el codigo tras 3 iteraciones del TD-017. Categorias: (1) Clases/archivos: AthleteViewModel, AthleteScreen, AthleteComponents.kt, AthleteDefaults, AthleteConfig. (2) Paquete: ui/athlete/ (12 archivos). (3) SharedPreferences: 'athlete' (WorkoutStore) y 'athlete_player' (player restore) — requieren migracion para no perder datos del dispositivo. (4) Comentarios sueltos en Strings.kt, MainActivity.kt, WorkoutStore.kt. Plan: renombrar AthleteViewModel -> MasterViewModel, AthleteScreen -> MasterScreen, AthleteComponents -> MasterComponents, AthleteDefaults -> MasterDefaults, AthleteConfig -> PlayerConfig. Mover ui/athlete/ -> ui/master/. Migrar SharedPreferences: leer clave vieja 'athlete'/'athlete_player' y escribir en nueva clave 'master'/'player_restore' (o similar), luego usar solo la nueva. Sin firma ni co-author en commits."
+    },
+    {
       "id": "TD-031",
       "title": "Mover Clear history al TopAppBar de History",
       "category": "Fix",
@@ -10,7 +17,7 @@
     },
     {
       "id": "TD-030",
-      "title": "Mejorar arquitectura: extraer use-cases y Repository del AthleteViewModel",
+      "title": "Mejorar arquitectura: extraer use-cases y Repository del MasterViewModel",
       "category": "Mantenimiento",
       "status": "pending",
       "manual": "AthleteViewModel.kt (751 lineas) es un god object que mezcla estado de UI, logica de negocio, acceso a Stores y coordinacion con el Service. El dominio (model/) ya esta aislado y testeado, pero la capa de presentacion no sigue clean architecture. Plan: (1) Introducir Repository pattern entre ViewModels y Stores (WorkoutRepository, SettingsRepository) para abstraer SharedPreferences. (2) Extraer use-cases del AthleteViewModel: seeding, restauracion del player, manejo de drafts, logica de sesiones. (3) Reducir AthleteViewModel a estado de UI + delegacion a use-cases. (4) Inyeccion manual por constructor (sin framework DI). (5) Tests de use-cases y Repository. Consideracion: para una app sin red ni DI framework, evaluar si el costo/valor justifica el refactor completo o si basta con extraer los use-cases mas grandes y dejar los Stores como estan. Decidir alcance antes de implementar."

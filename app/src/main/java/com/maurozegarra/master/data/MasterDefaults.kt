@@ -9,11 +9,11 @@ import com.maurozegarra.master.model.Workout
 import com.maurozegarra.master.model.WorkoutVariant
 
 /**
- * Datos por defecto de la sección Athlete que se siembran en la primera ejecución.
+ * Datos por defecto que se siembran en la primera ejecución.
  * Incluye el Training "Master" con Warmup, Base, Cardio (rotación de 4 opciones)
  * y un bloque de fuerza que alterna Lower/Upper. La rotación avanza al completar.
  */
-object AthleteDefaults {
+object MasterDefaults {
 
     fun masterTraining(lang: String): Training {
         var seq = 1L

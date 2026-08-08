@@ -1,4 +1,4 @@
-package com.maurozegarra.master.ui.athlete
+package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maurozegarra.master.AthleteViewModel
+import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.WorkoutVariant
 import com.maurozegarra.master.ui.DraggableItem
@@ -47,7 +47,7 @@ import com.maurozegarra.master.ui.theme.AppTheme
 
 /** Editor de un workout rotativo: lista de variantes que se alternan al completar. */
 @Composable
-fun VariantListScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
+fun VariantListScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val workout = vm.editingWorkout() ?: return
     val listState = rememberLazyListState()
     // El campo de nombre es el item 0 (fijo); las variantes arrastrables empiezan en 1.

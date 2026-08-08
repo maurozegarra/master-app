@@ -1,4 +1,4 @@
-package com.maurozegarra.master.ui.athlete
+package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,15 +7,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,9 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maurozegarra.master.AthleteViewModel
+import com.maurozegarra.master.MasterViewModel
+import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.i18n.Strings
-import com.maurozegarra.master.model.Workout
+import com.maurozegarra.master.model.Exercise
+import com.maurozegarra.master.model.WorkMode
 import com.maurozegarra.master.ui.DraggableItem
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
@@ -46,12 +49,14 @@ import com.maurozegarra.master.ui.rememberDragDropState
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
-fun TrainingEditorScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
-    val draft = vm.draft ?: return
+fun WorkoutEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
+    vm.editingWorkout() ?: return
+    val inVariant = vm.editingVariantId != null
+    val exercises = vm.editorExercises()
     val listState = rememberLazyListState()
-    // El campo de nombre es el item 0 (fijo); los workouts arrastrables empiezan en 1.
+    // El campo de nombre es el item 0 (fijo); los ejercicios arrastrables empiezan en 1.
     val dragDropState = rememberDragDropState(listState) { from, to ->
-        vm.moveWorkout(from - 1, to - 1)
+        vm.moveExercise(from - 1, to - 1)
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -63,9 +68,9 @@ fun TrainingEditorScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
         ) {
             item {
                 OutlinedTextField(
-                    value = draft.name,
-                    onValueChange = { vm.setTrainingName(it) },
-                    placeholder = { Text(t.trainingNameHint, color = AppTheme.colors.textFaded) },
+                    value = vm.editorName(),
+                    onValueChange = { vm.setEditorName(it) },
+                    placeholder = { Text(if (inVariant) t.variantNameHint else t.workoutNameHint, color = AppTheme.colors.textFaded) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -79,89 +84,81 @@ fun TrainingEditorScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
             }
 
             itemsIndexed(
-                draft.workouts,
+                exercises,
                 key = { _, it -> it.id },
                 contentType = { _, _ -> ReorderableContentType },
-            ) { index, w ->
+            ) { index, ex ->
                 DraggableItem(dragDropState, index + 1) { _ ->
-                    WorkoutRow(
-                        workout = w,
+                    ExerciseRow(
+                        exercise = ex,
                         t = t,
-                        onOpen = { vm.openWorkout(w.id) },
-                        onDuplicate = { vm.duplicateWorkout(w.id) },
-                        onDelete = { vm.deleteWorkout(w.id) },
-                        onToggleRotating = {
-                            if (w.rotating) vm.makeWorkoutSimple(w.id) else vm.makeWorkoutRotating(w.id)
-                        },
+                        onOpen = { vm.openExercise(ex.id) },
+                        onDuplicate = { vm.duplicateExercise(ex.id) },
+                        onDelete = { vm.deleteExercise(ex.id) },
                     )
                 }
             }
 
             item {
-                AddButton(label = t.addWorkout, accent = accent, onClick = { vm.addWorkout() })
+                AddButton(label = t.addExercise, accent = accent, onClick = { vm.openExercisePicker() })
             }
         }
 
         PrimaryButton(
-            label = t.saveTraining,
+            label = t.save,
             accent = accent,
-            enabled = vm.canSaveTraining,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(16.dp),
-            onClick = { vm.saveTraining() },
+            onClick = { if (inVariant) vm.closeVariantEditor() else vm.closeWorkoutEditor() },
         )
     }
 }
 
+private fun workSummary(ex: Exercise, t: Strings): String {
+    val work = if (ex.workMode == WorkMode.TIME) fmtSec(ex.workValue) else "${ex.workValue} ${t.repsUnit}"
+    return "${ex.sets} × $work"
+}
+
 @Composable
-private fun WorkoutRow(
-    workout: Workout,
+private fun ExerciseRow(
+    exercise: Exercise,
     t: Strings,
     onOpen: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,
-    onToggleRotating: () -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
-    val subtitle = if (workout.rotating) {
-        workout.variants.joinToString(" / ") { it.name.ifBlank { t.variant } }
-            .ifBlank { "${workout.variants.size} ${t.variant}" }
-    } else {
-        "${workout.exercises.size} ${t.exercise}"
-    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(AppTheme.colors.surface)
             .clickable(onClick = onOpen)
-            .padding(16.dp),
+            .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val exLabel = ExerciseCatalog.display(exercise.exerciseId, exercise.name, t.locale.language)
+        ExerciseGlyph(name = exLabel, color = exercise.workCfg.color, exerciseId = exercise.exerciseId)
+        Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(
-                workout.name.ifBlank { t.workout },
+                exLabel.ifBlank { t.exercise },
                 color = AppTheme.colors.textPrimary,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
             )
-            Text(subtitle, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Text(workSummary(exercise, t), color = AppTheme.colors.textDim, fontSize = 13.sp)
         }
         Box {
             IconButton(onClick = { menu = true }) {
                 Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim)
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(
-                    text = { Text(if (workout.rotating) t.makeSimple else t.makeRotating) },
-                    onClick = { menu = false; onToggleRotating() },
-                )
                 DropdownMenuItem(text = { Text(t.duplicate) }, onClick = { menu = false; onDuplicate() })
                 DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
             }
         }
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = AppTheme.colors.textDim)
     }
 }

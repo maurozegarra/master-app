@@ -84,7 +84,7 @@ fun SettingsScreen(vm: SettingsViewModel, t: Strings) {
             SwitchRow(
                 label = t.padPlayerClock,
                 desc = t.padPlayerClockDesc,
-                checked = cfg.athlete.padPlayerClock,
+                checked = cfg.masterConfig.padPlayerClock,
                 accent = accent,
                 onCheckedChange = { vm.setPadPlayerClock(it) },
             )

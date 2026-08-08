@@ -1,4 +1,4 @@
-package com.maurozegarra.master.ui.athlete
+package com.maurozegarra.master.ui.master
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -58,7 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maurozegarra.master.AthleteViewModel
+import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.ui.AnimatedGlowBorder
@@ -76,7 +76,7 @@ import com.maurozegarra.master.util.formatRemaining
 import kotlinx.coroutines.delay
 
 @Composable
-fun PlayerScreen(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit = { vm.startPlayerRun() }) {
+fun PlayerScreen(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> Unit = { vm.startPlayerRun() }) {
     when {
         vm.playerFinished -> FinishedView(vm, accent, t)
         !vm.playerStarted -> PreviewView(vm, accent, t, onStart)
@@ -120,7 +120,7 @@ private fun buildPreviewGroups(steps: List<PlayerStep>): List<PreviewGroup> =
     }
 
 @Composable
-private fun PreviewView(vm: AthleteViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
+private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
     val steps = vm.playerSteps
     val groups = remember(steps) { buildPreviewGroups(steps) }
     val totalExercises = groups.sumOf { it.exercises.size }
@@ -333,7 +333,7 @@ private fun WorkoutProgressBar(step: PlayerStep, accent: Color, t: Strings) {
 }
 
 @Composable
-private fun RoutineProgressBar(vm: AthleteViewModel, accent: Color) {
+private fun RoutineProgressBar(vm: MasterViewModel, accent: Color) {
     val steps = vm.playerSteps
     if (steps.isEmpty()) return
     val idx = vm.playerIndex.coerceIn(0, steps.lastIndex)
@@ -399,7 +399,7 @@ private fun RoutineProgressBar(vm: AthleteViewModel, accent: Color) {
 }
 
 @Composable
-private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
+private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     val step = vm.playerStep ?: return
     val color = Color(step.colorArgb)
     val stageLabel = when (step.kind) {
@@ -514,7 +514,7 @@ private fun RunningView(vm: AthleteViewModel, accent: Color, t: Strings) {
 }
 
 @Composable
-private fun NextExerciseLabel(vm: AthleteViewModel, t: Strings) {
+private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
     val steps = vm.playerSteps
     if (steps.isEmpty()) return
     val idx = vm.playerIndex
@@ -575,7 +575,7 @@ private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean) {
 }
 
 @Composable
-private fun WeightFeedback(vm: AthleteViewModel, step: PlayerStep, accent: Color, t: Strings) {
+private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color, t: Strings) {
     val current = vm.weightFeedback[vm.feedbackKey(step.ownerExerciseId, step.workoutIndex)]?.third
     Column(
         Modifier
@@ -631,7 +631,7 @@ private fun FeedbackChip(label: String, active: Boolean, accent: Color, onClick:
 }
 
 @Composable
-private fun Controls(vm: AthleteViewModel, step: PlayerStep, accent: Color, t: Strings) {
+private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: Strings) {
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -666,7 +666,7 @@ private fun Controls(vm: AthleteViewModel, step: PlayerStep, accent: Color, t: S
 }
 
 @Composable
-private fun FinishedView(vm: AthleteViewModel, accent: Color, t: Strings) {
+private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
     val suggestions = vm.weightSuggestions()
     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
         LazyColumn(

@@ -1,4 +1,4 @@
-package com.maurozegarra.master.ui.athlete
+package com.maurozegarra.master.ui.master
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -58,7 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maurozegarra.master.AthleteViewModel
+import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.AlarmSound
 import com.maurozegarra.master.model.ConfirmMode
@@ -76,7 +76,7 @@ import com.maurozegarra.master.ui.SwitchRow
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
-fun ExerciseEditorScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
+fun ExerciseEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val initial = vm.editingExercise() ?: return
     var ex by remember(initial.id) { mutableStateOf(initial) }
     // Acordeon: una sola etapa abierta a la vez; null = todas colapsadas (por defecto).
@@ -150,7 +150,7 @@ private fun StageSection(
     onToggle: () -> Unit,
     accent: Color,
     t: Strings,
-    vm: AthleteViewModel,
+    vm: MasterViewModel,
     onChange: (Exercise) -> Unit,
 ) {
     val cfg = when (kind) {
@@ -424,7 +424,7 @@ private fun StageAdvanced(
     cfg: StageConfig,
     accent: Color,
     t: Strings,
-    vm: AthleteViewModel,
+    vm: MasterViewModel,
     onChange: (Exercise) -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
@@ -563,7 +563,7 @@ private fun BeepSoundRow(label: String, value: String, accent: Color, onClick: (
 
 @Composable
 private fun BeepSoundPickerDialog(
-    vm: AthleteViewModel,
+    vm: MasterViewModel,
     currentUri: String?,
     t: Strings,
     accent: Color,

@@ -18,13 +18,37 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Persistencia de la sección Athlete (workouts, ejercicios propios e historial)
+ * Persistencia de trainings, ejercicios propios e historial
  * con SharedPreferences + JSON.
  */
 class WorkoutStore(context: Context) {
 
-    private val prefs = context.applicationContext
-        .getSharedPreferences("athlete", Context.MODE_PRIVATE)
+    private val appCtx = context.applicationContext
+    private val prefs = appCtx
+        .getSharedPreferences("master", Context.MODE_PRIVATE)
+
+    init {
+        migrateFromLegacyKey()
+    }
+
+    private fun migrateFromLegacyKey() {
+        if (prefs.contains(KEY_TRAININGS)) return
+        val legacy = appCtx.getSharedPreferences("athlete", Context.MODE_PRIVATE)
+        val all = legacy.all
+        if (all.isEmpty()) return
+        prefs.edit().apply {
+            all.forEach { (k, v) ->
+                when (v) {
+                    is String -> putString(k, v)
+                    is Boolean -> putBoolean(k, v)
+                    is Int -> putInt(k, v)
+                    is Long -> putLong(k, v)
+                    is Float -> putFloat(k, v)
+                    is Set<*> -> @Suppress("UNCHECKED_CAST") putStringSet(k, v as Set<String>)
+                }
+            }
+        }.apply()
+    }
 
     // ---------- Trainings ----------
 

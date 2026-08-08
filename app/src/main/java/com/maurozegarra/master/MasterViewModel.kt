@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.maurozegarra.master.audio.AlarmPlayer
-import com.maurozegarra.master.data.AthleteDefaults
+import com.maurozegarra.master.data.MasterDefaults
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.data.SettingsStore
 import com.maurozegarra.master.data.WorkoutStore
@@ -32,11 +32,11 @@ import com.maurozegarra.master.notify.WorkoutPlayerService
 import kotlinx.coroutines.launch
 
 /**
- * Estado y lógica de la sección Athlete (jerarquía Training > Workout > Exercise).
+ * Estado y lógica principal de MASTER (jerarquía Training > Workout > Exercise).
  * Mantiene la lista de trainings persistida y un "draft" en edición que contiene
  * todo el árbol (workouts → exercises) hasta que se guarda.
  */
-class AthleteViewModel(app: Application) : AndroidViewModel(app) {
+class MasterViewModel(app: Application) : AndroidViewModel(app) {
 
     private val store = WorkoutStore(app)
     private val alarmPlayer = AlarmPlayer(app)
@@ -92,8 +92,8 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
         trainings.addAll(store.loadTrainings())
         customExercises.addAll(store.loadCustomExercises())
         if (firstRun && trainings.isEmpty()) {
-            trainings.add(AthleteDefaults.masterTraining(lang()))
-            trainings.add(AthleteDefaults.frikiNikiTraining(lang()))
+            trainings.add(MasterDefaults.masterTraining(lang()))
+            trainings.add(MasterDefaults.frikiNikiTraining(lang()))
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
             store.setMasterV3Seeded()
@@ -102,21 +102,21 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
             var changed = false
             if (!store.isFrikiSeeded()) {
                 val masterIdx = trainings.indexOfFirst { it.name == "Master" }
-                val friki = AthleteDefaults.frikiNikiTraining(lang())
+                val friki = MasterDefaults.frikiNikiTraining(lang())
                 if (masterIdx >= 0) trainings.add(masterIdx + 1, friki) else trainings.add(friki)
                 store.setFrikiSeeded()
                 changed = true
             }
             if (!store.isMasterV2Seeded()) {
                 val masterIdx = trainings.indexOfFirst { it.name == "Master" }
-                val master = AthleteDefaults.masterTraining(lang())
+                val master = MasterDefaults.masterTraining(lang())
                 if (masterIdx >= 0) trainings[masterIdx] = master else trainings.add(0, master)
                 store.setMasterV2Seeded()
                 changed = true
             }
             if (!store.isMasterV3Seeded()) {
                 val masterIdx = trainings.indexOfFirst { it.name == "Master" }
-                val master = AthleteDefaults.masterTraining(lang())
+                val master = MasterDefaults.masterTraining(lang())
                 if (masterIdx >= 0) trainings[masterIdx] = master else trainings.add(0, master)
                 store.setMasterV3Seeded()
                 changed = true
@@ -124,13 +124,34 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
             if (changed) persist()
         }
         observePlayer()
+        migrateRestorePrefs()
         restorePlayerState()
         refreshSessions()
     }
 
+    private fun migrateRestorePrefs() {
+        val app = getApplication<Application>()
+        val prefs = app.getSharedPreferences("master_restore", android.content.Context.MODE_PRIVATE)
+        if (prefs.contains("active")) return
+        val legacy = app.getSharedPreferences("athlete_player", android.content.Context.MODE_PRIVATE)
+        val all = legacy.all
+        if (all.isEmpty()) return
+        prefs.edit().apply {
+            all.forEach { (k, v) ->
+                when (v) {
+                    is String -> putString(k, v)
+                    is Boolean -> putBoolean(k, v)
+                    is Int -> putInt(k, v)
+                    is Long -> putLong(k, v)
+                    is Float -> putFloat(k, v)
+                }
+            }
+        }.apply()
+    }
+
     /** Reconecta la UI al player activo tras reabrir la app (estilo YouTube). */
     fun restorePlayerState() {
-        val prefs = getApplication<Application>().getSharedPreferences("athlete_player", android.content.Context.MODE_PRIVATE)
+        val prefs = getApplication<Application>().getSharedPreferences("master_restore", android.content.Context.MODE_PRIVATE)
         if (!prefs.getBoolean("active", false)) return
         val steps = WorkoutPlayerService.decodeSteps(prefs.getString("steps", "[]") ?: "[]")
         if (steps.isEmpty()) return
@@ -175,7 +196,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Preferencia de reloj del player: ceros a la izquierda ("00:30" vs "30"). */
     fun padPlayerClock(): Boolean =
-        SettingsStore(getApplication()).loadConfig().athlete.padPlayerClock
+        SettingsStore(getApplication()).loadConfig().masterConfig.padPlayerClock
 
     // ---------- Catálogo de ejercicios ----------
 
@@ -598,7 +619,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
     fun openPlayer(trainingId: Long) {
         // Si hay un player activo para este training, reconectar (estilo YouTube).
         val prefs = getApplication<Application>()
-            .getSharedPreferences("athlete_player", android.content.Context.MODE_PRIVATE)
+            .getSharedPreferences("master_restore", android.content.Context.MODE_PRIVATE)
         if (prefs.getBoolean("active", false) && prefs.getLong("workoutId", 0L) == trainingId) {
             restorePlayerState()
             return
@@ -658,7 +679,7 @@ class AthleteViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun refreshActivePlayerId() {
         val prefs = getApplication<Application>()
-            .getSharedPreferences("athlete_player", android.content.Context.MODE_PRIVATE)
+            .getSharedPreferences("master_restore", android.content.Context.MODE_PRIVATE)
         activePlayerTrainingId = if (prefs.getBoolean("active", false))
             prefs.getLong("workoutId", 0L).takeIf { it != 0L } else null
     }

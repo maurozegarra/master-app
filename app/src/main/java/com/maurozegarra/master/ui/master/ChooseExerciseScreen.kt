@@ -1,4 +1,4 @@
-package com.maurozegarra.master.ui.athlete
+package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,13 +34,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maurozegarra.master.AthleteViewModel
+import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ExerciseDef
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
-fun ChooseExerciseScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
+fun ChooseExerciseScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     var query by remember { mutableStateOf("") }
     val all = remember { vm.catalog() }
     val q = query.trim().lowercase()

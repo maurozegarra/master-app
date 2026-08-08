@@ -40,17 +40,17 @@ El Forge es el sistema de verificación y to-do del proyecto. Define:
 ```
 app/src/main/java/com/maurozegarra/master/
 ├── MainActivity.kt          # Entry point, Scaffold, navegación, update bar
-├── AthleteViewModel.kt      # ViewModel principal (estado, lógica de dominio)
+├── MasterViewModel.kt       # ViewModel principal (estado, lógica de dominio)
 ├── SettingsViewModel.kt     # ViewModel de Ajustes
 ├── PlayerBus.kt             # Bus de estado/comandos del player (Service ↔ UI)
 ├── model/                   # Modelos: Workout, PlayerStep, Settings, StepEngine
-├── data/                    # Persistencia: WorkoutStore, SettingsStore, AthleteDefaults
+├── data/                    # Persistencia: WorkoutStore, SettingsStore, MasterDefaults
 │                            #   ExerciseCatalog, ExerciseIcons
 ├── audio/                   # AlarmPlayer (beeps del player + previews)
 ├── notify/                  # WorkoutPlayerService (foreground service del player)
 ├── ui/
 │   ├── theme/               # AppTheme, colores, tipografía, Dimens
-│   ├── athlete/             # Pantallas: lista, editor, player, historial, calendar
+│   ├── master/              # Pantallas: lista, editor, player, historial, calendar
 │   ├── MasterWordmark.kt   # Wordmark "MASTER" (Wallpoet)
 │   ├── Reorderable.kt      # Drag-and-drop sin librerías
 │   ├── WheelTimePicker.kt  # Selector de tiempo tipo rueda
