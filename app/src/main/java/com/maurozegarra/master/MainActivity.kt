@@ -20,13 +20,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.History
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -101,6 +107,8 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
     val accent = AppTheme.colors.accent
 
     var showSettings by remember { mutableStateOf(false) }
+    var showClearMenu by remember { mutableStateOf(false) }
+    var showClearDialog by remember { mutableStateOf(false) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -210,6 +218,23 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                             )
                         }
                     }
+                    if (vm.showingHistory) {
+                        Box {
+                            IconButton(onClick = { showClearMenu = true }) {
+                                Icon(
+                                    Icons.Filled.MoreVert,
+                                    contentDescription = null,
+                                    tint = AppTheme.colors.textPrimary,
+                                )
+                            }
+                            DropdownMenu(expanded = showClearMenu, onDismissRequest = { showClearMenu = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(t.clearHistory) },
+                                    onClick = { showClearMenu = false; showClearDialog = true },
+                                )
+                            }
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = AppTheme.colors.bg,
@@ -246,6 +271,27 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                 )
             }
         }
+    }
+
+    if (showClearDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearDialog = false },
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.textPrimary,
+            textContentColor = AppTheme.colors.textDim,
+            title = { Text(t.clearHistory) },
+            text = { Text(t.clearHistoryConfirm) },
+            confirmButton = {
+                TextButton(onClick = { vm.clearHistory(); showClearDialog = false }) {
+                    Text(t.delete, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearDialog = false }) {
+                    Text(t.cancel, color = AppTheme.colors.textDim)
+                }
+            },
+        )
     }
 }
 

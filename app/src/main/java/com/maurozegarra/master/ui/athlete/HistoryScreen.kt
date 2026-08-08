@@ -28,6 +28,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -87,8 +88,6 @@ fun HistoryScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
             .sortedByDescending { it.first }
     }
 
-    var confirmClear by remember { mutableStateOf(false) }
-
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -125,34 +124,6 @@ fun HistoryScreen(vm: AthleteViewModel, accent: Color, t: Strings) {
                 }
             }
         }
-
-        TextButton(
-            onClick = { confirmClear = true },
-            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-        ) {
-            Text(t.clearHistory, color = accent, fontWeight = FontWeight.SemiBold)
-        }
-    }
-
-    if (confirmClear) {
-        AlertDialog(
-            onDismissRequest = { confirmClear = false },
-            containerColor = AppTheme.colors.surface,
-            titleContentColor = AppTheme.colors.textPrimary,
-            textContentColor = AppTheme.colors.textDim,
-            title = { Text(t.clearHistory) },
-            text = { Text(t.clearHistoryConfirm) },
-            confirmButton = {
-                TextButton(onClick = { vm.clearHistory(); confirmClear = false }) {
-                    Text(t.delete, color = accent, fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmClear = false }) {
-                    Text(t.cancel, color = AppTheme.colors.textDim)
-                }
-            },
-        )
     }
 }
 
@@ -167,6 +138,7 @@ private fun SessionRow(
 ) {
     var menu by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -219,7 +191,7 @@ private fun SessionRow(
                     Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim)
                 }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
+                    DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; confirmDelete = true })
                 }
             }
         }
@@ -247,6 +219,27 @@ private fun SessionRow(
                 }
             }
         }
+    }
+
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.textPrimary,
+            textContentColor = AppTheme.colors.textDim,
+            title = { Text(t.delete) },
+            text = { Text(t.deleteSessionConfirm) },
+            confirmButton = {
+                TextButton(onClick = { onDelete(); confirmDelete = false }) {
+                    Text(t.delete, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = false }) {
+                    Text(t.cancel, color = AppTheme.colors.textDim)
+                }
+            },
+        )
     }
 }
 
