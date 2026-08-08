@@ -16,10 +16,12 @@ object SessionJson {
             s.exercises.forEach { er ->
                 val setsArr = JSONArray()
                 er.sets.forEach { sr ->
-                    setsArr.put(JSONObject()
+                    val setObj = JSONObject()
                         .put("reps", sr.reps)
                         .put("weightKg", sr.weightKg)
-                        .put("durationSec", sr.durationSec))
+                        .put("durationSec", sr.durationSec)
+                    if (sr.skipped) setObj.put("skipped", true)
+                    setsArr.put(setObj)
                 }
                 val erObj = JSONObject()
                     .put("exerciseId", er.exerciseId)
@@ -31,6 +33,7 @@ object SessionJson {
                     .put("sets", setsArr)
                     .put("timeBased", er.timeBased)
                     .put("totalExercisesInWorkout", er.totalExercisesInWorkout)
+                    .put("exerciseStatus", er.status.name)
                 if (er.feedbackDeltaKg != null) erObj.put("feedbackDeltaKg", er.feedbackDeltaKg)
                 exercises.put(erObj)
             }
@@ -63,6 +66,7 @@ object SessionJson {
                                 reps = so.optInt("reps", 0),
                                 weightKg = so.optDouble("weightKg", 0.0),
                                 durationSec = so.optInt("durationSec", 0),
+                                skipped = so.optBoolean("skipped", false),
                             ))
                         }
                     }
@@ -78,6 +82,8 @@ object SessionJson {
                         totalExercisesInWorkout = eo.optInt("totalExercisesInWorkout", 0),
                         feedbackDeltaKg = if (eo.has("feedbackDeltaKg"))
                             eo.optDouble("feedbackDeltaKg", 0.0) else null,
+                        status = runCatching { ExerciseStatus.valueOf(eo.optString("exerciseStatus")) }
+                            .getOrDefault(ExerciseStatus.COMPLETED),
                     ))
                 }
             }

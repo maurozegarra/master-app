@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ExerciseRecord
+import com.maurozegarra.master.model.ExerciseStatus
 import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.ui.theme.AppTheme
@@ -252,9 +253,19 @@ private fun WorkoutGroupSection(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val workoutName = exercises.firstOrNull()?.workoutName?.ifBlank { t.workout } ?: t.workout
-    val allComplete = exercises.size == (exercises.firstOrNull()?.totalExercisesInWorkout ?: exercises.size) &&
+    val allSkipped = exercises.isNotEmpty() && exercises.all { it.status == ExerciseStatus.SKIPPED }
+    val allComplete = !allSkipped && exercises.size == (exercises.firstOrNull()?.totalExercisesInWorkout ?: exercises.size) &&
         exercises.all { it.setsCompleted == it.totalSets }
-    val badgeColor = if (allComplete) Color(0xFF4CAF50) else accent
+    val badgeColor = when {
+        allSkipped -> Color(0xFFFFA000)
+        allComplete -> Color(0xFF4CAF50)
+        else -> accent
+    }
+    val badgeText = when {
+        allSkipped -> t.skipped
+        allComplete -> t.complete
+        else -> t.partial
+    }
 
     Column(
         Modifier
@@ -287,7 +298,7 @@ private fun WorkoutGroupSection(
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
                 Text(
-                    if (allComplete) t.complete else t.partial,
+                    badgeText,
                     color = badgeColor,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
@@ -349,7 +360,25 @@ private fun ExerciseDetailRow(er: ExerciseRecord, accent: Color, t: Strings, onC
                 if (sr.weightKg > 0) "$setLabel  ·  ${sr.reps} ${t.repLabel}  ·  ${fmtKgHistory(sr.weightKg)} ${t.kg}"
                 else "$setLabel  ·  ${sr.reps} ${t.repLabel}"
             }
-            Text(detail, color = AppTheme.colors.textDim, fontSize = 12.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(detail, color = AppTheme.colors.textDim, fontSize = 12.sp)
+                if (sr.skipped) {
+                    Spacer(Modifier.width(6.dp))
+                    Box(
+                        Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0xFFFFA000).copy(alpha = 0.15f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            t.skipped,
+                            color = Color(0xFFFFA000),
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            }
         }
         if (er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {
             Spacer(Modifier.height(2.dp))

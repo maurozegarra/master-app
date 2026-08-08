@@ -157,7 +157,14 @@ data class SetRecord(
     val reps: Int = 0,
     val weightKg: Double = 0.0,
     val durationSec: Int = 0,
+    val skipped: Boolean = false,
 )
+
+enum class ExerciseStatus {
+    COMPLETED,
+    PARTIAL,
+    SKIPPED,
+}
 
 /** Registro de un ejercicio dentro de una sesión (series completadas). */
 data class ExerciseRecord(
@@ -171,6 +178,7 @@ data class ExerciseRecord(
     val timeBased: Boolean,
     val totalExercisesInWorkout: Int = 0,
     val feedbackDeltaKg: Double? = null,
+    val status: ExerciseStatus = ExerciseStatus.COMPLETED,
 )
 
 /** Registro de una sesión de entrenamiento (completa o parcial). */

@@ -97,6 +97,7 @@ class WorkoutPlayerService : Service() {
             ACTION_PAUSE -> pause()
             ACTION_RESUME -> resume()
             ACTION_NEXT -> advance()
+            ACTION_SKIP -> skipStep()
             ACTION_STOP -> stopPlayer()
             ACTION_RECONNECT -> {
                 if (steps.isEmpty()) { restore() }
@@ -114,6 +115,8 @@ class WorkoutPlayerService : Service() {
                     PlayerCommand.RESUME -> resume()
                     PlayerCommand.NEXT -> advance()
                     PlayerCommand.PREV -> goBack()
+                    PlayerCommand.SKIP_STEP -> skipStep()
+                    PlayerCommand.SKIP_EXERCISE -> skipExercise()
                     PlayerCommand.STOP -> stopPlayer()
                     is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.deltaKg)
                 }
@@ -177,6 +180,37 @@ class WorkoutPlayerService : Service() {
         val prev = index - 1
         if (prev < 0) return
         beginStep(prev)
+    }
+
+    private fun skipStep() {
+        if (finished) return
+        steps.getOrNull(index)?.let { if (it.kind == StepKind.WORK) recorder.onWorkStepSkipped(it) }
+        val next = index + 1
+        if (next >= steps.size) {
+            finishPlayer()
+        } else {
+            alarmCue(steps.getOrNull(next))
+            beginStep(next)
+        }
+    }
+
+    private fun skipExercise() {
+        if (finished) return
+        val current = steps.getOrNull(index) ?: return
+        val remainingWorkSteps = steps.filter {
+            it.ownerExerciseId == current.ownerExerciseId && it.workoutIndex == current.workoutIndex &&
+                it.kind == StepKind.WORK && it.setIndex >= current.setIndex
+        }
+        remainingWorkSteps.forEach { recorder.onWorkStepSkipped(it) }
+        val nextIndex = steps.indices.firstOrNull { i ->
+            i > index && (steps[i].ownerExerciseId != current.ownerExerciseId || steps[i].workoutIndex != current.workoutIndex)
+        }
+        if (nextIndex == null) {
+            finishPlayer()
+        } else {
+            alarmCue(steps.getOrNull(nextIndex))
+            beginStep(nextIndex)
+        }
     }
 
     private fun finishPlayer() {
@@ -414,7 +448,7 @@ class WorkoutPlayerService : Service() {
             } else {
                 builder.addAction(action(R.drawable.ic_notif_play, "Resume", ACTION_RESUME))
             }
-            builder.addAction(action(R.drawable.ic_notif_play, "Next", ACTION_NEXT))
+            builder.addAction(action(R.drawable.ic_notif_play, "Skip", ACTION_SKIP))
         }
         builder.addAction(action(R.drawable.ic_notif_close, "Close", ACTION_STOP))
 
@@ -522,25 +556,23 @@ class WorkoutPlayerService : Service() {
             recorder.clear()
             p.getString("recorderJson", null)?.let { rj ->
                 com.maurozegarra.master.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
-                    repeat(er.setsCompleted) { setIdx ->
-                        val sr = er.sets.getOrNull(setIdx)
-                        if (sr != null) recorder.onWorkStepCompleted(
-                            PlayerStep(
-                                kind = StepKind.WORK,
-                                title = er.name,
-                                ownerName = er.name,
-                                ownerExerciseId = er.exerciseId,
-                                workoutName = er.workoutName,
-                                workoutIndex = er.workoutIndex,
-                                setIndex = setIdx,
-                                totalSets = er.totalSets,
-                                reps = sr.reps,
-                                durationSec = sr.durationSec,
-                                timeBased = er.timeBased,
-                                weighted = sr.weightKg > 0,
-                                weightTotal = sr.weightKg,
-                            )
+                    er.sets.forEachIndexed { setIdx, sr ->
+                        val step = PlayerStep(
+                            kind = StepKind.WORK,
+                            title = er.name,
+                            ownerName = er.name,
+                            ownerExerciseId = er.exerciseId,
+                            workoutName = er.workoutName,
+                            workoutIndex = er.workoutIndex,
+                            setIndex = setIdx,
+                            totalSets = er.totalSets,
+                            reps = sr.reps,
+                            durationSec = sr.durationSec,
+                            timeBased = er.timeBased,
+                            weighted = sr.weightKg > 0,
+                            weightTotal = sr.weightKg,
                         )
+                        if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step)
                     }
                     if (er.feedbackDeltaKg != null) {
                         recorder.setFeedback(er.exerciseId, er.workoutIndex, er.feedbackDeltaKg)
@@ -570,25 +602,23 @@ class WorkoutPlayerService : Service() {
         recorder.clear()
         p.getString("recorderJson", null)?.let { rj ->
             com.maurozegarra.master.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
-                repeat(er.setsCompleted) { setIdx ->
-                    val sr = er.sets.getOrNull(setIdx)
-                    if (sr != null) recorder.onWorkStepCompleted(
-                        PlayerStep(
-                            kind = StepKind.WORK,
-                            title = er.name,
-                            ownerName = er.name,
-                            ownerExerciseId = er.exerciseId,
-                            workoutName = er.workoutName,
-                            workoutIndex = er.workoutIndex,
-                            setIndex = setIdx,
-                            totalSets = er.totalSets,
-                            reps = sr.reps,
-                            durationSec = sr.durationSec,
-                            timeBased = er.timeBased,
-                            weighted = sr.weightKg > 0,
-                            weightTotal = sr.weightKg,
-                        )
+                er.sets.forEachIndexed { setIdx, sr ->
+                    val step = PlayerStep(
+                        kind = StepKind.WORK,
+                        title = er.name,
+                        ownerName = er.name,
+                        ownerExerciseId = er.exerciseId,
+                        workoutName = er.workoutName,
+                        workoutIndex = er.workoutIndex,
+                        setIndex = setIdx,
+                        totalSets = er.totalSets,
+                        reps = sr.reps,
+                        durationSec = sr.durationSec,
+                        timeBased = er.timeBased,
+                        weighted = sr.weightKg > 0,
+                        weightTotal = sr.weightKg,
                     )
+                    if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step)
                 }
                 if (er.feedbackDeltaKg != null) {
                     recorder.setFeedback(er.exerciseId, er.workoutIndex, er.feedbackDeltaKg)
@@ -624,6 +654,7 @@ class WorkoutPlayerService : Service() {
         private const val ACTION_PAUSE = "com.maurozegarra.master.player.PAUSE"
         private const val ACTION_RESUME = "com.maurozegarra.master.player.RESUME"
         private const val ACTION_NEXT = "com.maurozegarra.master.player.NEXT"
+        private const val ACTION_SKIP = "com.maurozegarra.master.player.SKIP"
         private const val ACTION_STOP = "com.maurozegarra.master.player.STOP"
         private const val ACTION_RECONNECT = "com.maurozegarra.master.player.RECONNECT"
         private const val EXTRA_STEPS = "steps"

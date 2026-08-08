@@ -11,6 +11,8 @@ sealed class PlayerCommand {
     data object RESUME : PlayerCommand()
     data object NEXT : PlayerCommand()
     data object PREV : PlayerCommand()
+    data object SKIP_STEP : PlayerCommand()
+    data object SKIP_EXERCISE : PlayerCommand()
     data object STOP : PlayerCommand()
     data class FEEDBACK(val exerciseId: String, val workoutIndex: Int, val deltaKg: Double) : PlayerCommand()
 }

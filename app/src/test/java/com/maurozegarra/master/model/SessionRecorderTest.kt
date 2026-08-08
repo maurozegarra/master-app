@@ -1,7 +1,7 @@
 package com.maurozegarra.master.model
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -184,5 +184,104 @@ class SessionRecorderTest {
         r.onWorkStepCompleted(workStep(exerciseId = "squat", workoutIndex = 0))
         val records = r.build()
         assertEquals(0, records[0].totalExercisesInWorkout)
+    }
+
+    @Test
+    fun `completed exercise has COMPLETED status`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(setIndex = 0, totalSets = 3))
+        r.onWorkStepCompleted(workStep(setIndex = 1, totalSets = 3))
+        r.onWorkStepCompleted(workStep(setIndex = 2, totalSets = 3))
+        val records = r.build()
+        assertEquals(ExerciseStatus.COMPLETED, records[0].status)
+    }
+
+    @Test
+    fun `partially completed exercise has PARTIAL status`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(setIndex = 0, totalSets = 3))
+        val records = r.build()
+        assertEquals(ExerciseStatus.PARTIAL, records[0].status)
+    }
+
+    @Test
+    fun `skip single set records set as skipped with planned values`() {
+        val r = SessionRecorder()
+        r.onWorkStepSkipped(workStep(setIndex = 0, totalSets = 3, reps = 15, timeBased = false))
+        val er = r.build()[0]
+        assertEquals(0, er.setsCompleted)
+        assertEquals(1, er.sets.size)
+        assertTrue(er.sets[0].skipped)
+        assertEquals(15, er.sets[0].reps)
+    }
+
+    @Test
+    fun `skip all sets produces SKIPPED status`() {
+        val r = SessionRecorder()
+        r.onWorkStepSkipped(workStep(setIndex = 0, totalSets = 3))
+        r.onWorkStepSkipped(workStep(setIndex = 1, totalSets = 3))
+        r.onWorkStepSkipped(workStep(setIndex = 2, totalSets = 3))
+        val er = r.build()[0]
+        assertEquals(ExerciseStatus.SKIPPED, er.status)
+        assertEquals(0, er.setsCompleted)
+        assertEquals(3, er.sets.size)
+        assertTrue(er.sets.all { it.skipped })
+    }
+
+    @Test
+    fun `mixed completed and skipped sets produces PARTIAL status`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(setIndex = 0, totalSets = 3))
+        r.onWorkStepSkipped(workStep(setIndex = 1, totalSets = 3))
+        r.onWorkStepCompleted(workStep(setIndex = 2, totalSets = 3))
+        val er = r.build()[0]
+        assertEquals(ExerciseStatus.PARTIAL, er.status)
+        assertEquals(2, er.setsCompleted)
+        assertEquals(3, er.sets.size)
+        assertFalse(er.sets[0].skipped)
+        assertTrue(er.sets[1].skipped)
+        assertFalse(er.sets[2].skipped)
+    }
+
+    @Test
+    fun `go-back after skip replaces skipped set with completed`() {
+        val r = SessionRecorder()
+        r.onWorkStepSkipped(workStep(setIndex = 1, totalSets = 3))
+        r.onWorkStepCompleted(workStep(setIndex = 1, totalSets = 3))
+        val er = r.build()[0]
+        assertEquals(1, er.setsCompleted)
+        assertEquals(1, er.sets.size)
+        assertFalse(er.sets[0].skipped)
+    }
+
+    @Test
+    fun `skip remaining sets after some completed produces PARTIAL`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(setIndex = 0, totalSets = 3))
+        r.onWorkStepSkipped(workStep(setIndex = 1, totalSets = 3))
+        r.onWorkStepSkipped(workStep(setIndex = 2, totalSets = 3))
+        val er = r.build()[0]
+        assertEquals(ExerciseStatus.PARTIAL, er.status)
+        assertEquals(1, er.setsCompleted)
+        assertEquals(3, er.sets.size)
+        assertFalse(er.sets[0].skipped)
+        assertTrue(er.sets[1].skipped)
+        assertTrue(er.sets[2].skipped)
+    }
+
+    @Test
+    fun `skip on non-work step is ignored`() {
+        val r = SessionRecorder()
+        r.onWorkStepSkipped(workStep().copy(kind = StepKind.REST))
+        assertTrue(r.isEmpty())
+    }
+
+    @Test
+    fun `clear resets all state`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(setIndex = 0, totalSets = 3))
+        r.onWorkStepSkipped(workStep(setIndex = 1, totalSets = 3))
+        r.clear()
+        assertTrue(r.isEmpty())
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -30,19 +31,29 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Pause
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.SkipNext
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -410,14 +421,6 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     }
 
 
-    // Auto-oculta el OSD tras 4 s; se re-arma con cada interacción (osdNonce).
-    LaunchedEffect(vm.playerControlsVisible, vm.osdNonce) {
-        if (vm.playerControlsVisible) {
-            delay(4000)
-            vm.hidePlayerControls()
-        }
-    }
-
     val padClock = remember { vm.padPlayerClock() }
     // Color de fase completo, oscurecido 12% para legibilidad del texto blanco.
     val bg = lerp(color, Color.Black, 0.12f)
@@ -435,7 +438,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                     onDragEnd = {
                         if (accumulated < -200f) {
                             vm.showPlayerControls()
-                            vm.nextStep()
+                            vm.checkStep()
                         } else if (accumulated > 200f) {
                             vm.showPlayerControls()
                             vm.prevStep()
@@ -487,7 +490,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(20.dp))
         Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
             if (step.kind == StepKind.WORK && !step.timeBased) {
                 RepsDisplay(step, repByRep, t)
@@ -495,17 +498,17 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                 ClockDisplay(step, vm.playerRemainingMs, padClock)
             }
         }
+        Spacer(Modifier.height(16.dp))
 
-        AnimatedVisibility(visible = vm.playerControlsVisible && step.weighted) {
+        if (step.weighted) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 WeightFeedback(vm, step, accent, t)
                 Spacer(Modifier.height(12.dp))
             }
         }
 
-        AnimatedVisibility(visible = vm.playerControlsVisible) {
-            Controls(vm, step, accent, t)
-        }
+        Controls(vm, step, accent, t)
+        Spacer(Modifier.height(8.dp))
         NextExerciseLabel(vm, t)
         Spacer(Modifier.height(8.dp))
     }
@@ -632,35 +635,98 @@ private fun FeedbackChip(label: String, active: Boolean, accent: Color, onClick:
 
 @Composable
 private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: Strings) {
+    var showSkipDialog by remember { mutableStateOf(false) }
+
     Row(
         Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        GlassButton(
+            icon = Icons.Outlined.SkipNext,
+            contentDescription = t.skip,
+            size = 48.dp,
+            iconSize = 24.dp,
+            onClick = { vm.showPlayerControls(); vm.skipStep() },
+            onLongClick = { vm.showPlayerControls(); showSkipDialog = true },
+        )
         if (!step.manual) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(SURFACE)
-                    .clickable {
-                        vm.showPlayerControls()
-                        if (vm.playerRunning) vm.pausePlayer() else vm.resumePlayer()
-                    },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    if (vm.playerRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    contentDescription = null,
-                    tint = Color.White,
-                )
-            }
+            GlassButton(
+                icon = if (vm.playerRunning) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
+                contentDescription = if (vm.playerRunning) t.pause else t.resume,
+                size = 72.dp,
+                iconSize = 36.dp,
+                onClick = {
+                    vm.showPlayerControls()
+                    if (vm.playerRunning) vm.pausePlayer() else vm.resumePlayer()
+                },
+            )
+            GlassButton(
+                icon = Icons.Outlined.Check,
+                contentDescription = t.check,
+                size = 48.dp,
+                iconSize = 24.dp,
+                onClick = { vm.showPlayerControls(); vm.checkStep() },
+            )
+        } else {
+            GlassButton(
+                icon = Icons.Outlined.Check,
+                contentDescription = t.check,
+                size = 72.dp,
+                iconSize = 36.dp,
+                onClick = { vm.showPlayerControls(); vm.checkStep() },
+            )
+            Spacer(Modifier.size(48.dp))
         }
-        PrimaryButton(
-            label = if (step.manual) t.doneLabel else t.nextLabel,
-            accent = accent,
-            modifier = Modifier.weight(1f),
-            onClick = { vm.showPlayerControls(); vm.nextStep() },
+    }
+
+    if (showSkipDialog) {
+        val exerciseName = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
+        AlertDialog(
+            onDismissRequest = { showSkipDialog = false },
+            title = { Text(t.skipExercise) },
+            text = { Text(t.skipExerciseConfirm(exerciseName)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSkipDialog = false
+                    vm.skipExercise()
+                }) { Text(t.skip) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSkipDialog = false }) { Text(t.cancel) }
+            },
+        )
+    }
+}
+
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+private fun GlassButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    size: androidx.compose.ui.unit.Dp = 56.dp,
+    iconSize: androidx.compose.ui.unit.Dp = 28.dp,
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.15f))
+            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)), CircleShape)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            icon,
+            contentDescription = contentDescription,
+            tint = Color.White,
+            modifier = Modifier.size(iconSize),
         )
     }
 }

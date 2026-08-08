@@ -653,7 +653,9 @@ class MasterViewModel(app: Application) : AndroidViewModel(app) {
 
     fun pausePlayer() = PlayerBus.command.tryEmit(PlayerCommand.PAUSE)
     fun resumePlayer() = PlayerBus.command.tryEmit(PlayerCommand.RESUME)
-    fun nextStep() = PlayerBus.command.tryEmit(PlayerCommand.NEXT)
+    fun checkStep() = PlayerBus.command.tryEmit(PlayerCommand.NEXT)
+    fun skipStep() = PlayerBus.command.tryEmit(PlayerCommand.SKIP_STEP)
+    fun skipExercise() = PlayerBus.command.tryEmit(PlayerCommand.SKIP_EXERCISE)
     fun prevStep() = PlayerBus.command.tryEmit(PlayerCommand.PREV)
     fun sendFeedback(exerciseId: String, workoutIndex: Int, deltaKg: Double) =
         PlayerBus.command.tryEmit(PlayerCommand.FEEDBACK(exerciseId, workoutIndex, deltaKg))
