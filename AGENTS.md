@@ -105,6 +105,10 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 ## Reglas de oro
 
 - **No implementar sin autorización explícita del usuario.** Registrar el TD, mostrar qué se va a hacer y esperar confirmación antes de tocar código.
+- **Checklist pre-fix (antes de proponer cualquier cambio):**
+  1. **¿Estoy parcheando el síntoma o arreglando la causa?** — Investigar el flujo completo antes de tocar código. No asumir que el primer punto de falla es la causa.
+  2. **¿Qué casos no estoy viendo?** — Listar edge cases: go-back, cierre abrupto, REST/PREP/COOLDOWN steps, ejercicios de 1 set, rotating workouts, timer vs reps. Si no los veo, preguntarle al usuario.
+  3. **¿Necesito más información antes de tocar código?** — Si no se entiende el flujo completo, agregar logging de diagnóstico y probar en dispositivo antes de proponer fix. No parchar a ciegas.
 - **No hacer commit sin autorización explícita del usuario.**
 - **Nada se declara done sin `.\verify-compile.ps1` verde** (tests + compila release). Aplica a cualquier item que toque código.
 - **Un TD es `done` cuando el usuario lo aprueba tras probar en el dispositivo**, no cuando compila. Mientras esté `pending`, los ajustes (fixes y refinements de forma) son parte del mismo TD. Cambios posteriores a la aprobación = nuevo TD.
