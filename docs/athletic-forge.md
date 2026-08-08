@@ -1,15 +1,15 @@
-# Athletic Forge
+# MASTER Forge
 
 > De vibe coding a production-ready, un arnés a la vez.
 
-Athletic nació como vibe coding: funciona, se publica, pero nada lo verifica
+MASTER nació como vibe coding: funciona, se publica, pero nada lo verifica
 automáticamente. **Forge** es el sistema para llevarlo a production-ready sin
 reescrituras, agregando capas de verificación en orden de valor y conectando
 el estado real del código con el to-do.
 
 ---
 
-## Diagnóstico — dónde está Athletic hoy
+## Diagnóstico — dónde está MASTER hoy
 
 **Nivel 0 — vibe coding estructurado.**
 

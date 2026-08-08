@@ -92,7 +92,7 @@ $pending = $derived | Where-Object { $_.state -eq 'pending' }
 $categories = ($derived | Select-Object -ExpandProperty category -Unique) | Sort-Object
 
 $lines = @()
-$lines += "# To-Do - Athletic"
+$lines += "# To-Do - MASTER"
 $lines += ""
 $lines += "> Generado automaticamente por ``forge-status.ps1`` desde ``docs/forge-todo.json``."
 $lines += "> No editar directamente; actualizar el JSON y regenerar con ``.\forge-status.ps1``."

@@ -139,12 +139,12 @@ fun BrandWordmark(accent: Color, height: Dp = 28.dp) {
 }
 ```
 
-## Referencia: proyecto Athletic
+## Referencia: proyecto MASTER
 
 - **Fuente origen**: `branding/wordmark/wallpoet_regular.ttf` (Wallpoet, unitsPerEm=1000, cap=575)
-- **Script**: `branding/wordmark/tools/build_athletic_font.py`
-- **Fuente generada**: `wallpoet_athletic.ttf` (E=M rotada ccw, I=barra `\`, S=puenteadas, espaciado normalizado 90/90)
-- **Composable**: `app/src/main/java/com/athletic/ui/MasterWordmark.kt`
+- **Script**: `branding/wordmark/tools/build_master_font.py`
+- **Fuente generada**: `wallpoet_master.ttf` (E=M rotada ccw, I=barra `\`, S=puenteadas, espaciado normalizado 90/90)
+- **Composable**: `app/src/main/java/com/maurozegarra/master/ui/MasterWordmark.kt`
 - **Tamaño en TopAppBar**: 28.dp de altura (~243.dp de ancho)
 
 ## Checklist

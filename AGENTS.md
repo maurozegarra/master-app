@@ -19,9 +19,9 @@ El Forge es el sistema de verificación y to-do del proyecto. Define:
 
 ## Proyecto
 
-**Athletic** — App Android (Kotlin + Jetpack Compose, Material 3) para crear y ejecutar rutinas de entrenamiento con un player tipo timer con intervalos.
+**MASTER** — App Android (Kotlin + Jetpack Compose, Material 3) para crear y ejecutar rutinas de entrenamiento con un player tipo timer con intervalos.
 
-- Paquete: `com.athletic`
+- Paquete: `com.maurozegarra.master`
 - Dominio: `Training` > `Workout` > `Exercise` (los workouts pueden ser rotativos)
 - Idioma: solo inglés
 - Mínimo SDK: 26 (Android 8.0)
@@ -38,7 +38,7 @@ El Forge es el sistema de verificación y to-do del proyecto. Define:
 ## Estructura del repo
 
 ```
-app/src/main/java/com/athletic/
+app/src/main/java/com/maurozegarra/master/
 ├── MainActivity.kt          # Entry point, Scaffold, navegación, update bar
 ├── AthleteViewModel.kt      # ViewModel principal (estado, lógica de dominio)
 ├── SettingsViewModel.kt     # ViewModel de Ajustes
@@ -60,7 +60,7 @@ app/src/main/java/com/athletic/
 ├── i18n/                    # Strings (solo EN)
 └── util/                    # Format.kt
 
-app/src/test/java/com/athletic/model/
+app/src/test/java/com/maurozegarra/master/model/
 ├── StepEngineTest.kt        # Tests de generación de pasos
 ├── WorkoutTest.kt           # Tests de dominio (rotación, pesos, hasContent)
 ├── PlayerStepTest.kt        # Tests de propiedades computadas (manual, estimatedSec)
@@ -112,6 +112,7 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 - **Cada cambio de comportamiento va con test.** Si tocas el motor, agregas o actualizas el test correspondiente.
 - **Commits referencian el to-do**: `feat: TD-NNN ...`, `fix: TD-NNN ...`, `chore: TD-NNN ...`.
 - **Commits atómicos**: un commit = un cambio lógico (ver `.windsurf/workflows/commit.md`).
+- **Sin firma ni co-author en commits.** NUNCA incluir "Generated with Devin", "Co-Authored-By: Devin", ni ninguna variante. El commit es del usuario, no del asistente.
 - **No se borra un test para que pase el build.** Si un test falla, se arregla el código o se cambia el test con justificación explícita.
 
 ## Dispositivo de prueba

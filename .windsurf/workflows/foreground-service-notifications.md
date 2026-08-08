@@ -16,7 +16,7 @@ En Android 13+ (API 33+), el permiso `POST_NOTIFICATIONS` es runtime y debe ser 
 
 Verificado con:
 ```
-adb shell dumpsys notification | grep athletic
+adb shell dumpsys notification | grep master
 # Resultado: numEnqueuedByApp=3432, numPostedByApp=0, numBlocked=3432
 ```
 

@@ -4,17 +4,17 @@ plugins {
 }
 
 android {
-    namespace = "com.athletic"
+    namespace = "com.maurozegarra.master"
     compileSdk = 36
     compileSdkMinor = 1
 
     defaultConfig {
-        applicationId = "com.athletic"
+        applicationId = "com.maurozegarra.master"
         minSdk = 26
         targetSdk = 36
         // Versionado: +1 por cada APK generado. Primer APK: 1.0.1 (Fase 7).
-        versionCode = 127
-        versionName = "1.0.127"
+        versionCode = 128
+        versionName = "1.0.128"
     }
 
     buildTypes {

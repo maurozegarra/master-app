@@ -17,7 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Athletic"
+        android:theme="@style/Theme.Master"
         tools:targetApi="31">
 
         <activity
@@ -25,7 +25,7 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:configChanges="orientation|screenSize|keyboardHidden"
-            android:theme="@style/Theme.Athletic">
+            android:theme="@style/Theme.Master">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

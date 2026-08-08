@@ -34,10 +34,10 @@ if (-not (Test-Path $apkSrc)) { throw "No se encontro el APK generado: $apkSrc" 
 # Copia a releases/
 $releasesDir = Join-Path $PSScriptRoot 'releases'
 if (-not (Test-Path $releasesDir)) { New-Item -ItemType Directory -Path $releasesDir | Out-Null }
-Remove-Item (Join-Path $releasesDir 'athletic-*.apk') -ErrorAction SilentlyContinue
-$apkDst = Join-Path $releasesDir "athletic-$newVersionName.apk"
+Remove-Item (Join-Path $releasesDir 'master-*.apk') -ErrorAction SilentlyContinue
+$apkDst = Join-Path $releasesDir "master-$newVersionName.apk"
 Copy-Item $apkSrc $apkDst -Force
-Write-Host "OK -> releases\athletic-$newVersionName.apk"
+Write-Host "OK -> releases\master-$newVersionName.apk"
 
 # Instalar en el device
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
@@ -48,15 +48,15 @@ if ($deviceLine) {
     & $adb -s $deviceLine install -r $apkSrc
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Install failed, trying uninstall + install..."
-        & $adb -s $deviceLine uninstall com.athletic
+        & $adb -s $deviceLine uninstall com.maurozegarra.master
         & $adb -s $deviceLine install $apkSrc
     }
-    & $adb -s $deviceLine shell am force-stop com.athletic
-    & $adb -s $deviceLine shell am start -n com.athletic/.MainActivity
+    & $adb -s $deviceLine shell am force-stop com.maurozegarra.master
+    & $adb -s $deviceLine shell am start -n com.maurozegarra.master/.MainActivity
 
     # Copiar APK a la carpeta Download del telefono
-    & $adb -s $deviceLine push $apkSrc /sdcard/Download/athletic-$newVersionName.apk
-    Write-Host "OK -> Copied to Download/athletic-$newVersionName.apk on device"
+    & $adb -s $deviceLine push $apkSrc /sdcard/Download/master-$newVersionName.apk
+    Write-Host "OK -> Copied to Download/master-$newVersionName.apk on device"
 
     Write-Host "OK -> Installed and launched on $deviceLine"
 } else {

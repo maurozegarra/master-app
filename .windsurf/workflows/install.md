@@ -30,5 +30,5 @@ $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 $dev = (& $adb devices | Select-String "device$")[0].ToString().Split()[0]
 $apk = Get-ChildItem .\app\build\outputs\apk\release\*.apk | Select-Object -First 1
 & $adb -s $dev install -r $apk.FullName
-& $adb -s $dev shell am start -n com.athletic/.MainActivity
+& $adb -s $dev shell am start -n com.maurozegarra.master/.MainActivity
 ```

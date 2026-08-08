@@ -1,6 +1,6 @@
 # Corre los unit tests del proyecto. Falla el script si algun test falla.
 # Usado por build-debug.ps1, build-release.ps1 y verify-compile.ps1 como puerta
-# de verificacion antes de compilar (Capa 2 del Athletic Forge).
+# de verificacion antes de compilar (Capa 2 del MASTER Forge).
 
 $ErrorActionPreference = 'Stop'
 

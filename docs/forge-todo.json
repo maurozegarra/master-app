@@ -184,21 +184,21 @@
       "title": "Tests de dominio (Workout, PlayerStep)",
       "category": "Forge",
       "status": "auto",
-      "test": ["com.athletic.model.WorkoutTest", "com.athletic.model.PlayerStepTest"]
+      "test": ["com.maurozegarra.master.model.WorkoutTest", "com.maurozegarra.master.model.PlayerStepTest"]
     },
     {
       "id": "TD-002",
       "title": "Tests de rotacion idempotente",
       "category": "Forge",
       "status": "auto",
-      "test": ["com.athletic.model.RotationTest"]
+      "test": ["com.maurozegarra.master.model.RotationTest"]
     },
     {
       "id": "TD-001",
       "title": "Tests del motor de pasos (StepEngine)",
       "category": "Forge",
       "status": "auto",
-      "test": ["com.athletic.model.StepEngineTest"]
+      "test": ["com.maurozegarra.master.model.StepEngineTest"]
     }
   ]
 }

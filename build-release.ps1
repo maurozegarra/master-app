@@ -36,15 +36,15 @@ $releasesDir = Join-Path $PSScriptRoot 'releases'
 if (-not (Test-Path $releasesDir)) { New-Item -ItemType Directory -Path $releasesDir | Out-Null }
 Remove-Item (Join-Path $releasesDir '*.apk') -ErrorAction SilentlyContinue
 
-$apkDst = Join-Path $releasesDir "athletic-$versionName.apk"
+$apkDst = Join-Path $releasesDir "master-$versionName.apk"
 Copy-Item $apkSrc $apkDst -Force
 
 Write-Host ""
-Write-Host "OK -> releases\athletic-$versionName.apk"
+Write-Host "OK -> releases\master-$versionName.apk"
 
 # Generar update.json para el mecanismo de auto-update (GitHub raw).
 $updateJson = Join-Path $PSScriptRoot 'update.json'
-$apkUrl = "https://github.com/maurozegarra/master-app/releases/download/v$versionName/athletic-$versionName.apk"
+$apkUrl = "https://github.com/maurozegarra/master-app/releases/download/v$versionName/master-$versionName.apk"
 $json = @{
     versionCode = $versionCode
     versionName = $versionName

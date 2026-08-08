@@ -56,7 +56,7 @@ Lineamientos y hallazgos que aplican de forma transversal a los proyectos Androi
   sub-opciones en linea (dentro de su fila/tarjeta) SOLO cuando aplican; el resto del tiempo NO se
   dibujan. Es anidable (un sub-control revela otro). En Compose: emitir el composable dentro de un
   `if (condicion) { ... }` (equivalente a `View.VISIBLE`/`GONE`), no dejarlo siempre presente.
-  - Ejemplo actual en Athletic: en `ui/athlete/ExerciseEditorScreen.kt`, el selector de beep sound
+  - Ejemplo actual en MASTER: en `ui/athlete/ExerciseEditorScreen.kt`, el selector de beep sound
     se emite solo si `cfg.finalCount > 0`.
 - **Distinguirlo del patron "atenuar"**: un ajuste ligado a su propio switch EN LA MISMA fila queda
   VISIBLE pero ATENUADO (p. ej. `alpha 0.4` + deshabilitado) con el switch OFF. En divulgacion

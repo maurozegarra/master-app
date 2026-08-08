@@ -1,0 +1,57 @@
+package com.maurozegarra.master
+
+import com.maurozegarra.master.model.DisplayMode
+import com.maurozegarra.master.model.StepKind
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+
+/** Comandos enviados al [com.maurozegarra.master.notify.WorkoutPlayerService]. */
+sealed class PlayerCommand {
+    data object PAUSE : PlayerCommand()
+    data object RESUME : PlayerCommand()
+    data object NEXT : PlayerCommand()
+    data object PREV : PlayerCommand()
+    data object STOP : PlayerCommand()
+    data class FEEDBACK(val exerciseId: String, val workoutIndex: Int, val deltaKg: Double) : PlayerCommand()
+}
+
+/**
+ * Instantánea del estado del player publicada por el servicio para que la UI la
+ * observe (sobrevive a la muerte de la Activity mientras el proceso viva).
+ */
+data class PlayerSnapshot(
+    val trainingId: Long,
+    val name: String,
+    val index: Int,
+    val totalSteps: Int,
+    val stepKind: StepKind,
+    val stepTitle: String,
+    val note: String = "",
+    val ownerName: String,
+    val ownerExerciseId: String,
+    val workoutName: String,
+    val workoutIndex: Int,
+    val totalWorkouts: Int,
+    val setIndex: Int,
+    val totalSets: Int,
+    val reps: Int,
+    val timeBased: Boolean,
+    val display: DisplayMode,
+    val finalCount: Int,
+    val colorArgb: Long,
+    val weighted: Boolean,
+    val weightTotal: Double,
+    val weightLabel: String,
+    val remainingMs: Long,
+    val running: Boolean,
+    val finished: Boolean,
+)
+
+/**
+ * Canal compartido entre el servicio del player y la UI. [state] = estado actual
+ * (null si no hay player activo).
+ */
+object PlayerBus {
+    val state = MutableStateFlow<PlayerSnapshot?>(null)
+    val command = MutableSharedFlow<PlayerCommand>(extraBufferCapacity = 8)
+}

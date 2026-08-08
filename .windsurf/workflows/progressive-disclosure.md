@@ -15,7 +15,7 @@ a `View.VISIBLE` / `View.GONE`), nunca dejarlo siempre presente.
 
 La divulgacion es anidable: un sub-control puede revelar otro.
 
-Ejemplo en Athletic: en `ExerciseEditorScreen.kt`, el selector de beep sound aparece
+Ejemplo en MASTER: en `ExerciseEditorScreen.kt`, el selector de beep sound aparece
 solo si `cfg.finalCount > 0`. Al abrir el dialogo del picker, revela mas opciones
 (preview, select) — todas condicionadas al mismo estado.
 

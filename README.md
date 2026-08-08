@@ -1,9 +1,9 @@
-# Athletic
+# MASTER
 
 App Android (Kotlin + Jetpack Compose, Material Design 3) para crear y ejecutar
 rutinas de entrenamiento con un player tipo timer con intervalos.
 
-- Paquete: `com.athletic`
+- Paquete: `com.maurozegarra.master`
 - Dominio: `Training` > `Workout` > `Exercise` (los workouts pueden ser rotativos)
 - Idioma: solo inglés
 - Mínimo SDK: 26 (Android 8.0)
