@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **25 / 33** hechos, 8 pendientes.
+Progreso: **26 / 33** hechos, 7 pendientes.
 
 ## Pendientes
 
@@ -27,8 +27,6 @@ Progreso: **25 / 33** hechos, 8 pendientes.
 
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
   - Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez.
-- [ ] **TD-030** Arquitectura: Koin DI
-  - Fase 1 del plan en docs/plan-arquitectura.md. Introducir Koin 4.2.0 para preparar el terreno para Repository interfaces (TD-033) y testing con fakes. Cambios: deps koin-android + koin-androidx-compose, MasterApp : Application con startKoin, modulo DI con WorkoutStore/SettingsStore/AlarmPlayer como single y ViewModels con viewModelOf, koinViewModel() en MainActivity, registrar MasterApp en AndroidManifest. Nota: Koin 4.2.0 sube Compose Foundation a 1.10.4 transitivamente — forzar 1.6.8 con resolutionStrategy para evitar crash por IndicationNodeFactory.
 
 ## Hechos
 
@@ -63,6 +61,7 @@ Progreso: **25 / 33** hechos, 8 pendientes.
 
 ### Mantenimiento
 
+- [x] **TD-030** Arquitectura: Koin DI
 - [x] **TD-029** Regla: TD es done solo cuando el usuario aprueba tras probar en dispositivo
 - [x] **TD-022** AGENTS.md como gatekeeper del harness
 - [x] **TD-020** Eliminar referencias a entorno corporativo y mini-timer

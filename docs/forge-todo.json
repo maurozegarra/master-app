@@ -26,7 +26,7 @@
       "id": "TD-030",
       "title": "Arquitectura: Koin DI",
       "category": "Mantenimiento",
-      "status": "pending",
+      "status": "done",
       "manual": "Fase 1 del plan en docs/plan-arquitectura.md. Introducir Koin 4.2.0 para preparar el terreno para Repository interfaces (TD-033) y testing con fakes. Cambios: deps koin-android + koin-androidx-compose, MasterApp : Application con startKoin, modulo DI con WorkoutStore/SettingsStore/AlarmPlayer como single y ViewModels con viewModelOf, koinViewModel() en MainActivity, registrar MasterApp en AndroidManifest. Nota: Koin 4.2.0 sube Compose Foundation a 1.10.4 transitivamente — forzar 1.6.8 con resolutionStrategy para evitar crash por IndicationNodeFactory."
     },
     {
