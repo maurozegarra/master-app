@@ -262,6 +262,7 @@ private fun DaySessionsSheet(
                     t = t,
                     onDelete = { onDeleteSession(s.id) },
                     onExerciseClick = onExerciseClick,
+                    initiallyExpanded = true,
                 )
             }
         }

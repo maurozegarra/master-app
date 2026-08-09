@@ -136,9 +136,10 @@ fun SessionRow(
     t: Strings,
     onDelete: () -> Unit,
     onExerciseClick: (String) -> Unit,
+    initiallyExpanded: Boolean = false,
 ) {
     var menu by remember { mutableStateOf(false) }
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(initiallyExpanded) }
     var confirmDelete by remember { mutableStateOf(false) }
 
     Column(
