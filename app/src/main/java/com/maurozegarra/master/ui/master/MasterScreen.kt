@@ -351,7 +351,6 @@ private fun TrainingCard(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(AppTheme.colors.bg)
                 .border(1.dp, accent, CircleShape)
                 .clickable(enabled = canPlay, onClick = onPlay),
             contentAlignment = Alignment.Center,

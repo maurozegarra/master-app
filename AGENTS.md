@@ -31,9 +31,10 @@ El Forge es el sistema de verificación y to-do del proyecto. Define:
 - Kotlin + Jetpack Compose (BOM 2024.06)
 - Material Design 3
 - ViewModel + StateFlow
+- Koin 4.2.0 para inyección de dependencias
 - Foreground Service para el player (notificaciones, restablecimiento tras muerte del proceso)
 - Persistencia: JSON serializado en SharedPreferences
-- Sin frameworks de red ni DI
+- Sin frameworks de red
 
 ## Estructura del repo
 

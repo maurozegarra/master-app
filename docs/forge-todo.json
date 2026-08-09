@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-036",
+      "title": "Boton play transparente en TrainingCard",
+      "category": "Fix",
+      "status": "done",
+      "manual": "El boton de play en la lista de trainings tenia fondo AppTheme.colors.bg (negro en dark theme). Cambiado a transparente — solo borde accent + icono. Cambio visual menor sobre TD-034 ya aprobado."
+    },
+    {
       "id": "TD-035",
       "title": "Atenuar pantalla del player cuando el timer esta en pausa",
       "category": "Feature",
