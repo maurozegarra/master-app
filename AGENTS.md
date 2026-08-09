@@ -116,6 +116,7 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 - **No crear archivos temporales** (screenshots, scripts de prueba) en el repo.
 - **Usar `build-debug.ps1`** para cada iteración: incrementa versión, instala, copia a Download.
 - **Lanzar el app tras instalar** con `adb shell monkey -p com.maurozegarra.master -c android.intent.category.LAUNCHER 1` para que el usuario pueda probar de inmediato.
+- **Reportar tras instalar:** tras cada `build-debug.ps1` o instalación, reportar al usuario: número de versión instalada, qué TD se probó, y pasos concretos para verificar el cambio en el dispositivo (qué mirar, qué interactuar).
 - **Push = GitHub Release.** Cuando el usuario pida "push", proponer `build-release.ps1` (sube APK a GitHub Releases + actualiza `update.json` + commit + push), no `git push` solo.
 - **Minificar siempre**: el APK release pesa ~1.2MB vs ~16MB en debug.
 - **Firma estable**: el release se firma con la clave debug para permitir updates sin desinstalar.

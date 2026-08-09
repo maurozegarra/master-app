@@ -2,6 +2,27 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-047",
+      "title": "Documentacion: regla post-build en AGENTS.md + actualizar master-forge.md",
+      "category": "Mantenimiento",
+      "status": "done",
+      "manual": "Tres cambios: (1) AGENTS.md regla de oro nueva: tras instalar un build, reportar al usuario version + TD probado + pasos concretos para verificar en dispositivo. (2) master-forge.md: nota arriba aclarando que es documento historico/contextual, las reglas operativas viven en AGENTS.md. (3) master-forge.md: actualizar tabla 'Estado del sistema' (tests 94 en 6 archivos, releases 150+, capas)."
+    },
+    {
+      "id": "TD-046",
+      "title": "DaySheet: mostrar training expandido a nivel workout al abrir",
+      "category": "Fix",
+      "status": "done",
+      "manual": "Al tap un dia del calendario, el sheet muestra los SessionRow colapsados (hay que expandir manualmente). Cambio: SessionRow recibe initiallyExpanded: Boolean = false (default, no cambia HistoryScreen). El DaySheet pasa initiallyExpanded = true para que al abrir el sheet se vean los workouts del training sin tener que expandir. WorkoutGroupSection sigue colapsado (no muestra ejercicios por defecto). El usuario puede colapsar el training o expandir un workout individual si quiere ver ejercicios."
+    },
+    {
+      "id": "TD-045",
+      "title": "Aumentar atenuacion de pausa en el player (0.35 -> 0.55)",
+      "category": "Fix",
+      "status": "done",
+      "manual": "Refinement de TD-035 (aprobado). El overlay negro de pausa en 0.35f queda demasiado sutil, sobre todo en colores de fase claros (PREP/COOLDOWN). Subir a 0.55f para que la pausa sea claramente visible sin perder legibilidad del texto blanco (que tiene Shadow) ni de los controles. Cambio de un solo valor en PlayerScreen.kt: dimAlpha 0.35f -> 0.55f."
+    },
+    {
       "id": "TD-044",
       "title": "Feedback haptico en el player (skip, check, pause)",
       "category": "Feature",

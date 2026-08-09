@@ -2,6 +2,13 @@
 
 > De vibe coding a production-ready, un arnés a la vez.
 
+> **Documento histórico y contextual.** Este archivo explica el "por qué" del
+> Forge, el diagnóstico inicial y las capas del sistema. Las **reglas operativas**
+> (workflow del agente, convenciones de commit, verificación, build) viven en
+> `AGENTS.md`, que es la fuente de verdad para los asistentes de IA. La tabla
+> "Estado del sistema" al final refleja el estado a la fecha de la última
+> actualización.
+
 MASTER nació como vibe coding: funciona, se publica, pero nada lo verifica
 automáticamente. **Forge** es el sistema para llevarlo a production-ready sin
 reescrituras, agregando capas de verificación en orden de valor y conectando
@@ -174,7 +181,7 @@ sigue estos pasos en orden.
 
 | Capa | Estado | Notas |
 |---|---|---|
-| 1 — Tests del motor | **Completada** | 59 tests, 4 archivos, corren en 18s |
+| 1 — Tests del motor | **Completada** | 94 tests, 6 archivos (StepEngine, Workout, PlayerStep, Rotation) |
 | 2 — CI local | **Completada** | `run-tests.ps1` + integrado en los 3 scripts de build |
 | 3 — To-do estructurado | **Completada** | `docs/forge-todo.json` + `forge-status.ps1` generan `to-do.md` |
-| 4 — Dispositivo + obs. | Pendiente | Depende de Capa 3 |
+| 4 — Dispositivo + obs. | Parcial | Verificación manual en dispositivo (S26 Ultra vía adb inalámbrico). Sin crash reporting ni UI automation todavía. TD-033 (arquitectura) pendiente. |

@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **31 / 44** hechos, 13 pendientes.
+Progreso: **34 / 47** hechos, 13 pendientes.
 
 ## Pendientes
 
@@ -59,6 +59,8 @@ Progreso: **31 / 44** hechos, 13 pendientes.
 
 ### Fix
 
+- [x] **TD-046** DaySheet: mostrar training expandido a nivel workout al abrir
+- [x] **TD-045** Aumentar atenuacion de pausa en el player (0.35 -> 0.55)
 - [x] **TD-038** Unificar indicadores del calendario a 8dp borde 1dp
 - [x] **TD-036** Boton play transparente en TrainingCard
 - [x] **TD-034** Confirmacion de delete con nombre en TrainingCard y SessionRow
@@ -78,6 +80,7 @@ Progreso: **31 / 44** hechos, 13 pendientes.
 
 ### Mantenimiento
 
+- [x] **TD-047** Documentacion: regla post-build en AGENTS.md + actualizar master-forge.md
 - [x] **TD-030** Arquitectura: Koin DI
 - [x] **TD-029** Regla: TD es done solo cuando el usuario aprueba tras probar en dispositivo
 - [x] **TD-022** AGENTS.md como gatekeeper del harness
