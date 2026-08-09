@@ -423,6 +423,9 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
 
     val padClock = remember { vm.padPlayerClock() }
     // Color de fase completo, oscurecido 12% para legibilidad del texto blanco.
+    // En pausa se oscurece adicionalmente como indicador visual.
+    val isPaused = !step.manual && !vm.playerRunning
+    val dimAlpha by animateFloatAsState(if (isPaused) 0.35f else 0f, label = "pauseDim")
     val bg = lerp(color, Color.Black, 0.12f)
     Box(
         Modifier
@@ -450,6 +453,13 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             },
     ) {
         RoutineProgressBar(vm, accent)
+        if (dimAlpha > 0f) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = dimAlpha)),
+            )
+        }
         Column(
         modifier = Modifier
             .fillMaxSize()

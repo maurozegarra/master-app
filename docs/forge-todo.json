@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-035",
+      "title": "Atenuar pantalla del player cuando el timer esta en pausa",
+      "category": "Feature",
+      "status": "done",
+      "manual": "En steps con timer (no manuales), al pausar el player la pantalla se oscurece con un overlay negro semi-transparente (alpha animado de 0 a 0.35) como indicador visual de pausa. El overlay se dibuja entre el RoutineProgressBar y el Column de contenido, para que titulo, clock y controles queden visibles por encima. animateFloatAsState para transicion suave. No aplica en steps manuales (reps) porque no tienen pausa."
+    },
+    {
       "id": "TD-034",
       "title": "Confirmacion de delete con nombre en TrainingCard y SessionRow",
       "category": "Fix",
