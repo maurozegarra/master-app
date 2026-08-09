@@ -20,7 +20,7 @@
       "title": "Mejorar arquitectura: extraer use-cases y Repository del MasterViewModel",
       "category": "Mantenimiento",
       "status": "pending",
-      "manual": "AthleteViewModel.kt (751 lineas) es un god object que mezcla estado de UI, logica de negocio, acceso a Stores y coordinacion con el Service. El dominio (model/) ya esta aislado y testeado, pero la capa de presentacion no sigue clean architecture. Plan: (1) Introducir Repository pattern entre ViewModels y Stores (WorkoutRepository, SettingsRepository) para abstraer SharedPreferences. (2) Extraer use-cases del AthleteViewModel: seeding, restauracion del player, manejo de drafts, logica de sesiones. (3) Reducir AthleteViewModel a estado de UI + delegacion a use-cases. (4) Inyeccion manual por constructor (sin framework DI). (5) Tests de use-cases y Repository. Consideracion: para una app sin red ni DI framework, evaluar si el costo/valor justifica el refactor completo o si basta con extraer los use-cases mas grandes y dejar los Stores como estan. Decidir alcance antes de implementar."
+      "manual": "MasterViewModel.kt (774 lineas) es un god object. Plan detallado en docs/plan-arquitectura.md. 5 fases incrementales: (1) Koin DI, (2) Repository interfaces, (3) MVI (State/Action/Event), (4) Compose Navigation + SavedStateHandle, (5) Testing con Turbine + fakes. Cada fase deja la app funcional y se ejecuta una a la vez. No se hace multi-modulo, Ktor, Room ni version catalog."
     },
     {
       "id": "TD-029",
