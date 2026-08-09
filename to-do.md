@@ -4,12 +4,24 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **31 / 38** hechos, 7 pendientes.
+Progreso: **31 / 44** hechos, 13 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-044** Feedback haptico en el player (skip, check, pause)
+  - Vibracion corta al hacer skip, check o pause en el player. Confirmacion tactil sin necesidad de mirar la pantalla. Usar VibrationEffect.createOneShot con duracion corta (~50ms) para no ser intrusivo. Solo en acciones del usuario, no en transiciones automaticas.
+- [ ] **TD-043** Preview del siguiente ejercicio en REST
+  - Durante los steps de REST, mostrar el glyph/icon del proximo ejercicio mas grande y prominente, no solo un label de texto. Ayuda a prepararse mentalmente para el siguiente ejercicio.
+- [ ] **TD-042** Resumen de stats en Historial
+  - Al abrir History, mostrar un header compacto con: total de sesiones, tiempo total acumulado, ejercicio mas frecuente. Datos derivados de vm.sessions.
+- [ ] **TD-041** Ring de progreso en el player
+  - Ademas de la barra lineal de progreso, un ring circular alrededor del clock que muestra cuantos del step actual ha transcurrido. Mas visual y moderno. Calcular fraccion con playerRemainingMs y la duracion total del step.
+- [ ] **TD-040** Duracion estimada en TrainingCard
+  - Mostrar duracion estimada (~12 min) junto a '3 workouts · 8 exercises' en la TrainingCard. Calcular sumando duraciones de todos los steps (PREP + WORK + REST + COOLDOWN) del training.
+- [ ] **TD-039** Swipe-to-delete en TrainingCards
+  - Deslizar la card a la izquierda para borrar (con dialogo de confirmacion), en vez de ir al menu de 3 puntos. Mas rapido y natural en movil. Usar SwipeToDismissBox de Material 3 con confirmacion via AlertDialog.
 - [ ] **TD-014** Keep-screen-on durante la corrida (opcional)
   - El player a pantalla completa podria beneficiarse de keep-screen-on
 - [ ] **TD-013** Accesibilidad (opcional)
