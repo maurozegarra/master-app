@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **30 / 37** hechos, 7 pendientes.
+Progreso: **31 / 38** hechos, 7 pendientes.
 
 ## Pendientes
 
@@ -47,6 +47,7 @@ Progreso: **30 / 37** hechos, 7 pendientes.
 
 ### Fix
 
+- [x] **TD-038** Unificar indicadores del calendario a 8dp borde 1dp
 - [x] **TD-036** Boton play transparente en TrainingCard
 - [x] **TD-034** Confirmacion de delete con nombre en TrainingCard y SessionRow
 - [x] **TD-031** Mover Clear history al TopAppBar de History

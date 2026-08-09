@@ -350,16 +350,14 @@ private fun WeekCalendar(
                 Spacer(Modifier.height(4.dp))
                 val sessionStatus = sessionDates[date]
                 Box(
-                    modifier = Modifier.size(
-                        if (sessionStatus == SessionStatus.PARTIAL) 8.dp else 6.dp
-                    )
+                    modifier = Modifier.size(8.dp)
                         .clip(CircleShape)
                         .background(
                             if (sessionStatus == SessionStatus.COMPLETED) accent
                             else Color.Transparent
                         )
                         .border(
-                            1.5.dp,
+                            1.dp,
                             if (sessionStatus == SessionStatus.PARTIAL) accent
                             else Color.Transparent,
                             CircleShape,

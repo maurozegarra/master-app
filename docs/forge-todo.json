@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-038",
+      "title": "Unificar indicadores del calendario a 8dp borde 1dp",
+      "category": "Fix",
+      "status": "done",
+      "manual": "Los indicadores del WeekCalendar tenian tamanos diferentes: COMPLETED 6dp sin borde, PARTIAL 8dp con borde 1.5dp. Unificados a 8dp ambos, borde 1dp para PARTIAL (mas fino). Coincide con el tamano de los dots de WorkoutProgressBar."
+    },
+    {
       "id": "TD-037",
       "title": "Tap en dia del calendario abre sheet con sesiones de ese dia",
       "category": "Feature",
