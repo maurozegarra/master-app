@@ -36,10 +36,11 @@ import kotlinx.coroutines.launch
  * Mantiene la lista de trainings persistida y un "draft" en edición que contiene
  * todo el árbol (workouts → exercises) hasta que se guarda.
  */
-class MasterViewModel(app: Application) : AndroidViewModel(app) {
-
-    private val store = WorkoutStore(app)
-    private val alarmPlayer = AlarmPlayer(app)
+class MasterViewModel(
+    app: Application,
+    private val store: WorkoutStore,
+    private val alarmPlayer: AlarmPlayer
+) : AndroidViewModel(app) {
 
     val trainings = mutableStateListOf<Training>()
     private val customExercises = mutableStateListOf<ExerciseDef>()

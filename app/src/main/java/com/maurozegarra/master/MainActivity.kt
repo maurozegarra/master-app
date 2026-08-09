@@ -48,7 +48,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maurozegarra.master.i18n.I18n
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.THEME_DARK
@@ -61,6 +60,7 @@ import com.maurozegarra.master.ui.master.MasterScreen
 import com.maurozegarra.master.ui.settings.SettingsScreen
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.MasterTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Punto de entrada del app y shell de navegación de MASTER. La sección principal se
@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         pendingWorkoutId.value = intent?.getLongExtra("workoutId", -1L)?.takeIf { it >= 0 }
         setContent {
-            val settingsVm: SettingsViewModel = viewModel()
+            val settingsVm: SettingsViewModel = koinViewModel()
             val cfg = settingsVm.config
             val dark = when (cfg.general.themeMode) {
                 THEME_LIGHT -> false
@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.compose.runtime.State<Long?>) {
-    val vm: MasterViewModel = viewModel()
+    val vm: MasterViewModel = koinViewModel()
     val t = I18n.EN
     val accent = AppTheme.colors.accent
 

@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **25 / 32** hechos, 7 pendientes.
+Progreso: **25 / 33** hechos, 8 pendientes.
 
 ## Pendientes
 
@@ -25,8 +25,10 @@ Progreso: **25 / 32** hechos, 7 pendientes.
 
 ### Mantenimiento
 
-- [ ] **TD-030** Mejorar arquitectura: extraer use-cases y Repository del MasterViewModel
-  - AthleteViewModel.kt (751 lineas) es un god object que mezcla estado de UI, logica de negocio, acceso a Stores y coordinacion con el Service. El dominio (model/) ya esta aislado y testeado, pero la capa de presentacion no sigue clean architecture. Plan: (1) Introducir Repository pattern entre ViewModels y Stores (WorkoutRepository, SettingsRepository) para abstraer SharedPreferences. (2) Extraer use-cases del AthleteViewModel: seeding, restauracion del player, manejo de drafts, logica de sesiones. (3) Reducir AthleteViewModel a estado de UI + delegacion a use-cases. (4) Inyeccion manual por constructor (sin framework DI). (5) Tests de use-cases y Repository. Consideracion: para una app sin red ni DI framework, evaluar si el costo/valor justifica el refactor completo o si basta con extraer los use-cases mas grandes y dejar los Stores como estan. Decidir alcance antes de implementar.
+- [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
+  - Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez.
+- [ ] **TD-030** Arquitectura: Koin DI
+  - Fase 1 del plan en docs/plan-arquitectura.md. Introducir Koin 4.2.0 para preparar el terreno para Repository interfaces (TD-033) y testing con fakes. Cambios: deps koin-android + koin-androidx-compose, MasterApp : Application con startKoin, modulo DI con WorkoutStore/SettingsStore/AlarmPlayer como single y ViewModels con viewModelOf, koinViewModel() en MainActivity, registrar MasterApp en AndroidManifest. Nota: Koin 4.2.0 sube Compose Foundation a 1.10.4 transitivamente — forzar 1.6.8 con resolutionStrategy para evitar crash por IndicationNodeFactory.
 
 ## Hechos
 

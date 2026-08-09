@@ -13,8 +13,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // Versionado: +1 por cada APK generado. Primer APK: 1.0.1 (Fase 7).
-        versionCode = 139
-        versionName = "1.0.139"
+        versionCode = 141
+        versionName = "1.0.141"
     }
 
     buildTypes {
@@ -37,6 +37,15 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    configurations.all {
+        resolutionStrategy.force(
+            "androidx.compose.foundation:foundation:1.6.8",
+            "androidx.compose.foundation:foundation-android:1.6.8",
+            "androidx.compose.foundation:foundation-layout:1.6.8",
+            "androidx.compose.foundation:foundation-layout-android:1.6.8",
+        )
     }
 }
 
@@ -62,6 +71,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    implementation("io.insert-koin:koin-android:4.2.0")
+    implementation("io.insert-koin:koin-androidx-compose:4.2.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")

@@ -1,10 +1,9 @@
 package com.maurozegarra.master
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.maurozegarra.master.data.SettingsStore
 import com.maurozegarra.master.model.AppConfig
 
@@ -13,9 +12,7 @@ import com.maurozegarra.master.model.AppConfig
  * Cada cambio persiste de inmediato para que el servicio del player lea la config
  * actualizada al reproducir.
  */
-class SettingsViewModel(app: Application) : AndroidViewModel(app) {
-
-    private val store = SettingsStore(app)
+class SettingsViewModel(private val store: SettingsStore) : ViewModel() {
 
     var config by mutableStateOf(store.loadConfig())
         private set

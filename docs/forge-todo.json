@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-033",
+      "title": "Arquitectura: Repository interfaces + MVI + Navigation + Testing",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "manual": "Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez."
+    },
+    {
       "id": "TD-032",
       "title": "Rebrand residual: eliminar todas las referencias a Athlete",
       "category": "Rebrand",
@@ -17,10 +24,10 @@
     },
     {
       "id": "TD-030",
-      "title": "Mejorar arquitectura: extraer use-cases y Repository del MasterViewModel",
+      "title": "Arquitectura: Koin DI",
       "category": "Mantenimiento",
       "status": "pending",
-      "manual": "MasterViewModel.kt (774 lineas) es un god object. Plan detallado en docs/plan-arquitectura.md. 5 fases incrementales: (1) Koin DI, (2) Repository interfaces, (3) MVI (State/Action/Event), (4) Compose Navigation + SavedStateHandle, (5) Testing con Turbine + fakes. Cada fase deja la app funcional y se ejecuta una a la vez. No se hace multi-modulo, Ktor, Room ni version catalog."
+      "manual": "Fase 1 del plan en docs/plan-arquitectura.md. Introducir Koin 4.2.0 para preparar el terreno para Repository interfaces (TD-033) y testing con fakes. Cambios: deps koin-android + koin-androidx-compose, MasterApp : Application con startKoin, modulo DI con WorkoutStore/SettingsStore/AlarmPlayer como single y ViewModels con viewModelOf, koinViewModel() en MainActivity, registrar MasterApp en AndroidManifest. Nota: Koin 4.2.0 sube Compose Foundation a 1.10.4 transitivamente — forzar 1.6.8 con resolutionStrategy para evitar crash por IndicationNodeFactory."
     },
     {
       "id": "TD-029",

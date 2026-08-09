@@ -1,4 +1,4 @@
-# Plan de arquitectura — TD-030
+# Plan de arquitectura — TD-030 + TD-033
 
 ## Contexto
 
@@ -6,6 +6,11 @@
 estado de UI, lógica de negocio, acceso a Stores, coordinación con el Service,
 seeding, historial de sesiones y beep picker. El dominio (`model/`) ya está
 aislado y testeado, pero la capa de presentación no sigue un patrón claro.
+
+## TDs
+
+- **TD-030 — Koin DI** (Fase 1)
+- **TD-033 — Repository + MVI + Navigation + Testing** (Fases 2-5)
 
 ## Skills de referencia
 
