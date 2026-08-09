@@ -229,7 +229,7 @@ private fun SessionRow(
             titleContentColor = AppTheme.colors.textPrimary,
             textContentColor = AppTheme.colors.textDim,
             title = { Text(t.delete) },
-            text = { Text(t.deleteSessionConfirm) },
+            text = { Text(t.deleteSessionConfirm(session.trainingName)) },
             confirmButton = {
                 TextButton(onClick = { onDelete(); confirmDelete = false }) {
                     Text(t.delete, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)

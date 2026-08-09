@@ -32,11 +32,14 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -297,6 +300,7 @@ private fun TrainingCard(
     onDelete: () -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf(false) }
     val exercises = training.workouts.sumOf { w ->
         if (w.variants.isNotEmpty()) w.variants.sumOf { it.exercises.size } else w.exercises.size
     }
@@ -372,9 +376,30 @@ private fun TrainingCard(
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                 DropdownMenuItem(text = { Text(t.edit) }, onClick = { menu = false; onEdit() })
                 DropdownMenuItem(text = { Text(t.duplicate) }, onClick = { menu = false; onDuplicate() })
-                DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
+                DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; confirmDelete = true })
             }
         }
+    }
+
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.textPrimary,
+            textContentColor = AppTheme.colors.textDim,
+            title = { Text(t.delete) },
+            text = { Text(t.deleteTrainingConfirm(training.name.ifBlank { t.noName })) },
+            confirmButton = {
+                TextButton(onClick = { onDelete(); confirmDelete = false }) {
+                    Text(t.delete, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = false }) {
+                    Text(t.cancel, color = AppTheme.colors.textDim)
+                }
+            },
+        )
     }
 }
 

@@ -120,8 +120,7 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 - **Firma estable**: el release se firma con la clave debug para permitir updates sin desinstalar.
 - **Versionado**: +1 por cada APK generado. `versionCode` y `versionName` en `app/build.gradle.kts`.
 - **Idioma**: solo inglés en la app. Comunicación con el usuario en español.
-- **No agregar comentarios** al código a menos que se pida explícitamente.
-- **Preferir ediciones mínimas** sobre reescrituras grandes.
+- **Comentarios en código**: documentar el porqué de decisiones no obvias, trade-offs, workarounds y restricciones del dominio. No comentar lo que el código ya dice por sí solo. Los comentarios deben responder a "¿por qué esto es así?" y no a "¿qué hace esto?". Priorizar comentarios en lógica de negocio, protocolos, y código que pueda parecer contraintuitivo a primera vista.
 - **Cada cambio de comportamiento va con test.** Si tocas el motor, agregas o actualizas el test correspondiente.
 - **Commits referencian el to-do**: `feat: TD-NNN ...`, `fix: TD-NNN ...`, `chore: TD-NNN ...`.
 - **Commits atómicos**: un commit = un cambio lógico (ver `.windsurf/workflows/commit.md`).

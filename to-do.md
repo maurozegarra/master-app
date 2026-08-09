@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **26 / 33** hechos, 7 pendientes.
+Progreso: **27 / 34** hechos, 7 pendientes.
 
 ## Pendientes
 
@@ -45,6 +45,7 @@ Progreso: **26 / 33** hechos, 7 pendientes.
 
 ### Fix
 
+- [x] **TD-034** Confirmacion de delete con nombre en TrainingCard y SessionRow
 - [x] **TD-031** Mover Clear history al TopAppBar de History
 - [x] **TD-027** Historial agrupado por workout con badge parcial/total
 - [x] **TD-026** Fix: WeekCalendar no se actualiza en vivo tras terminar training

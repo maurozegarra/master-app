@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-034",
+      "title": "Confirmacion de delete con nombre en TrainingCard y SessionRow",
+      "category": "Fix",
+      "status": "done",
+      "manual": "Delete de training en TrainingCard (MasterScreen.kt) no tiene confirmacion. Delete de session en SessionRow (HistoryScreen.kt) tiene confirmacion pero no muestra el nombre. Fix: (1) Agregar AlertDialog de confirmacion en TrainingCard antes de llamar onDelete, mostrando el nombre del training. (2) Modificar el AlertDialog de SessionRow para mostrar el nombre del training (session.trainingName). (3) Nuevo string deleteTrainingConfirm que incluya placeholder para el nombre. Mismo estilo que clearHistoryConfirm y deleteSessionConfirm (color error en boton confirmar)."
+    },
+    {
       "id": "TD-033",
       "title": "Arquitectura: Repository interfaces + MVI + Navigation + Testing",
       "category": "Mantenimiento",
