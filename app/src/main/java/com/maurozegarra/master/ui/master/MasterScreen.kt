@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -35,11 +36,14 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.hasContent
@@ -106,13 +111,16 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             }
     }
 
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    val timeFmt = remember { java.time.format.DateTimeFormatter.ofPattern("h:mm a") }
+
     Box(Modifier.fillMaxSize()) {
         if (vm.trainings.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- })
+                WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- }, onDayClick = { selectedDate = it })
                 Spacer(Modifier.weight(1f))
                 Text(t.emptyTrainings, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
                 Text(t.savedHint, color = AppTheme.colors.textDim, fontSize = 14.sp)
@@ -130,7 +138,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item(key = "week_calendar") {
-                    WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- })
+                    WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- }, onDayClick = { selectedDate = it })
                 }
                 itemsIndexed(
                     vm.trainings,
@@ -185,6 +193,78 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                 modifier = Modifier.size(28.dp),
             )
         }
+
+        if (selectedDate != null) {
+            val date = selectedDate!!
+            val daySessions = vm.sessions.filter {
+                Instant.ofEpochMilli(it.completedAt).atZone(zone).toLocalDate() == date
+            }.sortedByDescending { it.completedAt }
+            DaySessionsSheet(
+                date = date,
+                zone = zone,
+                sessions = daySessions,
+                timeFmt = timeFmt,
+                accent = accent,
+                t = t,
+                onDismiss = { selectedDate = null },
+                onDeleteSession = { id ->
+                    vm.deleteSession(id)
+                    val remaining = vm.sessions.filter {
+                        Instant.ofEpochMilli(it.completedAt).atZone(zone).toLocalDate() == date
+                    }
+                    if (remaining.isEmpty()) selectedDate = null
+                },
+                onExerciseClick = { exerciseId ->
+                    selectedDate = null
+                    vm.openExerciseHistory(exerciseId)
+                },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DaySessionsSheet(
+    date: LocalDate,
+    zone: ZoneId,
+    sessions: List<SessionLog>,
+    timeFmt: java.time.format.DateTimeFormatter,
+    accent: Color,
+    t: Strings,
+    onDismiss: () -> Unit,
+    onDeleteSession: (Long) -> Unit,
+    onExerciseClick: (String) -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = AppTheme.colors.bg,
+    ) {
+        Text(
+            dayLabel(date, zone, t),
+            color = AppTheme.colors.textPrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(16.dp, 0.dp, 16.dp, 24.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(sessions, key = { it.id }) { s ->
+                SessionRow(
+                    session = s,
+                    time = Instant.ofEpochMilli(s.completedAt).atZone(zone).format(timeFmt),
+                    accent = accent,
+                    t = t,
+                    onDelete = { onDeleteSession(s.id) },
+                    onExerciseClick = onExerciseClick,
+                )
+            }
+        }
     }
 }
 
@@ -196,6 +276,7 @@ private fun WeekCalendar(
     accent: Color,
     onSwipeLeft: () -> Unit = {},
     onSwipeRight: () -> Unit = {},
+    onDayClick: (LocalDate) -> Unit = {},
 ) {
     val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     var dragAccum by remember { mutableStateOf(0f) }
@@ -233,8 +314,11 @@ private fun WeekCalendar(
         for (i in 0..6) {
             val date = currentWeek.plusDays(i.toLong())
             val isToday = date == today
+            val hasSessions = sessionDates[date] != null
             Column(
-                modifier = Modifier.wrapContentSize(),
+                modifier = Modifier
+                    .wrapContentSize()
+                    .then(if (hasSessions) Modifier.clickable { onDayClick(date) } else Modifier),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(

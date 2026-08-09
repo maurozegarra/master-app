@@ -129,7 +129,7 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
 }
 
 @Composable
-private fun SessionRow(
+fun SessionRow(
     session: SessionLog,
     time: String,
     accent: Color,
@@ -397,7 +397,7 @@ private fun fmtKgHistory(v: Double): String =
     if (v == v.toLong().toDouble()) v.toLong().toString() else v.toString()
 
 /** Etiqueta relativa del día: Today/Yesterday o fecha larga localizada. */
-private fun dayLabel(date: LocalDate, zone: ZoneId, t: Strings): String {
+fun dayLabel(date: LocalDate, zone: ZoneId, t: Strings): String {
     val today = LocalDate.now(zone)
     return when (date) {
         today -> t.today

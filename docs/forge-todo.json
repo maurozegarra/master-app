@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-037",
+      "title": "Tap en dia del calendario abre sheet con sesiones de ese dia",
+      "category": "Feature",
+      "status": "done",
+      "manual": "En la pantalla principal, al tap un dia del WeekCalendar que tenga sesiones, se abre un ModalBottomSheet mostrando las sesiones de ese dia con el mismo formato expandible de HistoryScreen (SessionRow). WeekCalendar agrega onDayClick: (LocalDate) -> Unit, clickeable solo en dias con sessionStatus. SessionRow se hace publico para reutilizarlo. El sheet muestra titulo con la fecha + sesiones filtradas por ese dia."
+    },
+    {
       "id": "TD-036",
       "title": "Boton play transparente en TrainingCard",
       "category": "Fix",
