@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **34 / 47** hechos, 13 pendientes.
+Progreso: **35 / 48** hechos, 13 pendientes.
 
 ## Pendientes
 
@@ -52,6 +52,7 @@ Progreso: **34 / 47** hechos, 13 pendientes.
 
 ### Feature
 
+- [x] **TD-048** Icono de la barra de estado solo en segundo plano (estilo YouTube)
 - [x] **TD-037** Tap en dia del calendario abre sheet con sesiones de ese dia
 - [x] **TD-035** Atenuar pantalla del player cuando el timer esta en pausa
 - [x] **TD-028** Skip por ejercicio en el player
