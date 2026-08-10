@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-049",
+      "title": "Probar color naranja en el Now Bar",
+      "category": "Fix",
+      "status": "done",
+      "manual": "Ajuste de TD-048: agregar setColor naranja (#FF8C00) al builder de la notificacion del player para ver si el chip de la Now Bar adopta el color de acento. Verificar en S26 Ultra."
+    },
+    {
       "id": "TD-048",
       "title": "Icono de la barra de estado solo en segundo plano (estilo YouTube)",
       "category": "Feature",

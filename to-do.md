@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **35 / 48** hechos, 13 pendientes.
+Progreso: **36 / 49** hechos, 13 pendientes.
 
 ## Pendientes
 
@@ -60,6 +60,7 @@ Progreso: **35 / 48** hechos, 13 pendientes.
 
 ### Fix
 
+- [x] **TD-049** Probar color naranja en el Now Bar
 - [x] **TD-046** DaySheet: mostrar training expandido a nivel workout al abrir
 - [x] **TD-045** Aumentar atenuacion de pausa en el player (0.35 -> 0.55)
 - [x] **TD-038** Unificar indicadores del calendario a 8dp borde 1dp

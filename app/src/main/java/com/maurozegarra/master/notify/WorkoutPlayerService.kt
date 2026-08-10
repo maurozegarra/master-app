@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
 import com.maurozegarra.master.MainActivity
@@ -432,6 +433,7 @@ class WorkoutPlayerService : Service() {
 
         val builder = Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_timer)
+            .setColor(Color.parseColor("#FF8C00"))
             .setContentTitle("$title$round")
             .setContentText(info)
             .setOngoing(true)
