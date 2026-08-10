@@ -455,6 +455,24 @@ class WorkoutPlayerService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
         }
+
+        // Android 16+: Live Update (ProgressStyle) para que la notificación entre a la
+        // Now Bar / chip de la barra de estado. Efecto buscado (TD-048): One UI muestra
+        // el chip solo en segundo plano y suprime el ícono en primer plano, como YouTube.
+        // El progreso es del step actual; en steps manuales (reps) no hay reloj, así que
+        // el estilo muestra solo el texto crítico (reps).
+        if (Build.VERSION.SDK_INT >= 36) {
+            val totalMs = (step?.durationSec ?: 0) * 1000L
+            val progress = if (step != null && !step.manual && totalMs > 0) {
+                (((totalMs - currentRemaining()).coerceIn(0, totalMs)) * 100 / totalMs).toInt()
+            } else 0
+            val style = Notification.ProgressStyle()
+                .setProgress(progress)
+                .setStyledByProgress(true)
+            builder.setStyle(style)
+            builder.setRequestPromotedOngoing(true)
+            builder.setShortCriticalText(info)
+        }
         return builder.build()
     }
 
@@ -491,10 +509,15 @@ class WorkoutPlayerService : Service() {
 
     private fun ensureChannel() {
         val nm = getSystemService(NotificationManager::class.java)
+        // IMPORTANCE_LOW (no DEFAULT): en One UI/AOSP el SystemUI oculta el ícono de
+        // la barra de estado de la app que está en primer plano solo para canales
+        // silenciosos; con DEFAULT el ícono queda visible siempre (TD-048). El canal
+        // es nuevo (v2) porque la importancia de un canal existente no se puede subir
+        // por código y bajarla falla si el usuario tocó sus ajustes.
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Workout",
-            NotificationManager.IMPORTANCE_DEFAULT,
+            NotificationManager.IMPORTANCE_LOW,
         ).apply {
             setShowBadge(true)
             setSound(null, null)
@@ -648,7 +671,7 @@ class WorkoutPlayerService : Service() {
     }
 
     companion object {
-        private const val CHANNEL_ID = "master_workout_v1"
+        private const val CHANNEL_ID = "master_workout_v2"
         private const val NOTIF_ID = 43
         private const val ACTION_START = "com.maurozegarra.master.player.START"
         private const val ACTION_PAUSE = "com.maurozegarra.master.player.PAUSE"
