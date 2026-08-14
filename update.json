@@ -1,7 +1,7 @@
 {
+  "changelog": "release: TD-048 Live Update notification + TD-049 color naranja en Now Bar",
+  "versionCode": 153,
+  "versionName": "1.0.153",
   "minVersionCode": 1,
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.130/master-1.0.130.apk",
-  "changelog": "release: rebrand MASTER + Clear history fix + deteccion device mDNS",
-  "versionCode": 130,
-  "versionName": "1.0.130"
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.153/master-1.0.153.apk"
 }
