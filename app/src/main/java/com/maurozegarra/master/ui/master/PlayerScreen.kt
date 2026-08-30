@@ -351,7 +351,11 @@ private fun WorkoutProgressBar(step: PlayerStep, accent: Color, t: Strings) {
 }
 
 @Composable
-private fun RoutineProgressBar(vm: MasterViewModel, accent: Color) {
+private fun RoutineProgressBar(
+    vm: MasterViewModel,
+    accent: Color,
+    trailing: @Composable () -> Unit = {},
+) {
     val steps = vm.playerSteps
     if (steps.isEmpty()) return
     val idx = vm.playerIndex.coerceIn(0, steps.lastIndex)
@@ -379,8 +383,11 @@ private fun RoutineProgressBar(vm: MasterViewModel, accent: Color) {
             .windowInsetsPadding(WindowInsets.systemBars)
             .padding(horizontal = 20.dp, vertical = 6.dp),
     ) {
+        // Alto fijo: el contenido de [trailing] aparece y desaparece según el ejercicio,
+        // y sin esto la franja cambiaría de alto y empujaría todo lo de abajo al cambiar
+        // de paso.
         Row(
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth().height(36.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -390,12 +397,15 @@ private fun RoutineProgressBar(vm: MasterViewModel, accent: Color) {
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
             )
-            Text(
-                "$percent%",
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "$percent%",
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                trailing()
+            }
         }
         Spacer(Modifier.height(4.dp))
         Box(
@@ -459,8 +469,9 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                 }
             },
     ) {
-        RoutineProgressBar(vm, accent)
-        InstructionsButton(vm, step.ownerExerciseId, ownerNameFor(step, t), t)
+        RoutineProgressBar(vm, accent) {
+            InstructionsButton(vm, step.ownerExerciseId, ownerNameFor(step, t), t)
+        }
         if (dimAlpha > 0f) {
             Box(
                 Modifier
@@ -592,7 +603,9 @@ private fun ownerNameFor(step: PlayerStep, t: Strings): String =
  * vertical sería invisible sin un texto de ayuda, y la zona inferior ya carga con los
  * controles, el label "Next" y las barras de progreso.
  *
- * Vive dentro del OSD, con los demás controles: así no ocupa espacio permanente.
+ * Va **dentro** de la franja de progreso, después del porcentaje, y no flotando sobre
+ * ella: flotando aterrizaba justo encima del porcentaje y de la barra. Al estar maquetado
+ * no puede volver a superponerse, y la posición no depende de si el ejercicio tiene vídeo.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -601,24 +614,20 @@ private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, title: S
     if (steps.isEmpty()) return
     var open by remember { mutableStateOf(false) }
 
-    AnimatedVisibility(
-        visible = vm.playerControlsVisible,
+    Box(
         modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.systemBars)
-            .padding(16.dp)
-            .wrapContentSize(Alignment.TopEnd),
+            .padding(start = 12.dp)
+            .size(36.dp)
+            .clip(CircleShape)
+            .clickable { open = true },
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.35f))
-                .clickable { open = true },
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icons.AutoMirrored.Filled.List, contentDescription = t.instructions, tint = Color.White)
-        }
+        Icon(
+            Icons.AutoMirrored.Filled.List,
+            contentDescription = t.instructions,
+            tint = Color.White.copy(alpha = 0.7f),
+            modifier = Modifier.size(20.dp),
+        )
     }
 
     if (open) {
