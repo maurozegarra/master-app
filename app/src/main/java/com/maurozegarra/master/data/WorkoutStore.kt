@@ -8,6 +8,7 @@ import com.maurozegarra.master.model.SessionJson
 import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.TrainingJson
+import com.maurozegarra.master.model.withUids
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -49,8 +50,12 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
 
     // ---------- Trainings ----------
 
+    /**
+     * Nada se guarda sin [Training.uid]. Es el único punto de escritura, así que aquí se
+     * cubren de una vez los defaults sembrados y los trainings de un respaldo antiguo.
+     */
     fun saveTrainings(items: List<Training>) {
-        prefs.edit().putString(KEY_TRAININGS, TrainingJson.encode(items)).apply()
+        prefs.edit().putString(KEY_TRAININGS, TrainingJson.encode(items.withUids { newUid() })).apply()
     }
 
     /** true si nunca se ha guardado la lista de trainings (instalación limpia). */
@@ -70,8 +75,16 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
 
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
-        return TrainingJson.decode(raw)
+        val items = TrainingJson.decode(raw)
+        val filled = items.withUids { newUid() }
+        // Solo se reescribe si alguno cambio: guardar en cada carga seria un efecto
+        // secundario gratuito en la operacion mas frecuente del store.
+        if (filled != items) saveTrainings(filled)
+        return filled
     }
+
+    /** Identidad estable de un training, independiente del dispositivo (ver [Training.uid]). */
+    fun newUid(): String = java.util.UUID.randomUUID().toString()
 
     // ---------- Ejercicios propios (creados por el usuario) ----------
 
@@ -148,8 +161,8 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         saveTrainings(data.trainings)
         saveCustomExercises(data.customExercises)
         saveSessions(data.sessions)
-        // Solo el mapa: los videos viven en Movies/MASTER/ y sobreviven aparte,
-        // asi que tras reinstalar el respaldo los vuelve a enlazar por nombre.
+        // Solo instrucciones: los videos no viajan en el respaldo, se vuelven a descargar
+        // del manifiesto en cuanto hagan falta.
         media.save(data.exerciseMedia)
         return ImportSummary(trainings = data.trainings.size, sessions = data.sessions.size)
     }

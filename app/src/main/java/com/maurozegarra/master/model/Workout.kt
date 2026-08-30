@@ -146,7 +146,32 @@ data class Training(
     val workouts: List<Workout> = emptyList(),
     val createdAt: Long = 0L,
     val updatedAt: Long = 0L,
+    /**
+     * Identidad estable entre dispositivos.
+     *
+     * [id] es un contador local sacado del reloj: sirve para distinguir trainings dentro
+     * de un teléfono, pero dos teléfonos generan el mismo número sin problema. En cuanto
+     * un training venga asignado desde fuera —que es a donde va TD-063— hace falta algo
+     * que no colisione y que sobreviva a exportar e importar.
+     *
+     * Vacío significa "todavía sin asignar": los trainings guardados antes de que
+     * existiera este campo lo reciben al cargarse.
+     */
+    val uid: String = "",
 )
+
+/**
+ * Rellena el [Training.uid] de los trainings que no lo tengan, dejando intactos los que
+ * ya lo tienen.
+ *
+ * Los guardados antes de que existiera el campo llegan sin él. Quien llame debe
+ * **persistir el resultado**: si solo se rellenara en memoria, cada arranque daría un uid
+ * distinto y la identidad dejaría de ser estable, que es justo lo único que aporta.
+ *
+ * El generador se inyecta para poder probar esto sin depender de UUID.
+ */
+fun List<Training>.withUids(newUid: () -> String): List<Training> =
+    map { if (it.uid.isBlank()) it.copy(uid = newUid()) else it }
 
 /** Devuelve la serie [i] del ejercicio, con valores por defecto si falta. */
 fun Exercise.setAt(i: Int): WorkSet = setList.getOrElse(i) { WorkSet(reps = workValue) }

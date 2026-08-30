@@ -262,4 +262,58 @@ class WorkoutTest {
         assertEquals(1, w.variants[0].exercises.size)
         assertEquals("Cycling", edited.variants[0].name)
     }
+
+    // ---------- uid estable (TD-062, terreno para TD-063) ----------
+
+    @Test
+    fun `fills the uid of trainings that lack one`() {
+        val items = listOf(Training(id = 1), Training(id = 2))
+
+        val filled = items.withUids { "uid" }
+
+        assertEquals(listOf("uid", "uid"), filled.map { it.uid })
+    }
+
+    /** Reasignarlo en cada carga lo volveria inestable, que es lo unico que aporta. */
+    @Test
+    fun `an existing uid is never replaced`() {
+        val items = listOf(Training(id = 1, uid = "ya-tengo"), Training(id = 2))
+
+        val filled = items.withUids { "nuevo" }
+
+        assertEquals(listOf("ya-tengo", "nuevo"), filled.map { it.uid })
+    }
+
+    @Test
+    fun `filling uids changes nothing else`() {
+        val original = Training(id = 7, name = "MASTER", createdAt = 10L, updatedAt = 20L)
+
+        val filled = listOf(original).withUids { "uid" }.single()
+
+        assertEquals(original.copy(uid = "uid"), filled)
+    }
+
+    @Test
+    fun `a list already complete comes back untouched`() {
+        val items = listOf(Training(id = 1, uid = "a"), Training(id = 2, uid = "b"))
+
+        assertEquals(items, items.withUids { "no" })
+    }
+
+    @Test
+    fun `the uid survives a json round trip`() {
+        val items = listOf(Training(id = 1, uid = "abc-123", name = "MASTER"))
+
+        val back = TrainingJson.decode(TrainingJson.encode(items))
+
+        assertEquals("abc-123", back.single().uid)
+    }
+
+    /** Los trainings guardados antes de que el campo existiera llegan sin el. */
+    @Test
+    fun `a training saved without uid decodes with an empty one`() {
+        val back = TrainingJson.decode("""[{"id":1,"name":"MASTER"}]""")
+
+        assertEquals("", back.single().uid)
+    }
 }

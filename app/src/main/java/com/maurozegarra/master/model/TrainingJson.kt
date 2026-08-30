@@ -27,6 +27,7 @@ object TrainingJson {
         tr.workouts.forEach { workouts.put(workoutToJson(it)) }
         return JSONObject()
             .put("id", tr.id)
+            .put("uid", tr.uid)
             .put("name", tr.name)
             .put("createdAt", tr.createdAt)
             .put("updatedAt", tr.updatedAt)
@@ -40,6 +41,9 @@ object TrainingJson {
         }
         return Training(
             id = o.getLong("id"),
+            // Los trainings guardados antes de que existiera el uid llegan sin el; se lo
+            // pone WorkoutStore al cargar, que es quien puede persistirlo.
+            uid = o.optString("uid", ""),
             name = o.optString("name", ""),
             workouts = workouts,
             createdAt = o.optLong("createdAt", 0L),

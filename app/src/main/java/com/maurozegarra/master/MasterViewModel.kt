@@ -466,7 +466,7 @@ class MasterViewModel(
 
     fun startNewTraining() {
         val now = System.currentTimeMillis()
-        draft = Training(id = newId(), name = "", createdAt = now, updatedAt = now)
+        draft = Training(id = newId(), uid = store.newUid(), name = "", createdAt = now, updatedAt = now)
         editingWorkoutId = null
         editingExerciseId = null
         choosingExercise = false
@@ -519,6 +519,8 @@ class MasterViewModel(
         val src = trainings.firstOrNull { it.id == id } ?: return
         val copy = src.copy(
             id = newId(),
+            // Uid nuevo: una copia es otro training, no el mismo en otro sitio.
+            uid = store.newUid(),
             name = duplicateName(src.name),
             workouts = src.workouts.map { it.deepCopy(::newId) },
             createdAt = System.currentTimeMillis(),
