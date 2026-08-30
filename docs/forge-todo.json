@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-065",
+      "title": "Fix: build-release.ps1 borraria el release de videos al publicar",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "El script borra TODOS los releases anteriores y deja solo el ultimo, para que el repo no acumule APKs. Eso era correcto mientras lo unico publicado fueran APKs, pero TD-062 anadio el release 'videos' del que el app descarga los clips: la siguiente publicacion lo habria borrado, dejando videos.json apuntando a urls muertas y a los usuarios sin videos. Se detecto al leer el script antes de publicar, no en produccion. Arreglo: solo se borran los releases cuyo tag sea de version (^v\\d+\\.\\d+\\.\\d+$); cualquier otro se conserva y se anuncia por consola. Comprobado el filtro contra v1.0.156, v1.0.176, v2.0.0 (borrables) y videos, videos-v2, latest (conservados)."
+    },
+    {
       "id": "TD-064",
       "title": "Fix: quitar rotativo a un workout borra todas las variantes menos la primera",
       "category": "Fix",

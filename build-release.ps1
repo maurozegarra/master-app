@@ -65,11 +65,18 @@ $json = @{
 Set-Content $updateJson $json -NoNewline
 Write-Host "OK -> update.json (v$versionName)"
 
-# Subir APK a GitHub Releases (borra releases anteriores, guarda solo el ultimo).
+# Subir APK a GitHub Releases (borra los de version anteriores, guarda solo el ultimo).
 $repo = "maurozegarra/master-app"
 $tag = "v$versionName"
+# Solo se borran los releases de VERSION (tag "vX.Y.Z"). El repo aloja tambien contenido
+# que no es un APK -el release "videos" del que el app descarga los clips (TD-062)-, y
+# borrarlo dejaria videos.json apuntando a urls muertas.
 $oldReleases = gh release list --repo $repo --limit 50 --json tagName 2>$null | ConvertFrom-Json
 foreach ($rel in $oldReleases) {
+    if ($rel.tagName -notmatch '^v\d+\.\d+\.\d+$') {
+        Write-Host "Kept -> $($rel.tagName) (no es un release de version)"
+        continue
+    }
     if ($rel.tagName -ne $tag) {
         gh release delete $rel.tagName --repo $repo --yes --cleanup-tag 2>$null
         Write-Host "Deleted old release -> $($rel.tagName)"

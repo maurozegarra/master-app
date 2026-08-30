@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **51 / 64** hechos, 13 pendientes.
+Progreso: **51 / 65** hechos, 14 pendientes.
 
 ## Pendientes
 
@@ -35,6 +35,8 @@ Progreso: **51 / 64** hechos, 13 pendientes.
 
 ### Fix
 
+- [ ] **TD-065** Fix: build-release.ps1 borraria el release de videos al publicar
+  - El script borra TODOS los releases anteriores y deja solo el ultimo, para que el repo no acumule APKs. Eso era correcto mientras lo unico publicado fueran APKs, pero TD-062 anadio el release 'videos' del que el app descarga los clips: la siguiente publicacion lo habria borrado, dejando videos.json apuntando a urls muertas y a los usuarios sin videos. Se detecto al leer el script antes de publicar, no en produccion. Arreglo: solo se borran los releases cuyo tag sea de version (^v\d+\.\d+\.\d+$); cualquier otro se conserva y se anuncia por consola. Comprobado el filtro contra v1.0.156, v1.0.176, v2.0.0 (borrables) y videos, videos-v2, latest (conservados).
 - [ ] **TD-064** Fix: quitar rotativo a un workout borra todas las variantes menos la primera
   - makeWorkoutSimple conserva los ejercicios de la PRIMERA variante y descarta el resto: w.copy(rotating = false, exercises = w.variants.firstOrNull()?.exercises, variants = emptyList()). Un workout rotativo con 3 variantes pierde dos sin aviso y sin deshacer. EL COMPORTAMIENTO DESEADO, en palabras del usuario: 'rotativo es que los workouts rotan, si le quito el rotativo deberia simplemente no rotar, no borrar nada'. O sea que el flag gobierna COMO se recorren las variantes, no DONDE viven los ejercicios; quitarlo no puede ser una operacion destructiva. Se descarto anadir un dialogo de confirmacion: confirmar una perdida de datos no deseada no arregla que la perdida no deba ocurrir. El bug lleva ahi desde que existe la funcion y no se habia notado. NO ES SOLO ESTE FIX: al revisarlo el usuario pregunto 'cual es la interfaz para hacer de un workout una variante, no la ubico', y esa pregunta abre el modelo entero de workout/variante, que hoy tiene dos representaciones distintas para lo mismo (exercises sueltos cuando es simple, exercises dentro de variants cuando es rotativo) y es de donde nace la perdida de datos al convertir. Revisar el modelo y los flujos de conversion en su propio espacio antes de tocar codigo. CASO DE REFERENCIA, senalado por el usuario: el rotativo 'Strength' del training MASTER funciona como se espera y es el que hay que mirar al abordarlo. Precision de vocabulario: el usuario lo describe como 'dentro de Strength hay 2 workouts, uno lower y otro upper, cada uno con sus ejercicios independientes', pero en el modelo Strength es UN workout con rotating=true y dos VARIANTES, Lower (12 ejercicios) y Upper (5). Lo que el usuario llama workout ahi es lo que el codigo llama variante, y esa distancia entre el vocabulario del usuario y el del modelo es parte de lo que hay que resolver. Comprobado en sus datos del 30-ago-2026: MASTER tiene tambien 'Cardio' rotativo con 4 variantes (Rope Jumping, Tire Jumping, Shadow Boxing, Running), donde quitar el rotativo hoy borraria tres. Con Strength borraria los 5 ejercicios de Upper.
 
