@@ -42,6 +42,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
+ * Resultado de un import: qué entró y si quedó copia del estado anterior.
+ *
+ * [backedUp] se le dice al usuario. Un import reemplaza todos sus datos, y si la copia
+ * de seguridad previa no se pudo escribir tiene derecho a saberlo en ese momento, no
+ * cuando vaya a buscarla.
+ */
+data class ImportResult(val summary: ImportSummary, val backedUp: Boolean)
+
+/**
  * Estado y lógica principal de MASTER (jerarquía Training > Workout > Exercise).
  * Mantiene la lista de trainings persistida y un "draft" en edición que contiene
  * todo el árbol (workouts → exercises) hasta que se guarda.
@@ -288,13 +297,17 @@ class MasterViewModel(
      * Reemplaza todos los datos con los del respaldo y refresca la UI.
      * Devuelve null si el archivo no era un respaldo válido, sin haber tocado nada.
      */
-    fun importData(json: String): ImportSummary? {
+    fun importData(json: String): ImportResult? {
+        // Snapshot ANTES de tocar nada, y en este hilo: el import es la única operación
+        // que borra todos los datos a propósito, así que la copia tiene que existir
+        // cuando empiece, no cuando termine una corrutina. Es un archivo pequeño.
+        val backedUp = autoBackup.writeBeforeImport(store.exportJson())
         val summary = store.importJson(json) ?: return null
         reload()
         refreshSessions()
         exerciseMedia.clear()
         exerciseMedia.putAll(mediaStore.load())
-        return summary
+        return ImportResult(summary, backedUp)
     }
 
     // MASTER es English-only (decisión de producto): el idioma del catálogo y de

@@ -165,11 +165,14 @@ private fun BackupSection(masterVm: MasterViewModel, accent: Color, t: Strings) 
                     val json = runCatching {
                         ctx.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() }
                     }.getOrNull()
-                    val summary = json?.let { masterVm.importData(it) }
-                    val msg = if (summary == null) {
+                    val result = json?.let { masterVm.importData(it) }
+                    val msg = if (result == null) {
                         t.importFailed
                     } else {
-                        "${t.importDone}: ${summary.trainings} / ${summary.sessions}"
+                        val done = "${t.importDone}: ${result.summary.trainings} / ${result.summary.sessions}"
+                        // Si la copia previa no se pudo escribir, el usuario acaba de
+                        // reemplazar sus datos sin red: mejor que se entere ahora.
+                        if (result.backedUp) done else "$done\n${t.importNoBackup}"
                     }
                     Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
                 }) { Text(t.replace, color = accent, fontWeight = FontWeight.Bold) }
