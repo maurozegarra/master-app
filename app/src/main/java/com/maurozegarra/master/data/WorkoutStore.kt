@@ -1,19 +1,13 @@
 package com.maurozegarra.master.data
 
 import android.content.Context
-import com.maurozegarra.master.model.ConfirmMode
-import com.maurozegarra.master.model.DisplayMode
-import com.maurozegarra.master.model.Exercise
 import com.maurozegarra.master.model.ExerciseDef
+import com.maurozegarra.master.model.BackupData
+import com.maurozegarra.master.model.BackupJson
 import com.maurozegarra.master.model.SessionJson
 import com.maurozegarra.master.model.SessionLog
-import com.maurozegarra.master.model.StageConfig
-import com.maurozegarra.master.model.WeightType
-import com.maurozegarra.master.model.WorkMode
 import com.maurozegarra.master.model.Training
-import com.maurozegarra.master.model.WorkSet
-import com.maurozegarra.master.model.Workout
-import com.maurozegarra.master.model.WorkoutVariant
+import com.maurozegarra.master.model.TrainingJson
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -56,9 +50,7 @@ class WorkoutStore(context: Context) {
     // ---------- Trainings ----------
 
     fun saveTrainings(items: List<Training>) {
-        val arr = JSONArray()
-        items.forEach { tr -> arr.put(trainingToJson(tr)) }
-        prefs.edit().putString(KEY_TRAININGS, arr.toString()).apply()
+        prefs.edit().putString(KEY_TRAININGS, TrainingJson.encode(items)).apply()
     }
 
     /** true si nunca se ha guardado la lista de trainings (instalación limpia). */
@@ -78,172 +70,7 @@ class WorkoutStore(context: Context) {
 
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
-        return try {
-            val arr = JSONArray(raw)
-            (0 until arr.length()).map { trainingFromJson(arr.getJSONObject(it)) }
-        } catch (_: Exception) {
-            emptyList()
-        }
-    }
-
-    private fun trainingToJson(tr: Training): JSONObject {
-        val workouts = JSONArray()
-        tr.workouts.forEach { workouts.put(workoutToJson(it)) }
-        return JSONObject()
-            .put("id", tr.id)
-            .put("name", tr.name)
-            .put("createdAt", tr.createdAt)
-            .put("updatedAt", tr.updatedAt)
-            .put("workouts", workouts)
-    }
-
-    private fun trainingFromJson(o: JSONObject): Training {
-        val workouts = mutableListOf<Workout>()
-        o.optJSONArray("workouts")?.let { wa ->
-            for (i in 0 until wa.length()) workouts.add(workoutFromJson(wa.getJSONObject(i)))
-        }
-        return Training(
-            id = o.getLong("id"),
-            name = o.optString("name", ""),
-            workouts = workouts,
-            createdAt = o.optLong("createdAt", 0L),
-            updatedAt = o.optLong("updatedAt", 0L),
-        )
-    }
-
-    private fun workoutToJson(w: Workout): JSONObject {
-        val exercises = JSONArray()
-        w.exercises.forEach { exercises.put(exerciseToJson(it)) }
-        val variants = JSONArray()
-        w.variants.forEach { variants.put(variantToJson(it)) }
-        return JSONObject()
-            .put("id", w.id)
-            .put("name", w.name)
-            .put("exercises", exercises)
-            .put("rotating", w.rotating)
-            .put("rotationIndex", w.rotationIndex)
-            .put("variants", variants)
-    }
-
-    private fun workoutFromJson(o: JSONObject): Workout {
-        val exercises = mutableListOf<Exercise>()
-        o.optJSONArray("exercises")?.let { ea ->
-            for (i in 0 until ea.length()) exercises.add(exerciseFromJson(ea.getJSONObject(i)))
-        }
-        val variants = mutableListOf<WorkoutVariant>()
-        o.optJSONArray("variants")?.let { va ->
-            for (i in 0 until va.length()) variants.add(variantFromJson(va.getJSONObject(i)))
-        }
-        return Workout(
-            id = o.getLong("id"),
-            name = o.optString("name", ""),
-            exercises = exercises,
-            rotating = o.optBoolean("rotating", false),
-            rotationIndex = o.optInt("rotationIndex", 0),
-            variants = variants,
-        )
-    }
-
-    private fun variantToJson(v: WorkoutVariant): JSONObject {
-        val exercises = JSONArray()
-        v.exercises.forEach { exercises.put(exerciseToJson(it)) }
-        return JSONObject()
-            .put("id", v.id)
-            .put("name", v.name)
-            .put("exercises", exercises)
-    }
-
-    private fun variantFromJson(o: JSONObject): WorkoutVariant {
-        val exercises = mutableListOf<Exercise>()
-        o.optJSONArray("exercises")?.let { ea ->
-            for (i in 0 until ea.length()) exercises.add(exerciseFromJson(ea.getJSONObject(i)))
-        }
-        return WorkoutVariant(
-            id = o.getLong("id"),
-            name = o.optString("name", ""),
-            exercises = exercises,
-        )
-    }
-
-    private fun exerciseToJson(e: Exercise): JSONObject {
-        val sets = JSONArray()
-        e.setList.forEach { sets.put(JSONObject().put("reps", it.reps).put("weight", it.weight)) }
-        return JSONObject()
-            .put("id", e.id)
-            .put("exerciseId", e.exerciseId)
-            .put("name", e.name)
-            .put("note", e.note)
-            .put("prepareSec", e.prepareSec)
-            .put("sets", e.sets)
-            .put("workMode", e.workMode.name)
-            .put("workValue", e.workValue)
-            .put("secPerRep", e.secPerRep)
-            .put("restSec", e.restSec)
-            .put("restSkipOnLastSet", e.restSkipOnLastSet)
-            .put("cooldownSec", e.cooldownSec)
-            .put("weightType", e.weightType.name)
-            .put("barWeight", e.barWeight)
-            .put("setList", sets)
-            .put("prepareCfg", stageToJson(e.prepareCfg))
-            .put("workCfg", stageToJson(e.workCfg))
-            .put("restCfg", stageToJson(e.restCfg))
-            .put("cooldownCfg", stageToJson(e.cooldownCfg))
-    }
-
-    private fun exerciseFromJson(o: JSONObject): Exercise {
-        val setList = mutableListOf<WorkSet>()
-        o.optJSONArray("setList")?.let { sa ->
-            for (i in 0 until sa.length()) {
-                val s = sa.getJSONObject(i)
-                setList.add(WorkSet(reps = s.optInt("reps", 12), weight = s.optDouble("weight", 0.0)))
-            }
-        }
-        return Exercise(
-            id = o.getLong("id"),
-            exerciseId = o.optString("exerciseId", ""),
-            name = o.optString("name", ""),
-            note = o.optString("note", ""),
-            prepareSec = o.optInt("prepareSec", 0),
-            sets = o.optInt("sets", 1),
-            workMode = runCatching { WorkMode.valueOf(o.optString("workMode")) }.getOrDefault(WorkMode.TIME),
-            workValue = o.optInt("workValue", 30),
-            secPerRep = o.optInt("secPerRep", 3),
-            restSec = o.optInt("restSec", 30),
-            restSkipOnLastSet = o.optBoolean("restSkipOnLastSet", true),
-            cooldownSec = o.optInt("cooldownSec", 0),
-            weightType = runCatching { WeightType.valueOf(o.optString("weightType")) }.getOrDefault(WeightType.NONE),
-            barWeight = o.optDouble("barWeight", 20.0),
-            setList = setList,
-            prepareCfg = stageFromJson(o.optJSONObject("prepareCfg"), StageConfig.COLOR_PREPARE, 3),
-            workCfg = stageFromJson(o.optJSONObject("workCfg"), StageConfig.COLOR_WORK, 0),
-            restCfg = stageFromJson(o.optJSONObject("restCfg"), StageConfig.COLOR_REST, 3),
-            cooldownCfg = stageFromJson(o.optJSONObject("cooldownCfg"), StageConfig.COLOR_COOLDOWN, 0),
-        )
-    }
-
-    private fun stageToJson(c: StageConfig): JSONObject {
-        val o = JSONObject()
-            .put("color", c.color)
-            .put("display", c.display.name)
-            .put("alarm", c.alarm)
-            .put("finalCount", c.finalCount)
-            .put("confirm", c.confirm.name)
-        if (c.beepSoundUri != null) o.put("beepSoundUri", c.beepSoundUri)
-        if (c.beepSoundName != null) o.put("beepSoundName", c.beepSoundName)
-        return o
-    }
-
-    private fun stageFromJson(o: JSONObject?, defColor: Long, defFinal: Int): StageConfig {
-        if (o == null) return StageConfig(color = defColor, finalCount = defFinal)
-        return StageConfig(
-            color = o.optLong("color", defColor),
-            display = runCatching { DisplayMode.valueOf(o.optString("display")) }.getOrDefault(DisplayMode.COUNTDOWN),
-            alarm = o.optBoolean("alarm", true),
-            finalCount = o.optInt("finalCount", defFinal),
-            confirm = runCatching { ConfirmMode.valueOf(o.optString("confirm")) }.getOrDefault(ConfirmMode.AUTO),
-            beepSoundUri = o.optString("beepSoundUri", "").takeIf { it.isNotBlank() && it != "null" },
-            beepSoundName = o.optString("beepSoundName", "").takeIf { it.isNotBlank() && it != "null" },
-        )
+        return TrainingJson.decode(raw)
     }
 
     // ---------- Ejercicios propios (creados por el usuario) ----------
@@ -299,21 +126,14 @@ class WorkoutStore(context: Context) {
      * de instalarse y pisó la única copia buena que había. Un archivo que el usuario
      * controla es lo único que sobrevive a eso.
      */
-    fun exportJson(): String {
-        val trainings = JSONArray()
-        loadTrainings().forEach { trainings.put(trainingToJson(it)) }
-        val custom = JSONArray()
-        loadCustomExercises().forEach {
-            custom.put(JSONObject().put("id", it.id).put("name", it.name).put("custom", true))
-        }
-        return JSONObject()
-            .put("format", BACKUP_FORMAT)
-            .put("exportedAt", System.currentTimeMillis())
-            .put("trainings", trainings)
-            .put("customExercises", custom)
-            .put("sessions", JSONArray(SessionJson.encode(loadSessions())))
-            .toString(2)
-    }
+    fun exportJson(): String = BackupJson.encode(
+        BackupData(
+            trainings = loadTrainings(),
+            customExercises = loadCustomExercises(),
+            sessions = loadSessions(),
+        ),
+        exportedAt = System.currentTimeMillis(),
+    )
 
     /**
      * Reemplaza todos los datos con los del respaldo. Devuelve el resumen de lo
@@ -323,37 +143,14 @@ class WorkoutStore(context: Context) {
      * datos a medias, que sería peor que no importar.
      */
     fun importJson(json: String): ImportSummary? {
-        val root = try { JSONObject(json) } catch (_: Exception) { return null }
-        if (root.optInt("format", 0) !in 1..BACKUP_FORMAT) return null
-        val trainingsArr = root.optJSONArray("trainings") ?: return null
-
-        val trainings = try {
-            (0 until trainingsArr.length()).map { trainingFromJson(trainingsArr.getJSONObject(it)) }
-        } catch (_: Exception) {
-            return null
-        }
-        val custom = root.optJSONArray("customExercises")?.let { arr ->
-            try {
-                (0 until arr.length()).map {
-                    val o = arr.getJSONObject(it)
-                    ExerciseDef(id = o.getString("id"), name = o.getString("name"), custom = true)
-                }
-            } catch (_: Exception) {
-                return null
-            }
-        } ?: emptyList()
-        val sessions = root.optJSONArray("sessions")
-            ?.let { SessionJson.decode(it.toString()) }
-            ?: emptyList()
-
-        saveTrainings(trainings)
-        saveCustomExercises(custom)
-        saveSessions(sessions)
-        return ImportSummary(trainings = trainings.size, sessions = sessions.size)
+        val data = BackupJson.decode(json) ?: return null
+        saveTrainings(data.trainings)
+        saveCustomExercises(data.customExercises)
+        saveSessions(data.sessions)
+        return ImportSummary(trainings = data.trainings.size, sessions = data.sessions.size)
     }
 
     private companion object {
-        const val BACKUP_FORMAT = 1
         const val KEY_TRAININGS = "trainings_json"
         const val KEY_CUSTOM_EXERCISES = "custom_exercises_json"
         const val KEY_SESSIONS = "sessions_json"
