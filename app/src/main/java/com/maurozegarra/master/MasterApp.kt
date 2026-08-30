@@ -3,6 +3,7 @@ package com.maurozegarra.master
 import android.app.Application
 import android.content.Context
 import com.maurozegarra.master.audio.AlarmPlayer
+import com.maurozegarra.master.data.AutoBackup
 import com.maurozegarra.master.data.SettingsStore
 import com.maurozegarra.master.data.WorkoutStore
 import org.koin.android.ext.koin.androidContext
@@ -26,6 +27,7 @@ val appModule = module {
     singleOf(::WorkoutStore)
     singleOf(::SettingsStore)
     singleOf(::AlarmPlayer)
+    singleOf(::AutoBackup)
     viewModelOf(::MasterViewModel)
     viewModelOf(::SettingsViewModel)
 }

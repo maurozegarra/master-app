@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.maurozegarra.master.audio.AlarmPlayer
+import com.maurozegarra.master.data.AutoBackup
 import com.maurozegarra.master.data.ImportSummary
 import com.maurozegarra.master.data.MasterDefaults
 import com.maurozegarra.master.data.ExerciseCatalog
@@ -33,6 +34,7 @@ import com.maurozegarra.master.model.lastTrainedAt
 import com.maurozegarra.master.model.sortedByLastTrained
 import com.maurozegarra.master.model.weightTotal
 import com.maurozegarra.master.notify.WorkoutPlayerService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -43,7 +45,8 @@ import kotlinx.coroutines.launch
 class MasterViewModel(
     app: Application,
     private val store: WorkoutStore,
-    private val alarmPlayer: AlarmPlayer
+    private val alarmPlayer: AlarmPlayer,
+    private val autoBackup: AutoBackup,
 ) : AndroidViewModel(app) {
 
     val trainings = mutableStateListOf<Training>()
@@ -90,6 +93,13 @@ class MasterViewModel(
     /** Sesiones completadas (las registra el servicio del player en el mismo store). */
     val sessions = mutableStateListOf<SessionLog>()
 
+    /**
+     * El snapshot automatico no corre hasta terminar el init: durante el arranque el
+     * seeding de una instalacion limpia llama a persist(), y ese estado no debe pisar
+     * el respaldo bueno que haya en Documents/MASTER/.
+     */
+    private var snapshotReady = false
+
     private fun newId(): Long = nextId++
 
     init {
@@ -132,6 +142,7 @@ class MasterViewModel(
         migrateRestorePrefs()
         restorePlayerState()
         refreshSessions()
+        snapshotReady = true
     }
 
     private fun migrateRestorePrefs() {
@@ -185,7 +196,27 @@ class MasterViewModel(
         }
     }
 
-    private fun persist() = store.saveTrainings(trainings.toList())
+    private fun persist() {
+        store.saveTrainings(trainings.toList())
+        snapshot()
+    }
+
+    /**
+     * Escribe un snapshot automático en almacenamiento compartido (ver [AutoBackup]).
+     *
+     * Las dos guardas importan. [snapshotReady] evita disparar durante el init, cuando el
+     * seeding de una instalación limpia llama a `persist()`; y no se escribe con datos
+     * vacíos. Sin eso, reinstalar la app pisaría el snapshot bueno con sus defaults —que
+     * es exactamente como se perdió el historial el 29-ago-2026, pero con el backup
+     * automático de Google.
+     */
+    private fun snapshot() {
+        if (!snapshotReady) return
+        if (trainings.isEmpty() && sessions.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            autoBackup.write(store.exportJson())
+        }
+    }
 
     /** Recarga desde almacenamiento (tras restaurar un backup). */
     fun reload() {
@@ -766,6 +797,9 @@ class MasterViewModel(
                     if (hadPlayer || pendingSessionRefresh) {
                         refreshSessions()
                         pendingSessionRefresh = false
+                        // La sesion recien registrada por el servicio es justo lo que
+                        // mas duele perder: respaldarla en cuanto aparece.
+                        snapshot()
                     }
                     return@collect
                 }
@@ -802,6 +836,7 @@ class MasterViewModel(
                         sessionReloaded = true
                         reload()
                         refreshSessions()
+                        snapshot()
                     }
                 }
             }
