@@ -19,7 +19,7 @@
       "id": "TD-053",
       "title": "Snapshot automatico de datos a almacenamiento compartido",
       "category": "Feature",
-      "status": "pending",
+      "status": "done",
       "manual": "Complemento de TD-009: el export manual solo salva si el usuario se acordo de correrlo. Escribir un snapshot JSON (trainings + sesiones) en almacenamiento compartido via MediaStore (Documents/MASTER/), reescrito en cada persist() o al terminar una sesion. Los archivos en Documents/ sobreviven a la desinstalacion, a diferencia de SharedPreferences y de Android/data/. Con eso una reinstalacion deja de ser destructiva sin depender de que el usuario recuerde exportar. Mantener las ultimas N copias con fecha en el nombre."
     },
     {

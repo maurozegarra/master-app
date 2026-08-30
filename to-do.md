@@ -4,14 +4,12 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **42 / 55** hechos, 13 pendientes.
+Progreso: **43 / 55** hechos, 12 pendientes.
 
 ## Pendientes
 
 ### Feature
 
-- [ ] **TD-053** Snapshot automatico de datos a almacenamiento compartido
-  - Complemento de TD-009: el export manual solo salva si el usuario se acordo de correrlo. Escribir un snapshot JSON (trainings + sesiones) en almacenamiento compartido via MediaStore (Documents/MASTER/), reescrito en cada persist() o al terminar una sesion. Los archivos en Documents/ sobreviven a la desinstalacion, a diferencia de SharedPreferences y de Android/data/. Con eso una reinstalacion deja de ser destructiva sin depender de que el usuario recuerde exportar. Mantener las ultimas N copias con fecha en el nombre.
 - [ ] **TD-044** Feedback haptico en el player (skip, check, pause)
   - Vibracion corta al hacer skip, check o pause en el player. Confirmacion tactil sin necesidad de mirar la pantalla. Usar VibrationEffect.createOneShot con duracion corta (~50ms) para no ser intrusivo. Solo en acciones del usuario, no en transiciones automaticas.
 - [ ] **TD-043** Preview del siguiente ejercicio en REST
@@ -52,6 +50,7 @@ Progreso: **42 / 55** hechos, 13 pendientes.
 
 ### Feature
 
+- [x] **TD-053** Snapshot automatico de datos a almacenamiento compartido
 - [x] **TD-051** Add from existing: reutilizar un workout de otro training
 - [x] **TD-048** Icono de la barra de estado solo en segundo plano (estilo YouTube)
 - [x] **TD-037** Tap en dia del calendario abre sheet con sesiones de ese dia
