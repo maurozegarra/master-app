@@ -1,7 +1,7 @@
 {
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.175/master-1.0.175.apk",
-  "minVersionCode": 1,
-  "versionCode": 175,
-  "changelog": "release: TD-062 videos bajo demanda, TD-060 respaldo endurecido y TD-057 swipe en el editor",
-  "versionName": "1.0.175"
+  "versionCode": 177,
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.177/master-1.0.177.apk",
+  "versionName": "1.0.177",
+  "changelog": "release: TD-063 perfiles y trainings asignados, TD-057 swipe en el editor",
+  "minVersionCode": 1
 }
