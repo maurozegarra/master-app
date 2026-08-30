@@ -4,12 +4,14 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **44 / 56** hechos, 12 pendientes.
+Progreso: **45 / 57** hechos, 12 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-057** Swipe-to-reveal en WorkoutRow y VariantRow + quitar el chevron inutil
+  - Continuacion de TD-039, y donde mas se necesita segun el usuario: las filas del editor de training (WorkoutRow) y de la lista de variantes (VariantRow) muestran menu de 3 puntos Y un chevron KeyboardArrowRight que no aporta nada, porque la fila entera ya es clickable. Reusar el componente de swipe de TD-039: WorkoutRow con Make rotating/simple, Duplicate y Delete; VariantRow con Duplicate y Delete (dos acciones, de ahi que el componente acepte un numero variable). Eliminar el menu de 3 puntos y el chevron en ambas.
 - [ ] **TD-044** Feedback haptico en el player (skip, check, pause)
   - Vibracion corta al hacer skip, check o pause en el player. Confirmacion tactil sin necesidad de mirar la pantalla. Usar VibrationEffect.createOneShot con duracion corta (~50ms) para no ser intrusivo. Solo en acciones del usuario, no en transiciones automaticas.
 - [ ] **TD-043** Preview del siguiente ejercicio en REST
@@ -20,8 +22,6 @@ Progreso: **44 / 56** hechos, 12 pendientes.
   - Ademas de la barra lineal de progreso, un ring circular alrededor del clock que muestra cuantos del step actual ha transcurrido. Mas visual y moderno. Calcular fraccion con playerRemainingMs y la duracion total del step.
 - [ ] **TD-040** Duracion estimada en TrainingCard
   - Mostrar duracion estimada (~12 min) junto a '3 workouts · 8 exercises' en la TrainingCard. Calcular sumando duraciones de todos los steps (PREP + WORK + REST + COOLDOWN) del training.
-- [ ] **TD-039** Swipe-to-delete en TrainingCards
-  - Deslizar la card a la izquierda para borrar (con dialogo de confirmacion), en vez de ir al menu de 3 puntos. Mas rapido y natural en movil. Usar SwipeToDismissBox de Material 3 con confirmacion via AlertDialog.
 - [ ] **TD-014** Keep-screen-on durante la corrida (opcional)
   - El player a pantalla completa podria beneficiarse de keep-screen-on
 - [ ] **TD-013** Accesibilidad (opcional)
@@ -53,6 +53,7 @@ Progreso: **44 / 56** hechos, 12 pendientes.
 - [x] **TD-053** Snapshot automatico de datos a almacenamiento compartido
 - [x] **TD-051** Add from existing: reutilizar un workout de otro training
 - [x] **TD-048** Icono de la barra de estado solo en segundo plano (estilo YouTube)
+- [x] **TD-039** Swipe-to-reveal en TrainingCards, en reemplazo del menu de 3 puntos
 - [x] **TD-037** Tap en dia del calendario abre sheet con sesiones de ese dia
 - [x] **TD-035** Atenuar pantalla del player cuando el timer esta en pausa
 - [x] **TD-028** Skip por ejercicio en el player

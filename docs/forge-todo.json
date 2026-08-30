@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-057",
+      "title": "Swipe-to-reveal en WorkoutRow y VariantRow + quitar el chevron inutil",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Continuacion de TD-039, y donde mas se necesita segun el usuario: las filas del editor de training (WorkoutRow) y de la lista de variantes (VariantRow) muestran menu de 3 puntos Y un chevron KeyboardArrowRight que no aporta nada, porque la fila entera ya es clickable. Reusar el componente de swipe de TD-039: WorkoutRow con Make rotating/simple, Duplicate y Delete; VariantRow con Duplicate y Delete (dos acciones, de ahi que el componente acepte un numero variable). Eliminar el menu de 3 puntos y el chevron en ambas."
+    },
+    {
       "id": "TD-056",
       "title": "Borrar handoff.md (TD-048 resuelto)",
       "category": "Mantenimiento",
@@ -122,10 +129,10 @@
     },
     {
       "id": "TD-039",
-      "title": "Swipe-to-delete en TrainingCards",
+      "title": "Swipe-to-reveal en TrainingCards, en reemplazo del menu de 3 puntos",
       "category": "Feature",
-      "status": "pending",
-      "manual": "Deslizar la card a la izquierda para borrar (con dialogo de confirmacion), en vez de ir al menu de 3 puntos. Mas rapido y natural en movil. Usar SwipeToDismissBox de Material 3 con confirmacion via AlertDialog."
+      "status": "done",
+      "manual": "Deslizar la card a la izquierda revela botones circulares de accion en el borde derecho, al estilo TickTick: la fila se desplaza y el panel se queda abierto con los botones tocables. Acciones de TrainingCard: Edit, Duplicate y Delete (este ultimo conserva el dialogo de confirmacion con nombre de TD-034). El menu de 3 puntos se elimina. CORRECCION al plan original: NO se usa SwipeToDismissBox de Material 3, que es un gesto de descarte con fondo de color y no deja botones tocables; hay que usar AnchoredDraggable de Foundation (experimental en 1.6.8) para que el panel se quede anclado abierto. El componente va en ui/ reutilizable y debe aceptar un numero variable de acciones (2 o 3), porque TD-057 lo reusa. No hay conflicto con el drag-reorder: dragContainer usa detectDragGesturesAfterLongPress, que exige mantener pulsado primero. IMPLEMENTADO: orden de botones borrar-duplicar-editar (el destructivo en el extremo mas lejano al pulgar). SwipeRowsController coordina las filas por token para que solo una quede abierta. Se cierra al hacer scroll (listState.isScrollInProgress) y con el primer tap en cualquier sitio: sobre la fila abierta (overlay propio), sobre otra card o su boton de play (consumeTapIfOpen) y sobre el vacio de la lista (detectTapGestures en el contenedor, que ignora los taps ya consumidos por un hijo). Nota de version: Foundation 1.6.8 no tiene settledValue ni snapAnimationSpec/decayAnimationSpec, eso llego en 1.7; se usa currentValue y un unico animationSpec."
     },
     {
       "id": "TD-038",
