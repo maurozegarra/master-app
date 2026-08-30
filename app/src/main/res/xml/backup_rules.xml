@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Respaldo automático de Google en Android 11 y anteriores.
+
+  Los vídeos quedan fuera: son cien y pico megas que se recuperan con una descarga, y el
+  respaldo tiene un tope de 25 MB por app. Si se pasa, Google descarta la copia ENTERA,
+  y con ella el historial de entrenamientos, que es lo único aquí que no se recupera solo.
+-->
+<full-backup-content>
+    <exclude domain="file" path="videos/" />
+</full-backup-content>

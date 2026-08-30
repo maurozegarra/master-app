@@ -5,10 +5,15 @@ import java.io.File
 /**
  * Los vídeos en el dispositivo.
  *
- * Vive en `noBackupFilesDir`, que Android **excluye del respaldo automático** por
- * definición. Es exactamente lo que queremos: son cien y pico megas reconstruibles con
- * una descarga, y meterlos en el respaldo de Google reventaría su tope de 25 MB y con él
- * la copia del historial, que es lo que de verdad no se puede perder.
+ * Vive en `filesDir/videos/`, **excluido del respaldo** en `backup_rules.xml` y
+ * `data_extraction_rules.xml`. La exclusión no es un detalle: son cien y pico megas
+ * reconstruibles con una descarga, y el respaldo de Google tiene un tope de 25 MB por
+ * app; pasarse descarta la copia entera, historial incluido, que es lo único de aquí que
+ * no se recupera solo.
+ *
+ * `noBackupFilesDir` daría esa exclusión sin configurar nada, pero `FileProvider` no
+ * sabe exponer ese directorio, y sin él el reproductor del sistema no podría abrir un
+ * vídeo. Se prefiere declarar la exclusión a perder esa función.
  *
  * Dos carpetas separadas, y la separación es lo que hace segura la poda:
  *
@@ -50,6 +55,9 @@ class VideoCache(private val dir: File) {
     fun hasOwnVideo(exerciseId: String): Boolean = existing(ownFile(exerciseId)) != null
 
     fun deleteOwn(exerciseId: String): Boolean = ownFile(exerciseId).delete()
+
+    /** Ejercicios con vídeo propio. Tienen estado aunque no salgan en el manifiesto. */
+    fun ownExerciseIds(): List<String> = filesIn(ownDir).map { it.name.removeSuffix(".mp4") }
 
     /**
      * Borra las revisiones viejas de un ejercicio, dejando solo [keepRev].

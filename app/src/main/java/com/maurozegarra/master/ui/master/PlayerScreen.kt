@@ -79,7 +79,6 @@ import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.ui.AnimatedGlowBorder
 import com.maurozegarra.master.ui.ExerciseVideo
-import com.maurozegarra.master.ui.rememberVideoPermission
 import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.model.DisplayMode
 import com.maurozegarra.master.model.PlayerStep
@@ -143,6 +142,12 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
     val groups = remember(steps) { buildPreviewGroups(steps) }
     val totalExercises = groups.sumOf { it.exercises.size }
     val expanded = remember(steps) { mutableStateMapOf<Int, Boolean>() }
+
+    // Revisar el training antes de hacerlo es el momento en que se sabe qué ejercicios
+    // vienen y todavía queda tiempo para traer sus vídeos.
+    LaunchedEffect(steps) {
+        vm.prefetchVideos(groups.flatMap { g -> g.exercises.map { it.exerciseId } }.distinct())
+    }
 
     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
         LazyColumn(
@@ -438,6 +443,13 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     }
 
 
+    // El vídeo del ejercicio que viene, con prioridad sobre lo que encolara el preview:
+    // es el único que tiene una fecha límite.
+    LaunchedEffect(vm.playerIndex) {
+        vm.playerSteps.drop(vm.playerIndex + 1).firstOrNull { it.kind == StepKind.WORK }
+            ?.let { vm.requestVideoNow(it.ownerExerciseId) }
+    }
+
     val padClock = remember { vm.padPlayerClock() }
     // Color de fase completo, oscurecido 12% para legibilidad del texto blanco.
     // En pausa se oscurece adicionalmente como indicador visual.
@@ -492,17 +504,10 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         }
         Spacer(Modifier.height(8.dp))
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
-        // El permiso se pide aqui tambien, y no solo en el editor: quien recibe los videos
-        // en un respaldo importado nunca pasa por el editor y se quedaria sin verlos.
-        val hasVideo = vm.mediaFor(step.ownerExerciseId)?.videoFile?.isNotBlank() == true
-        val permission = rememberVideoPermission(requestOnLoad = hasVideo)
-        // Cacheado por ejercicio: resolver la Uri consulta MediaStore, y sin el remember
-        // eso ocurria en cada recomposicion — varias veces por segundo mientras corre el
-        // reloj.
-        val videoUri = remember(step.ownerExerciseId, permission.granted) {
-            if (permission.granted) vm.videoUriFor(step.ownerExerciseId) else null
-        }
-        val showVideo = videoUri != null && step.ownerName.isNotBlank()
+        // Lectura de un mapa en memoria: esto se evalua en cada recomposicion, varias
+        // veces por segundo mientras corre el reloj, y no puede tocar disco ni red.
+        val videoFile = vm.videoFileFor(step.ownerExerciseId)
+        val showVideo = videoFile != null && step.ownerName.isNotBlank()
         if (!showVideo && step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
             ExerciseGlyph(name = ownerLabel, color = step.colorArgb, sizeDp = 40, exerciseId = step.ownerExerciseId)
             Spacer(Modifier.height(8.dp))
@@ -530,7 +535,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
-        if (showVideo && videoUri != null) {
+        if (showVideo && videoFile != null) {
             // El vídeo se queda con el hueco elástico y el reloj baja justo encima de los
             // controles: así el vídeo crece con la pantalla y el número queda al alcance
             // de la vista sin competir con él por el centro. El fondo sigue siendo el
@@ -541,7 +546,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                 contentAlignment = Alignment.Center,
             ) {
                 ExerciseVideo(
-                    uri = videoUri,
+                    file = videoFile,
                     // Solo se mueve mientras se ejecuta: en PREP, REST y COOLDOWN queda
                     // el primer fotograma quieto.
                     playing = step.kind == StepKind.WORK,

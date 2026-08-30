@@ -24,10 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * Vídeo en bucle y sin sonido, para mostrar cómo se ejecuta un ejercicio.
@@ -97,15 +98,15 @@ fun VideoLoop(
  * archivo.
  */
 @Composable
-fun ExerciseVideo(uri: Uri, playing: Boolean, paused: Boolean, modifier: Modifier = Modifier) {
-    val info = rememberVideoInfo(uri)
+fun ExerciseVideo(file: File, playing: Boolean, paused: Boolean, modifier: Modifier = Modifier) {
+    val info = rememberVideoInfo(file)
     // Mientras se lee el archivo se asume horizontal, que es la forma mas comun: al
     // llegar el dato real el hueco se ajusta, y para un vertical el salto ocurre antes
     // de que el usuario empiece a moverse.
     val ratio = info?.ratio ?: (16f / 9f)
     // Se reinicia tambien al empezar a reproducir: cada vez que se entra en WORK hay un
     // VideoView nuevo, y vuelve a haber un hueco negro que tapar.
-    var rendering by remember(uri, playing) { mutableStateOf(false) }
+    var rendering by remember(file, playing) { mutableStateOf(false) }
 
     // Sin fondo propio: hasta que hay algo que enseñar se ve el color de etapa, y no un
     // rectangulo negro. El video ya trae el suyo, y el contenedor tiene su misma forma,
@@ -115,7 +116,7 @@ fun ExerciseVideo(uri: Uri, playing: Boolean, paused: Boolean, modifier: Modifie
         contentAlignment = Alignment.Center,
     ) {
         if (playing) {
-            VideoLoop(uri, paused, Modifier.fillMaxSize()) { rendering = true }
+            VideoLoop(Uri.fromFile(file), paused, Modifier.fillMaxSize()) { rendering = true }
         }
         // El fotograma quieto se queda ENCIMA del video hasta que este dibuja su primer
         // frame. Es lo que evita el parpadeo negro al entrar en WORK: VideoView es un
@@ -137,24 +138,23 @@ fun ExerciseVideo(uri: Uri, playing: Boolean, paused: Boolean, modifier: Modifie
 private class VideoInfo(val frame: Bitmap?, val ratio: Float)
 
 @Composable
-private fun rememberVideoInfo(uri: Uri): VideoInfo? {
-    val ctx = LocalContext.current
-    var info by remember(uri) { mutableStateOf<VideoInfo?>(null) }
+private fun rememberVideoInfo(file: File): VideoInfo? {
+    var info by remember(file) { mutableStateOf<VideoInfo?>(null) }
 
-    LaunchedEffect(uri) {
-        info = withContext(Dispatchers.IO) { readVideoInfo(ctx, uri) }
+    LaunchedEffect(file) {
+        info = withContext(Dispatchers.IO) { readVideoInfo(file) }
     }
 
-    DisposableEffect(uri) {
+    DisposableEffect(file) {
         onDispose { info = null }
     }
 
     return info
 }
 
-private fun readVideoInfo(ctx: Context, uri: Uri): VideoInfo? = runCatching {
+private fun readVideoInfo(file: File): VideoInfo? = runCatching {
     MediaMetadataRetriever().use { r ->
-        r.setDataSource(ctx, uri)
+        r.setDataSource(file.absolutePath)
         val frame = r.getFrameAtTime(0)
         // El fotograma ya viene girado, asi que sus lados son los que se van a ver. Solo
         // si no hay fotograma se recurre a los metadatos, y ahi si hay que aplicar la
@@ -176,9 +176,13 @@ private fun readVideoInfo(ctx: Context, uri: Uri): VideoInfo? = runCatching {
 /**
  * Abre el vídeo en el reproductor del sistema, que ya trae controles completos: no hace
  * falta construir un reproductor propio solo para ver un clip entero.
+ *
+ * El archivo es privado del app, así que se entrega por el `FileProvider` que ya existe
+ * para las actualizaciones: un `file://` sería inservible para otra aplicación.
  */
-fun openVideoExternally(context: android.content.Context, uri: Uri) {
+fun openVideoExternally(context: Context, file: File) {
     runCatching {
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
         context.startActivity(
             Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "video/*")

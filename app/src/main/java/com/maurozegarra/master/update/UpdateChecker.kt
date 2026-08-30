@@ -2,11 +2,10 @@ package com.maurozegarra.master.update
 
 import android.content.Context
 import android.content.pm.PackageManager
+import com.maurozegarra.master.net.Downloader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 
 data class UpdateInfo(
     val versionCode: Int,
@@ -35,14 +34,7 @@ object UpdateChecker {
 
     suspend fun checkForUpdate(context: Context): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
-            val conn = (URL("$UPDATE_URL?t=${System.currentTimeMillis()}").openConnection() as HttpURLConnection).apply {
-                connectTimeout = 10000
-                readTimeout = 10000
-                useCaches = false
-                setRequestProperty("Cache-Control", "no-cache")
-            }
-            val body = conn.inputStream.bufferedReader().use { it.readText() }
-            val json = JSONObject(body)
+            val json = JSONObject(Downloader.fetchText(UPDATE_URL))
             val info = UpdateInfo(
                 versionCode = json.getInt("versionCode"),
                 versionName = json.getString("versionName"),

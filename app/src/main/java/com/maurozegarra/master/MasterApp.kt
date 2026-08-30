@@ -7,6 +7,8 @@ import com.maurozegarra.master.data.AutoBackup
 import com.maurozegarra.master.data.ExerciseMediaStore
 import com.maurozegarra.master.data.SettingsStore
 import com.maurozegarra.master.data.SharedFiles
+import com.maurozegarra.master.data.VideoCache
+import com.maurozegarra.master.data.VideoRepository
 import com.maurozegarra.master.data.WorkoutStore
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -32,6 +34,10 @@ val appModule = module {
     singleOf(::AutoBackup)
     singleOf(::SharedFiles)
     singleOf(::ExerciseMediaStore)
+    // El directorio no se pide a Koin: es una decision del almacenamiento, no una
+    // dependencia. Queda fuera del respaldo en backup_rules.xml.
+    single { VideoCache(java.io.File(androidContext().filesDir, "videos")) }
+    singleOf(::VideoRepository)
     viewModelOf(::MasterViewModel)
     viewModelOf(::SettingsViewModel)
 }

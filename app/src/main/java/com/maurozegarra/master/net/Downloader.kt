@@ -17,6 +17,28 @@ import java.net.URL
 object Downloader {
 
     /**
+     * Lee un documento corto de texto: manifiestos, no archivos.
+     *
+     * Va con anticaché deliberado —parámetro de tiempo y cabecera— porque un manifiesto
+     * viejo es peor que ninguno: haría creer al app que no hay vídeo nuevo, o lo mandaría
+     * a una url que ya no existe.
+     */
+    fun fetchText(url: String): String {
+        val separator = if (url.contains('?')) '&' else '?'
+        val conn = (URL("$url${separator}t=${System.currentTimeMillis()}").openConnection() as HttpURLConnection).apply {
+            connectTimeout = 10_000
+            readTimeout = 10_000
+            useCaches = false
+            setRequestProperty("Cache-Control", "no-cache")
+        }
+        return try {
+            conn.inputStream.bufferedReader().use { it.readText() }
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+    /**
      * Descarga [url] en [target], creando los directorios que falten. Lanza [IOException]
      * si algo va mal; el `.part` se borra siempre antes de propagar.
      *

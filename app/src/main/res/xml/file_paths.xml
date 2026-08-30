@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <cache-path name="updates" path="." />
+    <!-- Videos de ejercicio: privados del app, pero el reproductor del sistema
+         necesita un content:// para poder abrirlos. -->
+    <files-path name="videos" path="videos/" />
 </paths>

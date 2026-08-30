@@ -131,4 +131,19 @@ class VideoCacheTest {
 
         assertEquals(140L, cache.bytesUsed())
     }
+
+    /** El repositorio los necesita para dar estado a ejercicios que no salen publicados. */
+    @Test
+    fun `lists the exercises with an own video`() {
+        write(cache.ownFile("ex_cat_cow"))
+        write(cache.ownFile("ex_open_book"))
+        write(cache.repoFile("ex_squat", 1))
+
+        assertEquals(setOf("ex_cat_cow", "ex_open_book"), cache.ownExerciseIds().toSet())
+    }
+
+    @Test
+    fun `lists nothing when there are no own videos`() {
+        assertTrue(cache.ownExerciseIds().isEmpty())
+    }
 }

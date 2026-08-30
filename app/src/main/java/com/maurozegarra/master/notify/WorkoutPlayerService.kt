@@ -317,7 +317,7 @@ class WorkoutPlayerService : Service() {
 
     private fun advanceWorkoutRotation(workoutIndex: Int) {
         try {
-            val store = WorkoutStore(this, ExerciseMediaStore(this, SharedFiles(this)))
+            val store = WorkoutStore(this, ExerciseMediaStore(this))
             val trainings = store.loadTrainings().toMutableList()
             val ti = trainings.indexOfFirst { it.id == workoutId }
             if (ti < 0) return
@@ -334,7 +334,7 @@ class WorkoutPlayerService : Service() {
 
     private fun recordSession(status: SessionStatus) {
         try {
-            val store = WorkoutStore(this, ExerciseMediaStore(this, SharedFiles(this)))
+            val store = WorkoutStore(this, ExerciseMediaStore(this))
             val now = System.currentTimeMillis()
             val durationSec = if (startedAt > 0L) ((now - startedAt) / 1000).toInt() else 0
             val log = SessionLog(

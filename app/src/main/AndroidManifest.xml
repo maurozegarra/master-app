@@ -12,21 +12,13 @@
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!--
-      Lectura de los videos de ejercicio guardados en Documents/MASTER/videos/.
-      Sin esto, MediaStore solo devuelve los archivos que el propio app creo, y al
-      desinstalar Android borra ese owner: los videos seguirian en disco pero el app
-      reinstalado no podria verlos, rompiendo justo la promesa de que sobreviven.
-    -->
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:name=".MasterApp"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"

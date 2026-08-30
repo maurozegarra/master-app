@@ -14,19 +14,15 @@ import android.util.Log
  * archivos **sobreviven a una desinstalación**, a diferencia de SharedPreferences y de
  * `Android/data/`.
  *
- * Hay dos áreas separadas, y la separación no es estética: MediaProvider **valida el
- * directorio raíz contra la colección** y rechaza la inserción con
- * `IllegalArgumentException: Primary directory X not allowed for content://media/...`.
+ * Guarda **solo los snapshots de respaldo**, en `Documents/MASTER/`. Aquí funciona
+ * porque el usuario los recupera con el selector de archivos del sistema, eligiéndolos a
+ * mano: no dependen de que MediaStore siga atribuyéndoselos al app.
  *
- * - **Snapshots JSON → `Documents/MASTER/`**, colección `Files`, que admite `Documents` y
- *   `Download`. Un JSON no es un archivo de medios.
- * - **Vídeos → `Movies/MASTER/`**, colección `Video`, que solo admite `DCIM`, `Movies` y
- *   `Pictures`. Guardarlos bajo `Documents/` fue el error inicial: quedaban indexados
- *   pero invisibles, porque bajo scoped storage una consulta a `Files` devuelve
- *   únicamente los archivos de medios que creó el propio app.
- *
- * Leer vídeos exige `READ_MEDIA_VIDEO` incluso para los que escribió este mismo app:
- * tras una reinstalación el sistema deja de atribuírselos.
+ * Los vídeos vivieron aquí y se sacaron a la caché privada (`VideoCache`). En
+ * almacenamiento compartido una consulta solo devuelve los archivos de medios que creó el
+ * propio app —ni siquiera con `READ_MEDIA_VIDEO` se ven los de otro propietario—, y
+ * MediaProvider renombra en vez de sobrescribir cuando el nombre ya está ocupado. Las dos
+ * cosas juntas hacían desaparecer vídeos recién guardados.
  *
  * Requiere API 29 (Q); por debajo, escribir fuera del sandbox exige
  * WRITE_EXTERNAL_STORAGE, que no se pide.
@@ -48,31 +44,6 @@ class SharedFiles(context: Context) {
         list(filesCollection(), DOCS_PATH, prefix)
 
     fun deleteDocumentById(id: Long): Boolean = deleteById(filesCollection(), id)
-
-    // ---------- Vídeos de ejercicio ----------
-
-    /**
-     * Copia un vídeo a `Movies/MASTER/`. Devuelve el nombre **con el que quedó
-     * realmente**, o null si falló.
-     *
-     * No devuelve el nombre pedido: si ya existe un archivo así en el directorio —por
-     * ejemplo uno de otro propietario, que este app ni siquiera puede ver—, MediaProvider
-     * no sobrescribe, renombra a `nombre (1).mp4`. Guardar el nombre pedido dejaría el
-     * vídeo escrito pero imposible de encontrar después.
-     */
-    fun writeVideo(name: String, source: () -> java.io.InputStream?): String? =
-        write(videoCollection(), VIDEOS_PATH, name, "video/mp4") { out ->
-            source()?.use { it.copyTo(out) } ?: throw IllegalStateException("sin origen")
-        }
-
-    /** Uri reproducible del vídeo, o null si no está o falta el permiso de lectura. */
-    fun findVideo(name: String): Uri? =
-        if (isAvailable) find(videoCollection(), VIDEOS_PATH, name) else null
-
-    fun deleteVideo(name: String): Boolean {
-        val uri = findVideo(name) ?: return false
-        return runCatching { appCtx.contentResolver.delete(uri, null, null) > 0 }.getOrDefault(false)
-    }
 
     // ---------- Mecánica común ----------
 
@@ -159,11 +130,9 @@ class SharedFiles(context: Context) {
 
     private fun filesCollection() = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
 
-    private fun videoCollection() = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
 
     private companion object {
         const val TAG = "SharedFiles"
         val DOCS_PATH = "${Environment.DIRECTORY_DOCUMENTS}/MASTER/"
-        val VIDEOS_PATH = "${Environment.DIRECTORY_MOVIES}/MASTER/"
     }
 }

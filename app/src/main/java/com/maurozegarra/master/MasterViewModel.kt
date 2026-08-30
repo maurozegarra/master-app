@@ -16,6 +16,9 @@ import com.maurozegarra.master.data.MasterDefaults
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.data.ExerciseMediaStore
 import com.maurozegarra.master.data.SettingsStore
+import com.maurozegarra.master.data.VideoCache
+import com.maurozegarra.master.data.VideoRepository
+import com.maurozegarra.master.data.VideoState
 import com.maurozegarra.master.data.WorkoutStore
 import com.maurozegarra.master.model.AlarmSound
 import com.maurozegarra.master.model.ConfirmMode
@@ -61,6 +64,8 @@ class MasterViewModel(
     private val alarmPlayer: AlarmPlayer,
     private val autoBackup: AutoBackup,
     private val mediaStore: ExerciseMediaStore,
+    private val videos: VideoRepository,
+    private val videoCache: VideoCache,
 ) : AndroidViewModel(app) {
 
     val trainings = mutableStateListOf<Training>()
@@ -248,32 +253,48 @@ class MasterViewModel(
 
     fun mediaFor(exerciseId: String): ExerciseMedia? = exerciseMedia[exerciseId]
 
-    /** Uri reproducible del vídeo, o null si el ejercicio no tiene o falta el archivo. */
-    fun videoUriFor(exerciseId: String): Uri? = mediaStore.videoUri(exerciseMedia[exerciseId])
+    /** En qué punto está el vídeo del ejercicio: descargado, bajando, pendiente o ninguno. */
+    fun videoStateFor(exerciseId: String): VideoState = videos.stateOf(exerciseId)
 
-    val canStoreVideos: Boolean get() = mediaStore.canStoreVideos
+    /** El archivo listo para reproducir, o null. */
+    fun videoFileFor(exerciseId: String): java.io.File? = videos.fileFor(exerciseId)
+
+    /** Si el vídeo que se ve es uno que puso el usuario, y por tanto puede quitarlo. */
+    fun hasOwnVideo(exerciseId: String): Boolean = videoCache.hasOwnVideo(exerciseId)
 
     /**
-     * Copia el vídeo elegido a `Movies/MASTER/` y lo asocia al ejercicio.
-     * [onDone] recibe false si no se pudo guardar.
+     * Pide los vídeos de un training entero. Se llama al abrir su preview: es el momento
+     * en que se sabe qué hará el usuario y todavía queda tiempo para traerlos.
+     */
+    fun prefetchVideos(exerciseIds: List<String>) = videos.requestAll(exerciseIds)
+
+    /** Pide el vídeo del ejercicio que viene ahora, saltándose la cola. */
+    fun requestVideoNow(exerciseId: String) = videos.request(exerciseId, urgent = true)
+
+    /**
+     * Copia el vídeo elegido por el usuario a la caché privada del app, donde gana sobre
+     * el publicado. [onDone] recibe false si no se pudo copiar.
      */
     fun assignVideo(exerciseId: String, source: () -> java.io.InputStream?, onDone: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val name = withContext(Dispatchers.IO) { mediaStore.importVideo(exerciseId, source) }
-            if (name == null) {
-                onDone(false)
-                return@launch
+            val ok = withContext(Dispatchers.IO) {
+                runCatching {
+                    val target = videoCache.ownFile(exerciseId)
+                    target.parentFile?.mkdirs()
+                    source()?.use { input -> target.outputStream().use { input.copyTo(it) } }
+                        ?: error("sin origen")
+                }.isSuccess
             }
-            updateMedia(exerciseId) { it.copy(videoFile = name) }
-            onDone(true)
+            if (ok) videos.refreshState(exerciseId)
+            onDone(ok)
         }
     }
 
+    /** Quita el vídeo propio. Si el ejercicio tiene uno publicado, vuelve a ser el que se ve. */
     fun removeVideo(exerciseId: String) {
         viewModelScope.launch {
-            val current = exerciseMedia[exerciseId]
-            withContext(Dispatchers.IO) { mediaStore.deleteVideo(current) }
-            updateMedia(exerciseId) { it.copy(videoFile = "") }
+            withContext(Dispatchers.IO) { videoCache.deleteOwn(exerciseId) }
+            videos.refreshState(exerciseId)
         }
     }
 

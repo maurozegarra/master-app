@@ -8,13 +8,12 @@ import org.junit.Test
 class ExerciseMediaJsonTest {
 
     @Test
-    fun `round trip keeps video and instructions`() {
+    fun `round trip keeps the instructions of every exercise`() {
         val media = mapOf(
             "ex_cat_cow" to ExerciseMedia(
-                videoFile = "ex_cat_cow.mp4",
                 instructions = listOf("Start on all fours", "Arch the back", "Round the back"),
             ),
-            "ex_open_book" to ExerciseMedia(videoFile = "ex_open_book.mp4"),
+            "ex_open_book" to ExerciseMedia(instructions = listOf("Lie on your side")),
         )
 
         val back = ExerciseMediaJson.decode(ExerciseMediaJson.encode(media))
@@ -33,9 +32,8 @@ class ExerciseMediaJsonTest {
     }
 
     @Test
-    fun `entries without video or instructions are dropped`() {
-        // Un ejercicio al que se le quito el video y no tiene pasos no debe ocupar sitio
-        // en el mapa ni viajar en el respaldo.
+    fun `entries without instructions are dropped`() {
+        // Un ejercicio sin pasos no debe ocupar sitio en el mapa ni viajar en el respaldo.
         val media = mapOf("ex_empty" to ExerciseMedia())
 
         assertEquals("{}", ExerciseMediaJson.encode(media))
@@ -49,12 +47,18 @@ class ExerciseMediaJsonTest {
         assertTrue(ExerciseMediaJson.decode("[]").isEmpty())
     }
 
+    /** Los respaldos viejos traen un campo video que ya no significa nada. */
     @Test
-    fun `decode tolerates an entry with only instructions`() {
-        val back = ExerciseMediaJson.decode("""{"ex_a":{"instructions":["one"]}}""")
+    fun `decode ignores the legacy video field`() {
+        val back = ExerciseMediaJson.decode("""{"ex_a":{"video":"ex_a.mp4","instructions":["one"]}}""")
 
-        assertEquals(listOf("one"), back["ex_a"]?.instructions)
-        assertEquals("", back["ex_a"]?.videoFile)
+        assertEquals(mapOf("ex_a" to ExerciseMedia(listOf("one"))), back)
+    }
+
+    /** Un respaldo viejo cuyo unico contenido era el video se queda sin nada que aportar. */
+    @Test
+    fun `an old entry with only a video is dropped`() {
+        assertTrue(ExerciseMediaJson.decode("""{"ex_a":{"video":"ex_a.mp4"}}""").isEmpty())
     }
 
     @Test

@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.data.VideoState
 import com.maurozegarra.master.ui.ExerciseVideo
-import com.maurozegarra.master.ui.rememberVideoPermission
 import com.maurozegarra.master.ui.openVideoExternally
 import com.maurozegarra.master.ui.theme.ACTION_DELETE
 import com.maurozegarra.master.ui.theme.AppTheme
@@ -56,14 +58,11 @@ import com.maurozegarra.master.ui.theme.Dims
 fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t: Strings) {
     val ctx = LocalContext.current
     val media = vm.mediaFor(exerciseId)
-    // Pedir el permiso al abrir la tarjeta: sin el, MediaStore no devuelve los videos
-    // (ni los que escribio el propio app, si se reinstalo) y la miniatura saldria vacia.
-    val permission = rememberVideoPermission(requestOnLoad = true)
-    val videoUri = if (permission.granted) vm.videoUriFor(exerciseId) else null
-    // Hay vídeo asignado pero el archivo no aparece en MediaStore. Sin distinguir este
-    // caso la tarjeta volvía a ofrecer "Add video", como si nunca se hubiera asignado, y
-    // un fallo al guardar era indistinguible de uno al leer.
-    val missing = videoUri == null && media?.videoFile.orEmpty().isNotBlank()
+    val state = vm.videoStateFor(exerciseId)
+    val videoFile = (state as? VideoState.Ready)?.file
+    // Solo se puede quitar lo que puso el usuario: un vídeo publicado se volvería a
+    // descargar, así que ofrecer "quitar" sería mentirle.
+    val own = remember(state) { vm.hasOwnVideo(exerciseId) }
     var error by remember { mutableStateOf(false) }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -90,18 +89,18 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
             modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
         )
 
-        if (videoUri != null) {
+        if (videoFile != null) {
             // Alto máximo, no fijo: la miniatura toma la forma real del archivo, así que
             // un vídeo vertical se ve entero en vez de recortado a un hueco horizontal.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 260.dp)
-                    .clickable { openVideoExternally(ctx, videoUri) },
+                    .clickable { openVideoExternally(ctx, videoFile) },
                 contentAlignment = Alignment.Center,
             ) {
                 ExerciseVideo(
-                    uri = videoUri,
+                    file = videoFile,
                     playing = false,
                     paused = true,
                     modifier = Modifier.clip(RoundedCornerShape(12.dp)),
@@ -116,25 +115,32 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
                     Icon(Icons.Filled.PlayArrow, contentDescription = t.play, tint = Color.White)
                 }
             }
-            VideoActions(accent, t, onReplace = { picker.launch(arrayOf("video/*")) }) {
-                vm.removeVideo(exerciseId)
-            }
-        } else if (missing) {
-            Text(t.videoMissing, color = AppTheme.colors.textDim, fontSize = 13.sp)
-            VideoActions(accent, t, onReplace = { picker.launch(arrayOf("video/*")) }) {
-                vm.removeVideo(exerciseId)
-            }
+            VideoActions(
+                accent = accent,
+                t = t,
+                canRemove = own,
+                onReplace = { picker.launch(arrayOf("video/*")) },
+                onRemove = { vm.removeVideo(exerciseId) },
+            )
         } else {
+            // Hay vídeo publicado pero todavía no está en el teléfono. Se dice, en vez de
+            // ofrecer "añadir" como si no existiera ninguno.
+            val pending = when (state) {
+                is VideoState.Downloading -> t.videoDownloading
+                is VideoState.Pending -> t.videoNotDownloaded
+                else -> null
+            }
+            if (pending != null) {
+                Text(pending, color = AppTheme.colors.textDim, fontSize = 13.sp)
+                Spacer(Modifier.height(8.dp))
+            }
             Text(
                 t.addVideo,
                 color = accent,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable(enabled = vm.canStoreVideos) { picker.launch(arrayOf("video/*")) },
+                modifier = Modifier.clickable { picker.launch(arrayOf("video/*")) },
             )
-            if (!vm.canStoreVideos) {
-                Text(t.videoNeedsAndroid10, color = AppTheme.colors.textFaded, fontSize = 12.sp)
-            }
         }
 
         if (error) {
@@ -151,7 +157,13 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
 }
 
 @Composable
-private fun VideoActions(accent: Color, t: Strings, onReplace: () -> Unit, onRemove: () -> Unit) {
+private fun VideoActions(
+    accent: Color,
+    t: Strings,
+    canRemove: Boolean,
+    onReplace: () -> Unit,
+    onRemove: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -163,13 +175,15 @@ private fun VideoActions(accent: Color, t: Strings, onReplace: () -> Unit, onRem
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable(onClick = onReplace),
         )
-        Text(
-            t.removeVideo,
-            color = ACTION_DELETE,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable(onClick = onRemove),
-        )
+        if (canRemove) {
+            Text(
+                t.removeVideo,
+                color = ACTION_DELETE,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable(onClick = onRemove),
+            )
+        }
     }
 }
 

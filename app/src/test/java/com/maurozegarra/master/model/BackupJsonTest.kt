@@ -117,7 +117,7 @@ class BackupJsonTest {
     fun `round trip keeps exercise media`() {
         val data = sampleData().copy(
             exerciseMedia = mapOf(
-                "ex_cat_cow" to ExerciseMedia("ex_cat_cow.mp4", listOf("Start on all fours")),
+                "ex_cat_cow" to ExerciseMedia(listOf("Start on all fours")),
             ),
         )
         val back = BackupJson.decode(BackupJson.encode(data, exportedAt = 1_000))!!
