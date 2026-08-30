@@ -1,5 +1,9 @@
 package com.maurozegarra.master.ui.settings
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,17 +24,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.SettingsViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ACCENT_COLORS
@@ -42,10 +54,11 @@ import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.PINK_ACCENT
 import com.maurozegarra.master.ui.theme.STITCH_ACCENT
+import java.time.LocalDate
 
-/** Pantalla de Ajustes: general y player. */
+/** Pantalla de Ajustes: general, player y respaldo de datos. */
 @Composable
-fun SettingsScreen(vm: SettingsViewModel, t: Strings) {
+fun SettingsScreen(vm: SettingsViewModel, masterVm: MasterViewModel, t: Strings) {
     val cfg = vm.config
     val accent = AppTheme.colors.accent
     Column(
@@ -89,6 +102,103 @@ fun SettingsScreen(vm: SettingsViewModel, t: Strings) {
                 onCheckedChange = { vm.setPadPlayerClock(it) },
             )
         }
+
+        SettingsCard(t.groupData) {
+            BackupSection(masterVm = masterVm, accent = accent, t = t)
+        }
+    }
+}
+
+/**
+ * Export/import del respaldo vía SAF: el archivo queda donde el usuario elija, fuera
+ * del sandbox, que es lo único que sobrevive a una desinstalación.
+ */
+@Composable
+private fun BackupSection(masterVm: MasterViewModel, accent: Color, t: Strings) {
+    val ctx = LocalContext.current
+    var pendingImport by remember { mutableStateOf<Uri?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val ok = runCatching {
+            ctx.contentResolver.openOutputStream(uri)?.use { out ->
+                out.write(masterVm.exportData().toByteArray())
+            } ?: error("no output stream")
+        }.isSuccess
+        Toast.makeText(ctx, if (ok) t.exportDone else t.exportFailed, Toast.LENGTH_SHORT).show()
+    }
+
+    // El picker se abre con */* a propósito: según la app que haya generado el archivo,
+    // un .json puede llegar con mime application/octet-stream y quedar invisible al
+    // filtrar por application/json.
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> pendingImport = uri }
+
+    ActionRow(
+        label = t.exportData,
+        desc = t.exportDataDesc,
+        accent = accent,
+        onClick = { exportLauncher.launch(backupFileName()) },
+    )
+    Spacer(Modifier.height(16.dp))
+    ActionRow(
+        label = t.importData,
+        desc = t.importDataDesc,
+        accent = accent,
+        onClick = { importLauncher.launch(arrayOf("*/*")) },
+    )
+
+    val uri = pendingImport
+    if (uri != null) {
+        AlertDialog(
+            onDismissRequest = { pendingImport = null },
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.textPrimary,
+            title = { Text(t.importTitle) },
+            text = { Text(t.importWarning, color = AppTheme.colors.textDim) },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingImport = null
+                    val json = runCatching {
+                        ctx.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() }
+                    }.getOrNull()
+                    val summary = json?.let { masterVm.importData(it) }
+                    val msg = if (summary == null) {
+                        t.importFailed
+                    } else {
+                        "${t.importDone}: ${summary.trainings} / ${summary.sessions}"
+                    }
+                    Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
+                }) { Text(t.replace, color = accent, fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingImport = null }) {
+                    Text(t.cancel, color = AppTheme.colors.textDim)
+                }
+            },
+        )
+    }
+}
+
+/** master-backup-2026-08-29.json */
+private fun backupFileName(): String =
+    "master-backup-${LocalDate.now()}.json"
+
+@Composable
+private fun ActionRow(label: String, desc: String, accent: Color, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Dims.card))
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp),
+    ) {
+        Text(label, color = accent, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(2.dp))
+        Text(desc, color = AppTheme.colors.textFaded, fontSize = 12.sp)
     }
 }
 

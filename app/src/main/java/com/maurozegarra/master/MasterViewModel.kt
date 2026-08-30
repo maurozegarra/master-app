@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.maurozegarra.master.audio.AlarmPlayer
+import com.maurozegarra.master.data.ImportSummary
 import com.maurozegarra.master.data.MasterDefaults
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.data.SettingsStore
@@ -192,6 +193,22 @@ class MasterViewModel(
         trainings.addAll(store.loadTrainings())
         customExercises.clear()
         customExercises.addAll(store.loadCustomExercises())
+    }
+
+    // ---------- Respaldo: export / import ----------
+
+    /** Contenido del archivo de respaldo (trainings + ejercicios propios + historial). */
+    fun exportData(): String = store.exportJson()
+
+    /**
+     * Reemplaza todos los datos con los del respaldo y refresca la UI.
+     * Devuelve null si el archivo no era un respaldo válido, sin haber tocado nada.
+     */
+    fun importData(json: String): ImportSummary? {
+        val summary = store.importJson(json) ?: return null
+        reload()
+        refreshSessions()
+        return summary
     }
 
     // MASTER es English-only (decisión de producto): el idioma del catálogo y de

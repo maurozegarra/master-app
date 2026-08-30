@@ -148,7 +148,7 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
     if (showSettings) {
         BackHandler { showSettings = false }
         SettingsScaffold(title = t.settings, onBack = { showSettings = false }) {
-            SettingsScreen(settingsVm, t)
+            SettingsScreen(settingsVm, vm, t)
         }
         return
     }

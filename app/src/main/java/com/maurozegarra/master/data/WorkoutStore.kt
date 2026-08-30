@@ -17,6 +17,9 @@ import com.maurozegarra.master.model.WorkoutVariant
 import org.json.JSONArray
 import org.json.JSONObject
 
+/** Qué trajo un respaldo importado, para poder reportarlo al usuario. */
+data class ImportSummary(val trainings: Int, val sessions: Int)
+
 /**
  * Persistencia de trainings, ejercicios propios e historial
  * con SharedPreferences + JSON.
@@ -284,7 +287,73 @@ class WorkoutStore(context: Context) {
         return SessionJson.decode(raw)
     }
 
+    // ---------- Respaldo: export / import ----------
+
+    /**
+     * Vuelca todos los datos del usuario (trainings, ejercicios propios e historial) a
+     * un único JSON.
+     *
+     * Existe porque desinstalar la app borra SharedPreferences sin vuelta atrás, y el
+     * backup automático de Android no es red de seguridad: el 29-ago-2026 una
+     * reinstalación limpia subió su propio estado vacío a la nube seis segundos después
+     * de instalarse y pisó la única copia buena que había. Un archivo que el usuario
+     * controla es lo único que sobrevive a eso.
+     */
+    fun exportJson(): String {
+        val trainings = JSONArray()
+        loadTrainings().forEach { trainings.put(trainingToJson(it)) }
+        val custom = JSONArray()
+        loadCustomExercises().forEach {
+            custom.put(JSONObject().put("id", it.id).put("name", it.name).put("custom", true))
+        }
+        return JSONObject()
+            .put("format", BACKUP_FORMAT)
+            .put("exportedAt", System.currentTimeMillis())
+            .put("trainings", trainings)
+            .put("customExercises", custom)
+            .put("sessions", JSONArray(SessionJson.encode(loadSessions())))
+            .toString(2)
+    }
+
+    /**
+     * Reemplaza todos los datos con los del respaldo. Devuelve el resumen de lo
+     * importado, o null si el archivo no es un respaldo válido.
+     *
+     * Todo se parsea y valida ANTES de escribir: un archivo corrupto no debe dejar los
+     * datos a medias, que sería peor que no importar.
+     */
+    fun importJson(json: String): ImportSummary? {
+        val root = try { JSONObject(json) } catch (_: Exception) { return null }
+        if (root.optInt("format", 0) !in 1..BACKUP_FORMAT) return null
+        val trainingsArr = root.optJSONArray("trainings") ?: return null
+
+        val trainings = try {
+            (0 until trainingsArr.length()).map { trainingFromJson(trainingsArr.getJSONObject(it)) }
+        } catch (_: Exception) {
+            return null
+        }
+        val custom = root.optJSONArray("customExercises")?.let { arr ->
+            try {
+                (0 until arr.length()).map {
+                    val o = arr.getJSONObject(it)
+                    ExerciseDef(id = o.getString("id"), name = o.getString("name"), custom = true)
+                }
+            } catch (_: Exception) {
+                return null
+            }
+        } ?: emptyList()
+        val sessions = root.optJSONArray("sessions")
+            ?.let { SessionJson.decode(it.toString()) }
+            ?: emptyList()
+
+        saveTrainings(trainings)
+        saveCustomExercises(custom)
+        saveSessions(sessions)
+        return ImportSummary(trainings = trainings.size, sessions = sessions.size)
+    }
+
     private companion object {
+        const val BACKUP_FORMAT = 1
         const val KEY_TRAININGS = "trainings_json"
         const val KEY_CUSTOM_EXERCISES = "custom_exercises_json"
         const val KEY_SESSIONS = "sessions_json"
