@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **38 / 54** hechos, 16 pendientes.
+Progreso: **41 / 54** hechos, 13 pendientes.
 
 ## Pendientes
 
@@ -12,8 +12,6 @@ Progreso: **38 / 54** hechos, 16 pendientes.
 
 - [ ] **TD-053** Snapshot automatico de datos a almacenamiento compartido
   - Complemento de TD-009: el export manual solo salva si el usuario se acordo de correrlo. Escribir un snapshot JSON (trainings + sesiones) en almacenamiento compartido via MediaStore (Documents/MASTER/), reescrito en cada persist() o al terminar una sesion. Los archivos en Documents/ sobreviven a la desinstalacion, a diferencia de SharedPreferences y de Android/data/. Con eso una reinstalacion deja de ser destructiva sin depender de que el usuario recuerde exportar. Mantener las ultimas N copias con fecha en el nombre.
-- [ ] **TD-051** Add from existing: reutilizar un workout de otro training
-  - En el editor de training, un segundo AddButton 'Add from existing' abre una pantalla nueva (ChooseWorkoutScreen, calcada de ChooseExerciseScreen) que lista los workouts de los demas trainings agrupados por training de origen, con buscador. Al elegir uno se inserta una copia profunda con ids nuevos (Workout.deepCopy de TD-050) al final del draft y se abre para editar. ORDEN: primero los trainings con sesiones registradas, por fecha de la ultima sesion descendente (vm.sessions ya viene ordenada por completedAt desc); despues los nunca entrenados, por updatedAt desc. El criterio es el historial y no updatedAt porque la lista acumula trainings de prueba que nunca se ejercitaron y no deben desplazar al que si se usa. El header de cada grupo muestra cuando se entreno reutilizando dayLabel() de HistoryScreen, y 'Never trained' si no hay sesiones. Excluye el training en edicion y los workouts sin contenido (hasContent). Wiring: flag choosingWorkout en el ViewModel siguiendo el patron de choosingExercise, mas MainActivity (when de pantallas, titleFor, back handler) y strings chooseWorkout / addFromExisting / neverTrained. La funcion de orden va en model/ como funcion pura sobre List<Training> + List<SessionLog> para testearla sin ViewModel.
 - [ ] **TD-044** Feedback haptico en el player (skip, check, pause)
   - Vibracion corta al hacer skip, check o pause en el player. Confirmacion tactil sin necesidad de mirar la pantalla. Usar VibrationEffect.createOneShot con duracion corta (~50ms) para no ser intrusivo. Solo en acciones del usuario, no en transiciones automaticas.
 - [ ] **TD-043** Preview del siguiente ejercicio en REST
@@ -36,13 +34,6 @@ Progreso: **38 / 54** hechos, 16 pendientes.
   - Placeholder para animacion por ejercicio; definir si entra en el roadmap
 - [ ] **TD-010** Catalogo de ejercicios expandido (opcional)
   - Revisar/expandir ExerciseCatalog y ExerciseIcons pensando en el app independiente
-- [ ] **TD-009** Export/import de datos a JSON (PRIORITARIO)
-  - Ya no es opcional. El 29-ago-2026 una reinstalacion por firma incompatible borro trainings e historial del dispositivo y no hubo forma de recuperarlos: el backup de Google se sobrescribio con la instalacion limpia seis segundos despues, y la copia de Samsung Cloud del 24-ago tampoco los tenia. Sin export no hay red de seguridad. Alcance: exportar trainings + sesiones + ejercicios custom a un unico JSON via SAF (ACTION_CREATE_DOCUMENT), e importar con ACTION_OPEN_DOCUMENT reemplazando todo previa confirmacion. Reutilizar la serializacion que ya existe en WorkoutStore y SessionJson. Entrada en la pantalla de Settings.
-
-### Fix
-
-- [ ] **TD-050** Fix preventivo: la copia de un workout no clona sus variantes
-  - duplicateWorkout y duplicateTraining hacen src.copy(id=newId(), exercises=...) sin mencionar variants, y al ser data class la copia arrastra la misma lista: un workout rotativo duplicado conserva los ids de sus WorkoutVariant y de los Exercise dentro de ellas. Hoy no se manifiesta porque todos los lookups estan acotados por workout (editingVariant resuelve dentro de editingWorkout), StepEngine no usa esos ids y las key de Compose son por lista. Es preventivo: TD-033 planea navegacion por ruta con SavedStateHandle, que direccionaria una variante por id sin el contexto del workout, y ahi dos ids iguales resuelven al objeto equivocado en silencio. Solucion: extension Workout.deepCopy(newId: () -> Long) en model/Workout.kt que reasigna ids de workout, exercises, variants y exercises de cada variante, y resetea rotationIndex a 0; los dos duplicados existentes pasan a usarla conservando su duplicateName(). Test de invariante en WorkoutTest (no de reproduccion: no hay fallo observable hoy).
 
 ### Mantenimiento
 
@@ -61,15 +52,18 @@ Progreso: **38 / 54** hechos, 16 pendientes.
 
 ### Feature
 
+- [x] **TD-051** Add from existing: reutilizar un workout de otro training
 - [x] **TD-048** Icono de la barra de estado solo en segundo plano (estilo YouTube)
 - [x] **TD-037** Tap en dia del calendario abre sheet con sesiones de ese dia
 - [x] **TD-035** Atenuar pantalla del player cuando el timer esta en pausa
 - [x] **TD-028** Skip por ejercicio en el player
 - [x] **TD-021** Historial por ejercicio + sesiones parciales
+- [x] **TD-009** Export/import de datos a JSON (PRIORITARIO)
 
 ### Fix
 
 - [x] **TD-052** build-debug.ps1 no debe desinstalar automaticamente
+- [x] **TD-050** Fix preventivo: la copia de un workout no clona sus variantes
 - [x] **TD-049** Probar color naranja en el Now Bar
 - [x] **TD-046** DaySheet: mostrar training expandido a nivel workout al abrir
 - [x] **TD-045** Aumentar atenuacion de pausa en el player (0.35 -> 0.55)
