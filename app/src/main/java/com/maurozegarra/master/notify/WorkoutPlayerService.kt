@@ -16,6 +16,8 @@ import com.maurozegarra.master.PlayerBus
 import com.maurozegarra.master.PlayerCommand
 import com.maurozegarra.master.PlayerSnapshot
 import com.maurozegarra.master.R
+import com.maurozegarra.master.data.ExerciseMediaStore
+import com.maurozegarra.master.data.SharedFiles
 import com.maurozegarra.master.data.WorkoutStore
 import com.maurozegarra.master.model.ConfirmMode
 import com.maurozegarra.master.model.DisplayMode
@@ -315,7 +317,7 @@ class WorkoutPlayerService : Service() {
 
     private fun advanceWorkoutRotation(workoutIndex: Int) {
         try {
-            val store = WorkoutStore(this)
+            val store = WorkoutStore(this, ExerciseMediaStore(this, SharedFiles(this)))
             val trainings = store.loadTrainings().toMutableList()
             val ti = trainings.indexOfFirst { it.id == workoutId }
             if (ti < 0) return
@@ -332,7 +334,7 @@ class WorkoutPlayerService : Service() {
 
     private fun recordSession(status: SessionStatus) {
         try {
-            val store = WorkoutStore(this)
+            val store = WorkoutStore(this, ExerciseMediaStore(this, SharedFiles(this)))
             val now = System.currentTimeMillis()
             val durationSec = if (startedAt > 0L) ((now - startedAt) / 1000).toInt() else 0
             val log = SessionLog(

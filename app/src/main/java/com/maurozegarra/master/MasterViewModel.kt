@@ -1,6 +1,7 @@
 package com.maurozegarra.master
 
 import android.app.Application
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -13,6 +14,7 @@ import com.maurozegarra.master.data.AutoBackup
 import com.maurozegarra.master.data.ImportSummary
 import com.maurozegarra.master.data.MasterDefaults
 import com.maurozegarra.master.data.ExerciseCatalog
+import com.maurozegarra.master.data.ExerciseMediaStore
 import com.maurozegarra.master.data.SettingsStore
 import com.maurozegarra.master.data.WorkoutStore
 import com.maurozegarra.master.model.AlarmSound
@@ -20,6 +22,7 @@ import com.maurozegarra.master.model.ConfirmMode
 import com.maurozegarra.master.model.DisplayMode
 import com.maurozegarra.master.model.Exercise
 import com.maurozegarra.master.model.ExerciseDef
+import com.maurozegarra.master.model.ExerciseMedia
 import com.maurozegarra.master.model.ExerciseRecord
 import com.maurozegarra.master.model.PlayerStep
 import com.maurozegarra.master.model.SessionLog
@@ -36,6 +39,7 @@ import com.maurozegarra.master.model.weightTotal
 import com.maurozegarra.master.notify.WorkoutPlayerService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Estado y lógica principal de MASTER (jerarquía Training > Workout > Exercise).
@@ -47,6 +51,7 @@ class MasterViewModel(
     private val store: WorkoutStore,
     private val alarmPlayer: AlarmPlayer,
     private val autoBackup: AutoBackup,
+    private val mediaStore: ExerciseMediaStore,
 ) : AndroidViewModel(app) {
 
     val trainings = mutableStateListOf<Training>()
@@ -92,6 +97,9 @@ class MasterViewModel(
 
     /** Sesiones completadas (las registra el servicio del player en el mismo store). */
     val sessions = mutableStateListOf<SessionLog>()
+
+    /** Material por ejercicio del catalogo. Clave: exerciseId, no el id de la instancia. */
+    private val exerciseMedia = mutableStateMapOf<String, ExerciseMedia>()
 
     /**
      * El snapshot automatico no corre hasta terminar el init: durante el arranque el
@@ -142,6 +150,7 @@ class MasterViewModel(
         migrateRestorePrefs()
         restorePlayerState()
         refreshSessions()
+        exerciseMedia.putAll(mediaStore.load())
         snapshotReady = true
     }
 
@@ -226,6 +235,50 @@ class MasterViewModel(
         customExercises.addAll(store.loadCustomExercises())
     }
 
+    // ---------- Vídeo e instrucciones por ejercicio (TD-058 / TD-059) ----------
+
+    fun mediaFor(exerciseId: String): ExerciseMedia? = exerciseMedia[exerciseId]
+
+    /** Uri reproducible del vídeo, o null si el ejercicio no tiene o falta el archivo. */
+    fun videoUriFor(exerciseId: String): Uri? = mediaStore.videoUri(exerciseMedia[exerciseId])
+
+    val canStoreVideos: Boolean get() = mediaStore.canStoreVideos
+
+    /**
+     * Copia el vídeo elegido a `Movies/MASTER/` y lo asocia al ejercicio.
+     * [onDone] recibe false si no se pudo guardar.
+     */
+    fun assignVideo(exerciseId: String, source: () -> java.io.InputStream?, onDone: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val name = withContext(Dispatchers.IO) { mediaStore.importVideo(exerciseId, source) }
+            if (name == null) {
+                onDone(false)
+                return@launch
+            }
+            updateMedia(exerciseId) { it.copy(videoFile = name) }
+            onDone(true)
+        }
+    }
+
+    fun removeVideo(exerciseId: String) {
+        viewModelScope.launch {
+            val current = exerciseMedia[exerciseId]
+            withContext(Dispatchers.IO) { mediaStore.deleteVideo(current) }
+            updateMedia(exerciseId) { it.copy(videoFile = "") }
+        }
+    }
+
+    fun setInstructions(exerciseId: String, steps: List<String>) {
+        updateMedia(exerciseId) { it.copy(instructions = steps.filter { s -> s.isNotBlank() }) }
+    }
+
+    private fun updateMedia(exerciseId: String, transform: (ExerciseMedia) -> ExerciseMedia) {
+        val updated = transform(exerciseMedia[exerciseId] ?: ExerciseMedia())
+        if (updated.isEmpty) exerciseMedia.remove(exerciseId) else exerciseMedia[exerciseId] = updated
+        mediaStore.save(exerciseMedia.toMap())
+        snapshot()
+    }
+
     // ---------- Respaldo: export / import ----------
 
     /** Contenido del archivo de respaldo (trainings + ejercicios propios + historial). */
@@ -239,6 +292,8 @@ class MasterViewModel(
         val summary = store.importJson(json) ?: return null
         reload()
         refreshSessions()
+        exerciseMedia.clear()
+        exerciseMedia.putAll(mediaStore.load())
         return summary
     }
 

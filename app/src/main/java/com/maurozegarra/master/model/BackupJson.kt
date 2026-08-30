@@ -8,6 +8,11 @@ data class BackupData(
     val trainings: List<Training>,
     val customExercises: List<ExerciseDef>,
     val sessions: List<SessionLog>,
+    /**
+     * Vídeos e instrucciones por ejercicio (formato 2). Solo el mapa: los vídeos son
+     * archivos en `Movies/MASTER/` y sobreviven por su cuenta.
+     */
+    val exerciseMedia: Map<String, ExerciseMedia> = emptyMap(),
 )
 
 /**
@@ -17,8 +22,11 @@ data class BackupData(
  */
 object BackupJson {
 
-    /** Versión del formato. Subirla solo si cambia de forma incompatible. */
-    const val FORMAT = 1
+    /**
+     * Versión del formato. La 2 añadió `exerciseMedia`; [decode] acepta desde la 1, así
+     * que los respaldos viejos se siguen importando sin perder nada.
+     */
+    const val FORMAT = 2
 
     fun encode(data: BackupData, exportedAt: Long): String {
         val custom = JSONArray()
@@ -31,6 +39,7 @@ object BackupJson {
             .put("trainings", JSONArray(TrainingJson.encode(data.trainings)))
             .put("customExercises", custom)
             .put("sessions", JSONArray(SessionJson.encode(data.sessions)))
+            .put("exerciseMedia", JSONObject(ExerciseMediaJson.encode(data.exerciseMedia)))
             .toString(2)
     }
 
@@ -64,6 +73,16 @@ object BackupJson {
             ?.let { SessionJson.decode(it.toString()) }
             ?: emptyList()
 
-        return BackupData(trainings = trainings, customExercises = custom, sessions = sessions)
+        // Ausente en los respaldos de formato 1: se importan igual, sin medios.
+        val media = root.optJSONObject("exerciseMedia")
+            ?.let { ExerciseMediaJson.decode(it.toString()) }
+            ?: emptyMap()
+
+        return BackupData(
+            trainings = trainings,
+            customExercises = custom,
+            sessions = sessions,
+            exerciseMedia = media,
+        )
     }
 }

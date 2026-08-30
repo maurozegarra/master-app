@@ -3,6 +3,7 @@ package com.maurozegarra.master.model
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -110,6 +111,40 @@ class BackupJsonTest {
         // Un training sin id no se puede parsear. Devolver lista vacia seria peor que
         // fallar: reemplazaria los datos del usuario por nada.
         assertNull(BackupJson.decode("""{"format":1,"trainings":[{"name":"broken"}]}"""))
+    }
+
+    @Test
+    fun `round trip keeps exercise media`() {
+        val data = sampleData().copy(
+            exerciseMedia = mapOf(
+                "ex_cat_cow" to ExerciseMedia("ex_cat_cow.mp4", listOf("Start on all fours")),
+            ),
+        )
+        val back = BackupJson.decode(BackupJson.encode(data, exportedAt = 1_000))!!
+
+        assertEquals(data.exerciseMedia, back.exerciseMedia)
+    }
+
+    @Test
+    fun `a format 1 backup still imports, just without media`() {
+        // La version de formato existe justo para esto: los respaldos exportados antes de
+        // TD-058 tienen que seguir entrando sin perder trainings ni historial.
+        val v1 = """
+            {
+              "format": 1,
+              "exportedAt": 1,
+              "trainings": [{"id": 10, "name": "Hybrid", "workouts": []}],
+              "customExercises": [],
+              "sessions": []
+            }
+        """.trimIndent()
+
+        val back = BackupJson.decode(v1)
+
+        assertNotNull(back)
+        assertEquals(1, back!!.trainings.size)
+        assertEquals("Hybrid", back.trainings[0].name)
+        assertTrue(back.exerciseMedia.isEmpty())
     }
 
     @Test

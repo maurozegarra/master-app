@@ -4,7 +4,9 @@ import android.app.Application
 import android.content.Context
 import com.maurozegarra.master.audio.AlarmPlayer
 import com.maurozegarra.master.data.AutoBackup
+import com.maurozegarra.master.data.ExerciseMediaStore
 import com.maurozegarra.master.data.SettingsStore
+import com.maurozegarra.master.data.SharedFiles
 import com.maurozegarra.master.data.WorkoutStore
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -28,6 +30,8 @@ val appModule = module {
     singleOf(::SettingsStore)
     singleOf(::AlarmPlayer)
     singleOf(::AutoBackup)
+    singleOf(::SharedFiles)
+    singleOf(::ExerciseMediaStore)
     viewModelOf(::MasterViewModel)
     viewModelOf(::SettingsViewModel)
 }

@@ -26,6 +26,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -37,6 +38,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Check
@@ -44,9 +46,12 @@ import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,6 +78,8 @@ import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.ui.AnimatedGlowBorder
+import com.maurozegarra.master.ui.VideoLoop
+import com.maurozegarra.master.ui.rememberVideoPermission
 import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.model.DisplayMode
 import com.maurozegarra.master.model.PlayerStep
@@ -453,6 +460,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             },
     ) {
         RoutineProgressBar(vm, accent)
+        InstructionsButton(vm, step.ownerExerciseId, ownerNameFor(step, t), t)
         if (dimAlpha > 0f) {
             Box(
                 Modifier
@@ -473,7 +481,31 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         }
         Spacer(Modifier.height(8.dp))
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
-        if (step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
+        // El permiso se pide aqui tambien, y no solo en el editor: quien recibe los videos
+        // en un respaldo importado nunca pasa por el editor y se quedaria sin verlos.
+        val hasVideo = vm.mediaFor(step.ownerExerciseId)?.videoFile?.isNotBlank() == true
+        val permission = rememberVideoPermission(requestOnLoad = hasVideo)
+        // Cacheado por ejercicio: resolver la Uri consulta MediaStore, y sin el remember
+        // eso ocurria en cada recomposicion — varias veces por segundo mientras corre el
+        // reloj.
+        val videoUri = remember(step.ownerExerciseId, permission.granted) {
+            if (permission.granted) vm.videoUriFor(step.ownerExerciseId) else null
+        }
+        if (videoUri != null && step.ownerName.isNotBlank()) {
+            // El vídeo ocupa el sitio del glyph pero mucho mayor, y a diferencia de aquel
+            // también en WORK, que es justo donde antes no había ninguna referencia visual.
+            // El fondo sigue siendo el color de etapa: ese color es la señal de en qué
+            // fase estás, no decoración.
+            VideoLoop(
+                uri = videoUri,
+                paused = isPaused,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+            )
+            Spacer(Modifier.height(8.dp))
+        } else if (step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
             ExerciseGlyph(name = ownerLabel, color = step.colorArgb, sizeDp = 40, exerciseId = step.ownerExerciseId)
             Spacer(Modifier.height(8.dp))
         }
@@ -523,6 +555,80 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         Spacer(Modifier.height(8.dp))
     }
         AnimatedGlowBorder(cornerRadius = 0.dp, colors = glowColors(color), strokeWidth = 3.dp)
+    }
+}
+
+private fun ownerNameFor(step: PlayerStep, t: Strings): String =
+    ExerciseCatalog.display(step.ownerExerciseId, step.ownerName.ifBlank { step.title }, t.locale.language)
+
+/**
+ * Acceso a las instrucciones del ejercicio: icono arriba a la derecha que abre un sheet
+ * con los pasos numerados.
+ *
+ * Es un icono y no un "swipe up" como el de Freeletics porque el player ya tiene el tap
+ * (alterna el OSD) y el arrastre horizontal (check / anterior) ocupados. Un tercer gesto
+ * vertical sería invisible sin un texto de ayuda, y la zona inferior ya carga con los
+ * controles, el label "Next" y las barras de progreso.
+ *
+ * Vive dentro del OSD, con los demás controles: así no ocupa espacio permanente.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, title: String, t: Strings) {
+    val steps = vm.mediaFor(exerciseId)?.instructions.orEmpty()
+    if (steps.isEmpty()) return
+    var open by remember { mutableStateOf(false) }
+
+    AnimatedVisibility(
+        visible = vm.playerControlsVisible,
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars)
+            .padding(16.dp)
+            .wrapContentSize(Alignment.TopEnd),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.35f))
+                .clickable { open = true },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.AutoMirrored.Filled.List, contentDescription = t.instructions, tint = Color.White)
+        }
+    }
+
+    if (open) {
+        ModalBottomSheet(
+            onDismissRequest = { open = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = AppTheme.colors.surface,
+        ) {
+            Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 32.dp)) {
+                Text(title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                Spacer(Modifier.height(16.dp))
+                steps.forEachIndexed { i, s ->
+                    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(26.dp)
+                                .clip(CircleShape)
+                                .background(AppTheme.colors.accent.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text("${i + 1}", color = AppTheme.colors.accent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Text(
+                            s,
+                            color = AppTheme.colors.textPrimary,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(start = 12.dp),
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

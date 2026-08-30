@@ -89,6 +89,7 @@ fun ExerciseEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item { GeneralCard(ex, accent, t) { ex = it } }
+            item { ExerciseMediaCard(vm, ex.exerciseId, accent, t) }
             listOf(StepKind.PREP, StepKind.WORK, StepKind.REST, StepKind.COOLDOWN).forEach { kind ->
                 item(key = kind) {
                     StageSection(

@@ -18,7 +18,7 @@ data class ImportSummary(val trainings: Int, val sessions: Int)
  * Persistencia de trainings, ejercicios propios e historial
  * con SharedPreferences + JSON.
  */
-class WorkoutStore(context: Context) {
+class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
 
     private val appCtx = context.applicationContext
     private val prefs = appCtx
@@ -131,6 +131,7 @@ class WorkoutStore(context: Context) {
             trainings = loadTrainings(),
             customExercises = loadCustomExercises(),
             sessions = loadSessions(),
+            exerciseMedia = media.load(),
         ),
         exportedAt = System.currentTimeMillis(),
     )
@@ -147,6 +148,9 @@ class WorkoutStore(context: Context) {
         saveTrainings(data.trainings)
         saveCustomExercises(data.customExercises)
         saveSessions(data.sessions)
+        // Solo el mapa: los videos viven en Movies/MASTER/ y sobreviven aparte,
+        // asi que tras reinstalar el respaldo los vuelve a enlazar por nombre.
+        media.save(data.exerciseMedia)
         return ImportSummary(trainings = data.trainings.size, sessions = data.sessions.size)
     }
 
