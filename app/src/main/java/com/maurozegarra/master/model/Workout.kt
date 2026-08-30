@@ -114,6 +114,29 @@ fun Workout.hasContent(): Boolean =
     exercises.isNotEmpty() || variants.any { it.exercises.isNotEmpty() }
 
 /**
+ * Copia independiente del workout: reasigna el id propio, el de cada ejercicio, el de
+ * cada variante y el de los ejercicios dentro de cada variante.
+ *
+ * Reasignar las variantes es la parte que se olvida fácil: `copy()` de un data class
+ * arrastra [variants] tal cual si no se la nombra, y la copia queda compartiendo ids
+ * con el original. Hoy eso no se nota porque todo lookup del editor está acotado por
+ * workout, pero esa es justamente la invariante que permite que los lookups sean
+ * seguros; direccionar una variante por id sin el contexto de su workout resolvería al
+ * objeto equivocado en silencio.
+ *
+ * [rotationIndex] vuelve a 0: la copia arranca limpia en vez de heredar en qué variante
+ * iba el original.
+ */
+fun Workout.deepCopy(newId: () -> Long): Workout = copy(
+    id = newId(),
+    exercises = exercises.map { it.copy(id = newId()) },
+    rotationIndex = 0,
+    variants = variants.map { v ->
+        v.copy(id = newId(), exercises = v.exercises.map { it.copy(id = newId()) })
+    },
+)
+
+/**
  * Training = nivel superior que agrupa workouts y es lo que se EJECUTA de corrido
  * en el player (ej. "Hybrid Strength").
  */

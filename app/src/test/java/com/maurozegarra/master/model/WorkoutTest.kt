@@ -2,6 +2,7 @@ package com.maurozegarra.master.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -166,5 +167,99 @@ class WorkoutTest {
         val e = Exercise(id = 1, exerciseId = "pu", name = "Pushup",
             workMode = WorkMode.REPS, weightType = WeightType.NONE)
         assertFalse(e.isWeighted)
+    }
+
+    // ---------- deepCopy: ningún id se comparte con el original ----------
+
+    /** Generador determinista para poder afirmar sobre los ids resultantes. */
+    private fun idGen(start: Long = 100L): () -> Long {
+        var next = start
+        return { next++ }
+    }
+
+    @Test
+    fun `deepCopy reassigns workout and exercise ids`() {
+        val w = Workout(id = 1, name = "Lower", exercises = listOf(exercise(), exercise("Lunge")))
+        val copy = w.deepCopy(idGen())
+
+        assertNotEquals(w.id, copy.id)
+        assertEquals(w.exercises.size, copy.exercises.size)
+        val originalIds = w.exercises.map { it.id }.toSet()
+        assertTrue(copy.exercises.none { it.id in originalIds })
+    }
+
+    @Test
+    fun `deepCopy reassigns variant ids and their exercise ids`() {
+        val w = Workout(
+            id = 1,
+            rotating = true,
+            variants = listOf(
+                variant(10, "Running", listOf(exercise("Run"))),
+                variant(11, "Lower", listOf(exercise("Squat"), exercise("Lunge"))),
+            ),
+        )
+        val copy = w.deepCopy(idGen())
+
+        assertEquals(w.variants.size, copy.variants.size)
+        val variantIds = w.variants.map { it.id }.toSet()
+        assertTrue(copy.variants.none { it.id in variantIds })
+
+        val exerciseIds = w.variants.flatMap { v -> v.exercises.map { it.id } }.toSet()
+        val copyExerciseIds = copy.variants.flatMap { v -> v.exercises.map { it.id } }
+        assertTrue(copyExerciseIds.none { it in exerciseIds })
+    }
+
+    @Test
+    fun `deepCopy produces globally unique ids`() {
+        val w = Workout(
+            id = 1,
+            exercises = listOf(exercise()),
+            rotating = true,
+            variants = listOf(variant(10, "A", listOf(exercise("Squat"), exercise("Lunge")))),
+        )
+        val copy = w.deepCopy(idGen())
+
+        val ids = buildList {
+            add(copy.id)
+            addAll(copy.exercises.map { it.id })
+            addAll(copy.variants.map { it.id })
+            addAll(copy.variants.flatMap { v -> v.exercises.map { it.id } })
+        }
+        assertEquals(ids.size, ids.toSet().size)
+    }
+
+    @Test
+    fun `deepCopy keeps content and resets rotationIndex`() {
+        val w = Workout(
+            id = 1,
+            name = "Cardio",
+            rotating = true,
+            rotationIndex = 3,
+            variants = listOf(variant(10, "Running", listOf(exercise("Run")))),
+        )
+        val copy = w.deepCopy(idGen())
+
+        assertEquals(w.name, copy.name)
+        assertEquals(w.rotating, copy.rotating)
+        assertEquals(0, copy.rotationIndex)
+        assertEquals("Running", copy.variants[0].name)
+        assertEquals("Run", copy.variants[0].exercises[0].name)
+    }
+
+    @Test
+    fun `editing the copy does not touch the original`() {
+        val w = Workout(
+            id = 1,
+            rotating = true,
+            variants = listOf(variant(10, "Running", listOf(exercise("Run")))),
+        )
+        val copy = w.deepCopy(idGen())
+        val edited = copy.copy(
+            variants = copy.variants.map { v -> v.copy(name = "Cycling", exercises = emptyList()) },
+        )
+
+        assertEquals("Running", w.variants[0].name)
+        assertEquals(1, w.variants[0].exercises.size)
+        assertEquals("Cycling", edited.variants[0].name)
     }
 }

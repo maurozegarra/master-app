@@ -26,6 +26,7 @@ import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.Workout
 import com.maurozegarra.master.model.WorkoutVariant
+import com.maurozegarra.master.model.deepCopy
 import com.maurozegarra.master.model.hasContent
 import com.maurozegarra.master.model.weightTotal
 import com.maurozegarra.master.notify.WorkoutPlayerService
@@ -373,9 +374,7 @@ class MasterViewModel(
         val copy = src.copy(
             id = newId(),
             name = duplicateName(src.name),
-            workouts = src.workouts.map { w ->
-                w.copy(id = newId(), exercises = w.exercises.map { it.copy(id = newId()) })
-            },
+            workouts = src.workouts.map { it.deepCopy(::newId) },
             createdAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis(),
         )
@@ -481,11 +480,7 @@ class MasterViewModel(
         val i = t.workouts.indexOfFirst { it.id == id }
         if (i < 0) return@updateDraft t
         val src = t.workouts[i]
-        val copy = src.copy(
-            id = newId(),
-            name = duplicateName(src.name),
-            exercises = src.exercises.map { it.copy(id = newId()) },
-        )
+        val copy = src.deepCopy(::newId).copy(name = duplicateName(src.name))
         t.copy(workouts = t.workouts.toMutableList().apply { add(i + 1, copy) })
     }
 
