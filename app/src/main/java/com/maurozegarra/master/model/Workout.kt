@@ -179,6 +179,25 @@ data class Training(
 fun List<Training>.withUids(newUid: () -> String): List<Training> =
     map { if (it.uid.isBlank()) it.copy(uid = newUid()) else it }
 
+/**
+ * Copia independiente de un training, con identidad propia.
+ *
+ * Las tres cosas que cambian son las tres que definen "otro training": id local, [uid]
+ * estable y, sobre todo, [Training.assigned] a false. Duplicar es como se hace propio uno
+ * que llegó de fuera; si la copia siguiera marcada como asignada, la siguiente
+ * sincronización la retiraría por no venir en la asignación y el usuario vería
+ * desaparecer solo el training que acababa de crear.
+ */
+fun Training.duplicate(newId: () -> Long, newUid: () -> String, name: String, now: Long): Training = copy(
+    id = newId(),
+    uid = newUid(),
+    assigned = false,
+    name = name,
+    workouts = workouts.map { it.deepCopy(newId) },
+    createdAt = now,
+    updatedAt = now,
+)
+
 /** Devuelve la serie [i] del ejercicio, con valores por defecto si falta. */
 fun Exercise.setAt(i: Int): WorkSet = setList.getOrElse(i) { WorkSet(reps = workValue) }
 

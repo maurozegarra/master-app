@@ -154,6 +154,48 @@ class AssignmentTest {
         assertEquals(once, twice)
     }
 
+    // ---------- Duplicar un training asignado ----------
+
+    /**
+     * El caso que fallo en dispositivo: la copia heredaba assigned, y como su uid nuevo no
+     * viene en la asignacion, la siguiente sincronizacion se la llevaba.
+     */
+    @Test
+    fun `duplicating an assigned training gives an own one`() {
+        val src = assigned(1, "a", "COLUMNA")
+
+        val copy = src.duplicate(newId = ::newId, newUid = { "nuevo" }, name = "COLUMNA (copy)", now = 5L)
+
+        assertEquals(false, copy.assigned)
+        assertEquals("nuevo", copy.uid)
+    }
+
+    @Test
+    fun `a copy of an assigned training survives the next sync`() {
+        val src = assigned(1, "a", "COLUMNA")
+        val copy = src.duplicate(newId = ::newId, newUid = { "nuevo" }, name = "COLUMNA (copy)", now = 5L)
+
+        // Llega la misma asignacion de siempre, que no menciona a la copia.
+        val out = mergeAssigned(listOf(src, copy), listOf(Training(id = 9, uid = "a", name = "COLUMNA")), ::newId)
+
+        assertEquals(listOf("COLUMNA", "COLUMNA (copy)"), out.map { it.name })
+    }
+
+    @Test
+    fun `duplicating gives fresh ids and keeps the contents`() {
+        val src = assigned(1, "a", "COLUMNA").copy(
+            workouts = listOf(Workout(id = 50, name = "W", exercises = listOf(Exercise(id = 51, exerciseId = "ex_a", name = "A")))),
+        )
+
+        val copy = src.duplicate(newId = ::newId, newUid = { "nuevo" }, name = "C", now = 5L)
+
+        assertEquals(1, copy.workouts.size)
+        assertEquals(listOf("ex_a"), copy.workouts[0].exercises.map { it.exerciseId })
+        assertTrue(copy.workouts[0].id != 50L)
+        assertTrue(copy.workouts[0].exercises[0].id != 51L)
+        assertEquals(5L, copy.createdAt)
+    }
+
     /** Un training propio con el mismo uid que uno asignado no se convierte en asignado. */
     @Test
     fun `an own training is not captured by an assignment with its uid`() {

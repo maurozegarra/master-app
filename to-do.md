@@ -4,14 +4,12 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **52 / 65** hechos, 13 pendientes.
+Progreso: **53 / 66** hechos, 13 pendientes.
 
 ## Pendientes
 
 ### Feature
 
-- [ ] **TD-063** Soporte de usuarios: asignar trainings con sus ejercicios y videos
-  - El app es hoy monousuario y todo vive en SharedPreferences. La meta es que existan usuarios a los que se les asigne un training con sus ejercicios y videos, al estilo de un entrenador que reparte rutinas. Va DESPUES de estabilizar TD-062, que deja preparado lo caro de retrofitear: el uid estable en Training -los ids de hoy son contadores locales y dos dispositivos generan el mismo- y la URL del manifiesto en un solo sitio, para pasar a uno por usuario (/users/<uid>/videos.json) cambiando una constante. Falta decidir proveedor: Supabase es el candidato, porque las mismas politicas RLS que controlan las filas controlan el acceso a los archivos, y su API REST se consume con HttpURLConnection sin anadir un SDK pesado; Firebase quedo descartado al retirar Cloud Storage del plan gratuito en febrero de 2026. Los bytes pueden quedarse en GitHub Releases o mudarse a Cloudflare R2 (10 GB gratis, egreso a coste cero) sin tocar el app, porque el manifiesto guarda URLs. Empezar por sincronizacion SOLO DE BAJADA: el usuario recibe trainings de solo lectura, mucho mas simple que un sync bidireccional. El historial de sesiones se queda local. Hoy son 4 usuarios.
 - [ ] **TD-044** Feedback haptico en el player (skip, check, pause)
   - Vibracion corta al hacer skip, check o pause en el player. Confirmacion tactil sin necesidad de mirar la pantalla. Usar VibrationEffect.createOneShot con duracion corta (~50ms) para no ser intrusivo. Solo en acciones del usuario, no en transiciones automaticas.
 - [ ] **TD-043** Preview del siguiente ejercicio en REST
@@ -40,6 +38,8 @@ Progreso: **52 / 65** hechos, 13 pendientes.
 
 ### Mantenimiento
 
+- [ ] **TD-066** Script para publicar perfiles y asignaciones
+  - TD-063 dejo el app recibiendo asignaciones, pero los archivos users.json y users/<id>.json se generaron A MANO desde un backup del dispositivo. Asi no es usable: cada cambio de asignacion exige que alguien edite JSON. Falta un publish-profiles.ps1 que lea los trainings de una fuente -el export del usuario, o docs/ si se decide tenerlos versionados-, cruce una tabla de asignaciones tipo docs/assignments.json ({ 'niko': ['<uid>', '<uid>'] }) y genere los archivos listos para publicar, con la misma mecanica que build-release.ps1. Ojo con dos cosas al escribirlo: el uid de cada training publicado tiene que ser ESTABLE entre publicaciones, porque es la clave con la que el dispositivo empareja y conserva el id local que enlaza el historial; y publicar una lista vacia para alguien le retira sus trainings asignados, asi que conviene que el script avise de cuantos quita antes de escribir.
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
   - Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez.
 
@@ -55,6 +55,7 @@ Progreso: **52 / 65** hechos, 13 pendientes.
 
 ### Feature
 
+- [x] **TD-063** Soporte de usuarios: asignar trainings con sus ejercicios y videos
 - [x] **TD-062** Repositorio remoto de videos con descarga bajo demanda y cache
 - [x] **TD-061** Refinar la presentacion del video en el player
 - [x] **TD-059** Instrucciones paso a paso por ejercicio

@@ -423,11 +423,20 @@ private fun TrainingCard(
 
     // Orden pedido: borrar, duplicar, editar. El destructivo queda en el extremo
     // izquierdo, el más lejano al pulgar cuando la fila apenas se abre.
-    val actions = listOf(
-        SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete) { confirmDelete = true },
-        SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate),
-        SwipeAction(Icons.Filled.Edit, ACTION_EDIT, t.edit, onEdit),
-    )
+    //
+    // Un training asignado solo se puede duplicar. Editarlo o borrarlo daría la falsa
+    // sensación de haberlo hecho: la siguiente sincronización lo devolvería tal cual, y
+    // el trabajo se perdería sin aviso. Quien quiera cambiarlo duplica, y la copia es
+    // suya y editable.
+    val actions = if (training.assigned) {
+        listOf(SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate))
+    } else {
+        listOf(
+            SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete) { confirmDelete = true },
+            SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate),
+            SwipeAction(Icons.Filled.Edit, ACTION_EDIT, t.edit, onEdit),
+        )
+    }
 
     SwipeActionsRow(actions = actions, controller = swipeController) {
     Row(
@@ -447,11 +456,15 @@ private fun TrainingCard(
                 .padding(end = 8.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // weight en el titulo, no en las insignias: sin el, un nombre largo se
+                // queda con todo el ancho y a la insignia no le sobra ninguno, asi que su
+                // texto se parte en una letra por linea y estira la card entera.
                 Text(
                     training.name.ifBlank { t.noName },
                     color = AppTheme.colors.textPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 if (isActive) {
                     Box(
@@ -461,6 +474,18 @@ private fun TrainingCard(
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
                         Text("IN PROGRESS", color = accent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                // Se avisa de que llega de fuera: explica por que no se puede editar y por
+                // que puede cambiar solo de un dia para otro.
+                if (training.assigned) {
+                    Box(
+                        Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(AppTheme.colors.textDim.copy(alpha = 0.2f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Text(t.assignedBadge, color = AppTheme.colors.textDim, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

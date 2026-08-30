@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.maurozegarra.master.audio.AlarmPlayer
+import com.maurozegarra.master.data.AssignmentRepository
 import com.maurozegarra.master.data.AutoBackup
 import com.maurozegarra.master.data.ImportSummary
 import com.maurozegarra.master.data.MasterDefaults
@@ -28,6 +29,7 @@ import com.maurozegarra.master.model.ExerciseDef
 import com.maurozegarra.master.model.ExerciseMedia
 import com.maurozegarra.master.model.ExerciseRecord
 import com.maurozegarra.master.model.PlayerStep
+import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
@@ -35,8 +37,10 @@ import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.Workout
 import com.maurozegarra.master.model.WorkoutVariant
 import com.maurozegarra.master.model.deepCopy
+import com.maurozegarra.master.model.duplicate
 import com.maurozegarra.master.model.hasContent
 import com.maurozegarra.master.model.lastTrainedAt
+import com.maurozegarra.master.model.mergeAssigned
 import com.maurozegarra.master.model.sortedByLastTrained
 import com.maurozegarra.master.model.weightTotal
 import com.maurozegarra.master.notify.WorkoutPlayerService
@@ -66,6 +70,7 @@ class MasterViewModel(
     private val mediaStore: ExerciseMediaStore,
     private val videos: VideoRepository,
     private val videoCache: VideoCache,
+    private val assignments: AssignmentRepository,
 ) : AndroidViewModel(app) {
 
     val trainings = mutableStateListOf<Training>()
@@ -166,6 +171,9 @@ class MasterViewModel(
         refreshSessions()
         exerciseMedia.putAll(mediaStore.load())
         snapshotReady = true
+        // Al arrancar se comprueba si cambio lo asignado. Va al final: antes de esto el
+        // estado todavia se esta armando, y persist() escribiria a medias.
+        syncAssignments()
     }
 
     private fun migrateRestorePrefs() {
@@ -307,6 +315,45 @@ class MasterViewModel(
         if (updated.isEmpty) exerciseMedia.remove(exerciseId) else exerciseMedia[exerciseId] = updated
         mediaStore.save(exerciseMedia.toMap())
         snapshot()
+    }
+
+    // ---------- Perfil y trainings asignados (TD-063) ----------
+
+    /** Perfil elegido en este dispositivo, o null si aún no se ha elegido ninguno. */
+    val profileId: String? get() = assignments.profileId
+
+    val profileName: String get() = assignments.profileName
+
+    /** Perfiles publicados, para elegir. Va a la red, así que se llama al abrir la lista. */
+    fun loadProfiles(onDone: (List<Profile>) -> Unit) {
+        viewModelScope.launch {
+            onDone(withContext(Dispatchers.IO) { assignments.directory() })
+        }
+    }
+
+    /** Fija quién usa este dispositivo y trae de inmediato lo que le toque. */
+    fun chooseProfile(profile: Profile) {
+        assignments.profileId = profile.id
+        assignments.profileName = profile.name
+        syncAssignments()
+    }
+
+    /**
+     * Trae los trainings asignados y los aplica.
+     *
+     * Si no hay perfil o no se pudo leer la asignación **no se toca nada**: un fallo de
+     * red no puede parecerse a "ya no te toca ninguno", que sí retira trainings.
+     */
+    fun syncAssignments() {
+        val id = assignments.profileId ?: return
+        viewModelScope.launch {
+            val incoming = withContext(Dispatchers.IO) { assignments.assignedTrainings(id) } ?: return@launch
+            val merged = mergeAssigned(trainings.toList(), incoming, ::newId)
+            if (merged == trainings.toList()) return@launch
+            trainings.clear()
+            trainings.addAll(merged)
+            persist()
+        }
     }
 
     // ---------- Respaldo: export / import ----------
@@ -517,14 +564,11 @@ class MasterViewModel(
 
     fun duplicateTraining(id: Long) {
         val src = trainings.firstOrNull { it.id == id } ?: return
-        val copy = src.copy(
-            id = newId(),
-            // Uid nuevo: una copia es otro training, no el mismo en otro sitio.
-            uid = store.newUid(),
+        val copy = src.duplicate(
+            newId = ::newId,
+            newUid = store::newUid,
             name = duplicateName(src.name),
-            workouts = src.workouts.map { it.deepCopy(::newId) },
-            createdAt = System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis(),
+            now = System.currentTimeMillis(),
         )
         val i = trainings.indexOfFirst { it.id == id }
         trainings.add(i + 1, copy)

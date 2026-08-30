@@ -46,6 +46,7 @@ import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.SettingsViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ACCENT_COLORS
+import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.THEME_AUTO
 import com.maurozegarra.master.model.THEME_DARK
 import com.maurozegarra.master.model.THEME_LIGHT
@@ -68,6 +69,10 @@ fun SettingsScreen(vm: SettingsViewModel, masterVm: MasterViewModel, t: Strings)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        SettingsCard(t.groupProfile) {
+            ProfileSection(masterVm = masterVm, accent = accent, t = t)
+        }
+
         SettingsCard(t.groupGeneral) {
             Text(t.color, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(10.dp))
@@ -187,6 +192,84 @@ private fun BackupSection(masterVm: MasterViewModel, accent: Color, t: Strings) 
             },
             dismissButton = {
                 TextButton(onClick = { pendingImport = null }) {
+                    Text(t.cancel, color = AppTheme.colors.textDim)
+                }
+            },
+        )
+    }
+}
+
+/**
+ * Quién usa este dispositivo.
+ *
+ * No hay cuentas ni contraseñas: la identidad solo decide qué trainings se descargan, y
+ * son personas conocidas. Elegir perfil dispara la sincronización en el acto, para que el
+ * efecto se vea sin tener que reiniciar nada.
+ */
+@Composable
+private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings) {
+    var choosing by remember { mutableStateOf(false) }
+    var profiles by remember { mutableStateOf<List<Profile>?>(null) }
+
+    Text(t.profileWho, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+    Spacer(Modifier.height(2.dp))
+    Text(t.profileDesc, color = AppTheme.colors.textDim, fontSize = 13.sp)
+    Spacer(Modifier.height(10.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            masterVm.profileName.ifBlank { t.profileNotSet },
+            color = AppTheme.colors.textPrimary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            t.profileChange,
+            color = accent,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.clickable {
+                // La lista se pide al abrir, no al pintar los ajustes: es una llamada de
+                // red y no tiene por que ocurrir cada vez que alguien mira esta pantalla.
+                profiles = null
+                choosing = true
+                masterVm.loadProfiles { profiles = it }
+            },
+        )
+    }
+
+    if (choosing) {
+        AlertDialog(
+            onDismissRequest = { choosing = false },
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.textPrimary,
+            textContentColor = AppTheme.colors.textDim,
+            title = { Text(t.profileWho) },
+            text = {
+                val list = profiles
+                when {
+                    list == null -> Text("…")
+                    list.isEmpty() -> Text(t.profileNoneAvailable)
+                    else -> Column {
+                        list.forEach { p ->
+                            Text(
+                                p.name,
+                                color = AppTheme.colors.textPrimary,
+                                fontSize = 16.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        masterVm.chooseProfile(p)
+                                        choosing = false
+                                    }
+                                    .padding(vertical = 12.dp),
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { choosing = false }) {
                     Text(t.cancel, color = AppTheme.colors.textDim)
                 }
             },
