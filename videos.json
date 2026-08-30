@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "baseUrl": "https://github.com/maurozegarra/master-app/releases/download/videos/",
+  "videos": {
+    "ex_kneeling_spine_extension": { "file": "ex_kneeling_spine_extension.mp4", "rev": 1, "bytes": 2053029 },
+    "ex_cobra_to_child": { "file": "ex_cobra_to_child.mp4", "rev": 1, "bytes": 3384002 },
+    "ex_cat_cow": { "file": "ex_cat_cow.mp4", "rev": 1, "bytes": 1721463 },
+    "ex_thread_the_needle": { "file": "ex_thread_the_needle.mp4", "rev": 1, "bytes": 4830011 },
+    "ex_open_book": { "file": "ex_open_book.mp4", "rev": 1, "bytes": 2978920 },
+    "ex_seated_side_bend": { "file": "ex_seated_side_bend.mp4", "rev": 1, "bytes": 2067435 },
+    "ex_thoracic_rotation_half_kneeling": { "file": "ex_thoracic_rotation_half_kneeling.mp4", "rev": 1, "bytes": 3748012 }
+  }
+}
