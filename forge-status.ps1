@@ -5,6 +5,10 @@
 #   - status "auto" + commit: busca el ID en git log (convencion "TD-XXX").
 #   - status "done":           respeta (marcado manualmente).
 #   - status "pending":        respeta (pendiente).
+#   - status "blocked":        respeta; se lista aparte, arriba del todo.
+#
+# Cualquier otro status cuenta como pendiente: un item nunca debe desaparecer del
+# listado por no encajar en una categoria.
 #
 # Uso:
 #   .\forge-status.ps1              # corre tests si hay items auto+test, genera to-do.md
@@ -87,7 +91,18 @@ foreach ($item in $items) {
 # --- Fase 3: generar to-do.md ---
 
 $done = $derived | Where-Object { $_.state -eq 'done' }
-$pending = $derived | Where-Object { $_.state -eq 'pending' }
+$blocked = $derived | Where-Object { $_.state -eq 'blocked' }
+# Todo lo que no esta hecho ni bloqueado va a pendientes, aunque su status sea uno
+# que este script no conozca. Con la particion anterior -done o pending, y nada mas-
+# un item en cualquier otro estado se contaba en el total pero no se listaba en
+# ninguna seccion: TD-058 estuvo en "blocked" y desaparecio de to-do.md sin aviso.
+$pending = $derived | Where-Object { $_.state -ne 'done' -and $_.state -ne 'blocked' }
+
+$unknown = $derived | Where-Object { $_.state -notin @('done', 'pending', 'blocked') }
+if ($unknown) {
+    $detail = ($unknown | ForEach-Object { "$($_.id)=$($_.state)" }) -join ', '
+    Write-Host "WARN -> status no reconocido, se listan como pendientes: $detail" -ForegroundColor Yellow
+}
 
 $categories = ($derived | Select-Object -ExpandProperty category -Unique) | Sort-Object
 
@@ -101,9 +116,32 @@ $lines += ""
 
 $doneCount = $done.Count
 $pendingCount = $pending.Count
+$blockedCount = $blocked.Count
 $total = $derived.Count
-$lines += "Progreso: **$doneCount / $total** hechos, $pendingCount pendientes."
+
+# La suma tiene que cuadrar: si no, algun item se esta perdiendo por el camino y
+# el contador mentiria, que es exactamente como TD-058 paso desapercibido.
+if ($doneCount + $pendingCount + $blockedCount -ne $total) {
+    throw "Items descuadrados: $doneCount done + $pendingCount pending + $blockedCount blocked != $total"
+}
+
+$progress = "Progreso: **$doneCount / $total** hechos, $pendingCount pendientes"
+if ($blockedCount -gt 0) { $progress += ", $blockedCount bloqueados" }
+$lines += "$progress."
 $lines += ""
+
+if ($blocked.Count -gt 0) {
+    # Arriba del todo: un item bloqueado es el que mas urge ver.
+    $lines += "## Bloqueados"
+    $lines += ""
+    foreach ($item in $blocked) {
+        $lines += "- [!] **$($item.id)** $($item.title)"
+        if ($item.manual) {
+            $lines += "  - $($item.manual)"
+        }
+    }
+    $lines += ""
+}
 
 if ($pending.Count -gt 0) {
     $lines += "## Pendientes"
@@ -145,7 +183,7 @@ Write-Host "OK -> to-do.md generado ($doneCount done, $pendingCount pending, $to
 # --- Resumen en consola ---
 Write-Host ""
 foreach ($item in $derived) {
-    $mark = if ($item.state -eq 'done') { '[x]' } else { '[ ]' }
+    $mark = switch ($item.state) { 'done' { '[x]' } 'blocked' { '[!]' } default { '[ ]' } }
     $ver = if ($item.verifiedBy) { " ($($item.verifiedBy))" } elseif ($item.state -eq 'done') { " (manual)" } else { "" }
     Write-Host "  $mark $($item.id) $($item.title)$ver"
 }
