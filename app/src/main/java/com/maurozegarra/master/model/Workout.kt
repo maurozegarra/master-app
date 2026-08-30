@@ -158,6 +158,12 @@ data class Training(
      * existiera este campo lo reciben al cargarse.
      */
     val uid: String = "",
+    /**
+     * true si el training llega asignado desde fuera, en vez de haberlo creado el propio
+     * usuario. Se sincroniza: al dejar de estar asignado desaparece, y editarlo en local
+     * no tendria sentido porque la siguiente sincronizacion lo pisaria.
+     */
+    val assigned: Boolean = false,
 )
 
 /**
