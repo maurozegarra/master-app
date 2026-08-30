@@ -65,23 +65,43 @@ $json = @{
 Set-Content $updateJson $json -NoNewline
 Write-Host "OK -> update.json (v$versionName)"
 
-# Subir APK a GitHub Releases (borra los de version anteriores, guarda solo el ultimo).
+# Subir APK a GitHub Releases, conservando los KEEP_RELEASES ultimos de version.
 $repo = "maurozegarra/master-app"
 $tag = "v$versionName"
-# Solo se borran los releases de VERSION (tag "vX.Y.Z"). El repo aloja tambien contenido
-# que no es un APK -el release "videos" del que el app descarga los clips (TD-062)-, y
-# borrarlo dejaria videos.json apuntando a urls muertas.
-$oldReleases = gh release list --repo $repo --limit 50 --json tagName 2>$null | ConvertFrom-Json
-foreach ($rel in $oldReleases) {
-    if ($rel.tagName -notmatch '^v\d+\.\d+\.\d+$') {
+$KEEP_RELEASES = 3
+
+# Que se borra se decide por lo que el release CONTIENE, no por como se llama: un
+# release de version es exactamente un archivo master-X.Y.Z.apk. Con el nombre solo,
+# etiquetar contenido como "v2.0.0" bastaria para que el script se lo llevara por
+# delante; el repo aloja tambien el release "videos" del que el app descarga los clips
+# (TD-062), y borrarlo dejaria videos.json apuntando a urls muertas.
+function Test-IsVersionRelease($rel) {
+    if ($rel.tagName -notmatch '^v\d+\.\d+\.\d+$') { return $false }
+    $names = @($rel.assets | ForEach-Object { $_.name })
+    return $names.Count -eq 1 -and $names[0] -match '^master-\d+\.\d+\.\d+\.apk$'
+}
+
+$all = gh release list --repo $repo --limit 50 --json tagName 2>$null | ConvertFrom-Json
+$versionReleases = @()
+foreach ($rel in $all) {
+    $full = gh release view $rel.tagName --repo $repo --json tagName,assets,createdAt 2>$null | ConvertFrom-Json
+    if ($full -and (Test-IsVersionRelease $full)) {
+        $versionReleases += $full
+    } else {
         Write-Host "Kept -> $($rel.tagName) (no es un release de version)"
-        continue
-    }
-    if ($rel.tagName -ne $tag) {
-        gh release delete $rel.tagName --repo $repo --yes --cleanup-tag 2>$null
-        Write-Host "Deleted old release -> $($rel.tagName)"
     }
 }
+
+# Se conservan los mas recientes para poder RETROCEDER: si una version sale mal, apuntar
+# update.json al APK anterior solo es posible si ese APK sigue existiendo.
+$versionReleases |
+    Where-Object { $_.tagName -ne $tag } |
+    Sort-Object { $_.createdAt } -Descending |
+    Select-Object -Skip ($KEEP_RELEASES - 1) |
+    ForEach-Object {
+        gh release delete $_.tagName --repo $repo --yes --cleanup-tag 2>$null
+        Write-Host "Deleted old release -> $($_.tagName)"
+    }
 gh release create $tag $apkDst --repo $repo --title "v$versionName" --notes $Message 2>$null
 if ($LASTEXITCODE -eq 0) {
     Write-Host "OK -> GitHub Release $tag uploaded"
