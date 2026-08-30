@@ -2,6 +2,7 @@ package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,24 +16,20 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.SyncDisabled
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,9 +37,16 @@ import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.Workout
 import com.maurozegarra.master.ui.DraggableItem
+import com.maurozegarra.master.ui.SwipeAction
+import com.maurozegarra.master.ui.SwipeActionsRow
+import com.maurozegarra.master.ui.SwipeRowsController
+import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
+import com.maurozegarra.master.ui.theme.ACTION_DELETE
+import com.maurozegarra.master.ui.theme.ACTION_DUPLICATE
+import com.maurozegarra.master.ui.theme.ACTION_EDIT
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
@@ -53,8 +57,29 @@ fun TrainingEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val dragDropState = rememberDragDropState(listState) { from, to ->
         vm.moveWorkout(from - 1, to - 1)
     }
+    val swipeController = rememberSwipeRowsController()
 
-    Box(Modifier.fillMaxSize()) {
+    // Al hacer scroll se cierra la fila abierta: dejarla abierta fuera de vista significa
+    // volver a encontrarla asi mas tarde, sin recordar por que.
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) swipeController.closeAll()
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            // Un tap en cualquier zona vacia cierra el panel abierto. Solo mientras hay
+            // algo abierto: detectTapGestures ignora los taps que un hijo ya consumio.
+            .then(
+                if (swipeController.isAnyOpen) {
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures { swipeController.closeAll() }
+                    }
+                } else {
+                    Modifier
+                }
+            ),
+    ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().dragContainer(dragDropState),
@@ -87,6 +112,7 @@ fun TrainingEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
                     WorkoutRow(
                         workout = w,
                         t = t,
+                        swipeController = swipeController,
                         onOpen = { vm.openWorkout(w.id) },
                         onDuplicate = { vm.duplicateWorkout(w.id) },
                         onDelete = { vm.deleteWorkout(w.id) },
@@ -131,49 +157,52 @@ fun TrainingEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
 private fun WorkoutRow(
     workout: Workout,
     t: Strings,
+    swipeController: SwipeRowsController,
     onOpen: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,
     onToggleRotating: () -> Unit,
 ) {
-    var menu by remember { mutableStateOf(false) }
+    // Mismo orden que en TrainingCard: el destructivo en el extremo más lejano al pulgar
+    // cuando la fila apenas se abre. La tercera acción es alternar rotativo porque
+    // "abrir" ya es el tap de la fila entera.
+    val actions = listOf(
+        SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete, onDelete),
+        SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate),
+        SwipeAction(
+            icon = if (workout.rotating) Icons.Filled.SyncDisabled else Icons.Filled.Sync,
+            tint = ACTION_EDIT,
+            label = if (workout.rotating) t.makeSimple else t.makeRotating,
+            onClick = onToggleRotating,
+        ),
+    )
     val subtitle = if (workout.rotating) {
         workout.variants.joinToString(" / ") { it.name.ifBlank { t.variant } }
             .ifBlank { "${workout.variants.size} ${t.variant}" }
     } else {
         "${workout.exercises.size} ${t.exercise}"
     }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(AppTheme.colors.surface)
-            .clickable(onClick = onOpen)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                workout.name.ifBlank { t.workout },
-                color = AppTheme.colors.textPrimary,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp,
-            )
-            Text(subtitle, color = AppTheme.colors.textDim, fontSize = 13.sp)
-        }
-        Box {
-            IconButton(onClick = { menu = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim)
-            }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(
-                    text = { Text(if (workout.rotating) t.makeSimple else t.makeRotating) },
-                    onClick = { menu = false; onToggleRotating() },
+    SwipeActionsRow(actions = actions, controller = swipeController) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(AppTheme.colors.surface)
+                // Con otra fila abierta, el primer tap solo la cierra: si no, tocar esta
+                // fila abriría su workout cuando la intención era descartar el panel.
+                .clickable { if (!swipeController.consumeTapIfOpen()) onOpen() }
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    workout.name.ifBlank { t.workout },
+                    color = AppTheme.colors.textPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp,
                 )
-                DropdownMenuItem(text = { Text(t.duplicate) }, onClick = { menu = false; onDuplicate() })
-                DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
+                Text(subtitle, color = AppTheme.colors.textDim, fontSize = 13.sp)
             }
         }
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = AppTheme.colors.textDim)
     }
 }
