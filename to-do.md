@@ -4,12 +4,16 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **45 / 57** hechos, 12 pendientes.
+Progreso: **46 / 61** hechos, 15 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-061** Refinar la presentacion del video en el player
+  - TD-058 dejo el video funcionando, no colocado. Tres ajustes pedidos por el usuario tras verlo corriendo: (1) la posicion no convence, hay que revisar donde queda el video respecto al reloj, el titulo y los controles; (2) hoy el video se reproduce tambien en PREPARE, y ahi deberia ser una miniatura estatica: el movimiento solo tiene sentido cuando el usuario esta ejecutando, en WORK; (3) video vertical, ya decidido: el contenedor adopta la relacion de aspecto real del archivo con tope de altura para no comerse el reloj, en vez de forzar una altura fija pensada para horizontales.
+- [ ] **TD-059** Instrucciones paso a paso por ejercicio
+  - Lista de pasos numerados por ejercicio del catalogo (exerciseId), guardada en ExerciseMediaStore junto al video de TD-058. Exercise.note NO se toca: sigue siendo la consigna corta por instancia que ya se muestra en 40sp durante la ejecucion. Editor: lista editable de pasos en la misma tarjeta del video. Player: icono en el OSD arriba a la derecha, visible con playerControlsVisible, que abre un ModalBottomSheet con el nombre y los pasos numerados; solo aparece si el ejercicio tiene instrucciones. Se descarto el swipe up de Freeletics: el player ya tiene el tap (alterna OSD) y el arrastre horizontal (check/anterior) ocupados, y un tercer gesto vertical seria invisible sin un texto de ayuda que cargaria mas la zona inferior, donde ya estan los controles y el label Next.
 - [ ] **TD-057** Swipe-to-reveal en WorkoutRow y VariantRow + quitar el chevron inutil
   - Continuacion de TD-039, y donde mas se necesita segun el usuario: las filas del editor de training (WorkoutRow) y de la lista de variantes (VariantRow) muestran menu de 3 puntos Y un chevron KeyboardArrowRight que no aporta nada, porque la fila entera ya es clickable. Reusar el componente de swipe de TD-039: WorkoutRow con Make rotating/simple, Duplicate y Delete; VariantRow con Duplicate y Delete (dos acciones, de ahi que el componente acepte un numero variable). Eliminar el menu de 3 puntos y el chevron en ambas.
 - [ ] **TD-044** Feedback haptico en el player (skip, check, pause)
@@ -33,6 +37,11 @@ Progreso: **45 / 57** hechos, 12 pendientes.
 - [ ] **TD-010** Catalogo de ejercicios expandido (opcional)
   - Revisar/expandir ExerciseCatalog y ExerciseIcons pensando en el app independiente
 
+### Fix
+
+- [ ] **TD-060** Respaldo: snapshot antes de importar y versionado por marca de tiempo
+  - El 30-ago-2026 TD-053 no protegio al usuario: tras importar un respaldo de prueba, correr un training reescribio el snapshot del dia con el estado nuevo y se perdio el anterior. Un archivo por dia con 7 dias de historia no sirve cuando varios eventos destructivos ocurren el mismo dia. Dos arreglos: (1) escribir un snapshot ANTES de cada import, con nombre propio tipo master-preimport-<timestamp>.json, porque el import es la operacion destructiva conocida; (2) versionar los snapshots por marca de tiempo y no por dia, conservando los ultimos N. Lo que salvo los datos fue el export manual del usuario del dia anterior, no el automatico.
+
 ### Mantenimiento
 
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
@@ -50,6 +59,7 @@ Progreso: **45 / 57** hechos, 12 pendientes.
 
 ### Feature
 
+- [x] **TD-058** Video instructivo por ejercicio
 - [x] **TD-053** Snapshot automatico de datos a almacenamiento compartido
 - [x] **TD-051** Add from existing: reutilizar un workout de otro training
 - [x] **TD-048** Icono de la barra de estado solo en segundo plano (estilo YouTube)

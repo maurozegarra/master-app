@@ -2,6 +2,34 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-061",
+      "title": "Refinar la presentacion del video en el player",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "TD-058 dejo el video funcionando, no colocado. Tres ajustes pedidos por el usuario tras verlo corriendo: (1) la posicion no convence, hay que revisar donde queda el video respecto al reloj, el titulo y los controles; (2) hoy el video se reproduce tambien en PREPARE, y ahi deberia ser una miniatura estatica: el movimiento solo tiene sentido cuando el usuario esta ejecutando, en WORK; (3) video vertical, ya decidido: el contenedor adopta la relacion de aspecto real del archivo con tope de altura para no comerse el reloj, en vez de forzar una altura fija pensada para horizontales."
+    },
+    {
+      "id": "TD-060",
+      "title": "Respaldo: snapshot antes de importar y versionado por marca de tiempo",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "El 30-ago-2026 TD-053 no protegio al usuario: tras importar un respaldo de prueba, correr un training reescribio el snapshot del dia con el estado nuevo y se perdio el anterior. Un archivo por dia con 7 dias de historia no sirve cuando varios eventos destructivos ocurren el mismo dia. Dos arreglos: (1) escribir un snapshot ANTES de cada import, con nombre propio tipo master-preimport-<timestamp>.json, porque el import es la operacion destructiva conocida; (2) versionar los snapshots por marca de tiempo y no por dia, conservando los ultimos N. Lo que salvo los datos fue el export manual del usuario del dia anterior, no el automatico."
+    },
+    {
+      "id": "TD-059",
+      "title": "Instrucciones paso a paso por ejercicio",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Lista de pasos numerados por ejercicio del catalogo (exerciseId), guardada en ExerciseMediaStore junto al video de TD-058. Exercise.note NO se toca: sigue siendo la consigna corta por instancia que ya se muestra en 40sp durante la ejecucion. Editor: lista editable de pasos en la misma tarjeta del video. Player: icono en el OSD arriba a la derecha, visible con playerControlsVisible, que abre un ModalBottomSheet con el nombre y los pasos numerados; solo aparece si el ejercicio tiene instrucciones. Se descarto el swipe up de Freeletics: el player ya tiene el tap (alterna OSD) y el arrastre horizontal (check/anterior) ocupados, y un tercer gesto vertical seria invisible sin un texto de ayuda que cargaria mas la zona inferior, donde ya estan los controles y el label Next."
+    },
+    {
+      "id": "TD-058",
+      "title": "Video instructivo por ejercicio",
+      "category": "Feature",
+      "status": "done",
+      "manual": "Referencia: Freeletics (video en loop mudo + sheet de instrucciones). Hoy el player solo muestra un emoji y solo cuando la etapa NO es WORK: durante el ejercicio no hay ninguna imagen. Origen: archivos propios elegidos con SAF y copiados a Documents/MASTER/videos/<exerciseId>.mp4, donde sobreviven a una desinstalacion (misma linea que TD-053) y no dependen de que el original no se mueva. Vinculo por exerciseId (catalogo), no por instancia: se asigna una vez y sirve en todos los trainings. Nuevo ExerciseMediaStore con el mapa exerciseId -> video + instrucciones, persistido en SharedPreferences. El helper de escritura a Documents/MASTER/ se extrae de AutoBackup en vez de duplicarlo. Editor: tarjeta con miniatura (MediaMetadataRetriever.getFrameAtTime) y tap para reproducir, mas aviso de que aplica a todos los trainings. Player: el video sustituye al glyph, mas grande, en loop y mudo (el audio peleria con los beeps de AlarmPlayer), conservando el color de etapa como fondo porque ese color es la senal de WORK/REST/PREP; se pausa con el player y se libera con DisposableEffect. Sin dependencias nuevas: MediaPlayer via AndroidView, no Media3 ni Coil. BackupJson sube a FORMAT 2 con seccion exerciseMedia; decode ya acepta 1..FORMAT, asi que los respaldos v1 siguen importandose. RESUELTO 30-ago-2026, verificado en dispositivo. La escritura si funcionaba: lo que fallaba era volver a encontrar el archivo. El video sembrado por adb push ya ocupaba ese nombre en disco y es invisible para el app, asi que MediaProvider no sobrescribia sino que renombraba a 'ex_cat_cow (1).mp4', mientras nosotros guardabamos el nombre pedido. La prueba estaba en el propio directorio: dos copias (1) y (2) con la hora exacta de los dos intentos por SAF. Arreglado leyendo de vuelta el DISPLAY_NAME real del Uri insertado. Ademas el catch de write ya no se traga la excepcion -sin log, el fallo solo se veia como un boton que no cambiaba- y la tarjeta distingue 'video asignado pero archivo no encontrado' de 'sin video'. Retirado el log MASTER_DIAG. VERIFICADO CON EVIDENCIA, no supuesto: (a) el permiso esta realmente concedido, READ_MEDIA_VIDEO granted=true, no es el acceso parcial de Android 14; (b) MediaStore.Files bajo scoped storage devuelve solo los archivos de medios del propio app, confirmado en la documentacion oficial, por eso la primera version nunca los veia; (c) los videos no pueden vivir en Documents/, solo DCIM, Movies y Pictures: MediaProvider valida el directorio raiz contra la coleccion y lanza IllegalArgumentException, de ahi la mudanza a Movies/MASTER/; (d) con el archivo en Movies/MASTER/ indexado en la coleccion Video y el permiso concedido, la consulta del app devuelve rows=0 mientras la identica desde shell devuelve 1 fila, o sea que el scoped storage oculta los archivos cuyo owner es com.android.shell y sembrar por adb push NO es viable. DECISION DE DISENO PENDIENTE: la documentacion dice que tras reinstalar el sistema deja de atribuir al app sus propios archivos; si el permiso no basta para leer los de otro propietario, la promesa de que los videos sobreviven a una reinstalacion no se sostiene, y hay que elegir entre reasignarlos o usar almacenamiento privado asumiendo que se pierden. DECIDIDO CON EL USUARIO: para video vertical el contenedor adopta la relacion de aspecto real del archivo, con tope de altura para no comerse el reloj. Corregido de paso: la Uri se resolvia consultando MediaStore en cada recomposicion, varias veces por segundo; ahora se cachea por ejercicio."
+    },
+    {
       "id": "TD-057",
       "title": "Swipe-to-reveal en WorkoutRow y VariantRow + quitar el chevron inutil",
       "category": "Feature",
