@@ -104,6 +104,14 @@ fun SettingsScreen(vm: SettingsViewModel, masterVm: MasterViewModel, t: Strings)
         }
 
         SettingsCard(t.groupData) {
+            SwitchRow(
+                label = t.downloadOverMobile,
+                desc = t.downloadOverMobileDesc,
+                checked = cfg.downloads.overMobileData,
+                accent = accent,
+                onCheckedChange = { vm.setDownloadOverMobileData(it) },
+            )
+            Spacer(Modifier.height(16.dp))
             BackupSection(masterVm = masterVm, accent = accent, t = t)
         }
     }

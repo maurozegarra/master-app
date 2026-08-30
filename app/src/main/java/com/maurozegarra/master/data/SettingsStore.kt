@@ -2,6 +2,7 @@ package com.maurozegarra.master.data
 
 import android.content.Context
 import com.maurozegarra.master.model.AppConfig
+import com.maurozegarra.master.model.DownloadsConfig
 import com.maurozegarra.master.model.MasterConfig
 import com.maurozegarra.master.model.GeneralConfig
 import org.json.JSONObject
@@ -40,10 +41,16 @@ class SettingsStore(context: Context) {
             JSONObject()
                 .put("padPlayerClock", cfg.masterConfig.padPlayerClock),
         )
+        .put(
+            "downloads",
+            JSONObject()
+                .put("overMobileData", cfg.downloads.overMobileData),
+        )
 
     private fun configFromJson(o: JSONObject): AppConfig {
         val g = o.optJSONObject("general")
         val a = o.optJSONObject("masterConfig") ?: o.optJSONObject("athlete")
+        val d = o.optJSONObject("downloads")
         val def = AppConfig()
         return AppConfig(
             general = GeneralConfig(
@@ -53,6 +60,10 @@ class SettingsStore(context: Context) {
             masterConfig = MasterConfig(
                 padPlayerClock = a?.optBoolean("padPlayerClock", def.masterConfig.padPlayerClock)
                     ?: def.masterConfig.padPlayerClock,
+            ),
+            downloads = DownloadsConfig(
+                overMobileData = d?.optBoolean("overMobileData", def.downloads.overMobileData)
+                    ?: def.downloads.overMobileData,
             ),
         )
     }

@@ -1,6 +1,8 @@
 package com.maurozegarra.master.data
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import androidx.compose.runtime.mutableStateMapOf
 import com.maurozegarra.master.model.VideoManifest
@@ -41,7 +43,11 @@ sealed interface VideoState {
  * Descarga **una cada vez**: bajar los siete vídeos de un workout a la vez satura el
  * enlace justo cuando hace falta el primero.
  */
-class VideoRepository(context: Context, private val cache: VideoCache) {
+class VideoRepository(
+    context: Context,
+    private val cache: VideoCache,
+    private val settings: SettingsStore,
+) {
 
     private val appCtx = context.applicationContext
     private val prefs = appCtx.getSharedPreferences("master", Context.MODE_PRIVATE)
@@ -134,8 +140,25 @@ class VideoRepository(context: Context, private val cache: VideoCache) {
         }
     }
 
+    /**
+     * Si toca descargar ahora mismo.
+     *
+     * Se mira lo **medido**, no si es wifi: un móvil compartiendo conexión también cuesta
+     * dinero, y una wifi de hotel no es gratis por ser wifi. Sin red no se sabe, y no se
+     * descarga.
+     */
+    private fun downloadsAllowed(): Boolean {
+        if (settings.loadConfig().downloads.overMobileData) return true
+        val cm = appCtx.getSystemService(ConnectivityManager::class.java) ?: return true
+        val caps = cm.getNetworkCapabilities(cm.activeNetwork) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+    }
+
     private fun pump() {
         if (downloading) return
+        // La cola se queda intacta: cuando vuelva una red sin coste, el siguiente
+        // request() la reanuda desde donde estaba.
+        if (!downloadsAllowed()) return
         val next = queue.removeFirstOrNull() ?: return
         downloading = true
         scope.launch {

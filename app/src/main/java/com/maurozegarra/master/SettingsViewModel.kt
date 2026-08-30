@@ -29,4 +29,8 @@ class SettingsViewModel(private val store: SettingsStore) : ViewModel() {
     // ---------- Player ----------
     fun setPadPlayerClock(v: Boolean) =
         update(config.copy(masterConfig = config.masterConfig.copy(padPlayerClock = v)))
+
+    // ---------- Descargas ----------
+    fun setDownloadOverMobileData(v: Boolean) =
+        update(config.copy(downloads = config.downloads.copy(overMobileData = v)))
 }

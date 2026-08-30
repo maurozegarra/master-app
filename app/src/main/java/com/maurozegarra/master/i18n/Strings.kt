@@ -52,6 +52,8 @@ data class Strings(
     val themeLockedByAccent: String,
     val padPlayerClock: String,
     val padPlayerClockDesc: String,
+    val downloadOverMobile: String,
+    val downloadOverMobileDesc: String,
     val defaultSound: String,
     val previewTone: String,
     // Listas y editores
@@ -216,6 +218,8 @@ object I18n {
         themeLockedByAccent = "Theme is set by the selected accent color",
         padPlayerClock = "Leading zeros in clock",
         padPlayerClockDesc = "In the player, shows 00:30 instead of 30 when under a minute",
+        downloadOverMobile = "Download over mobile data",
+        downloadOverMobileDesc = "Off means exercise videos only download on unmetered Wi-Fi",
         defaultSound = "Default",
         previewTone = "Preview tone",
         savedHint = "Workouts you create will be saved here.",

@@ -24,10 +24,23 @@ data class MasterConfig(
     val padPlayerClock: Boolean = false,
 )
 
-/** Configuración completa de MASTER: bloque general + player. */
+/** Ajustes de descarga de vídeos. */
+data class DownloadsConfig(
+    /**
+     * Permitir descargas con datos móviles.
+     *
+     * Por defecto sí: un training entero son unos 20 MB, molesto pero asumible, y con la
+     * opción contraria el usuario abriría un training fuera de casa y no se descargaría
+     * nada sin ninguna explicación visible. Quien quiera reservarlo para wifi lo apaga.
+     */
+    val overMobileData: Boolean = true,
+)
+
+/** Configuración completa de MASTER: bloque general + player + descargas. */
 data class AppConfig(
     val general: GeneralConfig = GeneralConfig(),
     val masterConfig: MasterConfig = MasterConfig(),
+    val downloads: DownloadsConfig = DownloadsConfig(),
 )
 
 /** Color de acento con etiqueta legible. */
