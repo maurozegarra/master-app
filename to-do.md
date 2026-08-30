@@ -4,14 +4,12 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **47 / 61** hechos, 14 pendientes.
+Progreso: **48 / 61** hechos, 13 pendientes.
 
 ## Pendientes
 
 ### Feature
 
-- [ ] **TD-061** Refinar la presentacion del video en el player
-  - TD-058 dejo el video funcionando, no colocado. Tres ajustes pedidos por el usuario tras verlo corriendo: (1) la posicion no convence, hay que revisar donde queda el video respecto al reloj, el titulo y los controles; (2) hoy el video se reproduce tambien en PREPARE, y ahi deberia ser una miniatura estatica: el movimiento solo tiene sentido cuando el usuario esta ejecutando, en WORK; (3) video vertical, ya decidido: el contenedor adopta la relacion de aspecto real del archivo con tope de altura para no comerse el reloj, en vez de forzar una altura fija pensada para horizontales.
 - [ ] **TD-059** Instrucciones paso a paso por ejercicio
   - Lista de pasos numerados por ejercicio del catalogo (exerciseId), guardada en ExerciseMediaStore junto al video de TD-058. Exercise.note NO se toca: sigue siendo la consigna corta por instancia que ya se muestra en 40sp durante la ejecucion. Editor: lista editable de pasos en la misma tarjeta del video. Player: icono en el OSD arriba a la derecha, visible con playerControlsVisible, que abre un ModalBottomSheet con el nombre y los pasos numerados; solo aparece si el ejercicio tiene instrucciones. Se descarto el swipe up de Freeletics: el player ya tiene el tap (alterna OSD) y el arrastre horizontal (check/anterior) ocupados, y un tercer gesto vertical seria invisible sin un texto de ayuda que cargaria mas la zona inferior, donde ya estan los controles y el label Next.
 - [ ] **TD-057** Swipe-to-reveal en WorkoutRow y VariantRow + quitar el chevron inutil
@@ -54,6 +52,7 @@ Progreso: **47 / 61** hechos, 14 pendientes.
 
 ### Feature
 
+- [x] **TD-061** Refinar la presentacion del video en el player
 - [x] **TD-058** Video instructivo por ejercicio
 - [x] **TD-053** Snapshot automatico de datos a almacenamiento compartido
 - [x] **TD-051** Add from existing: reutilizar un workout de otro training
