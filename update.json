@@ -1,7 +1,7 @@
 {
-  "versionCode": 156,
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.175/master-1.0.175.apk",
   "minVersionCode": 1,
-  "changelog": "release: TD-051 Add from existing + TD-009/TD-053 respaldo de datos",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.156/master-1.0.156.apk",
-  "versionName": "1.0.156"
+  "versionCode": 175,
+  "changelog": "release: TD-062 videos bajo demanda, TD-060 respaldo endurecido y TD-057 swipe en el editor",
+  "versionName": "1.0.175"
 }
