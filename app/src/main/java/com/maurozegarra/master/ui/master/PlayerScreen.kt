@@ -78,7 +78,7 @@ import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.ui.AnimatedGlowBorder
-import com.maurozegarra.master.ui.VideoLoop
+import com.maurozegarra.master.ui.ExerciseVideo
 import com.maurozegarra.master.ui.rememberVideoPermission
 import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.model.DisplayMode
@@ -491,21 +491,8 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         val videoUri = remember(step.ownerExerciseId, permission.granted) {
             if (permission.granted) vm.videoUriFor(step.ownerExerciseId) else null
         }
-        if (videoUri != null && step.ownerName.isNotBlank()) {
-            // El vídeo ocupa el sitio del glyph pero mucho mayor, y a diferencia de aquel
-            // también en WORK, que es justo donde antes no había ninguna referencia visual.
-            // El fondo sigue siendo el color de etapa: ese color es la señal de en qué
-            // fase estás, no decoración.
-            VideoLoop(
-                uri = videoUri,
-                paused = isPaused,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(16.dp)),
-            )
-            Spacer(Modifier.height(8.dp))
-        } else if (step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
+        val showVideo = videoUri != null && step.ownerName.isNotBlank()
+        if (!showVideo && step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
             ExerciseGlyph(name = ownerLabel, color = step.colorArgb, sizeDp = 40, exerciseId = step.ownerExerciseId)
             Spacer(Modifier.height(8.dp))
         }
@@ -532,12 +519,31 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
-        Spacer(Modifier.height(20.dp))
-        Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            if (step.kind == StepKind.WORK && !step.timeBased) {
-                RepsDisplay(step, repByRep, t)
-            } else {
-                ClockDisplay(step, vm.playerRemainingMs, padClock)
+        if (showVideo && videoUri != null) {
+            // El vídeo se queda con el hueco elástico y el reloj baja justo encima de los
+            // controles: así el vídeo crece con la pantalla y el número queda al alcance
+            // de la vista sin competir con él por el centro. El fondo sigue siendo el
+            // color de etapa, que es la señal de en qué fase estás, no decoración.
+            Spacer(Modifier.height(12.dp))
+            Box(
+                Modifier.weight(1f).fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                ExerciseVideo(
+                    uri = videoUri,
+                    // Solo se mueve mientras se ejecuta: en PREP, REST y COOLDOWN queda
+                    // el primer fotograma quieto.
+                    playing = step.kind == StepKind.WORK,
+                    paused = isPaused,
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp)),
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+            ClockOrReps(vm, step, repByRep, padClock, t)
+        } else {
+            Spacer(Modifier.height(20.dp))
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                ClockOrReps(vm, step, repByRep, padClock, t)
             }
         }
         Spacer(Modifier.height(16.dp))
@@ -555,6 +561,22 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         Spacer(Modifier.height(8.dp))
     }
         AnimatedGlowBorder(cornerRadius = 0.dp, colors = glowColors(color), strokeWidth = 3.dp)
+    }
+}
+
+/** Reloj o repeticiones, según el paso. Extraído porque el vídeo lo cambia de sitio. */
+@Composable
+private fun ClockOrReps(
+    vm: MasterViewModel,
+    step: PlayerStep,
+    repByRep: Boolean,
+    padClock: Boolean,
+    t: Strings,
+) {
+    if (step.kind == StepKind.WORK && !step.timeBased) {
+        RepsDisplay(step, repByRep, t)
+    } else {
+        ClockDisplay(step, vm.playerRemainingMs, padClock)
     }
 }
 

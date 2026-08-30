@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
-import com.maurozegarra.master.ui.VideoThumbnail
+import com.maurozegarra.master.ui.ExerciseVideo
 import com.maurozegarra.master.ui.rememberVideoPermission
 import com.maurozegarra.master.ui.openVideoExternally
 import com.maurozegarra.master.ui.theme.ACTION_DELETE
@@ -91,15 +91,21 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
         )
 
         if (videoUri != null) {
+            // Alto máximo, no fijo: la miniatura toma la forma real del archivo, así que
+            // un vídeo vertical se ve entero en vez de recortado a un hueco horizontal.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .heightIn(max = 260.dp)
                     .clickable { openVideoExternally(ctx, videoUri) },
                 contentAlignment = Alignment.Center,
             ) {
-                VideoThumbnail(videoUri, Modifier.fillMaxWidth().height(180.dp))
+                ExerciseVideo(
+                    uri = videoUri,
+                    playing = false,
+                    paused = true,
+                    modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+                )
                 Box(
                     modifier = Modifier
                         .size(56.dp)
