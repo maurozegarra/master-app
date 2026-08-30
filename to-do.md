@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **46 / 61** hechos, 15 pendientes.
+Progreso: **47 / 61** hechos, 14 pendientes.
 
 ## Pendientes
 
@@ -37,11 +37,6 @@ Progreso: **46 / 61** hechos, 15 pendientes.
 - [ ] **TD-010** Catalogo de ejercicios expandido (opcional)
   - Revisar/expandir ExerciseCatalog y ExerciseIcons pensando en el app independiente
 
-### Fix
-
-- [ ] **TD-060** Respaldo: snapshot antes de importar y versionado por marca de tiempo
-  - El 30-ago-2026 TD-053 no protegio al usuario: tras importar un respaldo de prueba, correr un training reescribio el snapshot del dia con el estado nuevo y se perdio el anterior. Un archivo por dia con 7 dias de historia no sirve cuando varios eventos destructivos ocurren el mismo dia. Dos arreglos: (1) escribir un snapshot ANTES de cada import, con nombre propio tipo master-preimport-<timestamp>.json, porque el import es la operacion destructiva conocida; (2) versionar los snapshots por marca de tiempo y no por dia, conservando los ultimos N. Lo que salvo los datos fue el export manual del usuario del dia anterior, no el automatico.
-
 ### Mantenimiento
 
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
@@ -72,6 +67,7 @@ Progreso: **46 / 61** hechos, 15 pendientes.
 
 ### Fix
 
+- [x] **TD-060** Respaldo: snapshot antes de importar y versionado por marca de tiempo
 - [x] **TD-052** build-debug.ps1 no debe desinstalar automaticamente
 - [x] **TD-050** Fix preventivo: la copia de un workout no clona sus variantes
 - [x] **TD-049** Probar color naranja en el Now Bar
