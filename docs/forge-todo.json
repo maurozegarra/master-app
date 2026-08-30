@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-055",
+      "title": "build-debug.ps1 deja de copiar el APK a Download del telefono",
+      "category": "Mantenimiento",
+      "status": "done",
+      "manual": "El script empujaba cada APK a /sdcard/Download/ del telefono. Ya no hace falta: los ultimos 3 se conservan en releases/ (TD-054) y el update in-app baja desde GitHub. Ademas acumulaba APKs viejos con firmas potencialmente incompatibles: el master-1.0.154.apk firmado con la clave equivocada quedo ahi y habria reventado con INSTALL_FAILED_UPDATE_INCOMPATIBLE si se instalaba por error. Se quito el paso del script, se corrigio la descripcion en AGENTS.md y se borraron las cuatro copias existentes del telefono (152, 154, 155, 156), conservando el export manual master-backup-2026-08-29.json."
+    },
+    {
       "id": "TD-054",
       "title": "Regla: verificar firma antes de instalar y nunca desinstalar sin autorizacion",
       "category": "Mantenimiento",

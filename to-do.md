@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **41 / 54** hechos, 13 pendientes.
+Progreso: **42 / 55** hechos, 13 pendientes.
 
 ## Pendientes
 
@@ -86,6 +86,7 @@ Progreso: **41 / 54** hechos, 13 pendientes.
 
 ### Mantenimiento
 
+- [x] **TD-055** build-debug.ps1 deja de copiar el APK a Download del telefono
 - [x] **TD-054** Regla: verificar firma antes de instalar y nunca desinstalar sin autorizacion
 - [x] **TD-047** Documentacion: regla post-build en AGENTS.md + actualizar master-forge.md
 - [x] **TD-030** Arquitectura: Koin DI

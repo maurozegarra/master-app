@@ -82,7 +82,9 @@ Lee `docs/forge-todo.json`, deriva el estado de cada item (tests + git log), gen
 - `.\forge-status.ps1 -SkipTests` — usa resultados existentes (instantáneo).
 
 ### `build-debug.ps1` — Iteración rápida
-Corre tests, compila release (minificado), instala en el device, copia APK a `releases/` y a `/sdcard/Download/` del teléfono, bumpea versionCode.
+Corre tests, compila release (minificado), instala en el device, copia APK a `releases/`
+(conservando los últimos 3), bumpea versionCode. Ante un install fallido **aborta**: no
+desinstala nunca.
 
 ```powershell
 .\build-debug.ps1 -Message "feat: TD-NNN descripción del cambio"

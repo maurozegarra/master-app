@@ -82,10 +82,6 @@ if ($deviceLine) {
     & $adb -s $deviceLine shell am force-stop com.maurozegarra.master
     & $adb -s $deviceLine shell am start -n com.maurozegarra.master/.MainActivity
 
-    # Copiar APK a la carpeta Download del telefono
-    & $adb -s $deviceLine push $apkSrc /sdcard/Download/master-$newVersionName.apk
-    Write-Host "OK -> Copied to Download/master-$newVersionName.apk on device"
-
     Write-Host "OK -> Installed and launched on $deviceLine"
 } else {
     Write-Host "WARN -> No device connected via adb"
