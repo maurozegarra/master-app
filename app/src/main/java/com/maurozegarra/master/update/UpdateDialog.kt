@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maurozegarra.master.net.Downloader
 import com.maurozegarra.master.ui.theme.AppTheme
 import java.io.File
 
@@ -59,7 +60,7 @@ fun UpdateBar(
         apkFile = file
         Thread {
             try {
-                downloadApk(updateInfo.apkUrl, file) { p -> progress = p }
+                Downloader.download(updateInfo.apkUrl, file) { p -> progress = p }
                 downloaded = true
                 downloading = false
             } catch (e: Exception) {
@@ -149,28 +150,6 @@ fun UpdateBar(
             )
         }
     }
-    }
-}
-
-private fun downloadApk(url: String, file: File, onProgress: (Float) -> Unit) {
-    var conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
-        connectTimeout = 30000
-        readTimeout = 30000
-        instanceFollowRedirects = true
-    }
-    var total = conn.contentLength.toFloat()
-    conn.inputStream.use { input ->
-        file.outputStream().use { output ->
-            val buffer = ByteArray(8192)
-            var bytesread = 0
-            while (true) {
-                val read = input.read(buffer)
-                if (read == -1) break
-                output.write(buffer, 0, read)
-                bytesread += read
-                if (total > 0) onProgress(bytesread / total)
-            }
-        }
     }
 }
 
