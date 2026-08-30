@@ -2,6 +2,27 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-054",
+      "title": "Regla: verificar firma antes de instalar y nunca desinstalar sin autorizacion",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "manual": "Documentar en AGENTS.md, en Reglas de oro: (1) antes de instalar en un dispositivo que ya tiene el app, verificar que la firma del APK coincide (apksigner verify --print-certs vs keytool sobre ~/.android/debug.keystore); (2) NUNCA correr adb uninstall sin autorizacion explicita del usuario, porque borra trainings e historial; (3) el debug.keystore es por maquina y no esta en el repo: al cambiar de PC hay que copiarlo, o todos los releases publicados dejan de poder instalarse encima; (4) procedimiento de emergencia si se borran datos: 'adb shell bmgr enabled false' ANTES de abrir el app, para que el backup automatico no suba la instalacion limpia encima de la copia buena en la nube (fue lo que impidio recuperar los datos el 29-ago-2026)."
+    },
+    {
+      "id": "TD-053",
+      "title": "Snapshot automatico de datos a almacenamiento compartido",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "Complemento de TD-009: el export manual solo salva si el usuario se acordo de correrlo. Escribir un snapshot JSON (trainings + sesiones) en almacenamiento compartido via MediaStore (Documents/MASTER/), reescrito en cada persist() o al terminar una sesion. Los archivos en Documents/ sobreviven a la desinstalacion, a diferencia de SharedPreferences y de Android/data/. Con eso una reinstalacion deja de ser destructiva sin depender de que el usuario recuerde exportar. Mantener las ultimas N copias con fecha en el nombre."
+    },
+    {
+      "id": "TD-052",
+      "title": "build-debug.ps1 no debe desinstalar automaticamente",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "El script tenia un fallback que, si el install fallaba, corria 'adb uninstall' y reinstalaba. El 29-ago-2026 eso destruyo trainings e historial: la PC nueva firmaba con otro debug.keystore, el install fallo por INSTALL_FAILED_UPDATE_INCOMPATIBLE y el script desinstalo sin preguntar. Cambio: capturar la salida del install, y ante fallo abortar explicando la causa probable (firma por maquina), como comparar huellas y que desinstalar borra los datos de forma irreversible. La decision de borrar es del usuario, no del script."
+    },
+    {
       "id": "TD-051",
       "title": "Add from existing: reutilizar un workout de otro training",
       "category": "Feature",
@@ -296,10 +317,10 @@
     },
     {
       "id": "TD-009",
-      "title": "Respaldo/exportacion de trainings JSON (opcional)",
+      "title": "Export/import de datos a JSON (PRIORITARIO)",
       "category": "Feature",
       "status": "pending",
-      "manual": "Evaluar export/import de trainings (JSON) via SAF con BackupManager"
+      "manual": "Ya no es opcional. El 29-ago-2026 una reinstalacion por firma incompatible borro trainings e historial del dispositivo y no hubo forma de recuperarlos: el backup de Google se sobrescribio con la instalacion limpia seis segundos despues, y la copia de Samsung Cloud del 24-ago tampoco los tenia. Sin export no hay red de seguridad. Alcance: exportar trainings + sesiones + ejercicios custom a un unico JSON via SAF (ACTION_CREATE_DOCUMENT), e importar con ACTION_OPEN_DOCUMENT reemplazando todo previa confirmacion. Reutilizar la serializacion que ya existe en WorkoutStore y SessionJson. Entrada en la pantalla de Settings."
     },
     {
       "id": "TD-008",
