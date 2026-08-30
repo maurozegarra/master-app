@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **43 / 55** hechos, 12 pendientes.
+Progreso: **44 / 56** hechos, 12 pendientes.
 
 ## Pendientes
 
@@ -85,6 +85,7 @@ Progreso: **43 / 55** hechos, 12 pendientes.
 
 ### Mantenimiento
 
+- [x] **TD-056** Borrar handoff.md (TD-048 resuelto)
 - [x] **TD-055** build-debug.ps1 deja de copiar el APK a Download del telefono
 - [x] **TD-054** Regla: verificar firma antes de instalar y nunca desinstalar sin autorizacion
 - [x] **TD-047** Documentacion: regla post-build en AGENTS.md + actualizar master-forge.md

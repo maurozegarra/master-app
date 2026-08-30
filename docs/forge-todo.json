@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-056",
+      "title": "Borrar handoff.md (TD-048 resuelto)",
+      "category": "Mantenimiento",
+      "status": "done",
+      "manual": "handoff.md documentaba la investigacion del icono de la barra de estado estilo YouTube, resuelta el 9-ago-2026 con el Live Update de Android 16 (TD-048). Llevaba en la raiz desde entonces describiendo un problema que ya no existe. Se borra: el contenido queda en git (git show 923a593:handoff.md) y el resumen de la solucion vive en el manual de TD-048, que se reapunto al commit para no dejar la referencia colgando."
+    },
+    {
       "id": "TD-055",
       "title": "build-debug.ps1 deja de copiar el APK a Download del telefono",
       "category": "Mantenimiento",
@@ -55,7 +62,7 @@
       "title": "Icono de la barra de estado solo en segundo plano (estilo YouTube)",
       "category": "Feature",
       "status": "done",
-      "manual": "Investigacion empirica con dumpsys en el S26 Ultra: el comportamiento de YouTube (sin icono en primer plano, chip en segundo plano) NO viene del canal de notificacion sino de la Now Bar de One UI, que SystemUI crea para apps con MediaSession o Live Updates. Primer intento con canal IMPORTANCE_LOW (master_workout_v2) no cambio nada. Solucion final: Live Update de Android 16 — Notification.ProgressStyle + setRequestPromotedOngoing(true) + setShortCriticalText(reloj/reps) + permiso POST_PROMOTED_NOTIFICATIONS en el manifest, todo detras de guard SDK_INT >= 36 (dispositivos viejos conservan la notificacion clasica). El chip de la Now Bar muestra el tiempo restante del step en vivo y solo aparece en segundo plano. Analisis completo en handoff.md."
+      "manual": "Investigacion empirica con dumpsys en el S26 Ultra: el comportamiento de YouTube (sin icono en primer plano, chip en segundo plano) NO viene del canal de notificacion sino de la Now Bar de One UI, que SystemUI crea para apps con MediaSession o Live Updates. Primer intento con canal IMPORTANCE_LOW (master_workout_v2) no cambio nada. Solucion final: Live Update de Android 16 — Notification.ProgressStyle + setRequestPromotedOngoing(true) + setShortCriticalText(reloj/reps) + permiso POST_PROMOTED_NOTIFICATIONS en el manifest, todo detras de guard SDK_INT >= 36 (dispositivos viejos conservan la notificacion clasica). El chip de la Now Bar muestra el tiempo restante del step en vivo y solo aparece en segundo plano. Analisis completo en handoff.md, borrado en TD-056; recuperable en git: git show 923a593:handoff.md"
     },
     {
       "id": "TD-047",
