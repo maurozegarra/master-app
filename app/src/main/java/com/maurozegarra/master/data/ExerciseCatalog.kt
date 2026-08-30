@@ -57,6 +57,14 @@ object ExerciseCatalog {
         Triple("ex_kicks", "Patadas", "Kicks"),
         Triple("ex_cable_pull", "Polea", "Cable Pull"),
         Triple("ex_walking_dog", "Perro caminando", "Walking Dog"),
+        // Movilidad de columna
+        Triple("ex_kneeling_spine_extension", "Extensión de columna arrodillado", "Kneeling Spine Extension"),
+        Triple("ex_cobra_to_child", "Cobra a postura del niño", "Cobra to Child's Pose"),
+        Triple("ex_cat_cow", "Gato-vaca", "Cat-Cow"),
+        Triple("ex_thread_the_needle", "Enhebrar la aguja", "Thread the Needle"),
+        Triple("ex_open_book", "Libro abierto", "Open Book"),
+        Triple("ex_seated_side_bend", "Estiramiento lateral sentado", "Seated Side Bend"),
+        Triple("ex_thoracic_rotation_half_kneeling", "Rotación torácica en media rodilla", "Half-Kneeling Thoracic Rotation"),
     )
 
     fun base(lang: String): List<ExerciseDef> =

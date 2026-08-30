@@ -46,6 +46,14 @@ object ExerciseIcons {
         "ex_shoulder_press" to "💪",
         "ex_assisted_dips" to "🤸",
         "ex_pushups" to "💪",
+        // Movilidad de columna
+        "ex_kneeling_spine_extension" to "🧎",
+        "ex_cobra_to_child" to "🐍",
+        "ex_cat_cow" to "🐈",
+        "ex_thread_the_needle" to "🧵",
+        "ex_open_book" to "📖",
+        "ex_seated_side_bend" to "🪑",
+        "ex_thoracic_rotation_half_kneeling" to "🌀",
     )
 
     private val byKeyword: List<Pair<List<String>, String>> = listOf(
