@@ -19,3 +19,9 @@ const val PINK_ACCENT = 0xFFFF69B4
 
 /** Acento azul que activa el tema especial "Stitch". */
 const val STITCH_ACCENT = 0xFF4A90D6
+
+// Colores de las acciones del swipe (TD-039). Fijos y no derivados del acento: el rojo
+// de borrar debe leerse como destructivo aunque el usuario elija un acento rojizo.
+val ACTION_EDIT = Color(0xFF2F6FED)
+val ACTION_DUPLICATE = Color(0xFFE2861E)
+val ACTION_DELETE = Color(0xFFD93A32)

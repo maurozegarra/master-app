@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,12 +31,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,9 +66,16 @@ import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.hasContent
 import com.maurozegarra.master.ui.DraggableItem
+import com.maurozegarra.master.ui.SwipeAction
+import com.maurozegarra.master.ui.SwipeActionsRow
+import com.maurozegarra.master.ui.SwipeRowsController
+import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
+import com.maurozegarra.master.ui.theme.ACTION_DELETE
+import com.maurozegarra.master.ui.theme.ACTION_DUPLICATE
+import com.maurozegarra.master.ui.theme.ACTION_EDIT
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.util.formatRemaining
 import java.time.DayOfWeek
@@ -114,8 +123,24 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
 
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     val timeFmt = remember { java.time.format.DateTimeFormatter.ofPattern("h:mm a") }
+    val swipeController = rememberSwipeRowsController()
 
-    Box(Modifier.fillMaxSize()) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            // Un tap en cualquier zona vacia cierra el panel abierto. Va en el contenedor
+            // y solo mientras hay algo abierto: detectTapGestures ignora los taps que un
+            // hijo ya consumio (la card, el play), asi que no pisa sus handlers.
+            .then(
+                if (swipeController.isAnyOpen) {
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures { swipeController.closeAll() }
+                    }
+                } else {
+                    Modifier
+                }
+            ),
+    ) {
         if (vm.trainings.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -131,6 +156,11 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             val listState = rememberLazyListState()
             val dragDropState = rememberDragDropState(listState) { from, to ->
                 vm.moveTraining(from - 1, to - 1)
+            }
+            // Al hacer scroll se cierra la fila abierta: dejarla abierta fuera de vista
+            // significa volver a encontrarla asi mas tarde, sin recordar por que.
+            LaunchedEffect(listState.isScrollInProgress) {
+                if (listState.isScrollInProgress) swipeController.closeAll()
             }
             LazyColumn(
                 state = listState,
@@ -152,6 +182,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             accent = accent,
                             t = t,
                             isActive = vm.activePlayerTrainingId == tr.id,
+                            swipeController = swipeController,
                             onPlay = { vm.openPlayer(tr.id); onStart() },
                             onOpen = { vm.openPlayer(tr.id) },
                             onEdit = { vm.startEditTraining(tr.id) },
@@ -377,33 +408,42 @@ private fun TrainingCard(
     accent: Color,
     t: Strings,
     isActive: Boolean,
+    swipeController: SwipeRowsController,
     onPlay: () -> Unit,
     onOpen: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    var menu by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     val exercises = training.workouts.sumOf { w ->
         if (w.variants.isNotEmpty()) w.variants.sumOf { it.exercises.size } else w.exercises.size
     }
     val canPlay = training.workouts.any { it.hasContent() }
 
+    // Orden pedido: borrar, duplicar, editar. El destructivo queda en el extremo
+    // izquierdo, el más lejano al pulgar cuando la fila apenas se abre.
+    val actions = listOf(
+        SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete) { confirmDelete = true },
+        SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate),
+        SwipeAction(Icons.Filled.Edit, ACTION_EDIT, t.edit, onEdit),
+    )
+
+    SwipeActionsRow(actions = actions, controller = swipeController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
             .background(AppTheme.colors.surface)
             .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(18.dp))
-            .padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
+            .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Column(
             Modifier
                 .weight(1f)
-                .clickable(onClick = onOpen)
+                .clickable { if (!swipeController.consumeTapIfOpen()) onOpen() }
                 .padding(end = 8.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -436,7 +476,11 @@ private fun TrainingCard(
                 .size(48.dp)
                 .clip(CircleShape)
                 .border(1.dp, accent, CircleShape)
-                .clickable(enabled = canPlay, onClick = onPlay),
+                // Con otra fila abierta, el tap solo descarta: arrancar un training por
+                // accidente al intentar cerrar un panel es de lo peor que puede pasar aqui.
+                .clickable(enabled = canPlay) {
+                    if (!swipeController.consumeTapIfOpen()) onPlay()
+                },
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -446,22 +490,7 @@ private fun TrainingCard(
             )
         }
 
-        Box(modifier = Modifier.size(32.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable { menu = true },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim, modifier = Modifier.size(20.dp))
-            }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(t.edit) }, onClick = { menu = false; onEdit() })
-                DropdownMenuItem(text = { Text(t.duplicate) }, onClick = { menu = false; onDuplicate() })
-                DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; confirmDelete = true })
-            }
-        }
+    }
     }
 
     if (confirmDelete) {
