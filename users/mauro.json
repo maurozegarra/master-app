@@ -1,0 +1,339 @@
+{
+  "format": 1,
+  "updatedAt": 1788131232267,
+  "trainings": [
+    {
+      "id": 900001,
+      "uid": "b60029b6-ef38-4071-9654-ab8ea7490c42",
+      "name": "COLUMNA (asignado)",
+      "createdAt": 1788075634581,
+      "updatedAt": 1788113184232,
+      "workouts": [
+        {
+          "id": 900002,
+          "name": "COLUMNA",
+          "exercises": [
+            {
+              "id": 900101,
+              "exerciseId": "ex_kneeling_spine_extension",
+              "name": "Kneeling Spine Extension",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 1,
+              "workMode": "TIME",
+              "workValue": 10,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              }
+            },
+            {
+              "id": 900102,
+              "exerciseId": "ex_cobra_to_child",
+              "name": "Cobra to Child's Pose",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 1,
+              "workMode": "TIME",
+              "workValue": 10,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              }
+            },
+            {
+              "id": 900103,
+              "exerciseId": "ex_cat_cow",
+              "name": "Cat-Cow",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 1,
+              "workMode": "TIME",
+              "workValue": 45,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              }
+            },
+            {
+              "id": 900104,
+              "exerciseId": "ex_thread_the_needle",
+              "name": "Thread the Needle",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 1,
+              "workMode": "TIME",
+              "workValue": 45,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              }
+            },
+            {
+              "id": 900105,
+              "exerciseId": "ex_open_book",
+              "name": "Open Book",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 1,
+              "workMode": "TIME",
+              "workValue": 45,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              }
+            },
+            {
+              "id": 900106,
+              "exerciseId": "ex_seated_side_bend",
+              "name": "Seated Side Bend",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 1,
+              "workMode": "TIME",
+              "workValue": 45,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              }
+            },
+            {
+              "id": 900107,
+              "exerciseId": "ex_thoracic_rotation_half_kneeling",
+              "name": "Half-Kneeling Thoracic Rotation",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 1,
+              "workMode": "TIME",
+              "workValue": 45,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              }
+            }
+          ],
+          "rotating": false,
+          "rotationIndex": 0,
+          "variants": []
+        }
+      ]
+    }
+  ]
+}
