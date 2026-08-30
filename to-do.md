@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **50 / 63** hechos, 13 pendientes.
+Progreso: **51 / 64** hechos, 13 pendientes.
 
 ## Pendientes
 
@@ -12,8 +12,6 @@ Progreso: **50 / 63** hechos, 13 pendientes.
 
 - [ ] **TD-063** Soporte de usuarios: asignar trainings con sus ejercicios y videos
   - El app es hoy monousuario y todo vive en SharedPreferences. La meta es que existan usuarios a los que se les asigne un training con sus ejercicios y videos, al estilo de un entrenador que reparte rutinas. Va DESPUES de estabilizar TD-062, que deja preparado lo caro de retrofitear: el uid estable en Training -los ids de hoy son contadores locales y dos dispositivos generan el mismo- y la URL del manifiesto en un solo sitio, para pasar a uno por usuario (/users/<uid>/videos.json) cambiando una constante. Falta decidir proveedor: Supabase es el candidato, porque las mismas politicas RLS que controlan las filas controlan el acceso a los archivos, y su API REST se consume con HttpURLConnection sin anadir un SDK pesado; Firebase quedo descartado al retirar Cloud Storage del plan gratuito en febrero de 2026. Los bytes pueden quedarse en GitHub Releases o mudarse a Cloudflare R2 (10 GB gratis, egreso a coste cero) sin tocar el app, porque el manifiesto guarda URLs. Empezar por sincronizacion SOLO DE BAJADA: el usuario recibe trainings de solo lectura, mucho mas simple que un sync bidireccional. El historial de sesiones se queda local. Hoy son 4 usuarios.
-- [ ] **TD-057** Swipe-to-reveal en WorkoutRow y VariantRow + quitar el chevron inutil
-  - Continuacion de TD-039, y donde mas se necesita segun el usuario: las filas del editor de training (WorkoutRow) y de la lista de variantes (VariantRow) muestran menu de 3 puntos Y un chevron KeyboardArrowRight que no aporta nada, porque la fila entera ya es clickable. Reusar el componente de swipe de TD-039: WorkoutRow con Make rotating/simple, Duplicate y Delete; VariantRow con Duplicate y Delete (dos acciones, de ahi que el componente acepte un numero variable). Eliminar el menu de 3 puntos y el chevron en ambas.
 - [ ] **TD-044** Feedback haptico en el player (skip, check, pause)
   - Vibracion corta al hacer skip, check o pause en el player. Confirmacion tactil sin necesidad de mirar la pantalla. Usar VibrationEffect.createOneShot con duracion corta (~50ms) para no ser intrusivo. Solo en acciones del usuario, no en transiciones automaticas.
 - [ ] **TD-043** Preview del siguiente ejercicio en REST
@@ -34,6 +32,11 @@ Progreso: **50 / 63** hechos, 13 pendientes.
   - Placeholder para animacion por ejercicio; definir si entra en el roadmap
 - [ ] **TD-010** Catalogo de ejercicios expandido (opcional)
   - Revisar/expandir ExerciseCatalog y ExerciseIcons pensando en el app independiente
+
+### Fix
+
+- [ ] **TD-064** Fix: quitar rotativo a un workout borra todas las variantes menos la primera
+  - makeWorkoutSimple conserva los ejercicios de la PRIMERA variante y descarta el resto: w.copy(rotating = false, exercises = w.variants.firstOrNull()?.exercises, variants = emptyList()). Un workout rotativo con 3 variantes pierde dos sin aviso y sin deshacer. EL COMPORTAMIENTO DESEADO, en palabras del usuario: 'rotativo es que los workouts rotan, si le quito el rotativo deberia simplemente no rotar, no borrar nada'. O sea que el flag gobierna COMO se recorren las variantes, no DONDE viven los ejercicios; quitarlo no puede ser una operacion destructiva. Se descarto anadir un dialogo de confirmacion: confirmar una perdida de datos no deseada no arregla que la perdida no deba ocurrir. El bug lleva ahi desde que existe la funcion y no se habia notado. NO ES SOLO ESTE FIX: al revisarlo el usuario pregunto 'cual es la interfaz para hacer de un workout una variante, no la ubico', y esa pregunta abre el modelo entero de workout/variante, que hoy tiene dos representaciones distintas para lo mismo (exercises sueltos cuando es simple, exercises dentro de variants cuando es rotativo) y es de donde nace la perdida de datos al convertir. Revisar el modelo y los flujos de conversion en su propio espacio antes de tocar codigo. CASO DE REFERENCIA, senalado por el usuario: el rotativo 'Strength' del training MASTER funciona como se espera y es el que hay que mirar al abordarlo. Precision de vocabulario: el usuario lo describe como 'dentro de Strength hay 2 workouts, uno lower y otro upper, cada uno con sus ejercicios independientes', pero en el modelo Strength es UN workout con rotating=true y dos VARIANTES, Lower (12 ejercicios) y Upper (5). Lo que el usuario llama workout ahi es lo que el codigo llama variante, y esa distancia entre el vocabulario del usuario y el del modelo es parte de lo que hay que resolver. Comprobado en sus datos del 30-ago-2026: MASTER tiene tambien 'Cardio' rotativo con 4 variantes (Rope Jumping, Tire Jumping, Shadow Boxing, Running), donde quitar el rotativo hoy borraria tres. Con Strength borraria los 5 ejercicios de Upper.
 
 ### Mantenimiento
 
@@ -56,6 +59,7 @@ Progreso: **50 / 63** hechos, 13 pendientes.
 - [x] **TD-061** Refinar la presentacion del video en el player
 - [x] **TD-059** Instrucciones paso a paso por ejercicio
 - [x] **TD-058** Video instructivo por ejercicio
+- [x] **TD-057** Swipe-to-reveal en WorkoutRow y VariantRow + quitar el chevron inutil
 - [x] **TD-053** Snapshot automatico de datos a almacenamiento compartido
 - [x] **TD-051** Add from existing: reutilizar un workout de otro training
 - [x] **TD-048** Icono de la barra de estado solo en segundo plano (estilo YouTube)
