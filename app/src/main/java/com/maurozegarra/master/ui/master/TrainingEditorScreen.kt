@@ -100,6 +100,18 @@ fun TrainingEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
             item {
                 AddButton(label = t.addWorkout, accent = accent, onClick = { vm.addWorkout() })
             }
+
+            // Sin otros trainings con contenido no hay nada que copiar: se oculta en vez de
+            // abrir un selector vacío (caso del primer arranque).
+            if (vm.workoutPickerSources().isNotEmpty()) {
+                item {
+                    AddButton(
+                        label = t.addFromExisting,
+                        accent = accent,
+                        onClick = { vm.openWorkoutPicker() },
+                    )
+                }
+            }
         }
 
         PrimaryButton(

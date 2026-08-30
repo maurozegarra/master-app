@@ -158,6 +158,7 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
         vm.showingHistory ||
         vm.exerciseHistoryId != null ||
         vm.choosingExercise ||
+        vm.choosingWorkout ||
         vm.editingExerciseId != null ||
         vm.editingVariantId != null ||
         vm.editingWorkoutId != null ||
@@ -332,6 +333,7 @@ private fun titleFor(vm: MasterViewModel, t: Strings): String = when {
     vm.exerciseHistoryId != null -> t.exerciseHistory
     vm.showingHistory -> t.history
     vm.choosingExercise -> t.chooseExercise
+    vm.choosingWorkout -> t.chooseWorkout
     vm.editingExerciseId != null -> vm.editingExercise()?.name ?: t.exercise
     vm.editingVariantId != null || vm.editingWorkoutId != null -> vm.editorName().ifBlank { t.workout }
     vm.draft != null -> vm.draft?.name?.ifBlank { t.training } ?: t.training
@@ -345,6 +347,7 @@ private fun goBack(vm: MasterViewModel) {
         vm.exerciseHistoryId != null -> vm.closeExerciseHistory()
         vm.showingHistory -> vm.closeHistory()
         vm.choosingExercise -> vm.closeExercisePicker()
+        vm.choosingWorkout -> vm.closeWorkoutPicker()
         vm.editingExerciseId != null -> vm.closeExerciseEditor()
         vm.editingVariantId != null -> vm.closeVariantEditor()
         vm.editingWorkoutId != null -> vm.closeWorkoutEditor()

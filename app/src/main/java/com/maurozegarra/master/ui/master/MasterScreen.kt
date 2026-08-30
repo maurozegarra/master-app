@@ -85,6 +85,7 @@ fun MasterScreen(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> 
         vm.exerciseHistoryId != null -> ExerciseHistoryScreen(vm, accent, t)
         vm.showingHistory -> HistoryScreen(vm, accent, t)
         vm.choosingExercise -> ChooseExerciseScreen(vm, accent, t)
+        vm.choosingWorkout -> ChooseWorkoutScreen(vm, accent, t)
         vm.editingExerciseId != null -> ExerciseEditorScreen(vm, accent, t)
         vm.editingVariantId != null -> WorkoutEditorScreen(vm, accent, t)
         vm.editingWorkoutId != null && vm.editingWorkout()?.rotating == true -> VariantListScreen(vm, accent, t)

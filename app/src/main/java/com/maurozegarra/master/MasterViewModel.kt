@@ -28,6 +28,8 @@ import com.maurozegarra.master.model.Workout
 import com.maurozegarra.master.model.WorkoutVariant
 import com.maurozegarra.master.model.deepCopy
 import com.maurozegarra.master.model.hasContent
+import com.maurozegarra.master.model.lastTrainedAt
+import com.maurozegarra.master.model.sortedByLastTrained
 import com.maurozegarra.master.model.weightTotal
 import com.maurozegarra.master.notify.WorkoutPlayerService
 import kotlinx.coroutines.launch
@@ -236,6 +238,10 @@ class MasterViewModel(
     var choosingExercise by mutableStateOf(false)
         private set
 
+    /** Selector de workouts existentes abierto (copia uno de otro training al draft). */
+    var choosingWorkout by mutableStateOf(false)
+        private set
+
     fun editingWorkout(): Workout? =
         draft?.workouts?.firstOrNull { it.id == editingWorkoutId }
 
@@ -327,6 +333,7 @@ class MasterViewModel(
         editingWorkoutId = null
         editingExerciseId = null
         choosingExercise = false
+        choosingWorkout = false
     }
 
     fun startEditTraining(id: Long) {
@@ -335,6 +342,7 @@ class MasterViewModel(
         editingVariantId = null
         editingExerciseId = null
         choosingExercise = false
+        choosingWorkout = false
     }
 
     fun closeTrainingEditor() {
@@ -343,6 +351,7 @@ class MasterViewModel(
         editingVariantId = null
         editingExerciseId = null
         choosingExercise = false
+        choosingWorkout = false
     }
 
     val canSaveTraining: Boolean
@@ -393,6 +402,49 @@ class MasterViewModel(
         val id = newId()
         updateDraft { it.copy(workouts = it.workouts + Workout(id = id, name = "")) }
         editingWorkoutId = id
+    }
+
+    // ---------- Reutilizar un workout de otro training ----------
+
+    /**
+     * Trainings que pueden aportar workouts, con los workouts que ofrecen. Ordenados por
+     * uso real (historial), no por edición: la lista acumula trainings de prueba que nunca
+     * se ejercitaron y taparían al que de verdad se usa. Ver [sortedByLastTrained].
+     *
+     * Excluye el training en edición —sus workouts ya están en pantalla, y duplicarlos ahí
+     * es lo que hace `duplicateWorkout`— y los workouts vacíos, que no aportan nada.
+     */
+    fun workoutPickerSources(): List<Pair<Training, List<Workout>>> {
+        val draftId = draft?.id
+        return trainings.sortedByLastTrained(sessions)
+            .filter { it.id != draftId }
+            .map { t -> t to t.workouts.filter { it.hasContent() } }
+            .filter { (_, workouts) -> workouts.isNotEmpty() }
+    }
+
+    /** Fecha de la última sesión de cada training, para el encabezado del selector. */
+    fun lastTrainedByTraining(): Map<Long, Long> = lastTrainedAt(sessions)
+
+    fun openWorkoutPicker() {
+        choosingWorkout = true
+    }
+
+    fun closeWorkoutPicker() {
+        choosingWorkout = false
+    }
+
+    /**
+     * Copia un workout de otro training al final del draft y abre su editor.
+     * La copia es profunda (ids nuevos), así que editarla no toca el original; el nombre
+     * se conserva sin sufijo porque viene de otro training y no colisiona.
+     */
+    fun pickWorkout(workoutId: Long) {
+        val src = trainings
+            .firstNotNullOfOrNull { t -> t.workouts.firstOrNull { it.id == workoutId } } ?: return
+        val copy = src.deepCopy(::newId)
+        updateDraft { it.copy(workouts = it.workouts + copy) }
+        choosingWorkout = false
+        editingWorkoutId = copy.id
     }
 
     fun openWorkout(id: Long) {

@@ -215,3 +215,29 @@ data class SessionLog(
     val exercises: List<ExerciseRecord> = emptyList(),
     val durationSec: Int = 0,
 )
+
+/** Fecha de la última sesión registrada de cada training (id → completedAt). */
+fun lastTrainedAt(sessions: List<SessionLog>): Map<Long, Long> {
+    val out = HashMap<Long, Long>()
+    for (s in sessions) {
+        val prev = out[s.trainingId]
+        if (prev == null || s.completedAt > prev) out[s.trainingId] = s.completedAt
+    }
+    return out
+}
+
+/**
+ * Trainings ordenados por uso real: primero los que se entrenaron, del más reciente al
+ * más antiguo según el historial; después los que nunca se entrenaron, por [Training.updatedAt].
+ *
+ * El criterio es el historial y no `updatedAt` porque la lista acumula trainings de
+ * prueba que nunca se ejercitaron: ordenarlos por edición los pondría arriba y taparía
+ * el que de verdad se usa.
+ */
+fun List<Training>.sortedByLastTrained(sessions: List<SessionLog>): List<Training> {
+    val last = lastTrainedAt(sessions)
+    return sortedWith(
+        compareByDescending<Training> { last[it.id] ?: Long.MIN_VALUE }
+            .thenByDescending { it.updatedAt }
+    )
+}
