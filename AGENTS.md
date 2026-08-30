@@ -110,6 +110,26 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
   1. **¿Estoy parcheando el síntoma o arreglando la causa?** — Investigar el flujo completo antes de tocar código. No asumir que el primer punto de falla es la causa.
   2. **¿Qué casos no estoy viendo?** — Listar edge cases: go-back, cierre abrupto, REST/PREP/COOLDOWN steps, ejercicios de 1 set, rotating workouts, timer vs reps. Si no los veo, preguntarle al usuario.
   3. **¿Necesito más información antes de tocar código?** — Si no se entiende el flujo completo, agregar logging de diagnóstico y probar en dispositivo antes de proponer fix. No parchar a ciegas.
+- **NUNCA correr `adb uninstall` sin autorización explícita del usuario.** Desinstalar
+  borra `/data/data` del paquete, y ahí viven trainings e historial (SharedPreferences).
+  No hay deshacer. Tampoco vale un fallback "automático" dentro de un script: la decisión
+  de destruir datos es del usuario. (El 29-ago-2026 un fallback así borró el historial
+  completo del usuario; de ahí TD-052.)
+- **Antes de instalar sobre una app ya instalada, verificar que la firma coincide.** El
+  release se firma con `~/.android/debug.keystore`, que es **por máquina y no está en el
+  repo**: al cambiar de PC hay que copiar ese archivo, o ningún build nuevo podrá
+  instalarse encima de los releases ya publicados. Comparar así:
+
+  ```powershell
+  keytool -list -v -keystore $env:USERPROFILE\.android\debug.keystore -storepass android -alias androiddebugkey
+  apksigner verify --print-certs releases\master-<version>.apk
+  ```
+
+- **Si se borran datos por accidente: `adb shell bmgr enabled false` ANTES de abrir la
+  app.** El backup automático de Android sube el estado de la instalación limpia y pisa
+  la única copia buena que hay en la nube — pasó seis segundos después de reinstalar y
+  fue lo que impidió recuperar los datos. Con los backups congelados se puede intentar
+  `adb shell bmgr list sets` + `bmgr restore <token> com.maurozegarra.master`.
 - **No hacer commit sin autorización explícita del usuario.**
 - **Nada se declara done sin `.\verify-compile.ps1` verde** (tests + compila release). Aplica a cualquier item que toque código.
 - **Un TD es `done` cuando el usuario lo aprueba tras probar en el dispositivo**, no cuando compila. Mientras esté `pending`, los ajustes (fixes y refinements de forma) son parte del mismo TD. Cambios posteriores a la aprobación = nuevo TD.

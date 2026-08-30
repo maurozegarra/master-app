@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **36 / 54** hechos, 18 pendientes.
+Progreso: **38 / 54** hechos, 16 pendientes.
 
 ## Pendientes
 
@@ -41,15 +41,11 @@ Progreso: **36 / 54** hechos, 18 pendientes.
 
 ### Fix
 
-- [ ] **TD-052** build-debug.ps1 no debe desinstalar automaticamente
-  - El script tenia un fallback que, si el install fallaba, corria 'adb uninstall' y reinstalaba. El 29-ago-2026 eso destruyo trainings e historial: la PC nueva firmaba con otro debug.keystore, el install fallo por INSTALL_FAILED_UPDATE_INCOMPATIBLE y el script desinstalo sin preguntar. Cambio: capturar la salida del install, y ante fallo abortar explicando la causa probable (firma por maquina), como comparar huellas y que desinstalar borra los datos de forma irreversible. La decision de borrar es del usuario, no del script.
 - [ ] **TD-050** Fix preventivo: la copia de un workout no clona sus variantes
   - duplicateWorkout y duplicateTraining hacen src.copy(id=newId(), exercises=...) sin mencionar variants, y al ser data class la copia arrastra la misma lista: un workout rotativo duplicado conserva los ids de sus WorkoutVariant y de los Exercise dentro de ellas. Hoy no se manifiesta porque todos los lookups estan acotados por workout (editingVariant resuelve dentro de editingWorkout), StepEngine no usa esos ids y las key de Compose son por lista. Es preventivo: TD-033 planea navegacion por ruta con SavedStateHandle, que direccionaria una variante por id sin el contexto del workout, y ahi dos ids iguales resuelven al objeto equivocado en silencio. Solucion: extension Workout.deepCopy(newId: () -> Long) en model/Workout.kt que reasigna ids de workout, exercises, variants y exercises de cada variante, y resetea rotationIndex a 0; los dos duplicados existentes pasan a usarla conservando su duplicateName(). Test de invariante en WorkoutTest (no de reproduccion: no hay fallo observable hoy).
 
 ### Mantenimiento
 
-- [ ] **TD-054** Regla: verificar firma antes de instalar y nunca desinstalar sin autorizacion
-  - Documentar en AGENTS.md, en Reglas de oro: (1) antes de instalar en un dispositivo que ya tiene el app, verificar que la firma del APK coincide (apksigner verify --print-certs vs keytool sobre ~/.android/debug.keystore); (2) NUNCA correr adb uninstall sin autorizacion explicita del usuario, porque borra trainings e historial; (3) el debug.keystore es por maquina y no esta en el repo: al cambiar de PC hay que copiarlo, o todos los releases publicados dejan de poder instalarse encima; (4) procedimiento de emergencia si se borran datos: 'adb shell bmgr enabled false' ANTES de abrir el app, para que el backup automatico no suba la instalacion limpia encima de la copia buena en la nube (fue lo que impidio recuperar los datos el 29-ago-2026).
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
   - Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez.
 
@@ -73,6 +69,7 @@ Progreso: **36 / 54** hechos, 18 pendientes.
 
 ### Fix
 
+- [x] **TD-052** build-debug.ps1 no debe desinstalar automaticamente
 - [x] **TD-049** Probar color naranja en el Now Bar
 - [x] **TD-046** DaySheet: mostrar training expandido a nivel workout al abrir
 - [x] **TD-045** Aumentar atenuacion de pausa en el player (0.35 -> 0.55)
@@ -95,6 +92,7 @@ Progreso: **36 / 54** hechos, 18 pendientes.
 
 ### Mantenimiento
 
+- [x] **TD-054** Regla: verificar firma antes de instalar y nunca desinstalar sin autorizacion
 - [x] **TD-047** Documentacion: regla post-build en AGENTS.md + actualizar master-forge.md
 - [x] **TD-030** Arquitectura: Koin DI
 - [x] **TD-029** Regla: TD es done solo cuando el usuario aprueba tras probar en dispositivo

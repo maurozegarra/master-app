@@ -34,10 +34,16 @@ if (-not (Test-Path $apkSrc)) { throw "No se encontro el APK generado: $apkSrc" 
 # Copia a releases/
 $releasesDir = Join-Path $PSScriptRoot 'releases'
 if (-not (Test-Path $releasesDir)) { New-Item -ItemType Directory -Path $releasesDir | Out-Null }
-Remove-Item (Join-Path $releasesDir 'master-*.apk') -ErrorAction SilentlyContinue
 $apkDst = Join-Path $releasesDir "master-$newVersionName.apk"
 Copy-Item $apkSrc $apkDst -Force
 Write-Host "OK -> releases\master-$newVersionName.apk"
+
+# Conservar los ultimos APKs en vez de borrarlos: sirven para comparar firmas cuando
+# un install falla (apksigner verify --print-certs) y para volver a una version previa.
+Get-ChildItem (Join-Path $releasesDir 'master-*.apk') -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -Skip 3 |
+    Remove-Item -Force -ErrorAction SilentlyContinue
 
 # Instalar en el device
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"

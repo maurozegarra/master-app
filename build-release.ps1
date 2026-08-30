@@ -38,10 +38,16 @@ if (-not (Test-Path $apkSrc)) { throw "No se encontro el APK generado: $apkSrc" 
 
 $releasesDir = Join-Path $PSScriptRoot 'releases'
 if (-not (Test-Path $releasesDir)) { New-Item -ItemType Directory -Path $releasesDir | Out-Null }
-Remove-Item (Join-Path $releasesDir '*.apk') -ErrorAction SilentlyContinue
 
 $apkDst = Join-Path $releasesDir "master-$versionName.apk"
 Copy-Item $apkSrc $apkDst -Force
+
+# Conservar los ultimos APKs: permiten comparar firmas ante un install fallido y
+# volver a una version previa sin bajarla de GitHub.
+Get-ChildItem (Join-Path $releasesDir '*.apk') -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -Skip 3 |
+    Remove-Item -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "OK -> releases\master-$versionName.apk"
