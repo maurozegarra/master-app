@@ -25,17 +25,9 @@ object Downloader {
      */
     fun fetchText(url: String): String {
         val separator = if (url.contains('?')) '&' else '?'
-        val conn = (URL("$url${separator}t=${System.currentTimeMillis()}").openConnection() as HttpURLConnection).apply {
-            connectTimeout = 10_000
-            readTimeout = 10_000
-            useCaches = false
-            setRequestProperty("Cache-Control", "no-cache")
-        }
-        return try {
-            conn.inputStream.bufferedReader().use { it.readText() }
-        } finally {
-            conn.disconnect()
-        }
+        val res = Http.request("GET", "$url${separator}t=${System.currentTimeMillis()}")
+        if (!res.ok) throw IOException("HTTP ${res.code} al leer $url")
+        return res.body
     }
 
     /**

@@ -6,17 +6,24 @@ import com.maurozegarra.master.model.AssignedTrainingsJson
 import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.ProfileDirectoryJson
 import com.maurozegarra.master.model.Training
-import com.maurozegarra.master.net.Downloader
+import com.maurozegarra.master.net.Http
+import com.maurozegarra.master.net.Supabase
+import java.io.IOException
+import java.net.URLEncoder
 
 /**
  * Quién usa este dispositivo y qué trainings le tocan.
  *
- * No hay cuentas ni contraseñas: son personas conocidas, y la identidad solo decide qué
- * archivo se descarga. Los trainings se publican como JSON estático, igual que el
- * manifiesto de vídeos de TD-062 y con la misma maquinaria.
+ * Los demás no tienen cuenta: son personas conocidas, eligen su nombre de una lista y eso
+ * solo decide qué se descarga. Quien reparte las rutinas sí inicia sesión, porque escribir
+ * exige permiso; leer no.
  *
  * Sincronización **solo de bajada**: el dispositivo recibe, nunca envía. Es mucho más
  * simple que un sync bidireccional y cubre el caso real, que es repartir rutinas.
+ *
+ * Antes esto leía JSON estático publicado a mano en GitHub. Se cambió porque asignar desde
+ * el teléfono exige escribir, y a un archivo de GitHub no se escribe sin una credencial
+ * que no puede vivir dentro de un APK.
  */
 class AssignmentRepository(context: Context) {
 
@@ -37,9 +44,9 @@ class AssignmentRepository(context: Context) {
             prefs.edit().putString(KEY_PROFILE_NAME, value).apply()
         }
 
-    /** Perfiles publicados. Lista vacía si no hay red o el directorio no es válido. */
+    /** Perfiles registrados. Lista vacía si no hay red o la respuesta no es válida. */
     fun directory(): List<Profile> =
-        runCatching { ProfileDirectoryJson.decode(Downloader.fetchText(DIRECTORY_URL)) }
+        runCatching { ProfileDirectoryJson.decode(get("profiles?select=id,name&order=name")) }
             .onFailure { Log.w(TAG, "no se pudo leer el directorio de perfiles", it) }
             .getOrNull()
             .orEmpty()
@@ -48,23 +55,30 @@ class AssignmentRepository(context: Context) {
      * Trainings asignados al perfil, o **null si no se pudo saber**.
      *
      * Null y lista vacía significan cosas opuestas: vacía retira las asignaciones del
-     * dispositivo, así que un fallo de red jamás puede parecerse a eso.
+     * dispositivo, así que un fallo de red jamás puede parecerse a eso. De ahí que [get]
+     * lance ante cualquier código que no sea 2xx en vez de devolver el cuerpo del error,
+     * que se decodificaría como cero trainings.
      */
     fun assignedTrainings(profileId: String): List<Training>? =
-        runCatching { AssignedTrainingsJson.decode(Downloader.fetchText(assignmentUrl(profileId))) }
+        runCatching { AssignedTrainingsJson.decode(get(assignmentQuery(profileId))) }
             .onFailure { Log.w(TAG, "no se pudo leer la asignacion de $profileId", it) }
             .getOrNull()
 
-    private fun assignmentUrl(profileId: String) = "${BASE_URL}users/$profileId.json"
+    /** Los trainings de alguien en una sola llamada, incrustando el de cada asignación. */
+    private fun assignmentQuery(profileId: String): String {
+        val id = URLEncoder.encode(profileId, "UTF-8")
+        return "assignments?profile_id=eq.$id&select=trainings(payload)"
+    }
+
+    private fun get(path: String): String {
+        val res = Http.request("GET", "${Supabase.REST}$path", Supabase.headers())
+        if (!res.ok) throw IOException("HTTP ${res.code}: ${res.body}")
+        return res.body
+    }
 
     private companion object {
         const val TAG = "AssignmentRepository"
         const val KEY_PROFILE = "profile_id"
         const val KEY_PROFILE_NAME = "profile_name"
-
-        // Mismo repo y misma mecanica que videos.json (TD-062). Un solo sitio: el dia que
-        // esto pase por un backend con auth, cambia aqui.
-        const val BASE_URL = "https://raw.githubusercontent.com/maurozegarra/master-app/main/"
-        const val DIRECTORY_URL = "${BASE_URL}users.json"
     }
 }

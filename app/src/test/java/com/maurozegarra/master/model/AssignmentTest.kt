@@ -19,10 +19,8 @@ class AssignmentTest {
     // ---------- Directorio de perfiles ----------
 
     @Test
-    fun `reads the published profiles`() {
-        val json = """
-        { "format": 1, "users": [ { "id": "mauro", "name": "Mauro" }, { "id": "niko", "name": "Niko" } ] }
-        """
+    fun `reads the registered profiles`() {
+        val json = """[ { "id": "mauro", "name": "Mauro" }, { "id": "niko", "name": "Niko" } ]"""
 
         assertEquals(
             listOf(Profile("mauro", "Mauro"), Profile("niko", "Niko")),
@@ -32,16 +30,18 @@ class AssignmentTest {
 
     @Test
     fun `a profile without name falls back to its id`() {
-        val json = """{ "format": 1, "users": [ { "id": "niko" } ] }"""
-
-        assertEquals(listOf(Profile("niko", "niko")), ProfileDirectoryJson.decode(json))
+        assertEquals(listOf(Profile("niko", "niko")), ProfileDirectoryJson.decode("""[ { "id": "niko" } ]"""))
     }
 
     @Test
     fun `rejects a broken directory`() {
         assertNull(ProfileDirectoryJson.decode("no soy json"))
-        assertNull(ProfileDirectoryJson.decode("""{ "format": 99, "users": [] }"""))
-        assertNull(ProfileDirectoryJson.decode("""{ "format": 1 }"""))
+        assertNull(ProfileDirectoryJson.decode("""{ "message": "algo fallo" }"""))
+    }
+
+    @Test
+    fun `nobody registered is a valid answer`() {
+        assertEquals(emptyList<Profile>(), ProfileDirectoryJson.decode("[]"))
     }
 
     // ---------- Trainings asignados ----------
@@ -49,7 +49,7 @@ class AssignmentTest {
     @Test
     fun `reads the assigned trainings`() {
         val json = """
-        { "format": 1, "trainings": [ { "id": 1, "uid": "abc", "name": "MASTER" } ] }
+        [ { "trainings": { "payload": { "id": 1, "uid": "abc", "name": "MASTER" } } } ]
         """
 
         val out = AssignedTrainingsJson.decode(json)!!
@@ -59,15 +59,32 @@ class AssignmentTest {
 
     /** No es lo mismo "no se pudo leer" que "ya no te toca ninguno": lo segundo borra. */
     @Test
-    fun `a broken document is null, not an empty assignment`() {
+    fun `a broken answer is null, not an empty assignment`() {
         assertNull(AssignedTrainingsJson.decode("no soy json"))
-        assertNull(AssignedTrainingsJson.decode("""{ "format": 1 }"""))
-        assertNull(AssignedTrainingsJson.decode("""{ "format": 1, "trainings": [ "roto" ] }"""))
+        // El cuerpo de un error de la API es un objeto, no una lista de filas.
+        assertNull(AssignedTrainingsJson.decode("""{ "code": "42501", "message": "denegado" }"""))
+        assertNull(AssignedTrainingsJson.decode("""[ "roto" ]"""))
+    }
+
+    /**
+     * Una fila sin su training invalida la respuesta entera. Saltársela dejaría menos
+     * trainings de los asignados, que desde fuera es indistinguible de una desasignación.
+     */
+    @Test
+    fun `a row without its training invalidates the answer`() {
+        assertNull(AssignedTrainingsJson.decode("""[ { "trainings": null } ]"""))
+        assertNull(
+            AssignedTrainingsJson.decode(
+                """
+                [ { "trainings": { "payload": { "id": 1, "uid": "abc" } } }, { "trainings": {} } ]
+                """
+            )
+        )
     }
 
     @Test
     fun `an empty assignment is valid and means none`() {
-        assertEquals(emptyList<Training>(), AssignedTrainingsJson.decode("""{ "format": 1, "trainings": [] }"""))
+        assertEquals(emptyList<Training>(), AssignedTrainingsJson.decode("[]"))
     }
 
     // ---------- Fusion ----------

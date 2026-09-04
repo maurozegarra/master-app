@@ -1,29 +1,28 @@
 package com.maurozegarra.master.model
 
-import org.json.JSONObject
+import org.json.JSONArray
 
 /** Una persona que puede recibir trainings. */
 data class Profile(val id: String, val name: String)
 
 /**
- * Directorio de perfiles publicados: quién puede recibir trainings.
+ * Directorio de perfiles: quién puede recibir trainings.
  *
- * El dispositivo lo lee para ofrecer la lista y que su dueño diga cuál es. No hay cuentas
- * ni contraseñas: son cuatro personas conocidas y la identidad solo decide qué archivo de
- * trainings se descarga.
+ * El dispositivo lo lee para ofrecer la lista y que su dueño diga cuál es. Los demás no
+ * inician sesión —solo lo hace quien asigna—, así que aquí la identidad no autentica
+ * nada: únicamente decide qué trainings se descargan.
+ *
+ * Lo que llega es la respuesta de la tabla `profiles`, o sea un array de filas.
  */
 object ProfileDirectoryJson {
 
-    const val FORMAT = 1
-
+    /** Null si la respuesta no es una lista de filas; una fila sin `id` se ignora. */
     fun decode(json: String): List<Profile>? {
-        val root = try { JSONObject(json) } catch (_: Exception) { return null }
-        if (root.optInt("format", 0) !in 1..FORMAT) return null
-        val arr = root.optJSONArray("users") ?: return null
+        val arr = try { JSONArray(json) } catch (_: Exception) { return null }
         return (0 until arr.length()).mapNotNull { i ->
-            val o = arr.optJSONObject(i) ?: return@mapNotNull null
-            val id = o.optString("id").takeIf { it.isNotBlank() } ?: return@mapNotNull null
-            Profile(id = id, name = o.optString("name").ifBlank { id })
+            val row = arr.optJSONObject(i) ?: return@mapNotNull null
+            val id = row.optString("id").takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            Profile(id = id, name = row.optString("name").ifBlank { id })
         }
     }
 }
@@ -31,21 +30,34 @@ object ProfileDirectoryJson {
 /** Trainings asignados a un perfil. */
 object AssignedTrainingsJson {
 
-    const val FORMAT = 1
-
     /**
-     * Devuelve null si el documento no es válido, y **null no es lista vacía**: quien
+     * Decodifica las filas de `assignments` con su training incrustado, tal y como las
+     * devuelve `?select=trainings(payload)`:
+     *
+     * ```
+     * [ { "trainings": { "payload": { ...training... } } } ]
+     * ```
+     *
+     * Devuelve null si la respuesta no es válida, y **null no es lista vacía**: quien
      * llame no debe confundir "no se pudo leer" con "ya no te toca ninguno", porque lo
-     * segundo borra trainings del dispositivo.
+     * segundo borra trainings del dispositivo. Por eso una fila sin payload legible
+     * invalida la respuesta entera en vez de saltarse esa fila: saltársela se vería,
+     * desde fuera, igual que una desasignación.
      */
     fun decode(json: String): List<Training>? {
-        val root = try { JSONObject(json) } catch (_: Exception) { return null }
-        if (root.optInt("format", 0) !in 1..FORMAT) return null
-        val arr = root.optJSONArray("trainings") ?: return null
-        val trainings = TrainingJson.decode(arr.toString())
-        // decode() devuelve lista vacía ante JSON corrupto: distinguirlo de un archivo
-        // legítimamente vacío evita tomar un fallo de parseo por una desasignación.
-        if (trainings.isEmpty() && arr.length() > 0) return null
+        val arr = try { JSONArray(json) } catch (_: Exception) { return null }
+        val payloads = JSONArray()
+        for (i in 0 until arr.length()) {
+            val payload = arr.optJSONObject(i)
+                ?.optJSONObject("trainings")
+                ?.optJSONObject("payload")
+                ?: return null
+            payloads.put(payload)
+        }
+        val trainings = TrainingJson.decode(payloads.toString())
+        // decode() devuelve lista vacía ante JSON corrupto: distinguirlo de una asignación
+        // legítimamente vacía evita tomar un fallo de parseo por una desasignación.
+        if (trainings.isEmpty() && payloads.length() > 0) return null
         return trainings
     }
 }
