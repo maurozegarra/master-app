@@ -87,6 +87,31 @@ class AssignmentTest {
         assertEquals(emptyList<Training>(), AssignedTrainingsJson.decode("[]"))
     }
 
+    // ---------- Filas de asignacion (las lee quien reparte) ----------
+
+    @Test
+    fun `reads who already has a training`() {
+        val json = """[ { "profile_id": "mauro" }, { "profile_id": "niko" } ]"""
+
+        assertEquals(listOf("mauro", "niko"), AssignmentRowsJson.profileIds(json))
+    }
+
+    /** Marcar a nadie cuando en realidad no se pudo leer haria que confirmar desasignase. */
+    @Test
+    fun `a broken row list is null, not nobody`() {
+        assertNull(AssignmentRowsJson.profileIds("no soy json"))
+        assertNull(AssignmentRowsJson.profileIds("""{ "code": "42501" }"""))
+        assertNull(AssignmentRowsJson.profileIds("""[ { "profile_id": "" } ]"""))
+        assertEquals(emptyList<String>(), AssignmentRowsJson.profileIds("[]"))
+    }
+
+    @Test
+    fun `counts the rows, and cannot confuse a failure with zero`() {
+        assertEquals(2, AssignmentRowsJson.count("""[ { "training_uid": "a" }, { "training_uid": "b" } ]"""))
+        assertEquals(0, AssignmentRowsJson.count("[]"))
+        assertNull(AssignmentRowsJson.count("""{ "message": "denegado" }"""))
+    }
+
     // ---------- Fusion ----------
 
     @Test

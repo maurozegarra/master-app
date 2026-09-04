@@ -6,12 +6,17 @@
     historial incluido.
   - device-transfer: al cambiar de teléfono tampoco tiene sentido mover vídeos que el
     app vuelve a bajar del manifiesto en cuanto haga falta.
+
+  Y en los dos, master_auth.xml: guarda la sesión del entrenador, y un refresh token
+  restaurado en otro teléfono es permiso de escritura sobre los perfiles de todos.
 -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="file" path="videos/" />
+        <exclude domain="sharedpref" path="master_auth.xml" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="videos/" />
+        <exclude domain="sharedpref" path="master_auth.xml" />
     </device-transfer>
 </data-extraction-rules>

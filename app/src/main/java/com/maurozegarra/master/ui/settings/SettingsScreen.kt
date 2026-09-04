@@ -21,11 +21,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,6 +42,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
@@ -59,7 +63,12 @@ import java.time.LocalDate
 
 /** Pantalla de Ajustes: general, player y respaldo de datos. */
 @Composable
-fun SettingsScreen(vm: SettingsViewModel, masterVm: MasterViewModel, t: Strings) {
+fun SettingsScreen(
+    vm: SettingsViewModel,
+    masterVm: MasterViewModel,
+    t: Strings,
+    onManageProfiles: () -> Unit,
+) {
     val cfg = vm.config
     val accent = AppTheme.colors.accent
     Column(
@@ -71,6 +80,15 @@ fun SettingsScreen(vm: SettingsViewModel, masterVm: MasterViewModel, t: Strings)
     ) {
         SettingsCard(t.groupProfile) {
             ProfileSection(masterVm = masterVm, accent = accent, t = t)
+        }
+
+        SettingsCard(t.groupCoach) {
+            CoachSection(
+                masterVm = masterVm,
+                accent = accent,
+                t = t,
+                onManageProfiles = onManageProfiles,
+            )
         }
 
         SettingsCard(t.groupGeneral) {
@@ -209,6 +227,9 @@ private fun BackupSection(masterVm: MasterViewModel, accent: Color, t: Strings) 
 @Composable
 private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings) {
     var choosing by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(false) }
+    // Null es "no se pudo leer", que no es "no hay nadie registrado": el estado de carga
+    // va aparte, porque si no un fallo de red se vería igual que una espera eterna.
     var profiles by remember { mutableStateOf<List<Profile>?>(null) }
 
     Text(t.profileWho, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
@@ -232,8 +253,12 @@ private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings)
                 // La lista se pide al abrir, no al pintar los ajustes: es una llamada de
                 // red y no tiene por que ocurrir cada vez que alguien mira esta pantalla.
                 profiles = null
+                loading = true
                 choosing = true
-                masterVm.loadProfiles { profiles = it }
+                masterVm.loadProfiles {
+                    profiles = it
+                    loading = false
+                }
             },
         )
     }
@@ -248,7 +273,8 @@ private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings)
             text = {
                 val list = profiles
                 when {
-                    list == null -> Text("…")
+                    loading -> Text("…")
+                    list == null -> Text(t.profileLoadFailed)
                     list.isEmpty() -> Text(t.profileNoneAvailable)
                     else -> Column {
                         list.forEach { p ->
@@ -277,12 +303,131 @@ private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings)
     }
 }
 
+/**
+ * La sesión de quien reparte rutinas.
+ *
+ * Es el único sitio del app donde se inicia sesión, porque es lo único que exige permiso:
+ * leer lo asignado es público, escribirlo no. Sin sesión aquí solo se ve el botón de
+ * entrar; con ella aparece administrar personas, y en la lista de trainings, "Asignar a…".
+ *
+ * Esconder esos controles es comodidad, no seguridad: quien decide es el servidor.
+ */
+@Composable
+private fun CoachSection(
+    masterVm: MasterViewModel,
+    accent: Color,
+    t: Strings,
+    onManageProfiles: () -> Unit,
+) {
+    val ctx = LocalContext.current
+    var signingIn by remember { mutableStateOf(false) }
+
+    if (masterVm.isCoach) {
+        Text(
+            "${t.coachSignedInAs} ${masterVm.coachEmail}",
+            color = AppTheme.colors.textDim,
+            fontSize = 13.sp,
+        )
+        Spacer(Modifier.height(12.dp))
+        ActionRow(
+            label = t.manageProfiles,
+            desc = t.manageProfilesDesc,
+            accent = accent,
+            onClick = onManageProfiles,
+        )
+        Spacer(Modifier.height(16.dp))
+        ActionRow(
+            label = t.coachSignOut,
+            accent = accent,
+            onClick = { masterVm.coachSignOut() },
+        )
+    } else {
+        Text(t.coachDesc, color = AppTheme.colors.textDim, fontSize = 13.sp)
+        Spacer(Modifier.height(12.dp))
+        ActionRow(
+            label = t.coachSignIn,
+            accent = accent,
+            onClick = { signingIn = true },
+        )
+    }
+
+    if (signingIn) {
+        SignInDialog(
+            t = t,
+            accent = accent,
+            onDismiss = { signingIn = false },
+            onSubmit = { email, password, done ->
+                masterVm.coachSignIn(email, password) { error ->
+                    done()
+                    if (error == null) {
+                        signingIn = false
+                    } else {
+                        Toast.makeText(ctx, error, Toast.LENGTH_LONG).show()
+                    }
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun SignInDialog(
+    t: Strings,
+    accent: Color,
+    onDismiss: () -> Unit,
+    onSubmit: (String, String, () -> Unit) -> Unit,
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = { if (!busy) onDismiss() },
+        containerColor = AppTheme.colors.surface,
+        titleContentColor = AppTheme.colors.textPrimary,
+        title = { Text(t.coachSignIn) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    singleLine = true,
+                    label = { Text(t.coachEmail) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    singleLine = true,
+                    label = { Text(t.coachPassword) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = email.isNotBlank() && password.isNotBlank() && !busy,
+                onClick = {
+                    busy = true
+                    onSubmit(email, password) { busy = false }
+                },
+            ) { Text(t.coachSignIn, color = accent, fontWeight = FontWeight.Bold) }
+        },
+        dismissButton = {
+            TextButton(enabled = !busy, onClick = onDismiss) {
+                Text(t.cancel, color = AppTheme.colors.textDim)
+            }
+        },
+    )
+}
+
 /** master-backup-2026-08-29.json */
 private fun backupFileName(): String =
     "master-backup-${LocalDate.now()}.json"
 
 @Composable
-private fun ActionRow(label: String, desc: String, accent: Color, onClick: () -> Unit) {
+private fun ActionRow(label: String, desc: String = "", accent: Color, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -291,8 +436,12 @@ private fun ActionRow(label: String, desc: String, accent: Color, onClick: () ->
             .padding(vertical = 4.dp),
     ) {
         Text(label, color = accent, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(2.dp))
-        Text(desc, color = AppTheme.colors.textFaded, fontSize = 12.sp)
+        // Sin descripción no se deja el hueco: una acción que se explica sola —entrar,
+        // salir— quedaría con una línea en blanco debajo.
+        if (desc.isNotBlank()) {
+            Spacer(Modifier.height(2.dp))
+            Text(desc, color = AppTheme.colors.textFaded, fontSize = 12.sp)
+        }
     }
 }
 

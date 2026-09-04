@@ -63,6 +63,33 @@ object AssignedTrainingsJson {
 }
 
 /**
+ * Filas de `assignments` leídas en crudo, sin el training incrustado.
+ *
+ * Las usa quien reparte, para saber quién tiene ya un training y cuánto se lleva por
+ * delante borrar un perfil. Devuelven null si la respuesta no vale, por la misma razón de
+ * siempre: contar cero cuando en realidad no se pudo leer llevaría a decir que borrar un
+ * perfil no quita nada.
+ */
+object AssignmentRowsJson {
+
+    /** Los perfiles que aparecen en las filas, sin repetir y en el orden que llegaron. */
+    fun profileIds(json: String): List<String>? {
+        val arr = try { JSONArray(json) } catch (_: Exception) { return null }
+        val out = LinkedHashSet<String>()
+        for (i in 0 until arr.length()) {
+            val row = arr.optJSONObject(i) ?: return null
+            val id = row.optString("profile_id").takeIf { it.isNotBlank() } ?: return null
+            out += id
+        }
+        return out.toList()
+    }
+
+    /** Cuántas filas trae la respuesta. */
+    fun count(json: String): Int? =
+        try { JSONArray(json).length() } catch (_: Exception) { null }
+}
+
+/**
  * Aplica los trainings asignados sobre los que ya hay en el dispositivo.
  *
  * Reglas, y cada una está aquí porque su contraria pierde datos:

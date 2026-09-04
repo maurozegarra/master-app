@@ -25,3 +25,6 @@ const val STITCH_ACCENT = 0xFF4A90D6
 val ACTION_EDIT = Color(0xFF2F6FED)
 val ACTION_DUPLICATE = Color(0xFFE2861E)
 val ACTION_DELETE = Color(0xFFD93A32)
+
+/** Asignar. Verde: es la unica accion del panel que no toca lo que hay en este telefono. */
+val ACTION_ASSIGN = Color(0xFF2E9E5B)

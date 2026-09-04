@@ -20,6 +20,9 @@ object Supabase {
 
     const val REST = "$URL/rest/v1/"
 
+    /** GoTrue: el único sitio donde se cambia una contraseña por una sesión. */
+    const val AUTH = "$URL/auth/v1/"
+
     /**
      * Cabeceras de PostgREST. Sin sesión se manda la clave publicable también como
      * `Authorization`, que es como la API identifica al rol anónimo.

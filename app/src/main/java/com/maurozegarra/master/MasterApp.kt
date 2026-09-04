@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.maurozegarra.master.audio.AlarmPlayer
 import com.maurozegarra.master.data.AssignmentRepository
+import com.maurozegarra.master.data.AuthStore
 import com.maurozegarra.master.data.AutoBackup
 import com.maurozegarra.master.data.ExerciseMediaStore
 import com.maurozegarra.master.data.SettingsStore
@@ -39,6 +40,7 @@ val appModule = module {
     // dependencia. Queda fuera del respaldo en backup_rules.xml.
     single { VideoCache(java.io.File(androidContext().filesDir, "videos")) }
     singleOf(::VideoRepository)
+    singleOf(::AuthStore)
     singleOf(::AssignmentRepository)
     viewModelOf(::MasterViewModel)
     viewModelOf(::SettingsViewModel)

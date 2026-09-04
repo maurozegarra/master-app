@@ -11,6 +11,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.maurozegarra.master.audio.AlarmPlayer
 import com.maurozegarra.master.data.AssignmentRepository
+import com.maurozegarra.master.data.AuthStore
 import com.maurozegarra.master.data.AutoBackup
 import com.maurozegarra.master.data.ImportSummary
 import com.maurozegarra.master.data.MasterDefaults
@@ -71,6 +72,7 @@ class MasterViewModel(
     private val videos: VideoRepository,
     private val videoCache: VideoCache,
     private val assignments: AssignmentRepository,
+    private val auth: AuthStore,
 ) : AndroidViewModel(app) {
 
     val trainings = mutableStateListOf<Training>()
@@ -324,8 +326,13 @@ class MasterViewModel(
 
     val profileName: String get() = assignments.profileName
 
-    /** Perfiles publicados, para elegir. Va a la red, así que se llama al abrir la lista. */
-    fun loadProfiles(onDone: (List<Profile>) -> Unit) {
+    /**
+     * Perfiles publicados, para elegir. Va a la red, así que se llama al abrir la lista.
+     *
+     * **Null es "no se pudo leer", no "no hay ninguno"**. Enseñar una lista vacía cuando
+     * falló la conexión haría creer que se borraron los perfiles.
+     */
+    fun loadProfiles(onDone: (List<Profile>?) -> Unit) {
         viewModelScope.launch {
             onDone(withContext(Dispatchers.IO) { assignments.directory() })
         }
@@ -336,6 +343,91 @@ class MasterViewModel(
         assignments.profileId = profile.id
         assignments.profileName = profile.name
         syncAssignments()
+    }
+
+    // ---------- Entrenador: crear personas y asignar (TD-067, etapa B) ----------
+
+    /**
+     * Si este dispositivo puede escribir. Lo decide el servidor; esto solo pinta la UI.
+     *
+     * Es estado observable y no una lectura directa del almacenamiento: la acción
+     * "Asignar a…" de la lista de trainings depende de esto, y con una lectura simple solo
+     * aparecería cuando algo más obligase a repintar esa pantalla.
+     */
+    var isCoach by mutableStateOf(auth.isCoach)
+        private set
+
+    val coachEmail: String get() = auth.email
+
+    /** [onDone] recibe null si entró, o el motivo. */
+    fun coachSignIn(email: String, password: String, onDone: (String?) -> Unit) {
+        viewModelScope.launch {
+            val error = withContext(Dispatchers.IO) { auth.signIn(email, password) }
+            isCoach = auth.isCoach
+            onDone(error)
+        }
+    }
+
+    /** Cerrar sesión no toca lo asignado: solo retira el permiso de este dispositivo. */
+    fun coachSignOut() {
+        auth.signOut()
+        isCoach = auth.isCoach
+    }
+
+    fun createProfile(name: String, onDone: (String?) -> Unit) = write(onDone) {
+        assignments.createProfile(name)
+    }
+
+    fun renameProfile(id: String, name: String, onDone: (String?) -> Unit) = write(onDone) {
+        assignments.renameProfile(id, name)
+    }
+
+    fun deleteProfile(id: String, onDone: (String?) -> Unit) = write(onDone) {
+        assignments.deleteProfile(id)
+    }
+
+    /** Cuántos trainings tiene asignados alguien, para avisarlo antes de borrarlo. */
+    fun countAssignments(profileId: String, onDone: (Int?) -> Unit) {
+        viewModelScope.launch {
+            onDone(withContext(Dispatchers.IO) { assignments.assignmentCount(profileId) })
+        }
+    }
+
+    /** Quién tiene ya este training, para marcarlo al abrir el diálogo de asignar. */
+    fun loadAssignees(trainingUid: String, onDone: (List<String>?) -> Unit) {
+        viewModelScope.launch {
+            onDone(withContext(Dispatchers.IO) { assignments.profilesWith(trainingUid) })
+        }
+    }
+
+    /**
+     * Deja el training en manos exactamente de [profileIds], y sincroniza al terminar.
+     *
+     * La sincronización es lo que hace visible el efecto en ESTE teléfono cuando el
+     * entrenador se asigna algo a sí mismo; en los demás llega en su siguiente arranque.
+     */
+    fun setAssignees(trainingId: Long, profileIds: Set<String>, onDone: (String?) -> Unit) {
+        val training = trainings.firstOrNull { it.id == trainingId } ?: return onDone("Training not found")
+        write(onDone) { assignments.setAssignees(training, profileIds) }
+    }
+
+    /**
+     * Escritura de red: fuera del hilo principal y devolviendo el motivo si falló.
+     *
+     * Al terminar bien se resincroniza, porque casi cualquier escritura puede haber
+     * cambiado lo asignado a este teléfono —borrar un perfil se lleva sus asignaciones en
+     * cascada—, y esperar al siguiente arranque para verlo sería raro justo después de
+     * haberlo hecho uno mismo.
+     */
+    private fun write(onDone: (String?) -> Unit, block: () -> String?) {
+        viewModelScope.launch {
+            val error = withContext(Dispatchers.IO) { block() }
+            // La sesión puede haber caducado durante la escritura; AuthStore la cierra al
+            // saberlo, y la UI tiene que dejar de ofrecer lo que ya no se puede hacer.
+            isCoach = auth.isCoach
+            if (error == null) syncAssignments()
+            onDone(error)
+        }
     }
 
     /**

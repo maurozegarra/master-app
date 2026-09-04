@@ -57,6 +57,7 @@ import com.maurozegarra.master.update.UpdateChecker
 import com.maurozegarra.master.update.UpdateBar
 import com.maurozegarra.master.update.UpdateInfo
 import com.maurozegarra.master.ui.master.MasterScreen
+import com.maurozegarra.master.ui.settings.ProfilesScreen
 import com.maurozegarra.master.ui.settings.SettingsScreen
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.MasterTheme
@@ -107,6 +108,7 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
     val accent = AppTheme.colors.accent
 
     var showSettings by remember { mutableStateOf(false) }
+    var showProfiles by remember { mutableStateOf(false) }
     var showClearMenu by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
 
@@ -144,11 +146,19 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
         }
     }
 
-    // Ajustes: pantalla propia por encima de la sección principal.
+    // Ajustes: pantalla propia por encima de la sección principal, y dentro de ella la de
+    // personas, que es un nivel más. El atrás cierra de dentro hacia fuera.
     if (showSettings) {
-        BackHandler { showSettings = false }
-        SettingsScaffold(title = t.settings, onBack = { showSettings = false }) {
-            SettingsScreen(settingsVm, vm, t)
+        if (showProfiles) {
+            BackHandler { showProfiles = false }
+            SettingsScaffold(title = t.manageProfiles, onBack = { showProfiles = false }) {
+                ProfilesScreen(vm, t)
+            }
+        } else {
+            BackHandler { showSettings = false }
+            SettingsScaffold(title = t.settings, onBack = { showSettings = false }) {
+                SettingsScreen(settingsVm, vm, t, onManageProfiles = { showProfiles = true })
+            }
         }
         return
     }

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,6 +74,7 @@ import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
+import com.maurozegarra.master.ui.theme.ACTION_ASSIGN
 import com.maurozegarra.master.ui.theme.ACTION_DELETE
 import com.maurozegarra.master.ui.theme.ACTION_DUPLICATE
 import com.maurozegarra.master.ui.theme.ACTION_EDIT
@@ -124,6 +126,9 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     val timeFmt = remember { java.time.format.DateTimeFormatter.ofPattern("h:mm a") }
     val swipeController = rememberSwipeRowsController()
+
+    /** Training cuyo reparto se está editando, si hay alguno. */
+    var assigning by remember { mutableStateOf<Training?>(null) }
 
     Box(
         Modifier
@@ -188,10 +193,22 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             onEdit = { vm.startEditTraining(tr.id) },
                             onDuplicate = { vm.duplicateTraining(tr.id) },
                             onDelete = { vm.deleteTraining(tr.id) },
+                            // Un training sin uid no se puede repartir: el uid es la clave
+                            // con la que el que recibe lo empareja, y sin ella cada
+                            // sincronización lo tomaría por uno nuevo.
+                            onAssign = if (vm.isCoach && tr.uid.isNotBlank()) {
+                                { assigning = tr }
+                            } else {
+                                null
+                            },
                         )
                     }
                 }
             }
+        }
+
+        assigning?.let { tr ->
+            AssignDialog(vm = vm, training = tr, t = t, onClose = { assigning = null })
         }
 
         val activeId = vm.activePlayerTrainingId
@@ -414,6 +431,8 @@ private fun TrainingCard(
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,
+    /** Null cuando este dispositivo no puede repartir: sin sesión no hay acción que ofrecer. */
+    onAssign: (() -> Unit)?,
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
     val exercises = training.workouts.sumOf { w ->
@@ -428,14 +447,21 @@ private fun TrainingCard(
     // sensación de haberlo hecho: la siguiente sincronización lo devolvería tal cual, y
     // el trabajo se perdería sin aviso. Quien quiera cambiarlo duplica, y la copia es
     // suya y editable.
+    //
+    // "Asignar a…" solo aparece con sesión de entrenador y solo en trainings propios: uno
+    // asignado ya viene de otro, y repartirlo desde aquí publicaría una copia con el mismo
+    // uid que se pisaría con el original en la siguiente sincronización.
     val actions = if (training.assigned) {
         listOf(SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate))
     } else {
-        listOf(
-            SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete) { confirmDelete = true },
-            SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate),
-            SwipeAction(Icons.Filled.Edit, ACTION_EDIT, t.edit, onEdit),
-        )
+        buildList {
+            add(SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete) { confirmDelete = true })
+            if (onAssign != null) {
+                add(SwipeAction(Icons.Filled.PersonAdd, ACTION_ASSIGN, t.assignTo, onAssign))
+            }
+            add(SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate))
+            add(SwipeAction(Icons.Filled.Edit, ACTION_EDIT, t.edit, onEdit))
+        }
     }
 
     SwipeActionsRow(actions = actions, controller = swipeController) {
