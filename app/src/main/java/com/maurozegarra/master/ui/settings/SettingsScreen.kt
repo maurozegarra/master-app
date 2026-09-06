@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.SettingsViewModel
+import com.maurozegarra.master.SyncResult
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ACCENT_COLORS
 import com.maurozegarra.master.model.Profile
@@ -226,11 +227,16 @@ private fun BackupSection(masterVm: MasterViewModel, accent: Color, t: Strings) 
  */
 @Composable
 private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings) {
+    val ctx = LocalContext.current
     var choosing by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
     // Null es "no se pudo leer", que no es "no hay nadie registrado": el estado de carga
     // va aparte, porque si no un fallo de red se vería igual que una espera eterna.
     var profiles by remember { mutableStateOf<List<Profile>?>(null) }
+
+    fun report(result: SyncResult) {
+        Toast.makeText(ctx, syncMessage(result, t), Toast.LENGTH_LONG).show()
+    }
 
     Text(t.profileWho, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
     Spacer(Modifier.height(2.dp))
@@ -262,6 +268,15 @@ private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings)
             },
         )
     }
+    Spacer(Modifier.height(16.dp))
+    // Sincronizar se ofrece siempre, tenga o no perfil: sin él la respuesta es justamente
+    // lo que hace falta saber —que primero hay que decir quién usa el teléfono—.
+    ActionRow(
+        label = if (masterVm.syncing) "…" else t.syncNow,
+        desc = t.syncNowDesc,
+        accent = accent,
+        onClick = { masterVm.syncNow { report(it) } },
+    )
 
     if (choosing) {
         AlertDialog(
@@ -272,24 +287,27 @@ private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings)
             title = { Text(t.profileWho) },
             text = {
                 val list = profiles
-                when {
-                    loading -> Text("…")
-                    list == null -> Text(t.profileLoadFailed)
-                    list.isEmpty() -> Text(t.profileNoneAvailable)
-                    else -> Column {
-                        list.forEach { p ->
-                            Text(
-                                p.name,
-                                color = AppTheme.colors.textPrimary,
-                                fontSize = 16.sp,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        masterVm.chooseProfile(p)
-                                        choosing = false
-                                    }
-                                    .padding(vertical = 12.dp),
-                            )
+                Column {
+                    when {
+                        loading -> Text("…")
+                        list == null -> Text(t.profileLoadFailed)
+                        list.isEmpty() -> Text(t.profileNoneAvailable)
+                        else -> list.forEach { p ->
+                            ProfileChoice(name = p.name) {
+                                // Elegir perfil sincroniza, y el resultado se dice: si no
+                                // le toca ninguno, la pantalla no cambia y sin aviso
+                                // parecería que la elección no hizo nada.
+                                masterVm.chooseProfile(p) { report(it) }
+                                choosing = false
+                            }
+                        }
+                    }
+                    // "Nadie" no depende de haber podido leer la lista: dejar de recibir
+                    // tiene que poder hacerse aunque el servidor no conteste.
+                    if (masterVm.profileId != null) {
+                        ProfileChoice(name = t.profileNone, desc = t.profileNoneDesc) {
+                            masterVm.clearProfile()
+                            choosing = false
                         }
                     }
                 }
@@ -420,6 +438,23 @@ private fun SignInDialog(
             }
         },
     )
+}
+
+/** Una opción del selector de perfil: la persona, o "Nadie". */
+@Composable
+private fun ProfileChoice(name: String, desc: String = "", onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+    ) {
+        Text(name, color = AppTheme.colors.textPrimary, fontSize = 16.sp)
+        if (desc.isNotBlank()) {
+            Spacer(Modifier.height(2.dp))
+            Text(desc, color = AppTheme.colors.textFaded, fontSize = 12.sp)
+        }
+    }
 }
 
 /** master-backup-2026-08-29.json */

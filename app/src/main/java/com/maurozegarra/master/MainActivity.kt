@@ -61,6 +61,7 @@ import com.maurozegarra.master.ui.settings.ProfilesScreen
 import com.maurozegarra.master.ui.settings.SettingsScreen
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.MasterTheme
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -71,6 +72,9 @@ import org.koin.compose.viewmodel.koinViewModel
 class MainActivity : ComponentActivity() {
 
     private val pendingWorkoutId = mutableStateOf<Long?>(null)
+
+    /** El mismo del árbol de Compose: los dos salen del ViewModelStore de esta Activity. */
+    private val master: MasterViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +95,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Lo asignado se comprueba también al volver a primer plano, no solo al arrancar en
+     * frío: un teléfono que nunca se cierra del todo podía tardar días en enterarse de una
+     * asignación nueva. Si de verdad toca ir a la red lo decide el ViewModel; aquí solo se
+     * le avisa de que el usuario ha vuelto.
+     */
+    override fun onStart() {
+        super.onStart()
+        master.syncAssignments()
     }
 
     override fun onNewIntent(intent: Intent) {

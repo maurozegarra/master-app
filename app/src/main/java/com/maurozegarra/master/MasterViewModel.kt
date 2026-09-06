@@ -59,6 +59,23 @@ import kotlinx.coroutines.withContext
 data class ImportResult(val summary: ImportSummary, val backedUp: Boolean)
 
 /**
+ * Cómo acabó una sincronización, para poder decirlo en vez de callar.
+ *
+ * Existe porque los tres finales se parecen desde fuera —la pantalla no cambia— y
+ * significan cosas opuestas: no se pudo leer, no te toca nada, o ya lo tenías todo.
+ */
+sealed interface SyncResult {
+    /** Este dispositivo todavía no tiene dueño, así que no hay nada que traer. */
+    data object NoProfile : SyncResult
+
+    /** No se pudo leer. No se ha tocado ningún training. */
+    data object Failed : SyncResult
+
+    /** Se leyó bien: [assigned] es cuántos le tocan, [changed] si alguno cambió aquí. */
+    data class Ok(val assigned: Int, val changed: Boolean) : SyncResult
+}
+
+/**
  * Estado y lógica principal de MASTER (jerarquía Training > Workout > Exercise).
  * Mantiene la lista de trainings persistida y un "draft" en edición que contiene
  * todo el árbol (workouts → exercises) hasta que se guarda.
@@ -173,9 +190,10 @@ class MasterViewModel(
         refreshSessions()
         exerciseMedia.putAll(mediaStore.load())
         snapshotReady = true
-        // Al arrancar se comprueba si cambio lo asignado. Va al final: antes de esto el
-        // estado todavia se esta armando, y persist() escribiria a medias.
-        syncAssignments()
+        // Aqui NO se sincroniza. El arranque en frio lo cubre MainActivity.onStart, igual
+        // que cualquier vuelta a primer plano. Ademas seria imposible: syncAssignments lee
+        // `syncing`, que es un mutableStateOf declarado mas abajo, y los inicializadores
+        // corren en orden de declaracion — desde el init su delegado todavia es null.
     }
 
     private fun migrateRestorePrefs() {
@@ -324,7 +342,14 @@ class MasterViewModel(
     /** Perfil elegido en este dispositivo, o null si aún no se ha elegido ninguno. */
     val profileId: String? get() = assignments.profileId
 
-    val profileName: String get() = assignments.profileName
+    /**
+     * Nombre del perfil elegido.
+     *
+     * Es estado observable y no una lectura del almacenamiento: Ajustes lo enseña, y con
+     * una lectura simple solo cambiaría cuando algo más obligase a repintar la pantalla.
+     */
+    var profileName by mutableStateOf(assignments.profileName)
+        private set
 
     /**
      * Perfiles publicados, para elegir. Va a la red, así que se llama al abrir la lista.
@@ -338,11 +363,28 @@ class MasterViewModel(
         }
     }
 
-    /** Fija quién usa este dispositivo y trae de inmediato lo que le toque. */
-    fun chooseProfile(profile: Profile) {
+    /** Fija quién usa este dispositivo y trae en el acto lo que le toque. */
+    fun chooseProfile(profile: Profile, onDone: (SyncResult) -> Unit = {}) {
         assignments.profileId = profile.id
         assignments.profileName = profile.name
-        syncAssignments()
+        profileName = profile.name
+        // Sin pasar por el freno del sincronizado automático: el perfil acaba de cambiar,
+        // y lo que se leyó hace un minuto era de otra persona.
+        runSync(onDone)
+    }
+
+    /**
+     * Deja el dispositivo sin dueño: deja de bajar asignaciones.
+     *
+     * **No retira los trainings que ya llegaron.** Retirarlos sería lo simétrico, pero
+     * rompería el enlace entre cada training y su historial —`SessionLog.trainingId`
+     * apunta al id local, y volver a elegir el perfil crearía uno nuevo—, y eso cuesta
+     * mucho más de recuperar que un training de sobra en la lista, que se borra a mano.
+     */
+    fun clearProfile() {
+        assignments.profileId = null
+        assignments.profileName = ""
+        profileName = ""
     }
 
     // ---------- Entrenador: crear personas y asignar (TD-067, etapa B) ----------
@@ -425,26 +467,66 @@ class MasterViewModel(
             // La sesión puede haber caducado durante la escritura; AuthStore la cierra al
             // saberlo, y la UI tiene que dejar de ofrecer lo que ya no se puede hacer.
             isCoach = auth.isCoach
-            if (error == null) syncAssignments()
+            // runSync y no syncAssignments: el freno del automático se saltaría justo la
+            // sincronización que el entrenador acaba de provocar a mano.
+            if (error == null) runSync {}
             onDone(error)
         }
+    }
+
+    /** Si hay una sincronización en curso, para no lanzar dos a la vez. */
+    var syncing by mutableStateOf(false)
+        private set
+
+    private var lastSyncAt = 0L
+
+    /**
+     * Sincronización automática: al arrancar y cada vez que el app vuelve a primer plano.
+     *
+     * Se salta si acaba de correr. Volver a primer plano ocurre decenas de veces al día
+     * —cada vez que se desbloquea el teléfono—, y lo asignado cambia de semana en semana.
+     * "Sincronizar ahora" no pasa por este freno: ese va a la red siempre.
+     */
+    fun syncAssignments() {
+        if (syncing || System.currentTimeMillis() - lastSyncAt < AUTO_SYNC_MIN_MS) return
+        runSync {}
+    }
+
+    /** "Sincronizar ahora": va a la red sin excusas y cuenta cómo fue. */
+    fun syncNow(onDone: (SyncResult) -> Unit) {
+        if (syncing) return
+        runSync(onDone)
     }
 
     /**
      * Trae los trainings asignados y los aplica.
      *
      * Si no hay perfil o no se pudo leer la asignación **no se toca nada**: un fallo de
-     * red no puede parecerse a "ya no te toca ninguno", que sí retira trainings.
+     * red no puede parecerse a "ya no te toca ninguno", que sí retira trainings. Y un
+     * fallo tampoco cuenta como sincronización hecha, para que se reintente en la
+     * siguiente vuelta a primer plano en vez de esperar al freno.
      */
-    fun syncAssignments() {
-        val id = assignments.profileId ?: return
+    private fun runSync(onDone: (SyncResult) -> Unit) {
+        val id = assignments.profileId ?: return onDone(SyncResult.NoProfile)
+        syncing = true
+        // Se marca antes de salir a la red, no al volver: el arranque y la primera vuelta
+        // a primer plano llegan casi juntos, y así el segundo ve que el primero ya va.
+        lastSyncAt = System.currentTimeMillis()
         viewModelScope.launch {
-            val incoming = withContext(Dispatchers.IO) { assignments.assignedTrainings(id) } ?: return@launch
+            val incoming = withContext(Dispatchers.IO) { assignments.assignedTrainings(id) }
+            syncing = false
+            if (incoming == null) {
+                lastSyncAt = 0L
+                return@launch onDone(SyncResult.Failed)
+            }
             val merged = mergeAssigned(trainings.toList(), incoming, ::newId)
-            if (merged == trainings.toList()) return@launch
-            trainings.clear()
-            trainings.addAll(merged)
-            persist()
+            val changed = merged != trainings.toList()
+            if (changed) {
+                trainings.clear()
+                trainings.addAll(merged)
+                persist()
+            }
+            onDone(SyncResult.Ok(assigned = incoming.size, changed = changed))
         }
     }
 
@@ -1097,5 +1179,10 @@ class MasterViewModel(
         super.onCleared()
         alarmPlayer.stop()
         alarmPlayer.stopPreview()
+    }
+
+    private companion object {
+        /** Cuánto tiene que pasar para que volver a primer plano vuelva a mirar. */
+        const val AUTO_SYNC_MIN_MS = 60_000L
     }
 }
