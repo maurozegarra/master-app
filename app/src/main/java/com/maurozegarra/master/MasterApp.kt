@@ -12,6 +12,7 @@ import com.maurozegarra.master.data.SharedFiles
 import com.maurozegarra.master.data.VideoCache
 import com.maurozegarra.master.data.VideoRepository
 import com.maurozegarra.master.data.WorkoutStore
+import com.maurozegarra.master.notify.AssignmentWorker
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
@@ -25,6 +26,9 @@ class MasterApp : Application() {
             androidContext(this@MasterApp)
             modules(appModule)
         }
+        // Va despues de startKoin: el worker resuelve sus dependencias de Koin, y aunque
+        // aqui solo se programe, el sistema puede lanzarlo en cuanto se encole.
+        AssignmentWorker.schedule(this)
     }
 }
 

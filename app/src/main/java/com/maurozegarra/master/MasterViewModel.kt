@@ -492,11 +492,14 @@ class MasterViewModel(
         runSync {}
     }
 
-    /** "Sincronizar ahora": va a la red sin excusas y cuenta cómo fue. */
-    fun syncNow(onDone: (SyncResult) -> Unit) {
-        if (syncing) return
-        runSync(onDone)
-    }
+    /**
+     * Refresco a mano: va a la red sin excusas y cuenta cómo fue.
+     *
+     * No mira [syncing] a propósito. Rebotar la petición dejaría a quien la pidió sin
+     * respuesta —y al indicador de refresco girando para siempre—; repetir una lectura
+     * pequeña es más barato que eso.
+     */
+    fun syncNow(onDone: (SyncResult) -> Unit) = runSync(onDone)
 
     /**
      * Trae los trainings asignados y los aplica.

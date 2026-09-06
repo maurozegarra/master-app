@@ -1,5 +1,6 @@
 package com.maurozegarra.master.ui.master
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -56,6 +57,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,7 +73,10 @@ import com.maurozegarra.master.ui.DraggableItem
 import com.maurozegarra.master.ui.SwipeAction
 import com.maurozegarra.master.ui.SwipeActionsRow
 import com.maurozegarra.master.ui.SwipeRowsController
+import com.maurozegarra.master.ui.PullToSyncIndicator
+import com.maurozegarra.master.ui.rememberPullToSyncState
 import com.maurozegarra.master.ui.rememberSwipeRowsController
+import com.maurozegarra.master.ui.settings.syncMessage
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
@@ -108,6 +114,7 @@ fun MasterScreen(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> 
 
 @Composable
 private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
+    val ctx = LocalContext.current
     val zone = remember { ZoneId.systemDefault() }
     val today = remember { LocalDate.now() }
     val baseWeekStart = remember { today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }
@@ -130,9 +137,22 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
     /** Training cuyo reparto se está editando, si hay alguno. */
     var assigning by remember { mutableStateOf<Training?>(null) }
 
+    val pull = rememberPullToSyncState()
+    if (pull.refreshing) {
+        LaunchedEffect(Unit) {
+            vm.syncNow { result ->
+                // Se dice siempre cómo fue: un refresco pedido a mano que no cambia nada
+                // en pantalla es indistinguible de uno que falló.
+                Toast.makeText(ctx, syncMessage(result, t), Toast.LENGTH_LONG).show()
+                pull.finish()
+            }
+        }
+    }
+
     Box(
         Modifier
             .fillMaxSize()
+            .nestedScroll(pull.connection)
             // Un tap en cualquier zona vacia cierra el panel abierto. Va en el contenedor
             // y solo mientras hay algo abierto: detectTapGestures ignora los taps que un
             // hijo ya consumio (la card, el play), asi que no pisa sus handlers.
@@ -269,6 +289,8 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                 },
             )
         }
+
+        PullToSyncIndicator(pull, accent, Modifier.align(Alignment.TopCenter))
     }
 }
 

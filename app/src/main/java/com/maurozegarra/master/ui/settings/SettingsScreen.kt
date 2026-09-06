@@ -268,16 +268,6 @@ private fun ProfileSection(masterVm: MasterViewModel, accent: Color, t: Strings)
             },
         )
     }
-    Spacer(Modifier.height(16.dp))
-    // Sincronizar se ofrece siempre, tenga o no perfil: sin él la respuesta es justamente
-    // lo que hace falta saber —que primero hay que decir quién usa el teléfono—.
-    ActionRow(
-        label = if (masterVm.syncing) "…" else t.syncNow,
-        desc = t.syncNowDesc,
-        accent = accent,
-        onClick = { masterVm.syncNow { report(it) } },
-    )
-
     if (choosing) {
         AlertDialog(
             onDismissRequest = { choosing = false },
