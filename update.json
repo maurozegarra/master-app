@@ -1,7 +1,7 @@
 {
-  "versionCode": 177,
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.177/master-1.0.177.apk",
-  "versionName": "1.0.177",
-  "changelog": "release: TD-063 perfiles y trainings asignados, TD-057 swipe en el editor",
-  "minVersionCode": 1
+  "versionCode": 189,
+  "minVersionCode": 1,
+  "changelog": "release: TD-067 asignar trainings desde el telefono, TD-068 entrega automatica con aviso",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.189/master-1.0.189.apk",
+  "versionName": "1.0.189"
 }
