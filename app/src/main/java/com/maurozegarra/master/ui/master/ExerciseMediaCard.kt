@@ -62,7 +62,7 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
     val videoFile = (state as? VideoState.Ready)?.file
     // Solo se puede quitar lo que puso el usuario: un vídeo publicado se volvería a
     // descargar, así que ofrecer "quitar" sería mentirle.
-    val own = remember(state) { vm.hasOwnVideo(exerciseId) }
+    val own = remember(exerciseId, state) { vm.hasOwnVideo(exerciseId) }
     var error by remember { mutableStateOf(false) }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -89,7 +89,19 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
             modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
         )
 
-        if (videoFile != null) {
+        if (state is VideoState.Hidden) {
+            // Ocultar tiene que ser una puerta de doble sentido: sin esta rama, el vídeo
+            // desaparecería y no quedaría ni rastro de cómo recuperarlo.
+            Text(t.videoHidden, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                t.showVideo,
+                color = accent,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable { vm.showVideo(exerciseId) },
+            )
+        } else if (videoFile != null) {
             // Alto máximo, no fijo: la miniatura toma la forma real del archivo, así que
             // un vídeo vertical se ve entero en vez de recortado a un hueco horizontal.
             Box(
@@ -118,9 +130,10 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
             VideoActions(
                 accent = accent,
                 t = t,
-                canRemove = own,
+                own = own,
                 onReplace = { picker.launch(arrayOf("video/*")) },
                 onRemove = { vm.removeVideo(exerciseId) },
+                onHide = { vm.hideVideo(exerciseId) },
             )
         } else {
             // Hay vídeo publicado pero todavía no está en el teléfono. Se dice, en vez de
@@ -156,13 +169,24 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
     }
 }
 
+/**
+ * Reemplazar, y quitar lo que se esté viendo.
+ *
+ * Quitar significa dos cosas distintas y por eso se llaman distinto. Sobre un vídeo
+ * propio, **Remove** borra el archivo y deja ver el publicado si lo había. Sobre uno
+ * publicado, **Remove** sería mentira —el archivo se volvería a descargar— y además haría
+ * pensar que se borra para todos, así que ahí la acción es **Hide**, que solo afecta a
+ * este teléfono. Con un vídeo propio encima de uno publicado salen los dos pasos
+ * seguidos, que es justo lo que pasa.
+ */
 @Composable
 private fun VideoActions(
     accent: Color,
     t: Strings,
-    canRemove: Boolean,
+    own: Boolean,
     onReplace: () -> Unit,
     onRemove: () -> Unit,
+    onHide: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
@@ -175,15 +199,13 @@ private fun VideoActions(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable(onClick = onReplace),
         )
-        if (canRemove) {
-            Text(
-                t.removeVideo,
-                color = ACTION_DELETE,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable(onClick = onRemove),
-            )
-        }
+        Text(
+            if (own) t.removeVideo else t.hideVideo,
+            color = ACTION_DELETE,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.clickable(onClick = if (own) onRemove else onHide),
+        )
     }
 }
 
