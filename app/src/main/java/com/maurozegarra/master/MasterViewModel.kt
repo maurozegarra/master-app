@@ -36,6 +36,8 @@ import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.Workout
+import com.maurozegarra.master.model.activeExercises
+import com.maurozegarra.master.model.activeVariant
 import com.maurozegarra.master.model.WorkoutVariant
 import com.maurozegarra.master.model.deepCopy
 import com.maurozegarra.master.model.duplicate
@@ -726,7 +728,38 @@ class MasterViewModel(
         val i = trainings.indexOfFirst { it.id == updated.id }
         if (i >= 0) trainings[i] = updated else trainings.add(updated)
         persist()
+        applyToRunningPlayer(updated)
         closeTrainingEditor()
+    }
+
+    /**
+     * Si lo que se acaba de guardar es el training que está corriendo, rehace su cola.
+     *
+     * Es el único disparador, y cubre los dos caminos: el atajo desde el player y editar
+     * desde la lista con el player minimizado, que ya se podía hacer y simplemente no
+     * tenía efecto.
+     *
+     * **El paso en curso se conserva tal cual**: si estás en la serie 15 de 30s y subes el
+     * tiempo a 40, esa serie termina siendo de 30 y el cambio entra en la siguiente. Así el
+     * reloj no salta bajo los pies y lo que se registre para esa serie es lo que de verdad
+     * se hizo. Solo se conserva si la casilla sigue existiendo: si esa serie desapareció,
+     * [StepEngine.relocate] deja el índice en el primer paso posterior y ahí manda el paso
+     * nuevo, no el viejo.
+     */
+    private fun applyToRunningPlayer(updated: Training) {
+        if (activePlayerTrainingId != updated.id) return
+        val current = playerStep ?: return
+        val rebuilt = StepEngine.buildSteps(updated)
+        if (rebuilt.isEmpty()) return
+        val at = StepEngine.relocate(current, rebuilt)
+        val steps = if (StepEngine.sameSlot(rebuilt[at], current)) {
+            rebuilt.toMutableList().also { it[at] = current }
+        } else {
+            rebuilt
+        }
+        playerSteps = steps
+        playerTotalSteps = steps.size
+        WorkoutPlayerService.update(getApplication(), steps, at)
     }
 
     fun deleteTraining(id: Long) {
@@ -1082,6 +1115,30 @@ class MasterViewModel(
         reload()
     }
 
+    /**
+     * Abre el editor en el ejercicio que se está haciendo, con la corrida en marcha.
+     *
+     * Minimiza en vez de cerrar: el servicio es independiente de la pantalla, así que el
+     * reloj sigue corriendo mientras se edita. Al guardar, [applyToRunningPlayer] rehace la
+     * cola desde el paso siguiente.
+     *
+     * Un training asignado no se edita —ni parado ni corriendo—, así que aquí no se ofrece.
+     */
+    fun editRunningExercise(step: PlayerStep) {
+        val id = playerTrainingId ?: activePlayerTrainingId ?: return
+        val training = trainings.firstOrNull { it.id == id } ?: return
+        if (training.assigned) return
+
+        minimizePlayer()
+        startEditTraining(id)
+        val workout = draft?.workouts?.getOrNull(step.workoutIndex) ?: return
+        openWorkout(workout.id)
+        // En un workout rotativo hay que entrar antes en la variante que se está corriendo:
+        // si no, el editor se queda en la lista de variantes y no en el ejercicio.
+        if (workout.rotating) workout.activeVariant()?.let { openVariant(it.id) }
+        workout.activeExercises().getOrNull(step.exerciseIndex)?.let { openExercise(it.id) }
+    }
+
     /** Vuelve a la lista de trainings sin detener ni pausar el player (estilo YouTube). */
     fun minimizePlayer() {
         playerStarted = false
@@ -1128,6 +1185,7 @@ class MasterViewModel(
                     note = snap.note,
                     ownerName = snap.ownerName,
                     ownerExerciseId = snap.ownerExerciseId,
+                    exerciseIndex = snap.exerciseIndex,
                     showVideo = snap.showVideo,
                     workoutName = snap.workoutName,
                     workoutIndex = snap.workoutIndex,

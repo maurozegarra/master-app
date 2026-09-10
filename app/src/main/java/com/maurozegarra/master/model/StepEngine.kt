@@ -12,14 +12,14 @@ object StepEngine {
         t.workouts.forEachIndexed { wi, w ->
             val wName = w.activeName()
             val wVariant = if (w.rotating) (w.activeVariant()?.name ?: "") else ""
-            w.activeExercises().forEach { e ->
+            w.activeExercises().forEachIndexed { ei, e ->
                 if (e.prepareSec > 0) {
-                    add(stageStep(StepKind.PREP, e, wName, wi, tw, durationSec = e.prepareSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating))
+                    add(stageStep(StepKind.PREP, e, wName, wi, tw, durationSec = e.prepareSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
                 }
                 val sets = e.sets.coerceAtLeast(1)
                 for (s in 0 until sets) {
                     if (e.workMode == WorkMode.TIME) {
-                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workValue, setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating))
+                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workValue, setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
                     } else {
                         val ws = e.setAt(s)
                         add(
@@ -30,20 +30,62 @@ object StepEngine {
                                 weightTotal = if (e.isWeighted) e.weightTotal(ws) else 0.0,
                                 weightLabel = if (e.isWeighted) weightLabel(e, ws) else "",
                                 workoutBase = w.name, variant = wVariant, rotating = w.rotating,
-                                secPerRep = e.secPerRep,
+                                secPerRep = e.secPerRep, exerciseIndex = ei,
                             ),
                         )
                     }
                     val lastSet = s == sets - 1
                     if (e.restSec > 0 && !(e.restSkipOnLastSet && lastSet)) {
-                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = e.restSec, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating))
+                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = e.restSec, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
                     }
                 }
                 if (e.cooldownSec > 0) {
-                    add(stageStep(StepKind.COOLDOWN, e, wName, wi, tw, durationSec = e.cooldownSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating))
+                    add(stageStep(StepKind.COOLDOWN, e, wName, wi, tw, durationSec = e.cooldownSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
                 }
             }
         }
+    }
+
+    /**
+     * Dónde seguir cuando la cola se rehace a mitad de corrida, tras editar el training.
+     *
+     * Busca el paso equivalente a [current] en [newSteps]. Si ya no existe —porque bajaste
+     * las series y esa desapareció, o borraste el ejercicio— devuelve el primero que venga
+     * **después**. Nunca uno anterior: retroceder haría repetir trabajo ya hecho, que es el
+     * peor fallo posible aquí. Si no queda nada por delante, devuelve el último paso.
+     */
+    fun relocate(current: PlayerStep, newSteps: List<PlayerStep>): Int {
+        if (newSteps.isEmpty()) return 0
+        val at = newSteps.indexOfFirst { compareSteps(it, current) >= 0 }
+        return if (at >= 0) at else newSteps.lastIndex
+    }
+
+    /**
+     * Posición de un paso dentro del training, comparable entre dos versiones de la cola.
+     *
+     * El orden de un ejercicio es `[PREP] · (WORK_s, [REST_s])* · [COOLDOWN]`, así que no
+     * vale comparar por etapa: REST de la serie 0 va ANTES que WORK de la serie 1. De ahí
+     * el grupo intermedio, que mete las dos en la misma casilla de serie.
+     *
+     * [PlayerStep.exerciseIndex] es lo que distingue dos apariciones del mismo ejercicio
+     * del catálogo dentro de un workout.
+     */
+    /** Si dos pasos ocupan la misma casilla del training, aunque cambien sus valores. */
+    fun sameSlot(a: PlayerStep, b: PlayerStep): Boolean = compareSteps(a, b) == 0
+
+    private fun compareSteps(a: PlayerStep, b: PlayerStep): Int = compareValuesBy(
+        a, b,
+        { it.workoutIndex },
+        { it.exerciseIndex },
+        { stageGroup(it) },
+        { if (stageGroup(it) == 1) it.setIndex else 0 },
+        { if (it.kind == StepKind.REST) 1 else 0 },
+    )
+
+    private fun stageGroup(s: PlayerStep): Int = when (s.kind) {
+        StepKind.PREP -> 0
+        StepKind.WORK, StepKind.REST -> 1
+        StepKind.COOLDOWN -> 2
     }
 
     private fun stageStep(
@@ -64,6 +106,7 @@ object StepEngine {
         variant: String = "",
         rotating: Boolean = false,
         secPerRep: Int = 3,
+        exerciseIndex: Int = 0,
     ): PlayerStep {
         val cfg = when (kind) {
             StepKind.PREP -> e.prepareCfg
@@ -77,6 +120,7 @@ object StepEngine {
             note = e.note,
             ownerName = e.name,
             ownerExerciseId = e.exerciseId,
+            exerciseIndex = exerciseIndex,
             showVideo = e.showVideo,
             workoutName = workoutName,
             workoutIndex = workoutIndex,

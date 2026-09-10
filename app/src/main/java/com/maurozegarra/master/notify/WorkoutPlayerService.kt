@@ -97,6 +97,9 @@ class WorkoutPlayerService : Service() {
                     beginStep(0)
                 }
             }
+            ACTION_UPDATE -> intent.getStringExtra(EXTRA_STEPS)?.let { json ->
+                replaceSteps(decodeSteps(json), intent.getIntExtra(EXTRA_INDEX, index))
+            }
             ACTION_PAUSE -> pause()
             ACTION_RESUME -> resume()
             ACTION_NEXT -> advance()
@@ -108,6 +111,31 @@ class WorkoutPlayerService : Service() {
             }
         }
         return START_STICKY
+    }
+
+    /**
+     * Cambia la cola a mitad de corrida, tras editar el training.
+     *
+     * **No se toca nada de lo que ya ocurrió.** Ni el reloj (`running`, `remainingMs`,
+     * `endAt`), ni la hora de inicio, ni el [recorder], que ya tiene guardadas las series
+     * hechas con los valores que tenían entonces. Quien llama se encarga de dejar en
+     * [newIndex] el paso equivalente al actual (ver `StepEngine.relocate`), y de conservar
+     * ahí el paso en curso para que el reloj y lo que se lee en pantalla no discrepen.
+     *
+     * Se vuelve a persistir en el acto: si el proceso muriera antes del siguiente tick,
+     * `restore()` recuperaría la cola vieja y el cambio se habría perdido.
+     */
+    private fun replaceSteps(newSteps: List<PlayerStep>, newIndex: Int) {
+        if (newSteps.isEmpty() || finished) return
+        steps = newSteps
+        index = newIndex.coerceIn(0, newSteps.lastIndex)
+        recorder.setTotalExercisesByWorkout(
+            newSteps.filter { it.kind == StepKind.WORK }
+                .groupBy { it.workoutIndex }
+                .mapValues { it.value.map { ex -> ex.ownerExerciseId }.distinct().size }
+        )
+        persist()
+        publishAndNotify()
     }
 
     private fun collectCommands() {
@@ -372,6 +400,7 @@ class WorkoutPlayerService : Service() {
             note = step.note,
             ownerName = step.ownerName,
             ownerExerciseId = step.ownerExerciseId,
+            exerciseIndex = step.exerciseIndex,
             showVideo = step.showVideo,
             workoutName = step.workoutName,
             workoutIndex = step.workoutIndex,
@@ -685,8 +714,10 @@ class WorkoutPlayerService : Service() {
         private const val ACTION_SKIP = "com.maurozegarra.master.player.SKIP"
         private const val ACTION_STOP = "com.maurozegarra.master.player.STOP"
         private const val ACTION_RECONNECT = "com.maurozegarra.master.player.RECONNECT"
+        private const val ACTION_UPDATE = "com.maurozegarra.master.player.UPDATE"
         private const val EXTRA_STEPS = "steps"
         private const val EXTRA_WORKOUT_ID = "workoutId"
+        private const val EXTRA_INDEX = "index"
         private const val EXTRA_NAME = "name"
         private const val ZOMBIE_TIMEOUT_MS = 12 * 60 * 60 * 1000L
 
@@ -696,6 +727,19 @@ class WorkoutPlayerService : Service() {
                 .putExtra(EXTRA_STEPS, encodeSteps(steps))
                 .putExtra(EXTRA_WORKOUT_ID, trainingId)
                 .putExtra(EXTRA_NAME, name)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+
+        /** Cola nueva para una corrida en marcha. Compañera de [start]. */
+        fun update(context: Context, steps: List<PlayerStep>, index: Int) {
+            val intent = Intent(context, WorkoutPlayerService::class.java)
+                .setAction(ACTION_UPDATE)
+                .putExtra(EXTRA_STEPS, encodeSteps(steps))
+                .putExtra(EXTRA_INDEX, index)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {
@@ -713,6 +757,7 @@ class WorkoutPlayerService : Service() {
                         .put("note", s.note)
                         .put("ownerName", s.ownerName)
                         .put("ownerExerciseId", s.ownerExerciseId)
+                        .put("exerciseIndex", s.exerciseIndex)
                         .put("showVideo", s.showVideo)
                         .put("workoutName", s.workoutName)
                         .put("workoutIndex", s.workoutIndex)
@@ -746,6 +791,7 @@ class WorkoutPlayerService : Service() {
                     note = o.optString("note", ""),
                     ownerName = o.optString("ownerName", ""),
                     ownerExerciseId = o.optString("ownerExerciseId", ""),
+                    exerciseIndex = o.optInt("exerciseIndex", 0),
                     showVideo = o.optBoolean("showVideo", true),
                     workoutName = o.optString("workoutName", ""),
                     workoutIndex = o.optInt("workoutIndex", 0),

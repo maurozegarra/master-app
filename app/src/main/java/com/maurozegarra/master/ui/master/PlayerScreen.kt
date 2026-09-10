@@ -39,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Check
@@ -489,6 +490,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     ) {
         RoutineProgressBar(vm, accent) {
             InstructionsButton(vm, step.ownerExerciseId, ownerNameFor(step, t), t)
+            EditExerciseButton(vm, step, t)
         }
         if (dimAlpha > 0f) {
             Box(
@@ -620,6 +622,35 @@ private fun ownerNameFor(step: PlayerStep, t: Strings): String =
  * ella: flotando aterrizaba justo encima del porcentaje y de la barra. Al estar maquetado
  * no puede volver a superponerse, y la posición no depende de si el ejercicio tiene vídeo.
  */
+/**
+ * Editar el ejercicio en curso sin parar el reloj.
+ *
+ * Va aquí arriba, discreto, y no entre los botones grandes: esos son para correr, y uno de
+ * editar del mismo tamaño al lado de saltar y confirmar se pulsaría por error con las manos
+ * sudadas. No aparece en un training asignado, que no es editable.
+ */
+@Composable
+private fun EditExerciseButton(vm: MasterViewModel, step: PlayerStep, t: Strings) {
+    val id = vm.playerTrainingId ?: return
+    if (vm.trainings.firstOrNull { it.id == id }?.assigned != false) return
+
+    Box(
+        modifier = Modifier
+            .padding(start = 12.dp)
+            .size(36.dp)
+            .clip(CircleShape)
+            .clickable { vm.editRunningExercise(step) },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            Icons.Filled.Edit,
+            contentDescription = t.edit,
+            tint = Color.White.copy(alpha = 0.7f),
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, title: String, t: Strings) {

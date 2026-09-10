@@ -19,6 +19,14 @@ data class PlayerStep(
     /** Id del catálogo del ejercicio dueño (para icono/animación). */
     val ownerExerciseId: String = "",
     /**
+     * Posición del ejercicio dentro de su workout.
+     *
+     * No basta con [ownerExerciseId]: un workout puede repetir el mismo ejercicio del
+     * catálogo, y sin distinguirlos reubicar la posición tras editar el training a mitad
+     * de corrida caería en la primera aparición y haría repetir trabajo ya hecho.
+     */
+    val exerciseIndex: Int = 0,
+    /**
      * Si este training enseña el vídeo del ejercicio. Viene de la instancia, no del
      * movimiento, y viaja en el paso porque el player pinta desde los pasos y no desde el
      * training —que ni siquiera tiene por qué estar cargado al reconectar con una corrida.

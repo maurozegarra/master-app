@@ -47,7 +47,7 @@ class SessionRecorder {
         val key = ExerciseKey(step.ownerExerciseId, step.workoutIndex)
         val setMap = sets.getOrPut(key) { mutableMapOf() }
         setMap[step.setIndex] = setRecord
-        val orderedSets = (0 until step.totalSets).mapNotNull { setMap[it] }
+        val orderedSets = ordered(setMap, step.totalSets)
         val completedCount = orderedSets.count { !it.skipped }
         records[key] = ExerciseRecord(
             exerciseId = step.ownerExerciseId,
@@ -81,15 +81,27 @@ class SessionRecorder {
     fun build(): List<ExerciseRecord> =
         records.values.map { er ->
             val key = ExerciseKey(er.exerciseId, er.workoutIndex)
-            val orderedSets = sets[key]?.let { sm ->
-                (0 until er.totalSets).mapNotNull { sm[it] }
-            } ?: er.sets
+            val orderedSets = sets[key]?.let { ordered(it, er.totalSets) } ?: er.sets
             er.copy(
                 setsCompleted = orderedSets.count { !it.skipped },
                 sets = orderedSets,
                 status = deriveStatus(orderedSets, er.totalSets),
             )
         }.sortedWith(compareBy({ it.workoutIndex }, { it.name }))
+
+    /**
+     * Las series en orden, recorriendo **hasta la última registrada** aunque el plan diga
+     * menos.
+     *
+     * Recorrer solo `0 until totalSets` perdía trabajo ya hecho: si a mitad de corrida se
+     * baja el número de series por debajo de las que ya se hicieron —que es justo lo que
+     * permite editar el training en marcha—, las de más desaparecían del historial. Lo que
+     * se hizo, se hizo.
+     */
+    private fun ordered(setMap: Map<Int, SetRecord>, totalSets: Int): List<SetRecord> {
+        val last = setMap.keys.maxOrNull() ?: -1
+        return (0 until maxOf(totalSets, last + 1)).mapNotNull { setMap[it] }
+    }
 
     fun isEmpty(): Boolean = records.isEmpty()
 

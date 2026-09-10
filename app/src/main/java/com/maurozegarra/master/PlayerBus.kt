@@ -31,6 +31,7 @@ data class PlayerSnapshot(
     val note: String = "",
     val ownerName: String,
     val ownerExerciseId: String,
+    val exerciseIndex: Int = 0,
     val showVideo: Boolean = true,
     val workoutName: String,
     val workoutIndex: Int,
