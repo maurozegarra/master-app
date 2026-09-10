@@ -326,16 +326,6 @@ class MasterViewModel(
         }
     }
 
-    /**
-     * Deja de enseñar aquí el vídeo publicado de un ejercicio, sin tocar lo publicado.
-     *
-     * Es la salida para el vídeo que uno no puede quitar porque no es suyo: borrarlo del
-     * disco solo haría que se volviera a descargar. Vale para todos los trainings de este
-     * teléfono que usen ese ejercicio, igual que las instrucciones.
-     */
-    fun hideVideo(exerciseId: String) = videos.hide(exerciseId)
-
-    fun showVideo(exerciseId: String) = videos.show(exerciseId)
 
     fun setInstructions(exerciseId: String, steps: List<String>) {
         updateMedia(exerciseId) { it.copy(instructions = steps.filter { s -> s.isNotBlank() }) }
@@ -1138,6 +1128,7 @@ class MasterViewModel(
                     note = snap.note,
                     ownerName = snap.ownerName,
                     ownerExerciseId = snap.ownerExerciseId,
+                    showVideo = snap.showVideo,
                     workoutName = snap.workoutName,
                     workoutIndex = snap.workoutIndex,
                     totalWorkouts = snap.totalWorkouts,

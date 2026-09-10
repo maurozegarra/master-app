@@ -8,6 +8,7 @@ import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.ProfileDirectoryJson
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.TrainingJson
+import com.maurozegarra.master.model.forPublishing
 import com.maurozegarra.master.net.Http
 import com.maurozegarra.master.net.HttpResponse
 import com.maurozegarra.master.net.Supabase
@@ -136,9 +137,10 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
                 .put("uid", training.uid)
                 .put("name", training.name)
                 // El training viaja tal cual lo serializa el app, que es el formato que el
-                // que recibe ya sabe leer. Se publica con assigned=false: la insignia la
-                // pone quien lo recibe, no quien lo reparte.
-                .put("payload", TrainingJson.toJson(training.copy(assigned = false)))
+                // que recibe ya sabe leer. forPublishing() le quita lo que es de quien lo
+                // reparte y no del que lo recibe: la insignia de asignado y los vídeos que
+                // uno haya apagado para sí mismo.
+                .put("payload", TrainingJson.toJson(training.forPublishing()))
                 .put("updated_at", java.time.Instant.now().toString())
                 .toString()
             val up = write("POST", "trainings", payload, merge = true) ?: return NO_CONNECTION

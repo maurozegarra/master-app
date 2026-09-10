@@ -66,6 +66,19 @@ data class Exercise(
     val workCfg: StageConfig = StageConfig(color = StageConfig.COLOR_WORK),
     val restCfg: StageConfig = StageConfig(color = StageConfig.COLOR_REST, finalCount = 3),
     val cooldownCfg: StageConfig = StageConfig(color = StageConfig.COLOR_COOLDOWN),
+    /**
+     * Si en ESTE training se enseña el vídeo del ejercicio.
+     *
+     * Va aquí, en la instancia, y no junto al vídeo: qué vídeo demuestra un movimiento es
+     * del movimiento —si no, habría que volver a adjuntarlo en cada training, y el
+     * manifiesto publicado empareja por `exerciseId`—, pero si aquí se ve es de este
+     * ejercicio en este training, igual que el color de la etapa. Guardarlo por movimiento
+     * hacía que apagarlo en una copia lo apagase también en el training del que salió.
+     *
+     * Se borra al publicar (ver [Training.forPublishing]): es una preferencia de quien lo
+     * tiene delante, y quien recibe un training asignado no podría deshacerla.
+     */
+    val showVideo: Boolean = true,
 ) {
     fun withStageColor(kind: StepKind, color: Long): Exercise = when (kind) {
         StepKind.PREP -> copy(prepareCfg = prepareCfg.copy(color = color))
@@ -196,6 +209,31 @@ fun Training.duplicate(newId: () -> Long, newUid: () -> String, name: String, no
     workouts = workouts.map { it.deepCopy(newId) },
     createdAt = now,
     updatedAt = now,
+)
+
+/**
+ * El training tal y como debe subirse al repartirlo.
+ *
+ * Deja fuera lo que es de quien lo tiene delante y no del que lo recibe:
+ *
+ * - **[Training.assigned] a false**, porque la insignia la pone quien recibe, no quien
+ *   reparte.
+ * - **[Exercise.showVideo] a true** en todos los ejercicios, los de los workouts simples y
+ *   los de las variantes. Apagar un vídeo es una preferencia de quien mira, y publicarla
+ *   se la impondría a los demás sin salida: un training asignado no se edita, así que
+ *   quien lo recibiera no podría volver a encenderlo.
+ *
+ * Es una función aparte y pura para poder fijarla con un test: es lo único que impide que
+ * algo local se le cuele a otra persona.
+ */
+fun Training.forPublishing(): Training = copy(
+    assigned = false,
+    workouts = workouts.map { w ->
+        w.copy(
+            exercises = w.exercises.map { it.copy(showVideo = true) },
+            variants = w.variants.map { v -> v.copy(exercises = v.exercises.map { it.copy(showVideo = true) }) },
+        )
+    },
 )
 
 /** Devuelve la serie [i] del ejercicio, con valores por defecto si falta. */

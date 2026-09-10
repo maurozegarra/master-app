@@ -144,9 +144,14 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
     val expanded = remember(steps) { mutableStateMapOf<Int, Boolean>() }
 
     // Revisar el training antes de hacerlo es el momento en que se sabe qué ejercicios
-    // vienen y todavía queda tiempo para traer sus vídeos.
+    // vienen y todavía queda tiempo para traer sus vídeos. Los que este training lleva
+    // apagados no se piden: no se van a ver, así que bajarlos sería gastar datos en balde.
     LaunchedEffect(steps) {
-        vm.prefetchVideos(groups.flatMap { g -> g.exercises.map { it.exerciseId } }.distinct())
+        vm.prefetchVideos(
+            steps.filter { it.showVideo && it.ownerExerciseId.isNotBlank() }
+                .map { it.ownerExerciseId }
+                .distinct(),
+        )
     }
 
     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
@@ -446,7 +451,8 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     // El vídeo del ejercicio que viene, con prioridad sobre lo que encolara el preview:
     // es el único que tiene una fecha límite.
     LaunchedEffect(vm.playerIndex) {
-        vm.playerSteps.drop(vm.playerIndex + 1).firstOrNull { it.kind == StepKind.WORK }
+        vm.playerSteps.drop(vm.playerIndex + 1)
+            .firstOrNull { it.kind == StepKind.WORK && it.showVideo }
             ?.let { vm.requestVideoNow(it.ownerExerciseId) }
     }
 
@@ -506,7 +512,9 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
         // Lectura de un mapa en memoria: esto se evalua en cada recomposicion, varias
         // veces por segundo mientras corre el reloj, y no puede tocar disco ni red.
-        val videoFile = vm.videoFileFor(step.ownerExerciseId)
+        // step.showVideo es de este ejercicio en ESTE training: apagarlo en una copia no
+        // toca al training del que salió.
+        val videoFile = if (step.showVideo) vm.videoFileFor(step.ownerExerciseId) else null
         val showVideo = videoFile != null && step.ownerName.isNotBlank()
         if (!showVideo && step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
             ExerciseGlyph(name = ownerLabel, color = step.colorArgb, sizeDp = 40, exerciseId = step.ownerExerciseId)

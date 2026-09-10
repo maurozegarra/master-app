@@ -26,16 +26,6 @@ sealed interface VideoState {
     data class Downloading(val progress: Float) : VideoState
 
     data class Ready(val file: File) : VideoState
-
-    /**
-     * El usuario no quiere ver este vídeo en este teléfono.
-     *
-     * Es distinto de [None]: el vídeo existe y sigue publicado para los demás, solo que
-     * aquí no se enseña ni se descarga. Se modela como un estado más y no como una
-     * consulta aparte porque así todo lo que ya mira el estado —el player, la cola de
-     * descargas, la ficha del ejercicio— hace lo correcto sin tocarlo.
-     */
-    data object Hidden : VideoState
 }
 
 /**
@@ -72,21 +62,10 @@ class VideoRepository(
 
     private var manifest: VideoManifest? = null
 
-    /**
-     * Ejercicios cuyo vídeo el usuario no quiere ver aquí.
-     *
-     * Va por `exerciseId` del catálogo, como el resto del material de apoyo, así que
-     * ocultarlo vale para todos los trainings de este dispositivo que usen ese ejercicio.
-     * Se guarda aquí y no en `ExerciseMedia` a propósito: ese modelo declara que el vídeo
-     * no vive ahí, y estar oculto es estado del vídeo.
-     */
-    private var hidden: Set<String> = emptySet()
-
     init {
         // El manifiesto guardado permite arrancar sin red sabiendo que hay descargado y
         // de donde vino; luego se refresca por detras.
         manifest = prefs.getString(KEY_MANIFEST, null)?.let { VideoManifestJson.decode(it) }
-        hidden = prefs.getStringSet(KEY_HIDDEN, emptySet()).orEmpty().toSet()
         rebuildStates()
         scope.launch { refreshManifest() }
     }
@@ -111,7 +90,7 @@ class VideoRepository(
      */
     fun request(exerciseId: String, urgent: Boolean = false) {
         val state = stateOf(exerciseId)
-        if (state is VideoState.Ready || state is VideoState.None || state is VideoState.Hidden) return
+        if (state is VideoState.Ready || state is VideoState.None) return
         if (queue.contains(exerciseId)) {
             if (urgent) {
                 queue.remove(exerciseId)
@@ -141,7 +120,7 @@ class VideoRepository(
     /** Recalcula el estado de todo lo que puede tener vídeo. Toca disco, así que se llama
      *  en los pocos momentos en que algo cambia, no al pintar. */
     fun rebuildStates() {
-        val ids = manifest?.videos?.keys.orEmpty() + cache.ownExerciseIds() + hidden
+        val ids = manifest?.videos?.keys.orEmpty() + cache.ownExerciseIds()
         states.clear()
         ids.forEach { states[it] = resolveState(it) }
     }
@@ -151,32 +130,9 @@ class VideoRepository(
         states[exerciseId] = resolveState(exerciseId)
     }
 
-    fun isHidden(exerciseId: String): Boolean = exerciseId in hidden
-
-    /**
-     * Deja de enseñar y de descargar el vídeo de un ejercicio.
-     *
-     * **El archivo no se borra.** Ocultar es una preferencia de cómo se ve, y tiene que
-     * poder deshacerse sin red; liberar espacio es otra cosa. Y nada de esto sale del
-     * teléfono: lo publicado sigue igual para los demás.
-     */
-    fun hide(exerciseId: String) = setHidden(exerciseId, true)
-
-    fun show(exerciseId: String) = setHidden(exerciseId, false)
-
-    private fun setHidden(exerciseId: String, value: Boolean) {
-        hidden = if (value) hidden + exerciseId else hidden - exerciseId
-        prefs.edit().putStringSet(KEY_HIDDEN, hidden).apply()
-        refreshState(exerciseId)
-    }
-
     private fun resolveState(exerciseId: String): VideoState {
         val rev = manifest?.entry(exerciseId)?.rev
-        return videoStateOf(
-            hidden = exerciseId in hidden,
-            rev = rev,
-            file = cache.resolve(exerciseId, rev),
-        )
+        return videoStateOf(rev = rev, file = cache.resolve(exerciseId, rev))
     }
 
     /**
@@ -245,7 +201,6 @@ class VideoRepository(
     private companion object {
         const val TAG = "VideoRepository"
         const val KEY_MANIFEST = "video_manifest_json"
-        const val KEY_HIDDEN = "video_hidden_ids"
 
         // Un solo sitio a proposito: TD-063 lo cambia por uno por usuario
         // (/users/<uid>/videos.json) tocando esta constante y nada mas.
@@ -255,15 +210,13 @@ class VideoRepository(
 }
 
 /**
- * En qué punto está un vídeo, a partir de los tres datos que lo deciden.
+ * En qué punto está un vídeo, a partir de los dos datos que lo deciden.
  *
- * Función aparte y pura para poder fijar con tests el orden, que es lo único delicado:
- * **oculto gana sobre todo lo demás**, tenga archivo o no. Si ganase el archivo, un vídeo
- * oculto seguiría enseñándose; y si ganase la revisión del manifiesto, se descargaría uno
- * que el usuario ya dijo que no quiere ver.
+ * Función aparte y pura para poder fijar con tests el orden: el archivo que ya está manda
+ * sobre lo que diga el manifiesto —un vídeo propio gana al publicado, y uno descargado no
+ * se vuelve a pedir— y solo cuando no hay archivo importa si hay revisión publicada.
  */
-internal fun videoStateOf(hidden: Boolean, rev: Int?, file: File?): VideoState = when {
-    hidden -> VideoState.Hidden
+internal fun videoStateOf(rev: Int?, file: File?): VideoState = when {
     file != null -> VideoState.Ready(file)
     rev != null -> VideoState.Pending
     else -> VideoState.None

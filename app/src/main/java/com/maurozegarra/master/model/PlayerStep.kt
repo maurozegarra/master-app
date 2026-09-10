@@ -18,6 +18,12 @@ data class PlayerStep(
     val ownerName: String = "",
     /** Id del catálogo del ejercicio dueño (para icono/animación). */
     val ownerExerciseId: String = "",
+    /**
+     * Si este training enseña el vídeo del ejercicio. Viene de la instancia, no del
+     * movimiento, y viaja en el paso porque el player pinta desde los pasos y no desde el
+     * training —que ni siquiera tiene por qué estar cargado al reconectar con una corrida.
+     */
+    val showVideo: Boolean = true,
     val workoutName: String = "",
     val workoutIndex: Int = 0,
     val totalWorkouts: Int = 1,

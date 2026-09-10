@@ -372,6 +372,7 @@ class WorkoutPlayerService : Service() {
             note = step.note,
             ownerName = step.ownerName,
             ownerExerciseId = step.ownerExerciseId,
+            showVideo = step.showVideo,
             workoutName = step.workoutName,
             workoutIndex = step.workoutIndex,
             totalWorkouts = step.totalWorkouts,
@@ -712,6 +713,7 @@ class WorkoutPlayerService : Service() {
                         .put("note", s.note)
                         .put("ownerName", s.ownerName)
                         .put("ownerExerciseId", s.ownerExerciseId)
+                        .put("showVideo", s.showVideo)
                         .put("workoutName", s.workoutName)
                         .put("workoutIndex", s.workoutIndex)
                         .put("totalWorkouts", s.totalWorkouts)
@@ -744,6 +746,7 @@ class WorkoutPlayerService : Service() {
                     note = o.optString("note", ""),
                     ownerName = o.optString("ownerName", ""),
                     ownerExerciseId = o.optString("ownerExerciseId", ""),
+                    showVideo = o.optBoolean("showVideo", true),
                     workoutName = o.optString("workoutName", ""),
                     workoutIndex = o.optInt("workoutIndex", 0),
                     totalWorkouts = o.optInt("totalWorkouts", 1),

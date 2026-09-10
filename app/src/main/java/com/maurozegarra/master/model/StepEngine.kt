@@ -77,6 +77,7 @@ object StepEngine {
             note = e.note,
             ownerName = e.name,
             ownerExerciseId = e.exerciseId,
+            showVideo = e.showVideo,
             workoutName = workoutName,
             workoutIndex = workoutIndex,
             totalWorkouts = totalWorkouts,

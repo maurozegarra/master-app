@@ -130,6 +130,7 @@ object TrainingJson {
             .put("workCfg", stageToJson(e.workCfg))
             .put("restCfg", stageToJson(e.restCfg))
             .put("cooldownCfg", stageToJson(e.cooldownCfg))
+            .put("showVideo", e.showVideo)
     }
 
     private fun exerciseFromJson(o: JSONObject): Exercise {
@@ -160,6 +161,10 @@ object TrainingJson {
             workCfg = stageFromJson(o.optJSONObject("workCfg"), StageConfig.COLOR_WORK, 0),
             restCfg = stageFromJson(o.optJSONObject("restCfg"), StageConfig.COLOR_REST, 3),
             cooldownCfg = stageFromJson(o.optJSONObject("cooldownCfg"), StageConfig.COLOR_COOLDOWN, 0),
+            // Por defecto true, y eso es lo que protege a todo lo ya guardado: ni los
+            // respaldos viejos ni los payloads ya publicados traen el campo, y leerlos
+            // como false apagaría de golpe todos los vídeos.
+            showVideo = o.optBoolean("showVideo", true),
         )
     }
 

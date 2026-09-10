@@ -55,7 +55,7 @@ import com.maurozegarra.master.ui.theme.Dims
  * ejercicio. De ahí el aviso explícito: sin él, el usuario esperaría un cambio local.
  */
 @Composable
-fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t: Strings) {
+fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, name: String, accent: Color, t: Strings) {
     val ctx = LocalContext.current
     val media = vm.mediaFor(exerciseId)
     val state = vm.videoStateFor(exerciseId)
@@ -81,27 +81,23 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
             .background(AppTheme.colors.surface)
             .padding(16.dp),
     ) {
-        Text(t.videoAndInstructions, color = AppTheme.colors.textDim, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        // El nombre del movimiento y el alcance, en grande y no en gris de 11px. Es la
+        // unica tarjeta de esta pantalla que no habla de esta instancia sino del
+        // movimiento, y sin decirlo se lee como una fila mas entre las series y las reps.
+        Text(
+            "${t.videoAndInstructions}${if (name.isBlank()) "" else " · ${name.uppercase()}"}",
+            color = AppTheme.colors.textDim,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+        )
         Text(
             t.appliesToAllTrainings,
             color = AppTheme.colors.textFaded,
-            fontSize = 11.sp,
-            modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
+            fontSize = 12.sp,
+            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
         )
 
-        if (state is VideoState.Hidden) {
-            // Ocultar tiene que ser una puerta de doble sentido: sin esta rama, el vídeo
-            // desaparecería y no quedaría ni rastro de cómo recuperarlo.
-            Text(t.videoHidden, color = AppTheme.colors.textDim, fontSize = 13.sp)
-            Spacer(Modifier.height(8.dp))
-            Text(
-                t.showVideo,
-                color = accent,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable { vm.showVideo(exerciseId) },
-            )
-        } else if (videoFile != null) {
+        if (videoFile != null) {
             // Alto máximo, no fijo: la miniatura toma la forma real del archivo, así que
             // un vídeo vertical se ve entero en vez de recortado a un hueco horizontal.
             Box(
@@ -130,10 +126,9 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
             VideoActions(
                 accent = accent,
                 t = t,
-                own = own,
+                canRemove = own,
                 onReplace = { picker.launch(arrayOf("video/*")) },
                 onRemove = { vm.removeVideo(exerciseId) },
-                onHide = { vm.hideVideo(exerciseId) },
             )
         } else {
             // Hay vídeo publicado pero todavía no está en el teléfono. Se dice, en vez de
@@ -169,24 +164,13 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, accent: Color, t:
     }
 }
 
-/**
- * Reemplazar, y quitar lo que se esté viendo.
- *
- * Quitar significa dos cosas distintas y por eso se llaman distinto. Sobre un vídeo
- * propio, **Remove** borra el archivo y deja ver el publicado si lo había. Sobre uno
- * publicado, **Remove** sería mentira —el archivo se volvería a descargar— y además haría
- * pensar que se borra para todos, así que ahí la acción es **Hide**, que solo afecta a
- * este teléfono. Con un vídeo propio encima de uno publicado salen los dos pasos
- * seguidos, que es justo lo que pasa.
- */
 @Composable
 private fun VideoActions(
     accent: Color,
     t: Strings,
-    own: Boolean,
+    canRemove: Boolean,
     onReplace: () -> Unit,
     onRemove: () -> Unit,
-    onHide: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
@@ -199,13 +183,18 @@ private fun VideoActions(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable(onClick = onReplace),
         )
-        Text(
-            if (own) t.removeVideo else t.hideVideo,
-            color = ACTION_DELETE,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable(onClick = if (own) onRemove else onHide),
-        )
+        // Solo se puede quitar lo que puso el usuario: un vídeo publicado se volvería a
+        // descargar, así que ofrecer "quitar" sería mentirle. Para no verlo aquí está el
+        // interruptor del ejercicio, que es de esta instancia y no del movimiento.
+        if (canRemove) {
+            Text(
+                t.removeVideo,
+                color = ACTION_DELETE,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable(onClick = onRemove),
+            )
+        }
     }
 }
 

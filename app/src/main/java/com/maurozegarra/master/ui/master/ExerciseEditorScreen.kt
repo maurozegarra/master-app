@@ -89,7 +89,7 @@ fun ExerciseEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item { GeneralCard(ex, accent, t) { ex = it } }
-            item { ExerciseMediaCard(vm, ex.exerciseId, accent, t) }
+            item { ExerciseMediaCard(vm, ex.exerciseId, ex.name, accent, t) }
             listOf(StepKind.PREP, StepKind.WORK, StepKind.REST, StepKind.COOLDOWN).forEach { kind ->
                 item(key = kind) {
                     StageSection(
@@ -138,6 +138,17 @@ private fun GeneralCard(ex: Exercise, accent: Color, t: Strings, onChange: (Exer
         ExerciseNoteField(ex, accent, t, onChange)
         VSpace(14)
         Stepper(t.setsLabel, ex.sets, accent, min = 1, max = 30) { onChange(ex.copy(sets = it)) }
+        VSpace(14)
+        // Va aquí, entre lo de esta instancia, y no en la tarjeta del vídeo: que el
+        // interruptor esté al lado de las series es lo que hace evidente su alcance. Qué
+        // vídeo demuestra el movimiento es del movimiento; si en ESTE training se ve, no.
+        SwitchRow(
+            label = t.showVideoHere,
+            desc = t.showVideoHereDesc,
+            checked = ex.showVideo,
+            accent = accent,
+            onCheckedChange = { onChange(ex.copy(showVideo = it)) },
+        )
     }
 }
 
