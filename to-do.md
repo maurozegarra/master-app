@@ -4,14 +4,9 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **58 / 75** hechos, 17 pendientes.
+Progreso: **59 / 75** hechos, 16 pendientes.
 
 ## Pendientes
-
-### Bug
-
-- [ ] **TD-075** Fix: el video del ejercicio pausa la musica (Spotify) al reproducirse
-  - Bug del usuario: pone su musica para entrenar (Spotify), entra al training, y en cuanto el video del ejercicio empieza a reproducirse (WORK) Spotify se pausa; y al cambiar entre apps recientes y volver, lo mismo. CAUSA: el video es un VideoView (ui/VideoLoop.kt) y VideoView.start() pide AUDIOFOCUS_GAIN por su cuenta. El codigo ya silenciaba el MediaPlayer con setVolume(0f, 0f), pero silenciar NO evita la peticion de foco: Android se lo quita a Spotify igual, y Spotify al perder el foco de forma permanente se pausa. Al volver desde recientes la vista se recrea, vuelve a arrancar y vuelve a pedirlo, de ahi el segundo sintoma. EL ARREGLO es setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE) en el VideoView, antes de arrancar, disponible desde API 26 que es el minimo del app: un video de demostracion sin sonido no tiene por que tocar el audio de nadie. LOS PITIDOS NO SE TOCAN, y conviene dejar escrito por que, porque al cerrar esto se dijo mal. Los pitidos de la corrida van por AlarmPlayer.beepTone() -WorkoutPlayerService, lineas 323 y 330-, que NO pide foco de audio a proposito -su comentario dice 'evita ducking'-: suenan encima de la musica al mismo nivel, sin bajarla, y ese es el comportamiento que el usuario quiere. Lo que pide AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK es previewTone(), que solo usa la vista previa de tonos del editor de ejercicio. Al usuario se le dijo que los pitidos atenuaban la musica un instante, por haber visto MAY_DUCK en el archivo sin mirar que funcion lo usaba; lo comprobo en el telefono y lo corrigio. Quien pausaba era solo el video.
 
 ### Feature
 
@@ -62,6 +57,7 @@ Progreso: **58 / 75** hechos, 17 pendientes.
 
 ### Bug
 
+- [x] **TD-075** Fix: el video del ejercicio pausa la musica (Spotify) al reproducirse
 - [x] **TD-015** Fix drag-reorder en lista de trainings
 
 ### Feature
