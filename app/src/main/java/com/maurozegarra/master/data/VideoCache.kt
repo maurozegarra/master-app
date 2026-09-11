@@ -74,7 +74,11 @@ class VideoCache(private val dir: File) {
 
     private fun filesIn(d: File): List<File> = d.listFiles()?.toList() ?: emptyList()
 
-    /** Bytes que ocupan los vídeos descargados, para poder enseñarlo en Settings. */
+    /**
+     * Bytes de TODOS los vídeos del app: los descargados del manifiesto y los propios del
+     * usuario. No es lo que libera [clearDownloaded], que solo borra lo descargado; para eso
+     * está [bytesDownloaded], que es lo que enseña Ajustes.
+     */
     fun bytesUsed(): Long = (filesIn(repoDir) + filesIn(ownDir)).sumOf { it.length() }
 
     /**
