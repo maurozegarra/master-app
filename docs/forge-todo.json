@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-075",
+      "title": "Fix: el video del ejercicio pausa la musica (Spotify) al reproducirse",
+      "category": "Bug",
+      "status": "pending",
+      "manual": "Bug del usuario: pone su musica para entrenar (Spotify), entra al training, y en cuanto el video del ejercicio empieza a reproducirse (WORK) Spotify se pausa; y al cambiar entre apps recientes y volver, lo mismo. CAUSA: el video es un VideoView (ui/VideoLoop.kt) y VideoView.start() pide AUDIOFOCUS_GAIN por su cuenta. El codigo ya silenciaba el MediaPlayer con setVolume(0f, 0f), pero silenciar NO evita la peticion de foco: Android se lo quita a Spotify igual, y Spotify al perder el foco de forma permanente se pausa. Al volver desde recientes la vista se recrea, vuelve a arrancar y vuelve a pedirlo, de ahi el segundo sintoma. EL ARREGLO es setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE) en el VideoView, antes de arrancar, disponible desde API 26 que es el minimo del app: un video de demostracion sin sonido no tiene por que tocar el audio de nadie. LOS PITIDOS NO SE TOCAN: AlarmPlayer pide AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK, que es lo correcto -Spotify baja el volumen durante el pitido y sigue-, asi que quien pausaba era solo el video."
+    },
+    {
       "id": "TD-074",
       "title": "Nombre del ejercicio en el player: dos lineas como mucho, sin cortar palabras y con alto fijo",
       "category": "UI",

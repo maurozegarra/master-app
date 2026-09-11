@@ -3,6 +3,7 @@ package com.maurozegarra.master.ui
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
@@ -52,6 +53,13 @@ fun VideoLoop(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
                 VideoView(ctx).apply {
+                    // Silenciar no basta: VideoView.start() pide AUDIOFOCUS_GAIN por su
+                    // cuenta, aunque el vídeo no suene, y la música del usuario (Spotify)
+                    // se pausa al perder el foco. Al volver desde recientes la vista se
+                    // recrea y lo pedía otra vez. Un vídeo mudo no tiene por qué tocar el
+                    // audio de nadie. Va antes de setVideoURI para estar puesto antes de
+                    // cualquier start().
+                    setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
                     setOnPreparedListener { mp ->
                         mp.isLooping = true
                         mp.setVolume(0f, 0f)
