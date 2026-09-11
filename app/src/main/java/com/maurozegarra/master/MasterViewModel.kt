@@ -1258,7 +1258,24 @@ class MasterViewModel(
         return result
     }
 
-    fun previewBeepTone(uri: String) = alarmPlayer.previewTone(uri, 1f)
+    /** El nivel de los pitidos elegido en Ajustes, de 0 a 1. */
+    private fun beepVolume(): Float =
+        SettingsStore(getApplication()).loadConfig().masterConfig.beepVolume / 100f
+
+    // La vista previa del editor suena al nivel de Ajustes: antes iba fija al 100 %, y al
+    // bajar el volumen se oiría una cosa en el editor y otra en el training.
+    fun previewBeepTone(uri: String) = alarmPlayer.previewTone(uri, beepVolume())
+
+    /**
+     * Suena el pitido por defecto a [percent], para oír el nivel al elegirlo en Ajustes.
+     *
+     * Recibe el nivel en vez de leerlo de Ajustes porque se llama en el mismo toque que lo
+     * guarda, y leerlo ahí podría devolver todavía el anterior.
+     */
+    fun previewBeepVolume(percent: Int) = alarmPlayer.previewTone(
+        "android.resource://${getApplication<Application>().packageName}/${R.raw.beep_second}",
+        percent / 100f,
+    )
     fun stopBeepPreview() = alarmPlayer.stopPreview()
 
     override fun onCleared() {

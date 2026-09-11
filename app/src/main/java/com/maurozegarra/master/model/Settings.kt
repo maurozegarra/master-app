@@ -22,7 +22,16 @@ data class GeneralConfig(
 data class MasterConfig(
     /** Reloj del player con ceros a la izquierda: "00:30" en vez de "30". */
     val padPlayerClock: Boolean = false,
+    /**
+     * Volumen de los pitidos, en %, sobre la curva perceptual de `AlarmPlayer`: 100 no
+     * atenúa y cada escalón hacia abajo se oye como un paso parejo. Uno solo para todos los
+     * pitidos, no por etapa. Por defecto 100, que es como sonaban antes de existir el ajuste.
+     */
+    val beepVolume: Int = 100,
 )
+
+/** Los niveles que se ofrecen en Ajustes. Pocos y separados, para que cada uno se note. */
+val BEEP_VOLUME_STEPS = listOf(100, 85, 70, 55, 40)
 
 /** Ajustes de descarga de vídeos. */
 data class DownloadsConfig(

@@ -53,14 +53,20 @@ class AlarmPlayer(private val context: Context) {
     }
 
     /**
-     * Reproduce un beep corto sin gestionar foco en cada llamada (evita ducking).
+     * Reproduce un beep corto sin gestionar foco en cada llamada (evita ducking): suena
+     * encima de la música del usuario, sin bajarla.
      * Crea un MediaPlayer por beep y lo libera al completar.
+     *
+     * [volume] es el nivel elegido en Ajustes (0..1), por la misma curva perceptual que la
+     * vista previa. Antes no se aplicaba ninguno y los pitidos sonaban siempre al 100 %.
      */
-    fun beepTone(uriStr: String) {
+    fun beepTone(uriStr: String, volume: Float = 1f) {
         try {
             val mp = MediaPlayer()
             mp.setAudioAttributes(mediaAttrs())
             mp.setDataSource(context, Uri.parse(uriStr))
+            val vol = perceptualVolume(volume)
+            mp.setVolume(vol, vol)
             mp.setOnPreparedListener { it.start() }
             mp.setOnCompletionListener { it.release() }
             mp.setOnErrorListener { mp2, _, _ -> mp2.release(); true }

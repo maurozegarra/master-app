@@ -486,8 +486,9 @@ private fun StageAdvanced(
                 SwitchRow(t.alarmLabel, null, cfg.alarm, accent) { onCfg(cfg.copy(alarm = it)) }
                 VSpace(10)
                 Stepper(t.finalCountLabel, cfg.finalCount, accent, min = 0, max = 10) { onCfg(cfg.copy(finalCount = it)) }
-                // Divulgacion progresiva: el control de volumen y sonido del beep
-                // solo aparece cuando finalCount > 0.
+                // Divulgacion progresiva: el selector de sonido del beep solo aparece
+                // cuando finalCount > 0. El volumen no es de la etapa: es uno solo para
+                // todos los pitidos, en Ajustes -> Player.
                 if (cfg.finalCount > 0) {
                     VSpace(10)
                     var showBeepPicker by remember { mutableStateOf(false) }

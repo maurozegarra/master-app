@@ -52,6 +52,7 @@ import com.maurozegarra.master.SettingsViewModel
 import com.maurozegarra.master.SyncResult
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ACCENT_COLORS
+import com.maurozegarra.master.model.BEEP_VOLUME_STEPS
 import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.THEME_AUTO
 import com.maurozegarra.master.model.THEME_DARK
@@ -128,6 +129,22 @@ fun SettingsScreen(
                 checked = cfg.masterConfig.padPlayerClock,
                 accent = accent,
                 onCheckedChange = { vm.setPadPlayerClock(it) },
+            )
+            Spacer(Modifier.height(16.dp))
+            Text(t.beepVolume, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(2.dp))
+            Text(t.beepVolumeDesc, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Spacer(Modifier.height(10.dp))
+            // Al elegir un nivel suena un pitido a ese nivel: es la única forma de afinarlo
+            // contra la música sin tener que arrancar un training.
+            SegmentedRow(
+                options = BEEP_VOLUME_STEPS.map { it to "$it%" },
+                selected = cfg.masterConfig.beepVolume,
+                accent = accent,
+                onSelect = {
+                    vm.setBeepVolume(it)
+                    masterVm.previewBeepVolume(it)
+                },
             )
         }
 

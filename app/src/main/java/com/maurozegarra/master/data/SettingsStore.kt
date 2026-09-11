@@ -39,7 +39,8 @@ class SettingsStore(context: Context) {
         .put(
             "masterConfig",
             JSONObject()
-                .put("padPlayerClock", cfg.masterConfig.padPlayerClock),
+                .put("padPlayerClock", cfg.masterConfig.padPlayerClock)
+                .put("beepVolume", cfg.masterConfig.beepVolume),
         )
         .put(
             "downloads",
@@ -60,6 +61,9 @@ class SettingsStore(context: Context) {
             masterConfig = MasterConfig(
                 padPlayerClock = a?.optBoolean("padPlayerClock", def.masterConfig.padPlayerClock)
                     ?: def.masterConfig.padPlayerClock,
+                // Un ajuste guardado antes de que existiera este campo cae a 100: sonaban así.
+                beepVolume = (a?.optInt("beepVolume", def.masterConfig.beepVolume) ?: def.masterConfig.beepVolume)
+                    .coerceIn(0, 100),
             ),
             downloads = DownloadsConfig(
                 overMobileData = d?.optBoolean("overMobileData", def.downloads.overMobileData)

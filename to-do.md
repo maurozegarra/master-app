@@ -4,12 +4,14 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **61 / 75** hechos, 14 pendientes.
+Progreso: **61 / 76** hechos, 15 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-076** Volumen de los pitidos ajustable en Ajustes
+  - El usuario oye los pitidos 'ligeramente mas alto que la musica' y quiere bajarlos un poco; recordaba que eso tenia un porcentaje. LO QUE HABIA: los pitidos de la corrida (AlarmPlayer.beepTone, desde WorkoutPlayerService playBeep y alarmCue) no aplicaban NINGUN volumen, asi que sonaban al 100 % del volumen multimedia, el mismo canal que Spotify. La curva perceptual en dB de AlarmPlayer existia, pero solo la usaba la vista previa de tonos del editor, y fijada a 1f, o sea tambien al 100 %. En el historial de este proyecto nunca hubo un campo de volumen en el modelo; el porcentaje que el usuario recordaba, si acaso, venia del app anterior. Y un comentario en ExerciseEditorScreen hablaba de 'el control de volumen y sonido del beep' cuando solo habia selector de sonido: de los que en un escaneo rapido hacen concluir cosas que no son; se corrigio y ahora remite al ajuste global. DECISION DEL USUARIO entre un nivel fijo mas bajo o un ajuste: el ajuste, para afinarlo el mismo en el telefono en vez de recompilar. LA SOLUCION: MasterConfig.beepVolume en %, default 100 -como sonaban-, guardado en SettingsStore, y en Ajustes -> Player un SegmentedRow con 100/85/70/55/40 % sobre la curva que ya existia (85 son unos -3 dB, 70 unos -5). Es uno solo para todos los pitidos, no por etapa. Al tocar un nivel suena un pitido a ese nivel, que es la unica forma de afinarlo contra la musica sin arrancar un training; se le pasa el nivel elegido en vez de leerlo de Ajustes porque se llama en el mismo toque que lo guarda. El servicio lee el nivel en CADA pitido y no al arrancar, para que un cambio con una corrida en marcha se note en el siguiente. La vista previa del editor tambien usa el nivel de Ajustes, para que no suene distinto que en el training. Los pitidos siguen sin pedir foco de audio: se oyen encima de la musica sin bajarla, que es lo que el usuario quiere.
 - [ ] **TD-044** Feedback haptico en el player (skip, check, pause)
   - Vibracion corta al hacer skip, check o pause en el player. Confirmacion tactil sin necesidad de mirar la pantalla. Usar VibrationEffect.createOneShot con duracion corta (~50ms) para no ser intrusivo. Solo en acciones del usuario, no en transiciones automaticas.
 - [ ] **TD-043** Preview del siguiente ejercicio en REST

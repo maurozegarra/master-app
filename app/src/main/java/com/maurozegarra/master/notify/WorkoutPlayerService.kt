@@ -317,17 +317,27 @@ class WorkoutPlayerService : Service() {
 
     private val beepPlayer by lazy { com.maurozegarra.master.audio.AlarmPlayer(this) }
 
+    /**
+     * El nivel de los pitidos elegido en Ajustes, de 0 a 1.
+     *
+     * Se lee en cada pitido y no una vez al arrancar: así, si se cambia en Ajustes con una
+     * corrida en marcha, el siguiente pitido ya suena al nivel nuevo. Son unos pocos por
+     * etapa; leer las preferencias cada vez no cuesta nada.
+     */
+    private fun beepVolume(): Float =
+        com.maurozegarra.master.data.SettingsStore(this).loadConfig().masterConfig.beepVolume / 100f
+
     private fun playBeep(step: com.maurozegarra.master.model.PlayerStep) {
         val uri = step.beepSoundUri
             ?: "android.resource://${packageName}/${R.raw.beep_second}"
-        beepPlayer.beepTone(uri)
+        beepPlayer.beepTone(uri, beepVolume())
     }
 
     private fun alarmCue(step: com.maurozegarra.master.model.PlayerStep? = null) {
         if (step?.alarm == false) return
         val uri = step?.beepSoundUri
             ?: "android.resource://${packageName}/${R.raw.beep_work}"
-        beepPlayer.beepTone(uri)
+        beepPlayer.beepTone(uri, beepVolume())
     }
 
     /**
