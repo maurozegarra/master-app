@@ -72,6 +72,15 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.LineBreak
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -506,7 +515,10 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(Modifier.height(12.dp))
+        // La barra de progreso de arriba va superpuesta y mide 55dp (6 + 36 + 4 + 3 + 6).
+        // Con 12 aquí el nombre empezaba a 40dp, o sea dentro de ella. 44 + los 20 del
+        // padding lo dejan ~17dp por debajo.
+        Spacer(Modifier.height(44.dp))
         AnimatedVisibility(visible = vm.playerControlsVisible && step.totalWorkouts > 1) {
             WorkoutProgressBar(step, accent, t)
         }
@@ -534,7 +546,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         }
         val showSeries = (step.kind == StepKind.WORK || step.kind == StepKind.REST) &&
             step.totalSets > 1 && !repByRep
-        Text(bigTitle, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 48.sp, lineHeight = 52.sp, textAlign = TextAlign.Center)
+        ExerciseTitle(bigTitle)
         if (step.note.isNotBlank()) {
             Text(step.note.uppercase(), color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp, textAlign = TextAlign.Center)
         }
@@ -622,6 +634,87 @@ private fun ownerNameFor(step: PlayerStep, t: Strings): String =
  * ella: flotando aterrizaba justo encima del porcentaje y de la barra. Al estar maquetado
  * no puede volver a superponerse, y la posición no depende de si el ejercicio tiene vídeo.
  */
+/**
+ * El nombre del ejercicio en el player. Tres reglas, y cada una evita algo que se veía:
+ *
+ * - **Nunca más de dos líneas.** Un nombre largo se hace más pequeño en vez de crecer.
+ * - **Nunca partido a mitad de palabra.** "HALF-KNEELIN / G THORACIC" no se lee. El tamaño
+ *   baja hasta que la palabra más larga cabe entera en una línea, y solo entonces se mira
+ *   que el conjunto quepa en dos.
+ * - **Alto fijo: el de dos líneas al tamaño máximo**, aunque el nombre quepa en una. Si la
+ *   caja creciera y menguara con el nombre, el vídeo de debajo daría un salto cada vez que
+ *   cambia el ejercicio. El texto va arriba y el hueco sobrante queda debajo.
+ */
+@Composable
+private fun ExerciseTitle(text: String) {
+    val measurer = rememberTextMeasurer()
+    // El alto de dos líneas al tamaño máximo, MEDIDO y no calculado. 2 × interlineado se
+    // quedaba corto por el relleno que la fuente añade arriba y abajo, y con la caja justa
+    // Compose recortaba a una línea con puntos suspensivos: "COBRA TO C...".
+    val boxPx = remember(measurer) { measurer.measure("A\nA", titleStyle(TITLE_MAX_SIZE)).size.height }
+    val boxHeight = with(LocalDensity.current) { boxPx.toDp() }
+    BoxWithConstraints(
+        Modifier.fillMaxWidth().height(boxHeight),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        val maxWidth = constraints.maxWidth
+        // Se mide una vez por nombre y ancho, no en cada recomposición: el reloj repinta
+        // esta pantalla varias veces por segundo.
+        val size = remember(text, maxWidth) { fitTitleSize(measurer, text, maxWidth, boxPx) }
+        Text(
+            text,
+            style = titleStyle(size),
+            maxLines = TITLE_LINES,
+            // Solo se llega aquí con un nombre absurdo que no cabe ni al tamaño mínimo:
+            // mejor puntos suspensivos que una tercera línea.
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+private fun titleStyle(size: TextUnit) = TextStyle(
+    color = Color.White,
+    fontWeight = FontWeight.Bold,
+    fontSize = size,
+    lineHeight = size * TITLE_LINE_RATIO,
+    textAlign = TextAlign.Center,
+    // Reparte en líneas parejas —"HALF-KNEELING / THORACIC ROTATION"— en vez de llenar la
+    // primera y dejar una palabra suelta en la segunda.
+    lineBreak = LineBreak.Heading,
+)
+
+/**
+ * El tamaño más grande con el que el nombre cabe en dos líneas sin partir ninguna palabra.
+ *
+ * Mirar solo el número de líneas no basta: una palabra más ancha que la línea se parte por
+ * donde caiga y aun así pueden salir dos líneas. Por eso primero se exige que la palabra
+ * más ancha quepa entera, y después que el conjunto no pase de dos.
+ */
+private fun fitTitleSize(measurer: TextMeasurer, text: String, maxWidth: Int, maxHeight: Int): TextUnit {
+    val words = text.split(' ').filter { it.isNotBlank() }
+    var size = TITLE_MAX_SIZE.value
+    while (size > TITLE_MIN_SIZE.value) {
+        val style = titleStyle(size.sp)
+        val widest = words.maxOfOrNull {
+            measurer.measure(it, style, softWrap = false, maxLines = 1).size.width
+        } ?: 0
+        if (widest <= maxWidth) {
+            val layout = measurer.measure(text, style, constraints = Constraints(maxWidth = maxWidth))
+            // El alto también, no solo las líneas: es lo que decide si Compose lo recorta.
+            if (layout.lineCount <= TITLE_LINES && layout.size.height <= maxHeight) return size.sp
+        }
+        size -= TITLE_SIZE_STEP
+    }
+    return TITLE_MIN_SIZE
+}
+
+private val TITLE_MAX_SIZE = 48.sp
+private val TITLE_MIN_SIZE = 20.sp
+private const val TITLE_SIZE_STEP = 2f
+private const val TITLE_LINES = 2
+/** 52/48: el interlineado que ya tenía el título. */
+private const val TITLE_LINE_RATIO = 52f / 48f
+
 /**
  * Editar el ejercicio en curso sin parar el reloj.
  *
