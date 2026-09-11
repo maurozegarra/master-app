@@ -133,6 +133,20 @@ class VideoCacheTest {
     }
 
     /** El repositorio los necesita para dar estado a ejercicios que no salen publicados. */
+    /** Lo que enseña Ajustes es lo que se libera: los vídeos propios no cuentan. */
+    @Test
+    fun `downloaded bytes leave out the user's own videos`() {
+        write(cache.repoFile("ex_cat_cow", 1), bytes = 100)
+        write(cache.ownFile("ex_open_book"), bytes = 40)
+
+        assertEquals(100L, cache.bytesDownloaded())
+
+        cache.clearDownloaded()
+
+        assertEquals(0L, cache.bytesDownloaded())
+        assertEquals(40L, cache.bytesUsed())
+    }
+
     @Test
     fun `lists the exercises with an own video`() {
         write(cache.ownFile("ex_cat_cow"))

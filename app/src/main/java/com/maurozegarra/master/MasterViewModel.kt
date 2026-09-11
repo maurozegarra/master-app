@@ -328,6 +328,29 @@ class MasterViewModel(
         }
     }
 
+    /** Cuánto ocupan los vídeos descargados, para Ajustes. Es disco: fuera del hilo principal. */
+    fun loadDownloadedVideoBytes(onDone: (Long) -> Unit) {
+        viewModelScope.launch {
+            onDone(withContext(Dispatchers.IO) { videoCache.bytesDownloaded() })
+        }
+    }
+
+    /**
+     * Borra los vídeos descargados del manifiesto (TD-072). Los propios se quedan: esos no
+     * se recuperan solos.
+     *
+     * Después se recalcula el estado de todos, para que los publicados vuelvan a pendiente
+     * y se descarguen otra vez la próxima vez que un training los pida, en vez de quedarse
+     * marcados como listos apuntando a un archivo que ya no existe.
+     */
+    fun clearDownloadedVideos(onDone: () -> Unit) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) { videoCache.clearDownloaded() }
+            videos.rebuildStates()
+            onDone()
+        }
+    }
+
 
     fun setInstructions(exerciseId: String, steps: List<String>) {
         updateMedia(exerciseId) { it.copy(instructions = steps.filter { s -> s.isNotBlank() }) }

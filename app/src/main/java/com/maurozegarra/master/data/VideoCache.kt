@@ -77,6 +77,15 @@ class VideoCache(private val dir: File) {
     /** Bytes que ocupan los vídeos descargados, para poder enseñarlo en Settings. */
     fun bytesUsed(): Long = (filesIn(repoDir) + filesIn(ownDir)).sumOf { it.length() }
 
+    /**
+     * Bytes de lo descargado del manifiesto: exactamente lo que libera [clearDownloaded].
+     *
+     * Es lo que enseña Ajustes, y no [bytesUsed]: esa cuenta también los vídeos propios, que
+     * liberar no toca, así que después de liberar el número no bajaría a cero y parecería
+     * que no hizo nada.
+     */
+    fun bytesDownloaded(): Long = filesIn(repoDir).sumOf { it.length() }
+
     /** Borra lo descargado del manifiesto. Los vídeos propios no se tocan: no se recuperan solos. */
     fun clearDownloaded() {
         repoDir.deleteRecursively()

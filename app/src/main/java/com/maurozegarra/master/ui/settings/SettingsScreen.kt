@@ -31,6 +31,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,10 +58,13 @@ import com.maurozegarra.master.model.THEME_DARK
 import com.maurozegarra.master.model.THEME_LIGHT
 import com.maurozegarra.master.ui.SwitchRow
 import com.maurozegarra.master.ui.theme.AppTheme
+import com.maurozegarra.master.ui.theme.ACTION_DELETE
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.PINK_ACCENT
 import com.maurozegarra.master.ui.theme.STITCH_ACCENT
 import java.time.LocalDate
+import java.util.Locale
+import kotlin.math.roundToInt
 
 /** Pantalla de Ajustes: general, player y respaldo de datos. */
 @Composable
@@ -135,6 +139,8 @@ fun SettingsScreen(
                 accent = accent,
                 onCheckedChange = { vm.setDownloadOverMobileData(it) },
             )
+            Spacer(Modifier.height(16.dp))
+            DownloadedVideosRow(masterVm = masterVm, accent = accent, t = t)
             Spacer(Modifier.height(16.dp))
             BackupSection(masterVm = masterVm, accent = accent, t = t)
         }
@@ -445,6 +451,68 @@ private fun ProfileChoice(name: String, desc: String = "", onClick: () -> Unit) 
             Text(desc, color = AppTheme.colors.textFaded, fontSize = 12.sp)
         }
     }
+}
+
+/**
+ * Cuánto ocupan los vídeos descargados, y liberarlo (TD-072).
+ *
+ * Enseña lo que se libera de verdad —solo lo descargado—, no el total con los vídeos
+ * propios: si no, tras liberar el número no bajaría a cero. Se lee al abrir Ajustes y otra
+ * vez tras borrar; es disco, no red.
+ *
+ * Pide confirmación aunque sea reversible: volver a bajarlos cuesta datos, y con la descarga
+ * por datos móviles apagada el siguiente training se quedaría sin vídeos hasta el wifi.
+ */
+@Composable
+private fun DownloadedVideosRow(masterVm: MasterViewModel, accent: Color, t: Strings) {
+    val ctx = LocalContext.current
+    var bytes by remember { mutableStateOf<Long?>(null) }
+    var reloads by remember { mutableStateOf(0) }
+    var confirming by remember { mutableStateOf(false) }
+
+    LaunchedEffect(reloads) { masterVm.loadDownloadedVideoBytes { bytes = it } }
+
+    val size = bytes
+    ActionRow(
+        label = t.freeUpSpace,
+        desc = when {
+            size == null -> t.downloadedVideosDesc
+            size <= 0L -> t.nothingDownloaded
+            else -> "${t.downloadedVideos}: ${formatMegabytes(size)}. ${t.downloadedVideosDesc}"
+        },
+        accent = accent,
+        onClick = { if ((size ?: 0L) > 0L) confirming = true },
+    )
+
+    if (confirming) {
+        AlertDialog(
+            onDismissRequest = { confirming = false },
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.textPrimary,
+            title = { Text(t.freeUpSpace) },
+            text = { Text(t.freeUpSpaceConfirm, color = AppTheme.colors.textDim) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirming = false
+                    masterVm.clearDownloadedVideos {
+                        Toast.makeText(ctx, t.spaceFreed, Toast.LENGTH_SHORT).show()
+                        reloads++
+                    }
+                }) { Text(t.delete, color = ACTION_DELETE, fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirming = false }) {
+                    Text(t.cancel, color = AppTheme.colors.textDim)
+                }
+            },
+        )
+    }
+}
+
+/** "21 MB", "3.4 MB". Con punto decimal aunque el teléfono esté en español: el app va en inglés. */
+private fun formatMegabytes(bytes: Long): String {
+    val mb = bytes / (1024.0 * 1024.0)
+    return if (mb >= 10) "${mb.roundToInt()} MB" else String.format(Locale.US, "%.1f MB", mb)
 }
 
 /** master-backup-2026-08-29.json */
