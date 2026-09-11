@@ -1,7 +1,7 @@
 {
-  "versionCode": 189,
+  "versionCode": 192,
   "minVersionCode": 1,
-  "changelog": "release: TD-067 asignar trainings desde el telefono, TD-068 entrega automatica con aviso",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.189/master-1.0.189.apk",
-  "versionName": "1.0.189"
+  "changelog": "release: TD-070 ocultar el video por training, TD-073 editar el training en ejecucion",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.192/master-1.0.192.apk",
+  "versionName": "1.0.192"
 }
