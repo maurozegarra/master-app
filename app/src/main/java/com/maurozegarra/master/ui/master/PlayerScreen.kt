@@ -625,11 +625,11 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         }
         Spacer(Modifier.height(8.dp))
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
-        // El emoji es la identidad del ejercicio cuando no hay vídeo que enseñar, y sale en
-        // TODAS las etapas: antes se saltaba WORK, así que en un ejercicio sin vídeo el
-        // emoji aparecía y desaparecía al pasar de PREP a WORK. Pequeño y junto al nombre,
-        // no de 96dp en mitad de la pantalla: acompaña, no finge ser contenido.
-        if (!showVideo && step.ownerName.isNotBlank()) {
+        // El emoji va encima del nombre, y de momento NO en WORK: eso lo deja incoherente
+        // —en un ejercicio sin vídeo aparece y desaparece al pasar de PREP a WORK—, pero
+        // extenderlo a WORK es un cambio aparte y se mira por separado, para no mezclar
+        // dos diferencias en la misma comparación.
+        if (!showVideo && step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
             ExerciseGlyph(name = ownerLabel, color = step.colorArgb, sizeDp = 40, exerciseId = step.ownerExerciseId)
             Spacer(Modifier.height(8.dp))
         }
