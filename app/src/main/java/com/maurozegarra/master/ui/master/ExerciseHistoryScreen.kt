@@ -27,6 +27,7 @@ import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ExerciseRecord
 import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -95,7 +96,7 @@ private fun ExerciseSessionCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .padding(16.dp),
     ) {

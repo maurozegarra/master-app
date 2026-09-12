@@ -38,6 +38,7 @@ import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ExerciseDef
 import com.maurozegarra.master.ui.ExerciseThumb
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
@@ -97,7 +98,7 @@ private fun ExercisePickRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .clickable(onClick = onClick)
             .padding(12.dp),
@@ -121,7 +122,7 @@ private fun CreateCustomRow(name: String, accent: Color, t: Strings, onClick: ()
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .clickable(onClick = onClick)
             .padding(12.dp),

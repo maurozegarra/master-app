@@ -42,6 +42,7 @@ import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 
 /** Editor de un workout rotativo: lista de variantes que se alternan al completar. */
@@ -154,7 +155,7 @@ private fun VariantRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(Dims.row))
                 .background(AppTheme.colors.surface)
                 // Con otra fila abierta, el primer tap solo la cierra.
                 .clickable { if (!swipeController.consumeTapIfOpen()) onOpen() }

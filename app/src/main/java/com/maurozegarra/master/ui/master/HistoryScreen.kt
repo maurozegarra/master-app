@@ -55,6 +55,7 @@ import com.maurozegarra.master.ui.SwipeActionsRow
 import com.maurozegarra.master.ui.SwipeRowsController
 import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.model.SessionStatus
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.STATUS_DONE
 import com.maurozegarra.master.ui.theme.STATUS_SKIPPED
@@ -182,7 +183,7 @@ fun SessionRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             // La tarjeta entera despliega. Antes eso lo hacía un IconButton, que reserva
             // 48dp de área táctil y era quien marcaba el alto de la fila de abajo; con el

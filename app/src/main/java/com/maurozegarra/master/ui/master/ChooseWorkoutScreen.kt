@@ -35,6 +35,7 @@ import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.Workout
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -141,7 +142,7 @@ private fun WorkoutPickRow(workout: Workout, t: Strings, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .clickable(onClick = onClick)
             .padding(12.dp),

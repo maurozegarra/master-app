@@ -47,6 +47,7 @@ import com.maurozegarra.master.ui.SwipeRowsController
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
 import com.maurozegarra.master.ui.rememberSwipeRowsController
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
@@ -167,7 +168,7 @@ private fun ExerciseRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             // Con el panel abierto, el primer tap lo cierra en vez de abrir el ejercicio:
             // si no, tocar la fila para cerrar te metía en el editor sin querer.

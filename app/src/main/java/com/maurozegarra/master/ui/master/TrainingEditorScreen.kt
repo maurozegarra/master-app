@@ -44,6 +44,7 @@ import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
@@ -182,7 +183,7 @@ private fun WorkoutRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(Dims.row))
                 .background(AppTheme.colors.surface)
                 // Con otra fila abierta, el primer tap solo la cierra: si no, tocar esta
                 // fila abriría su workout cuando la intención era descartar el panel.

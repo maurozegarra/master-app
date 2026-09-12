@@ -89,6 +89,7 @@ import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.model.DisplayMode
 import com.maurozegarra.master.model.PlayerStep
 import com.maurozegarra.master.model.StepKind
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.ON_ACCENT
 import com.maurozegarra.master.ui.theme.SURFACE
@@ -210,7 +211,7 @@ private fun WorkoutGroupCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .padding(14.dp)
             .animateContentSize(),

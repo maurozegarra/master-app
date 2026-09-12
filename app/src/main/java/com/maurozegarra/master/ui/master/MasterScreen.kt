@@ -80,6 +80,7 @@ import com.maurozegarra.master.ui.settings.syncMessage
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
+import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.util.formatRemaining
 import java.time.DayOfWeek
@@ -495,7 +496,7 @@ private fun TrainingCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(18.dp))
             .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
