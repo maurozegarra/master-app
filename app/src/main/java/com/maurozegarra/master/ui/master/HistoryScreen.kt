@@ -22,12 +22,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -183,6 +182,19 @@ fun SessionRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(AppTheme.colors.surface)
+            // La tarjeta entera despliega. Antes eso lo hacía un IconButton, que reserva
+            // 48dp de área táctil y era quien marcaba el alto de la fila de abajo; con el
+            // área en la tarjeta, el chevrón puede ser un icono de 24 y la tarjeta baja de
+            // 99 a ~75dp, por debajo incluso de los 80 que medía antes de todo esto.
+            .then(
+                if (session.exercises.isEmpty()) {
+                    Modifier
+                } else {
+                    Modifier.clickable {
+                        if (!swipeController.consumeTapIfOpen()) expanded = !expanded
+                    }
+                }
+            )
             .padding(16.dp),
     ) {
         // El nombre tiene su propia línea, a todo el ancho de la tarjeta.
@@ -236,17 +248,15 @@ fun SessionRow(
             // entre una tarjeta y otra.
             Spacer(Modifier.weight(1f))
             if (session.exercises.isNotEmpty()) {
-                // Con el panel abierto, el primer toque lo cierra en vez de desplegar la
-                // sesión: si no, tocar la fila para cerrar te abría el detalle sin querer.
-                IconButton(onClick = {
-                    if (!swipeController.consumeTapIfOpen()) expanded = !expanded
-                }) {
-                    Icon(
-                        if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                        contentDescription = null,
-                        tint = AppTheme.colors.textDim,
-                    )
-                }
+                // Indicador, no botón: quien recoge el toque es la tarjeta entera. Un `>`
+                // que gira 90°, la misma gramática que el preview del training, en vez de
+                // dos iconos distintos para abierto y cerrado.
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = AppTheme.colors.textDim,
+                    modifier = Modifier.rotate(if (expanded) 90f else 0f),
+                )
             }
         }
 
@@ -366,9 +376,10 @@ private fun WorkoutGroupSection(
                 )
             }
             Icon(
-                if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = AppTheme.colors.textDim,
+                modifier = Modifier.rotate(if (expanded) 90f else 0f),
             )
         }
         AnimatedVisibility(
