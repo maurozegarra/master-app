@@ -8,6 +8,7 @@ import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
+import android.util.LruCache
 import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -204,15 +205,22 @@ private fun readVideoInfo(file: File): VideoInfo? = runCatching {
  */
 @Composable
 fun ExerciseThumb(file: File, sizeDp: Int, modifier: Modifier = Modifier) {
-    val density = LocalDensity.current
-    val px = with(density) { sizeDp.dp.roundToPx() }
-    var frame by remember(file, px) { mutableStateOf<Bitmap?>(null) }
+    val px = with(LocalDensity.current) { sizeDp.dp.roundToPx() }
+    // `lastModified` en la clave: si se reemplaza el vídeo del ejercicio, la miniatura
+    // vieja deja de encontrarse sola, sin tener que invalidar nada a mano.
+    val key = remember(file, px) { "${file.absolutePath}|$px|${file.lastModified()}" }
+    // Arranca con lo que ya hubiera en caché, y ese es el arreglo del parpadeo: al plegar
+    // y desplegar un workout la fila sale de composición y `remember` se descarta, así que
+    // sin esto volvía a leer del disco y la miniatura parpadeaba CADA vez, no solo la
+    // primera. Si está cacheada se pinta en el primer frame y no hay hueco que tapar.
+    var frame by remember(key) { mutableStateOf(thumbCache[key]) }
 
-    LaunchedEffect(file, px) {
-        frame = withContext(Dispatchers.IO) { readThumb(file, px) }
-    }
-    DisposableEffect(file) {
-        onDispose { frame = null }
+    LaunchedEffect(key) {
+        if (frame == null) {
+            frame = withContext(Dispatchers.IO) {
+                readThumb(file, px)?.also { thumbCache.put(key, it) }
+            }
+        }
     }
 
     Box(
@@ -231,6 +239,24 @@ fun ExerciseThumb(file: File, sizeDp: Int, modifier: Modifier = Modifier) {
             )
         }
     }
+}
+
+/**
+ * Miniaturas ya decodificadas, compartidas por todas las listas del app.
+ *
+ * Existe por el parpadeo: una caché por fila no sirve de nada cuando el problema es que la
+ * fila se destruye al plegar el workout. Esta vive fuera de la composición, así que
+ * sobrevive a plegar, desplazar y cambiar de pantalla.
+ *
+ * Se limita por bytes y no por número de entradas, que es lo único que acota de verdad:
+ * una miniatura de 38dp ocupa el triple que una de 30dp, y contarlas por igual dejaría el
+ * techo de memoria al azar del tamaño que pida cada lista. 4 MB dan para cientos.
+ *
+ * Los bitmaps desalojados **no se reciclan**: puede haber uno todavía dibujándose en
+ * pantalla, y reciclarlo bajo los pies revienta el dibujado. Se dejan al recolector.
+ */
+private val thumbCache = object : LruCache<String, Bitmap>(4 * 1024 * 1024) {
+    override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount
 }
 
 /**

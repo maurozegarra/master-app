@@ -43,6 +43,7 @@ import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.Exercise
 import com.maurozegarra.master.model.WorkMode
 import com.maurozegarra.master.ui.DraggableItem
+import com.maurozegarra.master.ui.ExerciseThumb
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
@@ -92,6 +93,7 @@ fun WorkoutEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
                     ExerciseRow(
                         exercise = ex,
                         t = t,
+                        videoFor = vm::videoFileFor,
                         onOpen = { vm.openExercise(ex.id) },
                         onDuplicate = { vm.duplicateExercise(ex.id) },
                         onDelete = { vm.deleteExercise(ex.id) },
@@ -125,6 +127,8 @@ private fun workSummary(ex: Exercise, t: Strings): String {
 private fun ExerciseRow(
     exercise: Exercise,
     t: Strings,
+    /** El vídeo ya descargado de ese ejercicio, o null. Lambda y no el ViewModel: la fila solo pinta. */
+    videoFor: (String) -> java.io.File?,
     onOpen: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,
@@ -140,7 +144,14 @@ private fun ExerciseRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val exLabel = ExerciseCatalog.display(exercise.exerciseId, exercise.name, t.locale.language)
-        ExerciseGlyph(name = exLabel, color = exercise.workCfg.color, exerciseId = exercise.exerciseId)
+        // Respeta `showVideo` de ESTA instancia: si le apagaste el vídeo en este training,
+        // la fila enseña el emoji, igual que el player y que el preview.
+        val thumb = if (exercise.showVideo) videoFor(exercise.exerciseId) else null
+        if (thumb != null) {
+            ExerciseThumb(file = thumb, sizeDp = 44)
+        } else {
+            ExerciseGlyph(name = exLabel, color = exercise.workCfg.color, exerciseId = exercise.exerciseId)
+        }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(

@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ExerciseDef
+import com.maurozegarra.master.ui.ExerciseThumb
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
@@ -80,14 +81,19 @@ fun ChooseExerciseScreen(vm: MasterViewModel, accent: Color, t: Strings) {
                 }
             }
             items(filtered, key = { it.id }) { def ->
-                ExercisePickRow(def = def) { vm.pickExercise(def) }
+                ExercisePickRow(def = def, videoFor = vm::videoFileFor) { vm.pickExercise(def) }
             }
         }
     }
 }
 
 @Composable
-private fun ExercisePickRow(def: ExerciseDef, onClick: () -> Unit) {
+private fun ExercisePickRow(
+    def: ExerciseDef,
+    /** El vídeo ya descargado de ese ejercicio, o null. Lambda y no el ViewModel: la fila solo pinta. */
+    videoFor: (String) -> java.io.File?,
+    onClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,7 +103,14 @@ private fun ExercisePickRow(def: ExerciseDef, onClick: () -> Unit) {
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ExerciseGlyph(name = def.name, color = 0xFF2E9E5BL, sizeDp = 38, exerciseId = def.id)
+        // Aquí no hay `showVideo` que respetar: eso es de la instancia dentro de un
+        // training, y esto es el catálogo. Si el ejercicio tiene vídeo, se enseña.
+        val thumb = videoFor(def.id)
+        if (thumb != null) {
+            ExerciseThumb(file = thumb, sizeDp = 38)
+        } else {
+            ExerciseGlyph(name = def.name, color = 0xFF2E9E5BL, sizeDp = 38, exerciseId = def.id)
+        }
         Spacer(Modifier.width(12.dp))
         Text(def.name, color = AppTheme.colors.textPrimary, fontSize = 16.sp, fontWeight = FontWeight.Medium)
     }
