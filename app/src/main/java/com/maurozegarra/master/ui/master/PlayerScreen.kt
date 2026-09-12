@@ -660,11 +660,11 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             // Aquí solo queda el hueco elástico que empuja el reloj junto a los controles,
             // donde está al alcance de la vista sin disputarle el centro al vídeo.
             Spacer(Modifier.weight(1f))
-            ClockOrReps(vm, step, repByRep, padClock, t)
+            ClockOrReps(vm, step, repByRep, padClock, t, showGlyph = !showVideo)
         } else {
             Spacer(Modifier.height(20.dp))
             Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                ClockOrReps(vm, step, repByRep, padClock, t)
+                ClockOrReps(vm, step, repByRep, padClock, t, showGlyph = !showVideo)
             }
         }
         Spacer(Modifier.height(16.dp))
@@ -696,9 +696,10 @@ private fun ClockOrReps(
     repByRep: Boolean,
     padClock: Boolean,
     t: Strings,
+    showGlyph: Boolean,
 ) {
     if (step.kind == StepKind.WORK && !step.timeBased) {
-        RepsDisplay(step, repByRep, t)
+        RepsDisplay(step, repByRep, t, showGlyph)
     } else {
         ClockDisplay(step, vm.playerRemainingMs, padClock)
     }
@@ -933,22 +934,28 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
 }
 
 @Composable
-private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings) {
-    val transition = rememberInfiniteTransition(label = "bob")
-    val offset by transition.animateFloat(
-        initialValue = -6f,
-        targetValue = 6f,
-        animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
-        label = "bobOffset",
-    )
+private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings, showGlyph: Boolean) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(Modifier.graphicsLayer { translationY = offset }) {
-            ExerciseGlyph(
-                name = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language),
-                color = step.colorArgb, sizeDp = 96, exerciseId = step.ownerExerciseId,
+        // El emoji es el sustituto del vídeo, no un acompañante: sirve para que un
+        // ejercicio sin vídeo no sea solo un número. Con vídeo detrás sobra, y además lo
+        // tapa, que es como se vio. La animación se monta dentro del `if` para no dejar
+        // una infinita corriendo por un glifo que no se dibuja.
+        if (showGlyph) {
+            val transition = rememberInfiniteTransition(label = "bob")
+            val offset by transition.animateFloat(
+                initialValue = -6f,
+                targetValue = 6f,
+                animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+                label = "bobOffset",
             )
+            Box(Modifier.graphicsLayer { translationY = offset }) {
+                ExerciseGlyph(
+                    name = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language),
+                    color = step.colorArgb, sizeDp = 96, exerciseId = step.ownerExerciseId,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
         }
-        Spacer(Modifier.height(16.dp))
         if (repByRep) {
             Text(t.repLabel, color = TEXT_DIM, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             Text("${step.setIndex + 1} / ${step.totalSets}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 56.sp)
