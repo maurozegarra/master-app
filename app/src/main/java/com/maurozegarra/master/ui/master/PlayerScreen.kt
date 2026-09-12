@@ -50,7 +50,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -465,6 +464,10 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     }
 
     val padClock = remember { vm.padPlayerClock() }
+    // El sheet de instrucciones se compone fuera del chrome, así que sobrevive a que las
+    // franjas se vayan. Guarda el contenido, no el id: se captura al abrirlo, y si el
+    // training avanza de ejercicio mientras lees no se te cambia el texto por debajo.
+    var sheetTarget by remember { mutableStateOf<InstructionsTarget?>(null) }
     // Color de fase completo, oscurecido 12% para legibilidad del texto blanco.
     // En pausa se oscurece adicionalmente como indicador visual.
     val isPaused = !step.manual && !vm.playerRunning
@@ -504,8 +507,8 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         if (vm.playerControlsVisible) 1f else 0f,
         label = "osdFade",
     )
-    LaunchedEffect(vm.playerControlsVisible, vm.playerControlsPinned) {
-        if (vm.playerControlsVisible && !vm.playerControlsPinned) {
+    LaunchedEffect(vm.playerControlsVisible) {
+        if (vm.playerControlsVisible) {
             delay(OSD_HIDE_MS)
             vm.hidePlayerControls()
         }
@@ -592,7 +595,16 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         if (chromeAlpha > 0f) {
             Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
                 RoutineProgressBar(vm, accent) {
-                    InstructionsButton(vm, step.ownerExerciseId, ownerNameFor(step, t), t)
+                    // Abrir el sheet se lleva las franjas por delante: no conviven. Se lee
+                    // lo que se ha pedido leer, y al cerrarlo la pantalla queda limpia; las
+                    // franjas vuelven con un tap, como cualquier otra vez.
+                    InstructionsButton(vm, step.ownerExerciseId, t) {
+                        sheetTarget = InstructionsTarget(
+                            title = ownerNameFor(step, t),
+                            steps = vm.mediaFor(step.ownerExerciseId)?.instructions.orEmpty(),
+                        )
+                        vm.hidePlayerControls()
+                    }
                     EditExerciseButton(vm, step, t)
                 }
             }
@@ -693,6 +705,9 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         NextExerciseLabel(vm, t)
         Spacer(Modifier.height(8.dp))
     }
+        // Hermano del chrome, no hijo suyo: por eso sigue abierto cuando las franjas ya se
+        // fueron. Solo lo cierra el usuario.
+        sheetTarget?.let { InstructionsSheet(it) { sheetTarget = null } }
         AnimatedGlowBorder(cornerRadius = 0.dp, colors = glowColors(color), strokeWidth = 3.dp)
     }
 }
@@ -858,26 +873,24 @@ private fun EditExerciseButton(vm: MasterViewModel, step: PlayerStep, t: Strings
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * El icono que pide las instrucciones. **Solo dispara**: el sheet lo compone
+ * [RunningView], fuera del chrome.
+ *
+ * Tenerlo aquí dentro era el bug: el sheet quedaba colgando de la franja de arriba, y al
+ * desvanecerse esta no se atenuaba el sheet, se iba de la composición con el usuario
+ * leyendo. Un sheet no puede depender de que siga visible el botón que lo abrió.
+ */
 @Composable
-private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, title: String, t: Strings) {
-    val steps = vm.mediaFor(exerciseId)?.instructions.orEmpty()
-    if (steps.isEmpty()) return
-    var open by remember { mutableStateOf(false) }
-
-    // Con el sheet abierto, el OSD no se puede auto-ocultar: este sheet se compone DENTRO
-    // de la franja de arriba, así que al desvanecerse esta el sheet no se atenúa, se va de
-    // la composición y se cierra solo mientras lo estás leyendo. El onDispose suelta el pin
-    // aunque el sheet salga de pantalla por otro camino (cambio de paso, fin del training).
-    LaunchedEffect(open) { vm.pinPlayerControls(open) }
-    DisposableEffect(Unit) { onDispose { vm.pinPlayerControls(false) } }
+private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, t: Strings, onOpen: () -> Unit) {
+    if (vm.mediaFor(exerciseId)?.instructions.orEmpty().isEmpty()) return
 
     Box(
         modifier = Modifier
             .padding(start = 12.dp)
             .size(36.dp)
             .clip(CircleShape)
-            .clickable { open = true },
+            .clickable(onClick = onOpen),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -888,33 +901,47 @@ private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, title: S
         )
     }
 
-    if (open) {
-        ModalBottomSheet(
-            onDismissRequest = { open = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = AppTheme.colors.surface,
-        ) {
-            Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 32.dp)) {
-                Text(title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
-                Spacer(Modifier.height(16.dp))
-                steps.forEachIndexed { i, s ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .size(26.dp)
-                                .clip(CircleShape)
-                                .background(AppTheme.colors.accent.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text("${i + 1}", color = AppTheme.colors.accent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                        }
-                        Text(
-                            s,
-                            color = AppTheme.colors.textPrimary,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(start = 12.dp),
-                        )
+}
+
+/** Lo que se enseña en el sheet, capturado al abrirlo. Ver [InstructionsSheet]. */
+private data class InstructionsTarget(val title: String, val steps: List<String>)
+
+/**
+ * Los pasos del ejercicio, en un sheet que vive **fuera del chrome**: se abre con el
+ * icono de la franja, las franjas se van, y él se queda hasta que el usuario lo cierra.
+ *
+ * Recibe el contenido ya resuelto y no el `exerciseId`, a propósito: quien lo abre captura
+ * título y pasos en ese momento, así que si el training avanza de ejercicio mientras lees
+ * no se te cambia el texto por debajo.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun InstructionsSheet(target: InstructionsTarget, onDismiss: () -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = AppTheme.colors.surface,
+    ) {
+        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 32.dp)) {
+            Text(target.title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+            Spacer(Modifier.height(16.dp))
+            target.steps.forEachIndexed { i, s ->
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(26.dp)
+                            .clip(CircleShape)
+                            .background(AppTheme.colors.accent.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("${i + 1}", color = AppTheme.colors.accent, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
+                    Text(
+                        s,
+                        color = AppTheme.colors.textPrimary,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(start = 12.dp),
+                    )
                 }
             }
         }
