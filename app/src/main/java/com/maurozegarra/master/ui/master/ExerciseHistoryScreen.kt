@@ -102,20 +102,22 @@ private fun ExerciseSessionCard(
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
+                // 16 y 13, como cualquier otra fila de lista del app. Estaba en 15 y 12,
+                // que no eran un nivel propio: nadie los decidió, se heredaron.
                 Text(
                     zdt.format(dateFmt),
                     color = AppTheme.colors.textPrimary,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp,
+                    fontSize = 16.sp,
                 )
                 Text(
                     "${session.trainingName}  ·  ${zdt.format(timeFmt)}",
                     color = AppTheme.colors.textDim,
-                    fontSize = 12.sp,
+                    fontSize = 13.sp,
                 )
             }
             if (session.status == SessionStatus.PARTIAL) {
-                Text(t.partial, color = accent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                StatusBadge(text = t.partial, color = accent)
             }
         }
         Spacer(Modifier.height(8.dp))
