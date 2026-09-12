@@ -121,12 +121,15 @@ class MasterViewModel(
     var playerStep by mutableStateOf<PlayerStep?>(null)
         private set
 
-    /** OSD: si los controles del player están visibles (se auto-ocultan tras un tap). */
-    var playerControlsVisible by mutableStateOf(true)
-        private set
-
-    /** Se incrementa en cada interacción para re-armar el auto-ocultado del OSD. */
-    var osdNonce by mutableStateOf(0)
+    /**
+     * OSD: si las dos franjas de arriba del player están visibles.
+     *
+     * **Nace oculto y solo lo saca el tap del usuario.** No lo levanta arrancar la corrida
+     * ni avanzar de etapa: la corrida se sigue por el vídeo, el reloj y los controles, que
+     * están siempre ahí. Que las franjas salieran solas hacía que en un ejercicio por
+     * repeticiones aparecieran en cada serie, porque cada una avanza confirmando.
+     */
+    var playerControlsVisible by mutableStateOf(false)
         private set
 
     /** ID del training con un player en curso (para mostrar indicador en la lista). */
@@ -1049,7 +1052,6 @@ class MasterViewModel(
 
     fun showPlayerControls() {
         playerControlsVisible = true
-        osdNonce++
     }
 
     fun hidePlayerControls() {
@@ -1111,7 +1113,6 @@ class MasterViewModel(
         val id = playerTrainingId ?: return
         if (playerSteps.isEmpty()) return
         playerStarted = true
-        showPlayerControls()
         WorkoutPlayerService.start(getApplication(), id, playerName, playerSteps)
         activePlayerTrainingId = id
     }

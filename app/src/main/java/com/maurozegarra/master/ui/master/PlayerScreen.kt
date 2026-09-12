@@ -482,22 +482,32 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         null
     }
     val showVideo = videoFile != null
-    // Auto-ocultado del chrome: a los OSD_HIDE_MS sin tocar nada, la barra de arriba, los
-    // controles y el "Next" se desvanecen y el vídeo queda limpio. El reloj y el nombre se
-    // quedan: son la información por la que estás mirando la pantalla, no adorno.
+    // Auto-ocultado: a los OSD_HIDE_MS sin tocar nada se desvanecen las DOS FRANJAS DE
+    // ARRIBA —la de rutina y la de workout—, y con ellas los botones de instrucciones y
+    // editar que viven dentro. Nada más.
     //
-    // `osdNonce` es lo que permite reprogramar la cuenta: al volver a mostrar algo que ya
-    // estaba visible, `playerControlsVisible` no cambia y la clave del efecto tampoco, así
-    // que sin el contador el temporizador no se reiniciaría con cada toque.
+    // Lo que NO se oculta nunca: los controles de reproducción, el "Next", el reloj y el
+    // nombre. Son el mando y la información de la corrida; que aparezcan y desaparezcan
+    // solo obliga a tocar dos veces para hacer una cosa.
     //
-    // En pausa o en un paso manual no se oculta nada, y por eso `chromeVisible` va por
-    // encima del flag en vez de tocar el estado del ViewModel: ahí los controles son justo
-    // lo que hace falta tener a mano, y al reanudar la cuenta sigue donde estaba.
-    val keepChrome = isPaused || step.manual
-    val chromeVisible = vm.playerControlsVisible || keepChrome
-    val chromeAlpha by animateFloatAsState(if (chromeVisible) 1f else 0f, label = "osdFade")
-    LaunchedEffect(vm.osdNonce, vm.playerControlsVisible, keepChrome) {
-        if (vm.playerControlsVisible && !keepChrome) {
+    // Sin excepciones por etapa ni por estado, y eso es justamente el arreglo: antes esto
+    // llevaba un `keepChrome = isPaused || step.manual` para no dejar sin botones un paso
+    // que solo avanza confirmando. Pero `PlayerStep.manual` es true en TODO WORK por
+    // repeticiones, así que el chrome quedaba clavado en los ejercicios por reps y se
+    // ocultaba en los de tiempo; peor aún, dentro de un mismo ejercicio por reps se
+    // ocultaba en PREP y REST —que sí son por tiempo— y no en WORK. Con los controles
+    // siempre visibles esa excepción ya no protege nada, así que desaparece.
+    //
+    // Las franjas nacen ocultas y solo las saca el tap, así que el único camino para
+    // mostrarlas ya cambia `playerControlsVisible`: basta con esa clave. Antes hacía falta
+    // además un contador (`osdNonce`) porque los botones podían pedir "muéstrate" estando
+    // ya visibles, y entonces la clave no cambiaba y la cuenta no se reiniciaba.
+    val chromeAlpha by animateFloatAsState(
+        if (vm.playerControlsVisible) 1f else 0f,
+        label = "osdFade",
+    )
+    LaunchedEffect(vm.playerControlsVisible) {
+        if (vm.playerControlsVisible) {
             delay(OSD_HIDE_MS)
             vm.hidePlayerControls()
         }
@@ -513,12 +523,12 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                 var accumulated = 0f
                 detectHorizontalDragGestures(
                     onDragStart = { accumulated = 0f },
+                    // Sin sacar las franjas: arrastrar avanza o retrocede, y el resultado
+                    // ya se ve en el reloj y en el nombre. Solo el tap las pide.
                     onDragEnd = {
                         if (accumulated < -200f) {
-                            vm.showPlayerControls()
                             vm.checkStep()
                         } else if (accumulated > 200f) {
-                            vm.showPlayerControls()
                             vm.prevStep()
                         }
                     },
@@ -666,26 +676,12 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             }
         }
 
-        // Alto reservado y fijo: el de la fila, que lo marca el botón grande. Dejar de
-        // componer los botones al llegar a 0 es lo que hace que el toque vuelva a la capa
-        // de abajo y devuelva el chrome, en vez de pausar a ciegas. Reservando el hueco,
-        // el reloj no se mueve al desvanecerse.
-        Box(
-            Modifier.fillMaxWidth().height(CONTROLS_HEIGHT),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (chromeAlpha > 0f) {
-                Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
-                    Controls(vm, step, accent, t)
-                }
-            }
-        }
+        // Siempre visibles, en toda etapa y en cualquier modo: son el mando de la corrida.
+        // Además es lo que hace innecesaria cualquier excepción en el auto-ocultado, porque
+        // el botón de confirmar de un paso manual nunca llega a irse.
+        Controls(vm, step, accent, t)
         Spacer(Modifier.height(8.dp))
-        // Este no captura toque, así que basta con atenuarlo y se queda compuesto: así
-        // conserva su hueco y nada salta.
-        Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
-            NextExerciseLabel(vm, t)
-        }
+        NextExerciseLabel(vm, t)
         Spacer(Modifier.height(8.dp))
     }
         AnimatedGlowBorder(cornerRadius = 0.dp, colors = glowColors(color), strokeWidth = 3.dp)
@@ -805,14 +801,6 @@ private fun fitTitleSize(measurer: TextMeasurer, text: String, maxWidth: Int, ma
  * el vídeo pase la mayor parte del tiempo tapado.
  */
 private const val OSD_HIDE_MS = 4_000L
-
-/**
- * Alto que la fila de controles reserva siempre, se vean o no.
- *
- * Es el del botón grande de play/pausa, que es quien marca la altura de la fila. Se
- * reserva para que el reloj no baje cuando el chrome se desvanece.
- */
-private val CONTROLS_HEIGHT = 72.dp
 
 /**
  * Alto de los degradados que hacen legible el chrome sobre el vídeo.
@@ -1000,15 +988,12 @@ private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color,
         Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FeedbackChip("${t.tooHeavy} ↓", current == -2.5, accent) {
-                vm.showPlayerControls()
                 vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, -2.5)
             }
             FeedbackChip(t.justRight, current == 0.0, accent) {
-                vm.showPlayerControls()
                 vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, 0.0)
             }
             FeedbackChip("${t.tooLight} ↑", current == 2.5, accent) {
-                vm.showPlayerControls()
                 vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, 2.5)
             }
         }
@@ -1048,8 +1033,8 @@ private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: St
             contentDescription = t.skip,
             size = 48.dp,
             iconSize = 24.dp,
-            onClick = { vm.showPlayerControls(); vm.skipStep() },
-            onLongClick = { vm.showPlayerControls(); showSkipDialog = true },
+            onClick = { vm.skipStep() },
+            onLongClick = { showSkipDialog = true },
         )
         if (!step.manual) {
             GlassButton(
@@ -1058,7 +1043,6 @@ private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: St
                 size = 72.dp,
                 iconSize = 36.dp,
                 onClick = {
-                    vm.showPlayerControls()
                     if (vm.playerRunning) vm.pausePlayer() else vm.resumePlayer()
                 },
             )
@@ -1067,7 +1051,7 @@ private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: St
                 contentDescription = t.check,
                 size = 48.dp,
                 iconSize = 24.dp,
-                onClick = { vm.showPlayerControls(); vm.checkStep() },
+                onClick = { vm.checkStep() },
             )
         } else {
             GlassButton(
@@ -1075,7 +1059,7 @@ private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: St
                 contentDescription = t.check,
                 size = 72.dp,
                 iconSize = 36.dp,
-                onClick = { vm.showPlayerControls(); vm.checkStep() },
+                onClick = { vm.checkStep() },
             )
             Spacer(Modifier.size(48.dp))
         }
