@@ -2,6 +2,14 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-083",
+      "title": "Auditoria de coherencia UI: un solo mecanismo para todas las listas",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "plan": "docs/auditoria-ui.md",
+      "manual": "Pedido del usuario tras ver que History usa menu de 3 puntos mientras otras listas usan swipe: 'si es una lista, todas deberian funcionar bajo el mismo mecanismo o 3 puntos o swipe', y despues 'necesito que escanees todo el proyecto en busca de inconsistencias UI para no ir cazandolas una a una'. HALLAZGO PRINCIPAL: la decision YA ESTABA TOMADA y quedaron dos pantallas sin migrar. TD-039 puso swipe en las TrainingCards 'en reemplazo del menu de 3 puntos' y TD-057 lo extendio a WorkoutRow y VariantRow; nadie volvio a por WorkoutEditorScreen (ejercicios) ni HistoryScreen (sesiones). WorkoutEditorScreen es la mas llamativa porque arrastra para reordenar igual que las otras tres pero cambia de idioma al llegar a las acciones. En HistoryScreen el menu tiene UNA sola entrada, Delete, y ocupa 48dp. OTROS EJES ESCANEADOS, con archivo y linea en el informe: chevrons con dos gramaticas -el > que gira 90 grados en el preview del player contra ExpandMore/ExpandLess en History y ExerciseEditor-; cinco badges escritos a mano sin componente compartido, misma receta y colores distintos; cuatro colores fuera de AppTheme (verde completo, ambar saltado, verde del glifo, gris del switch), que por tanto no siguen el acento; nueve radios de esquina distintos, y en concreto la tarjeta de lista tiene dos valores segun la pantalla (14 y 16); titulo de fila en 18, 16 y 15sp, donde el 15 de ExerciseHistoryScreen parece heredado y no decidido; y padding de tarjeta 16dp salvo las dos del player, que van a 14. ORDEN PROPUESTO en el informe: 1) swipe en las dos pantallas que faltan, 2) chevron > en todas, 3) componente Badge compartido + colores de estado al tema, 4) radio y padding unicos, 5) tamano del titulo de fila. Los dos ultimos son barridos y conviene verlos juntos, no de uno en uno."
+    },
+    {
       "id": "TD-082",
       "title": "Fix: la tarjeta de History crece y el badge se parte con nombres largos",
       "category": "Fix",

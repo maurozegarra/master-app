@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **64 / 82** hechos, 18 pendientes.
+Progreso: **64 / 83** hechos, 19 pendientes.
 
 ## Pendientes
 
@@ -46,6 +46,8 @@ Progreso: **64 / 82** hechos, 18 pendientes.
 
 ### Mantenimiento
 
+- [ ] **TD-083** Auditoria de coherencia UI: un solo mecanismo para todas las listas
+  - Pedido del usuario tras ver que History usa menu de 3 puntos mientras otras listas usan swipe: 'si es una lista, todas deberian funcionar bajo el mismo mecanismo o 3 puntos o swipe', y despues 'necesito que escanees todo el proyecto en busca de inconsistencias UI para no ir cazandolas una a una'. HALLAZGO PRINCIPAL: la decision YA ESTABA TOMADA y quedaron dos pantallas sin migrar. TD-039 puso swipe en las TrainingCards 'en reemplazo del menu de 3 puntos' y TD-057 lo extendio a WorkoutRow y VariantRow; nadie volvio a por WorkoutEditorScreen (ejercicios) ni HistoryScreen (sesiones). WorkoutEditorScreen es la mas llamativa porque arrastra para reordenar igual que las otras tres pero cambia de idioma al llegar a las acciones. En HistoryScreen el menu tiene UNA sola entrada, Delete, y ocupa 48dp. OTROS EJES ESCANEADOS, con archivo y linea en el informe: chevrons con dos gramaticas -el > que gira 90 grados en el preview del player contra ExpandMore/ExpandLess en History y ExerciseEditor-; cinco badges escritos a mano sin componente compartido, misma receta y colores distintos; cuatro colores fuera de AppTheme (verde completo, ambar saltado, verde del glifo, gris del switch), que por tanto no siguen el acento; nueve radios de esquina distintos, y en concreto la tarjeta de lista tiene dos valores segun la pantalla (14 y 16); titulo de fila en 18, 16 y 15sp, donde el 15 de ExerciseHistoryScreen parece heredado y no decidido; y padding de tarjeta 16dp salvo las dos del player, que van a 14. ORDEN PROPUESTO en el informe: 1) swipe en las dos pantallas que faltan, 2) chevron > en todas, 3) componente Badge compartido + colores de estado al tema, 4) radio y padding unicos, 5) tamano del titulo de fila. Los dos ultimos son barridos y conviene verlos juntos, no de uno en uno.
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
 - [ ] **TD-066** Opcional: script para publicar perfiles y asignaciones desde la PC
