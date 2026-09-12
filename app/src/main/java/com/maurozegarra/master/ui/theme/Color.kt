@@ -20,11 +20,18 @@ const val PINK_ACCENT = 0xFFFF69B4
 /** Acento azul que activa el tema especial "Stitch". */
 const val STITCH_ACCENT = 0xFF4A90D6
 
-// Colores de las acciones del swipe (TD-039). Fijos y no derivados del acento: el rojo
-// de borrar debe leerse como destructivo aunque el usuario elija un acento rojizo.
-val ACTION_EDIT = Color(0xFF2F6FED)
-val ACTION_DUPLICATE = Color(0xFFE2861E)
+/**
+ * Rojo de lo destructivo, para **texto**: el "Delete" de los diálogos de confirmación y
+ * los avisos de error.
+ *
+ * Fijo y no derivado del acento, para que se lea como destructivo aunque el usuario elija
+ * un acento rojizo —que es el caso del perfil MASTER—.
+ *
+ * Nació con los colores de las acciones del swipe (TD-039), que eran cuatro círculos
+ * macizos: rojo borrar, naranja duplicar, azul editar, verde asignar. Esos tres se
+ * borraron al pasar el panel a círculos huecos en blanco (TD-083): el rojo macizo grita
+ * "algo va mal" aunque solo estés borrando a conciencia, y cuatro colores fuertes en una
+ * fila pesaban más que la lista que acompañan. Aquí el rojo sigue teniendo sentido porque
+ * es una palabra, no un bloque.
+ */
 val ACTION_DELETE = Color(0xFFD93A32)
-
-/** Asignar. Verde: es la unica accion del panel que no toca lo que hay en este telefono. */
-val ACTION_ASSIGN = Color(0xFF2E9E5B)

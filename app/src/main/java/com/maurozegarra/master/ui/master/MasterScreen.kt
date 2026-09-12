@@ -32,12 +32,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -80,10 +80,6 @@ import com.maurozegarra.master.ui.settings.syncMessage
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
-import com.maurozegarra.master.ui.theme.ACTION_ASSIGN
-import com.maurozegarra.master.ui.theme.ACTION_DELETE
-import com.maurozegarra.master.ui.theme.ACTION_DUPLICATE
-import com.maurozegarra.master.ui.theme.ACTION_EDIT
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.util.formatRemaining
 import java.time.DayOfWeek
@@ -474,15 +470,15 @@ private fun TrainingCard(
     // asignado ya viene de otro, y repartirlo desde aquí publicaría una copia con el mismo
     // uid que se pisaría con el original en la siguiente sincronización.
     val actions = if (training.assigned) {
-        listOf(SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate))
+        listOf(SwipeAction(Icons.Outlined.ContentCopy, t.duplicate, onDuplicate))
     } else {
         buildList {
-            add(SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete) { confirmDelete = true })
+            add(SwipeAction(Icons.Outlined.Delete, t.delete) { confirmDelete = true })
             if (onAssign != null) {
-                add(SwipeAction(Icons.Filled.PersonAdd, ACTION_ASSIGN, t.assignTo, onAssign))
+                add(SwipeAction(Icons.Outlined.PersonAdd, t.assignTo, onAssign))
             }
-            add(SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate))
-            add(SwipeAction(Icons.Filled.Edit, ACTION_EDIT, t.edit, onEdit))
+            add(SwipeAction(Icons.Outlined.ContentCopy, t.duplicate, onDuplicate))
+            add(SwipeAction(Icons.Outlined.Edit, t.edit, onEdit))
         }
     }
 

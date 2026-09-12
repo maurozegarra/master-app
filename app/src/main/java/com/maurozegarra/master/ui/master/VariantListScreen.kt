@@ -16,8 +16,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -42,8 +42,6 @@ import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
-import com.maurozegarra.master.ui.theme.ACTION_DELETE
-import com.maurozegarra.master.ui.theme.ACTION_DUPLICATE
 import com.maurozegarra.master.ui.theme.AppTheme
 
 /** Editor de un workout rotativo: lista de variantes que se alternan al completar. */
@@ -148,8 +146,8 @@ private fun VariantRow(
     // Dos acciones, no tres: una variante no se puede volver rotativa. El componente
     // acepta un número variable justo por esto.
     val actions = listOf(
-        SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete, onDelete),
-        SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate),
+        SwipeAction(Icons.Outlined.Delete, t.delete, onDelete),
+        SwipeAction(Icons.Outlined.ContentCopy, t.duplicate, onDuplicate),
     )
 
     SwipeActionsRow(actions = actions, controller = swipeController) {

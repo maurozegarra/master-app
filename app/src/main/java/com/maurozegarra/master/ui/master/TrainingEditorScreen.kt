@@ -16,10 +16,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.filled.SyncDisabled
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Sync
+import androidx.compose.material.icons.outlined.SyncDisabled
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -44,9 +44,6 @@ import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
-import com.maurozegarra.master.ui.theme.ACTION_DELETE
-import com.maurozegarra.master.ui.theme.ACTION_DUPLICATE
-import com.maurozegarra.master.ui.theme.ACTION_EDIT
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
@@ -167,11 +164,10 @@ private fun WorkoutRow(
     // cuando la fila apenas se abre. La tercera acción es alternar rotativo porque
     // "abrir" ya es el tap de la fila entera.
     val actions = listOf(
-        SwipeAction(Icons.Filled.Delete, ACTION_DELETE, t.delete, onDelete),
-        SwipeAction(Icons.Filled.ContentCopy, ACTION_DUPLICATE, t.duplicate, onDuplicate),
+        SwipeAction(Icons.Outlined.Delete, t.delete, onDelete),
+        SwipeAction(Icons.Outlined.ContentCopy, t.duplicate, onDuplicate),
         SwipeAction(
-            icon = if (workout.rotating) Icons.Filled.SyncDisabled else Icons.Filled.Sync,
-            tint = ACTION_EDIT,
+            icon = if (workout.rotating) Icons.Outlined.SyncDisabled else Icons.Outlined.Sync,
             label = if (workout.rotating) t.makeSimple else t.makeRotating,
             onClick = onToggleRotating,
         ),

@@ -2,7 +2,7 @@ package com.maurozegarra.master.ui
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -38,9 +38,17 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /** Una acción del panel que se revela al deslizar. */
+/**
+ * Una acción del panel que aparece al deslizar una fila.
+ *
+ * **Sin color propio, a propósito.** Antes cada acción traía el suyo y se pintaba como un
+ * círculo macizo —rojo para borrar, naranja duplicar, azul editar, verde asignar—. El rojo
+ * macizo grita "algo va mal" aunque solo estés a punto de borrar algo a conciencia, y con
+ * cuatro colores fuertes en la misma fila el panel pesaba más que la lista. Ahora todas se
+ * dibujan igual, en blanco y huecas, y lo que las distingue es el icono.
+ */
 data class SwipeAction(
     val icon: ImageVector,
-    val tint: Color,
     /** Se usa como contentDescription: un gesto no es descubrible por lector de pantalla. */
     val label: String,
     val onClick: () -> Unit,
@@ -51,6 +59,15 @@ private enum class SwipeState { Closed, Open }
 private val ButtonSize = 44.dp
 private val ButtonGap = 10.dp
 private val PanelEndPadding = 12.dp
+
+/**
+ * Grosor del borde del círculo de acción.
+ *
+ * 1dp no es un número al azar: es el que usa toda la pantalla principal —los círculos del
+ * calendario, el del acento y el borde de la tarjeta—, así que el panel de acciones se
+ * dibuja con el mismo trazo que el resto del app.
+ */
+private val SwipeBorder = 1.dp
 
 /**
  * Coordina las filas de una misma lista para que solo una quede abierta.
@@ -153,11 +170,14 @@ fun SwipeActionsRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 actions.forEach { action ->
+                    // Círculo hueco sobre el fondo de la lista, que es negro puro: sin
+                    // relleno, borde blanco de 1dp —el mismo grosor que usan los círculos
+                    // y las tarjetas de la pantalla principal— e icono de contorno.
                     Box(
                         modifier = Modifier
                             .size(ButtonSize)
                             .clip(CircleShape)
-                            .background(action.tint)
+                            .border(SwipeBorder, Color.White, CircleShape)
                             .clickable {
                                 scope.launch { state.animateTo(SwipeState.Closed) }
                                 action.onClick()
