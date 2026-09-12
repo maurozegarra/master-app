@@ -1,11 +1,6 @@
 package com.maurozegarra.master.ui.master
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -33,6 +28,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -628,7 +625,11 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         }
         Spacer(Modifier.height(8.dp))
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
-        if (!showVideo && step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
+        // El emoji es la identidad del ejercicio cuando no hay vídeo que enseñar, y sale en
+        // TODAS las etapas: antes se saltaba WORK, así que en un ejercicio sin vídeo el
+        // emoji aparecía y desaparecía al pasar de PREP a WORK. Pequeño y junto al nombre,
+        // no de 96dp en mitad de la pantalla: acompaña, no finge ser contenido.
+        if (!showVideo && step.ownerName.isNotBlank()) {
             ExerciseGlyph(name = ownerLabel, color = step.colorArgb, sizeDp = 40, exerciseId = step.ownerExerciseId)
             Spacer(Modifier.height(8.dp))
         }
@@ -655,18 +656,25 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
-        if (videoFile != null) {
-            // El vídeo ya no está en la columna: vive en su propia capa, al fondo del Box.
-            // Aquí solo queda el hueco elástico que empuja el reloj junto a los controles,
-            // donde está al alcance de la vista sin disputarle el centro al vídeo.
-            Spacer(Modifier.weight(1f))
-            ClockOrReps(vm, step, repByRep, padClock, t, showGlyph = !showVideo)
-        } else {
-            Spacer(Modifier.height(20.dp))
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                ClockOrReps(vm, step, repByRep, padClock, t, showGlyph = !showVideo)
+        // Un solo esqueleto para los tres casos, y lo único que cambia es qué llena el
+        // campo elástico: el vídeo —que va detrás, en su propia capa—, las instrucciones,
+        // o nada. El reloj siempre abajo, junto a los controles.
+        //
+        // Cuando no hay ni vídeo ni instrucciones el campo se queda vacío a propósito. Un
+        // hueco honesto dice "aquí todavía no hay nada que enseñarte"; llenarlo con un
+        // emoji gigante solo finge que sí.
+        Spacer(Modifier.height(12.dp))
+        Box(
+            Modifier.weight(1f).fillMaxWidth(),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            if (videoFile == null) {
+                val instructions = vm.mediaFor(step.ownerExerciseId)?.instructions.orEmpty()
+                if (instructions.isNotEmpty()) InstructionsPanel(instructions)
             }
         }
+        Spacer(Modifier.height(12.dp))
+        ClockOrReps(vm, step, repByRep, padClock, t)
         Spacer(Modifier.height(16.dp))
 
         if (step.weighted) {
@@ -696,10 +704,9 @@ private fun ClockOrReps(
     repByRep: Boolean,
     padClock: Boolean,
     t: Strings,
-    showGlyph: Boolean,
 ) {
     if (step.kind == StepKind.WORK && !step.timeBased) {
-        RepsDisplay(step, repByRep, t, showGlyph)
+        RepsDisplay(step, repByRep, t)
     } else {
         ClockDisplay(step, vm.playerRemainingMs, padClock)
     }
@@ -934,33 +941,50 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
 }
 
 @Composable
-private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings, showGlyph: Boolean) {
+private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        // El emoji es el sustituto del vídeo, no un acompañante: sirve para que un
-        // ejercicio sin vídeo no sea solo un número. Con vídeo detrás sobra, y además lo
-        // tapa, que es como se vio. La animación se monta dentro del `if` para no dejar
-        // una infinita corriendo por un glifo que no se dibuja.
-        if (showGlyph) {
-            val transition = rememberInfiniteTransition(label = "bob")
-            val offset by transition.animateFloat(
-                initialValue = -6f,
-                targetValue = 6f,
-                animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
-                label = "bobOffset",
-            )
-            Box(Modifier.graphicsLayer { translationY = offset }) {
-                ExerciseGlyph(
-                    name = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language),
-                    color = step.colorArgb, sizeDp = 96, exerciseId = step.ownerExerciseId,
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-        }
         if (repByRep) {
             Text(t.repLabel, color = TEXT_DIM, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             Text("${step.setIndex + 1} / ${step.totalSets}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 56.sp)
         } else {
             Text("× ${step.reps}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 56.sp)
+        }
+    }
+}
+
+/**
+ * Los pasos escritos del ejercicio, ocupando el hueco del vídeo cuando no hay vídeo.
+ *
+ * Es el sustituto de verdad: el vídeo enseña mostrando y el texto enseña contando, y las
+ * dos responden la misma pregunta. Un emoji no responde ninguna.
+ *
+ * Mismo lenguaje que el sheet de instrucciones —círculo numerado y paso al lado— pero en
+ * blanco sobre el color de etapa, que aquí es el fondo, en vez de sobre `surface`.
+ *
+ * Va con scroll porque el número de pasos lo pone el usuario: cuatro caben de sobra, doce
+ * no, y desbordar en silencio dejaría los últimos fuera de la pantalla sin avisar.
+ */
+@Composable
+private fun InstructionsPanel(steps: List<String>) {
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+        steps.forEachIndexed { i, s ->
+            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("${i + 1}", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                }
+                Text(
+                    s,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(start = 12.dp),
+                )
+            }
         }
     }
 }
