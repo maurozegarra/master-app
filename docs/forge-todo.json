@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-077",
+      "title": "Como reproduce Freeletics sus videos: zoom, loop parcial y velocidad",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "NOTA PARA INVESTIGAR, no hay nada que implementar todavia. Al ver los videos extraidos de Freeletics (38 mp4 1080x1920, 8.8 a 43.7 s, sin cifrar en /sdcard/Android/data/com.freeletics.lite/files/Downloads) el usuario observa que la app NO se limita a reproducirlos enteros en bucle: a unos les hace zoom, a otros les repite solo un tramo concreto, y en algunos cambia la velocidad de reproduccion. O sea que junto al archivo hay parametros de presentacion por ejercicio -recorte, region de interes, tramo del bucle, velocidad- que aqui no tenemos: MASTER hoy reproduce el archivo entero en bucle a 1x (ui/VideoLoop.kt, VideoLoop/ExerciseVideo). El mapa hash->ejercicio y esos parametros viven en /data/data/com.freeletics.lite, que no es accesible sin root y con el APK no debuggable run-as tampoco vale, asi que no se pudo confirmar como los guardan. A DECIDIR MAS ADELANTE si a MASTER le interesa algo de eso; lo mas barato y lo que mas se notaria seria el tramo de bucle (in/out por ejercicio) para que un clip largo no obligue a ver la entrada y la salida cada vuelta. Contexto: se genero al armar el training de prueba On Your Marks."
+    },
+    {
       "id": "TD-076",
       "title": "Volumen de los pitidos ajustable en Ajustes",
       "category": "Feature",
