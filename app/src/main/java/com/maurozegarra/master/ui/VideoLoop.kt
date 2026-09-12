@@ -7,12 +7,17 @@ import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.widget.VideoView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
@@ -178,6 +184,75 @@ private fun readVideoInfo(file: File): VideoInfo? = runCatching {
             else if (rotated) h / w else w / h
         }
         ratio?.let { VideoInfo(frame, it) }
+    }
+}.getOrNull()
+
+/**
+ * El primer fotograma del vídeo como miniatura cuadrada, para filas de lista.
+ *
+ * Misma forma y tamaño que `ExerciseGlyph`, al que sustituye cuando el ejercicio tiene
+ * vídeo: en una lista lo que ayuda a reconocer un ejercicio es su propia imagen, no un
+ * emoji genérico que además choca entre ejercicios distintos.
+ *
+ * **No reutiliza [readVideoInfo]**, y eso es lo importante aquí: aquel devuelve el
+ * fotograma a resolución completa, que para un vídeo 1080x1920 son unos 8 MB. Uno basta
+ * en el player, pero una lista entera los tendría todos vivos a la vez. Este lo pide ya
+ * escalado.
+ *
+ * Recorta en vez de ajustar: en un cuadro tan pequeño, un vídeo vertical ajustado dejaría
+ * dos franjas enormes y la imagen se vería diminuta.
+ */
+@Composable
+fun ExerciseThumb(file: File, sizeDp: Int, modifier: Modifier = Modifier) {
+    val density = LocalDensity.current
+    val px = with(density) { sizeDp.dp.roundToPx() }
+    var frame by remember(file, px) { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(file, px) {
+        frame = withContext(Dispatchers.IO) { readThumb(file, px) }
+    }
+    DisposableEffect(file) {
+        onDispose { frame = null }
+    }
+
+    Box(
+        modifier
+            .size(sizeDp.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.Black.copy(alpha = 0.25f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        frame?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        }
+    }
+}
+
+/**
+ * Un fotograma ya escalado al tamaño en que se va a ver.
+ *
+ * `getScaledFrameAtTime` escala durante la decodificación, así que el bitmap grande nunca
+ * llega a existir; solo hay desde API 27, y por debajo —minSdk es 26— toca decodificar
+ * entero y reducir, liberando el original en cuanto se copia.
+ */
+private fun readThumb(file: File, px: Int): Bitmap? = runCatching {
+    MediaMetadataRetriever().use { r ->
+        r.setDataSource(file.absolutePath)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            r.getScaledFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, px, px)
+        } else {
+            r.getFrameAtTime(0)?.let { full ->
+                val scale = px.toFloat() / maxOf(1, minOf(full.width, full.height))
+                val w = maxOf(1, (full.width * scale).toInt())
+                val h = maxOf(1, (full.height * scale).toInt())
+                Bitmap.createScaledBitmap(full, w, h, true).also { if (it !== full) full.recycle() }
+            }
+        }
     }
 }.getOrNull()
 

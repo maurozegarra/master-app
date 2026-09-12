@@ -83,6 +83,7 @@ import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.ui.AnimatedGlowBorder
+import com.maurozegarra.master.ui.ExerciseThumb
 import com.maurozegarra.master.ui.ExerciseVideo
 import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.model.DisplayMode
@@ -106,7 +107,13 @@ fun PlayerScreen(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> 
     }
 }
 
-private data class PreviewExercise(val name: String, val exerciseId: String, val meta: String)
+private data class PreviewExercise(
+    val name: String,
+    val exerciseId: String,
+    val meta: String,
+    /** Del paso, o sea de ESTA instancia: un ejercicio con el vídeo apagado no enseña miniatura. */
+    val showVideo: Boolean,
+)
 
 private data class PreviewGroup(
     val index: Int,
@@ -130,7 +137,7 @@ private fun buildPreviewGroups(steps: List<PlayerStep>): List<PreviewGroup> =
         val first = list.first()
         val exercises = list.filter { it.kind == StepKind.WORK }
             .distinctBy { it.ownerName + "|" + it.ownerExerciseId }
-            .map { s -> PreviewExercise(s.ownerName, s.ownerExerciseId, metaFor(s)) }
+            .map { s -> PreviewExercise(s.ownerName, s.ownerExerciseId, metaFor(s), s.showVideo) }
         PreviewGroup(
             index = idx,
             title = first.workoutBaseName.ifBlank { first.workoutName },
@@ -175,7 +182,7 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
             }
             items(groups, key = { it.index }) { g ->
                 val open = expanded[g.index] ?: false
-                WorkoutGroupCard(g, open, accent, t) { expanded[g.index] = !open }
+                WorkoutGroupCard(g, open, accent, t, vm::videoFileFor) { expanded[g.index] = !open }
             }
         }
         PrimaryButton(
@@ -196,6 +203,8 @@ private fun WorkoutGroupCard(
     open: Boolean,
     accent: Color,
     t: Strings,
+    /** El vídeo ya descargado de ese ejercicio, o null. Lambda y no el ViewModel: la tarjeta solo pinta. */
+    videoFor: (String) -> java.io.File?,
     onToggle: () -> Unit,
 ) {
     Column(
@@ -272,7 +281,15 @@ private fun WorkoutGroupCard(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val exLabel = ExerciseCatalog.display(ex.exerciseId, ex.name, t.locale.language)
-                            ExerciseGlyph(name = exLabel, color = 0xFF2E9E5BL, sizeDp = 30, exerciseId = ex.exerciseId)
+                            // Miniatura del propio vídeo si lo hay; si no, el emoji. En una
+                            // lista el emoji sí trabaja —distingue filas de un vistazo—, pero
+                            // el fotograma real lo hace mejor y sin colisiones entre ejercicios.
+                            val thumb = if (ex.showVideo) videoFor(ex.exerciseId) else null
+                            if (thumb != null) {
+                                ExerciseThumb(file = thumb, sizeDp = 30)
+                            } else {
+                                ExerciseGlyph(name = exLabel, color = 0xFF2E9E5BL, sizeDp = 30, exerciseId = ex.exerciseId)
+                            }
                             Spacer(Modifier.width(10.dp))
                             Text(
                                 exLabel,
