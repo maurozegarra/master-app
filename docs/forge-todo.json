@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-081",
+      "title": "Unificar los dos botones de la franja del player (instrucciones y editar)",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "NOTA DEL USUARIO, sin decidir todavia: 'no me convence del todo un boton para instrucciones y otro boton para editar el ejercicio, creo que deberiamos unificarlo o pensar en algo mas'. Hoy la franja de rutina lleva dos iconos sueltos a la derecha: InstructionsButton (lista, abre un ModalBottomSheet con los pasos numerados; no se dibuja si el ejercicio no tiene instrucciones) y EditExerciseButton (lapiz, llama a editRunningExercise; no se dibuja si el training viene asignado). O sea que segun el ejercicio y el training puede haber dos iconos, uno o ninguno, y la franja cambia de contenido sin que el usuario sepa por que. A PENSAR: un solo punto de entrada -menu, sheet unico con pestanas, o accion contextual- en vez de dos iconos que compiten por la misma esquina. Contexto: surge tras descartar las instrucciones como relleno del hueco del video (TD-080), que las devuelve a vivir detras de su boton. Relacionado con TD-071, que busca llegar al video y a las instrucciones de un training asignado sin duplicarlo."
+    },
+    {
       "id": "TD-080",
       "title": "Que ve un ejercicio que todavia no tiene video",
       "category": "Feature",

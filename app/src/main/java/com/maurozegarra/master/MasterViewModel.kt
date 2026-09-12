@@ -132,6 +132,20 @@ class MasterViewModel(
     var playerControlsVisible by mutableStateOf(false)
         private set
 
+    /**
+     * Mientras algo abierto DESDE el OSD siga en pantalla, el auto-ocultado no corre.
+     *
+     * El sheet de instrucciones se compone dentro de la franja de arriba, así que al
+     * desvanecerse esta el sheet no se oculta: **se va de la composición**, con el usuario
+     * leyendo. Quien abra algo así lo marca aquí y lo suelta al cerrarlo.
+     */
+    var playerControlsPinned by mutableStateOf(false)
+        private set
+
+    fun pinPlayerControls(pinned: Boolean) {
+        playerControlsPinned = pinned
+    }
+
     /** ID del training con un player en curso (para mostrar indicador en la lista). */
     var activePlayerTrainingId by mutableStateOf<Long?>(null)
         private set

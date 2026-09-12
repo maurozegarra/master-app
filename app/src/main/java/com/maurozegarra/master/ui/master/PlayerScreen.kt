@@ -50,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -503,8 +504,8 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         if (vm.playerControlsVisible) 1f else 0f,
         label = "osdFade",
     )
-    LaunchedEffect(vm.playerControlsVisible) {
-        if (vm.playerControlsVisible) {
+    LaunchedEffect(vm.playerControlsVisible, vm.playerControlsPinned) {
+        if (vm.playerControlsVisible && !vm.playerControlsPinned) {
             delay(OSD_HIDE_MS)
             vm.hidePlayerControls()
         }
@@ -863,6 +864,13 @@ private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, title: S
     val steps = vm.mediaFor(exerciseId)?.instructions.orEmpty()
     if (steps.isEmpty()) return
     var open by remember { mutableStateOf(false) }
+
+    // Con el sheet abierto, el OSD no se puede auto-ocultar: este sheet se compone DENTRO
+    // de la franja de arriba, así que al desvanecerse esta el sheet no se atenúa, se va de
+    // la composición y se cierra solo mientras lo estás leyendo. El onDispose suelta el pin
+    // aunque el sheet salga de pantalla por otro camino (cambio de paso, fin del training).
+    LaunchedEffect(open) { vm.pinPlayerControls(open) }
+    DisposableEffect(Unit) { onDispose { vm.pinPlayerControls(false) } }
 
     Box(
         modifier = Modifier
