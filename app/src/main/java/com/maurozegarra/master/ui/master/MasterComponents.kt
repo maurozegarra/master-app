@@ -214,6 +214,40 @@ internal fun ColorDot(color: Long, size: Int = 18, modifier: Modifier = Modifier
     )
 }
 
+/**
+ * Etiqueta de estado: COMPLETE, PARTIAL, SKIPPED, ASSIGNED, IN PROGRESS, rotativo.
+ *
+ * Existe porque había **seis escritas a mano** repitiendo la misma receta, y no salían
+ * iguales: cinco con esquina de 4dp —rectángulos— y una con 20 —pastilla—. Esa diferencia
+ * se veía.
+ *
+ * Pastilla para todas, y con [CircleShape] sobre una caja que se ajusta al contenido, no
+ * con un radio a ojo: así los extremos quedan completamente redondeados sea cual sea el
+ * alto, y no hay ningún número que volver a cuadrar si cambia el tamaño del texto.
+ *
+ * El color llega por parámetro porque lo decide el estado, no la etiqueta. El texto nunca
+ * se parte: si un día no cabe, que se recorte y se note, en vez de romperse en dos líneas
+ * y estirar en silencio la tarjeta que lo contiene.
+ */
+@Composable
+internal fun StatusBadge(text: String, color: Color, modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .clip(CircleShape)
+            .background(color.copy(alpha = 0.15f))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+    ) {
+        Text(
+            text,
+            color = color,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
+        )
+    }
+}
+
 @Composable
 internal fun ExerciseGlyph(name: String, color: Long, sizeDp: Int = 44, exerciseId: String = "") {
     val emoji = ExerciseIcons.emoji(exerciseId, name)

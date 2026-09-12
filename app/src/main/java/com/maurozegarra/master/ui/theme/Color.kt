@@ -33,6 +33,20 @@ const val PINK_ACCENT = 0xFFFF69B4
 const val STITCH_ACCENT = 0xFF4A90D6
 
 /**
+ * Estados de una sesión, para las etiquetas de `StatusBadge`.
+ *
+ * Fijos y no derivados del acento: "completo" y "saltado" significan lo mismo lleve el
+ * perfil el color que lleve, y si siguieran al acento dejarían de distinguirse entre sí.
+ * Estaban sueltos como literales dentro de `HistoryScreen`, que es lo que los mantenía
+ * fuera del tema y hacía que nadie supiera que existían.
+ *
+ * "Parcial" no está aquí: usa el acento a propósito, porque es el estado de lo que dejaste
+ * a medias y conviene que lea como "tuyo".
+ */
+val STATUS_DONE = Color(0xFF4CAF50)
+val STATUS_SKIPPED = Color(0xFFFFA000)
+
+/**
  * Rojo de lo destructivo, para **texto**: el "Delete" de los diálogos de confirmación y
  * los avisos de error.
  *

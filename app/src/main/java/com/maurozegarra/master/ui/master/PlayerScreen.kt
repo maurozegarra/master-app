@@ -235,14 +235,7 @@ private fun WorkoutGroupCard(
                     )
                     if (g.rotating) {
                         Spacer(Modifier.width(8.dp))
-                        Box(
-                            Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(accent.copy(alpha = 0.22f))
-                                .padding(horizontal = 8.dp, vertical = 2.dp),
-                        ) {
-                            Text(t.rotatingTag, color = accent, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                        }
+                        StatusBadge(text = t.rotatingTag, color = accent)
                     }
                 }
                 val sub = buildString {

@@ -56,6 +56,8 @@ import com.maurozegarra.master.ui.SwipeRowsController
 import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.ui.theme.AppTheme
+import com.maurozegarra.master.ui.theme.STATUS_DONE
+import com.maurozegarra.master.ui.theme.STATUS_SKIPPED
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -224,25 +226,10 @@ fun SessionRow(
         ) {
             Text(time, color = AppTheme.colors.textDim, fontSize = 13.sp)
             val isPartial = session.status == SessionStatus.PARTIAL
-            val trainingBadgeColor = if (isPartial) accent else Color(0xFF4CAF50)
-            Box(
-                Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(trainingBadgeColor.copy(alpha = 0.15f))
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
-            ) {
-                // Un badge no se parte nunca, pase lo que pase con el ancho: si algún día
-                // vuelve a faltar sitio, que se recorte y se note, en vez de romperse en
-                // dos líneas y estirar la tarjeta en silencio.
-                Text(
-                    if (isPartial) t.partial else t.complete,
-                    color = trainingBadgeColor,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    softWrap = false,
-                )
-            }
+            StatusBadge(
+                text = if (isPartial) t.partial else t.complete,
+                color = if (isPartial) accent else STATUS_DONE,
+            )
             // Empuja los iconos a la derecha. La hora y el badge se quedan juntos a la
             // izquierda, y como la hora no cambia de ancho, el badge no se mueve de sitio
             // entre una tarjeta y otra.
@@ -321,8 +308,8 @@ private fun WorkoutGroupSection(
     val allComplete = !allSkipped && exercises.size == (exercises.firstOrNull()?.totalExercisesInWorkout ?: exercises.size) &&
         exercises.all { it.setsCompleted == it.totalSets }
     val badgeColor = when {
-        allSkipped -> Color(0xFFFFA000)
-        allComplete -> Color(0xFF4CAF50)
+        allSkipped -> STATUS_SKIPPED
+        allComplete -> STATUS_DONE
         else -> accent
     }
     val badgeText = when {
@@ -360,21 +347,7 @@ private fun WorkoutGroupSection(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            Box(
-                Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(badgeColor.copy(alpha = 0.15f))
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
-            ) {
-                Text(
-                    badgeText,
-                    color = badgeColor,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    softWrap = false,
-                )
-            }
+            StatusBadge(text = badgeText, color = badgeColor)
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
@@ -436,19 +409,7 @@ private fun ExerciseDetailRow(er: ExerciseRecord, accent: Color, t: Strings, onC
                 Text(detail, color = AppTheme.colors.textDim, fontSize = 12.sp)
                 if (sr.skipped) {
                     Spacer(Modifier.width(6.dp))
-                    Box(
-                        Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFFFFA000).copy(alpha = 0.15f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp),
-                    ) {
-                        Text(
-                            t.skipped,
-                            color = Color(0xFFFFA000),
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
+                    StatusBadge(text = t.skipped, color = STATUS_SKIPPED)
                 }
             }
         }

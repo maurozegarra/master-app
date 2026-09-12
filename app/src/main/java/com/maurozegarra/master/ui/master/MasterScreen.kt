@@ -520,26 +520,12 @@ private fun TrainingCard(
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 if (isActive) {
-                    Box(
-                        Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(accent.copy(alpha = 0.2f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp),
-                    ) {
-                        Text("IN PROGRESS", color = accent, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    }
+                    StatusBadge(text = "IN PROGRESS", color = accent)
                 }
                 // Se avisa de que llega de fuera: explica por que no se puede editar y por
                 // que puede cambiar solo de un dia para otro.
                 if (training.assigned) {
-                    Box(
-                        Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(AppTheme.colors.textDim.copy(alpha = 0.2f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp),
-                    ) {
-                        Text(t.assignedBadge, color = AppTheme.colors.textDim, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    }
+                    StatusBadge(text = t.assignedBadge, color = AppTheme.colors.textDim)
                 }
             }
             Text(
