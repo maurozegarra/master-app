@@ -304,6 +304,13 @@ private fun DaySessionsSheet(
     onExerciseClick: (String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // Controlador propio: el sheet es otra superficie, y una fila abierta aquí no tiene
+    // nada que ver con una abierta en la lista de trainings que hay detrás.
+    val sheetListState = rememberLazyListState()
+    val sheetSwipeController = rememberSwipeRowsController()
+    LaunchedEffect(sheetListState.isScrollInProgress) {
+        if (sheetListState.isScrollInProgress) sheetSwipeController.closeAll()
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -317,6 +324,7 @@ private fun DaySessionsSheet(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )
         LazyColumn(
+            state = sheetListState,
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(16.dp, 0.dp, 16.dp, 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -327,6 +335,7 @@ private fun DaySessionsSheet(
                     time = Instant.ofEpochMilli(s.completedAt).atZone(zone).format(timeFmt),
                     accent = accent,
                     t = t,
+                    swipeController = sheetSwipeController,
                     onDelete = { onDeleteSession(s.id) },
                     onExerciseClick = onExerciseClick,
                     initiallyExpanded = true,

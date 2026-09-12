@@ -2,6 +2,7 @@ package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,23 +18,18 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,8 +41,12 @@ import com.maurozegarra.master.model.WorkMode
 import com.maurozegarra.master.ui.DraggableItem
 import com.maurozegarra.master.ui.ExerciseThumb
 import com.maurozegarra.master.ui.ReorderableContentType
+import com.maurozegarra.master.ui.SwipeAction
+import com.maurozegarra.master.ui.SwipeActionsRow
+import com.maurozegarra.master.ui.SwipeRowsController
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
+import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.theme.AppTheme
 
 @Composable
@@ -59,8 +59,28 @@ fun WorkoutEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val dragDropState = rememberDragDropState(listState) { from, to ->
         vm.moveExercise(from - 1, to - 1)
     }
+    val swipeController = rememberSwipeRowsController()
 
-    Box(Modifier.fillMaxSize()) {
+    // Al hacer scroll se cierra la fila abierta: dejarla abierta fuera de vista significa
+    // volver a encontrarla asi mas tarde, sin recordar por que.
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) swipeController.closeAll()
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            // Un tap en cualquier zona vacia cierra el panel abierto.
+            .then(
+                if (swipeController.isAnyOpen) {
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures { swipeController.closeAll() }
+                    }
+                } else {
+                    Modifier
+                }
+            ),
+    ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().dragContainer(dragDropState),
@@ -94,6 +114,7 @@ fun WorkoutEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
                         exercise = ex,
                         t = t,
                         videoFor = vm::videoFileFor,
+                        swipeController = swipeController,
                         onOpen = { vm.openExercise(ex.id) },
                         onDuplicate = { vm.duplicateExercise(ex.id) },
                         onDelete = { vm.deleteExercise(ex.id) },
@@ -129,17 +150,28 @@ private fun ExerciseRow(
     t: Strings,
     /** El vídeo ya descargado de ese ejercicio, o null. Lambda y no el ViewModel: la fila solo pinta. */
     videoFor: (String) -> java.io.File?,
+    swipeController: SwipeRowsController,
     onOpen: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    var menu by remember { mutableStateOf(false) }
+    // Mismo orden que en las otras listas: el destructivo en el extremo más lejano al
+    // pulgar cuando la fila apenas se abre. "Abrir" no es una acción del panel porque ya
+    // es el tap de la fila entera.
+    val actions = listOf(
+        SwipeAction(Icons.Outlined.Delete, t.delete, onDelete),
+        SwipeAction(Icons.Outlined.ContentCopy, t.duplicate, onDuplicate),
+    )
+
+    SwipeActionsRow(actions = actions, controller = swipeController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(AppTheme.colors.surface)
-            .clickable(onClick = onOpen)
+            // Con el panel abierto, el primer tap lo cierra en vez de abrir el ejercicio:
+            // si no, tocar la fila para cerrar te metía en el editor sin querer.
+            .clickable { if (!swipeController.consumeTapIfOpen()) onOpen() }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -162,14 +194,6 @@ private fun ExerciseRow(
             )
             Text(workSummary(exercise, t), color = AppTheme.colors.textDim, fontSize = 13.sp)
         }
-        Box {
-            IconButton(onClick = { menu = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim)
-            }
-            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(t.duplicate) }, onClick = { menu = false; onDuplicate() })
-                DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; onDelete() })
-            }
-        }
+    }
     }
 }

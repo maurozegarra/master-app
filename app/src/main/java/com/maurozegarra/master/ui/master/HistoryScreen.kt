@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,20 +19,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,6 +51,10 @@ import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ExerciseRecord
 import com.maurozegarra.master.model.ExerciseStatus
 import com.maurozegarra.master.model.SessionLog
+import com.maurozegarra.master.ui.SwipeAction
+import com.maurozegarra.master.ui.SwipeActionsRow
+import com.maurozegarra.master.ui.SwipeRowsController
+import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.ui.theme.AppTheme
 import java.time.Instant
@@ -90,8 +96,31 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
             .sortedByDescending { it.first }
     }
 
-    Box(Modifier.fillMaxSize()) {
+    val listState = rememberLazyListState()
+    val swipeController = rememberSwipeRowsController()
+
+    // Al hacer scroll se cierra la fila abierta: dejarla abierta fuera de vista significa
+    // volver a encontrarla asi mas tarde, sin recordar por que.
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) swipeController.closeAll()
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            // Un tap en cualquier zona vacia cierra el panel abierto.
+            .then(
+                if (swipeController.isAnyOpen) {
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures { swipeController.closeAll() }
+                    }
+                } else {
+                    Modifier
+                }
+            ),
+    ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 96.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -120,6 +149,7 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
                         time = Instant.ofEpochMilli(s.completedAt).atZone(zone).format(timeFmt),
                         accent = accent,
                         t = t,
+                        swipeController = swipeController,
                         onDelete = { vm.deleteSession(s.id) },
                         onExerciseClick = { exerciseId -> vm.openExerciseHistory(exerciseId) },
                     )
@@ -135,14 +165,19 @@ fun SessionRow(
     time: String,
     accent: Color,
     t: Strings,
+    swipeController: SwipeRowsController,
     onDelete: () -> Unit,
     onExerciseClick: (String) -> Unit,
     initiallyExpanded: Boolean = false,
 ) {
-    var menu by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(initiallyExpanded) }
     var confirmDelete by remember { mutableStateOf(false) }
 
+    // Una sola acción: una sesión no se duplica ni se edita, solo se borra. El menú
+    // desplegable que había aquí gastaba 48dp en ofrecer exactamente eso mismo.
+    val actions = listOf(SwipeAction(Icons.Outlined.Delete, t.delete) { confirmDelete = true })
+
+    SwipeActionsRow(actions = actions, controller = swipeController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -201,20 +236,16 @@ fun SessionRow(
             // entre una tarjeta y otra.
             Spacer(Modifier.weight(1f))
             if (session.exercises.isNotEmpty()) {
-                IconButton(onClick = { expanded = !expanded }) {
+                // Con el panel abierto, el primer toque lo cierra en vez de desplegar la
+                // sesión: si no, tocar la fila para cerrar te abría el detalle sin querer.
+                IconButton(onClick = {
+                    if (!swipeController.consumeTapIfOpen()) expanded = !expanded
+                }) {
                     Icon(
                         if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                         contentDescription = null,
                         tint = AppTheme.colors.textDim,
                     )
-                }
-            }
-            Box {
-                IconButton(onClick = { menu = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = null, tint = AppTheme.colors.textDim)
-                }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    DropdownMenuItem(text = { Text(t.delete) }, onClick = { menu = false; confirmDelete = true })
                 }
             }
         }
@@ -242,6 +273,7 @@ fun SessionRow(
                 }
             }
         }
+    }
     }
 
     if (confirmDelete) {
