@@ -480,7 +480,6 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     } else {
         null
     }
-    val showVideo = videoFile != null
     // Auto-ocultado: a los OSD_HIDE_MS sin tocar nada se desvanecen las DOS FRANJAS DE
     // ARRIBA —la de rutina y la de workout—, y con ellas los botones de instrucciones y
     // editar que viven dentro. Nada más.
@@ -636,14 +635,6 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         }
         Spacer(Modifier.height(8.dp))
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
-        // El emoji va encima del nombre, y de momento NO en WORK: eso lo deja incoherente
-        // —en un ejercicio sin vídeo aparece y desaparece al pasar de PREP a WORK—, pero
-        // extenderlo a WORK es un cambio aparte y se mira por separado, para no mezclar
-        // dos diferencias en la misma comparación.
-        if (!showVideo && step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
-            ExerciseGlyph(name = ownerLabel, color = step.colorArgb, sizeDp = 40, exerciseId = step.ownerExerciseId)
-            Spacer(Modifier.height(8.dp))
-        }
         val repByRep = step.kind == StepKind.WORK && !step.timeBased && step.reps == 1 && step.totalSets > 1
         val bigTitle = when (step.kind) {
             StepKind.WORK -> step.title.ifBlank { t.exercise }
