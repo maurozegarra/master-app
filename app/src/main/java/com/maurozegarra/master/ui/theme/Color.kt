@@ -7,6 +7,18 @@ import androidx.compose.ui.graphics.Color
 val BG = Color(0xFF000000)
 val SURFACE = Color(0xFF1C1E1F)
 val TRACK = Color(0xFF2A2D2F)
+/**
+ * Texto principal del tema oscuro. **Blanco roto, no blanco puro.**
+ *
+ * `#FFFFFF` sobre `BG` negro es un contraste de 21:1 que produce halación y cansa la
+ * vista, y este app se usa entrenando, a veces con mala luz. Bajarlo a `#E6E9EA` deja
+ * 17.2:1 sobre el negro y 13.9:1 sobre `SURFACE`: el minimo AAA son 7:1, asi que sobra.
+ *
+ * Frio a propósito, de la misma familia que [TEXT_DIM] (`#9AA0A3`): un blanco neutro
+ * cantaría al lado del resto de la paleta.
+ */
+val TEXT_PRIMARY = Color(0xFFE6E9EA)
+
 val TEXT_DIM = Color(0xFF9AA0A3)
 val TEXT_FADED = Color(0xFF5A5D5F)
 val ON_ACCENT = Color(0xFF001316)
