@@ -150,56 +150,56 @@ fun SessionRow(
             .background(AppTheme.colors.surface)
             .padding(16.dp),
     ) {
+        // El nombre tiene su propia línea, a todo el ancho de la tarjeta.
+        //
+        // Antes compartía línea con el badge y con los dos iconos, así que de los 320dp
+        // que tiene la tarjeta por dentro le quedaban unos 156: "COLUMNA (asignado)(copy)"
+        // no cabía, se recortaba, y dos sesiones distintas se leían igual. Bajando el
+        // badge y los iconos a la segunda línea —que estaba casi vacía— pasa a tener los
+        // 320 enteros, y ese nombre ocupa ~216.
+        //
+        // Sigue con una línea y puntos suspensivos, pero ya solo como último recurso:
+        // recortar es lo que hay que hacer cuando de verdad no cabe, no la primera
+        // respuesta ante un nombre normal.
+        Text(
+            session.trainingName.ifBlank { t.noName },
+            color = AppTheme.colors.textPrimary,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth(),
+        )
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // `weight` aquí es lo que arregla el badge partido, y no es cosmético:
-                    // en un Row, los hijos SIN peso se miden primero y con todo el ancho
-                    // disponible. Sin peso, el nombre se lo quedaba entero y al badge le
-                    // sobraba sitio para tres letras, así que "Complete" se partía. Con
-                    // peso el orden se invierte: el badge se mide a su tamaño natural y el
-                    // nombre se queda con lo que reste.
-                    //
-                    // `fill = false` para que un nombre corto no empuje el badge al borde
-                    // derecho: se quedan juntos, con los 8dp del Arrangement.
-                    //
-                    // Y una línea como mucho: la tarjeta tiene que medir igual para todos.
-                    // "COLUMNA (asignado)(copy)" la estiraba a casi el triple.
-                    Text(
-                        session.trainingName.ifBlank { t.noName },
-                        color = AppTheme.colors.textPrimary,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
-                    val isPartial = session.status == SessionStatus.PARTIAL
-                    val trainingBadgeColor = if (isPartial) accent else Color(0xFF4CAF50)
-                    Box(
-                        Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(trainingBadgeColor.copy(alpha = 0.15f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp),
-                    ) {
-                        // Un badge no se parte nunca, pase lo que pase con el ancho: si
-                        // algún día vuelve a faltar sitio, que se recorte y se note, en
-                        // vez de romperse en dos líneas y estirar la tarjeta en silencio.
-                        Text(
-                            if (isPartial) t.partial else t.complete,
-                            color = trainingBadgeColor,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            softWrap = false,
-                        )
-                    }
-                }
-                Text(time, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Text(time, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            val isPartial = session.status == SessionStatus.PARTIAL
+            val trainingBadgeColor = if (isPartial) accent else Color(0xFF4CAF50)
+            Box(
+                Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(trainingBadgeColor.copy(alpha = 0.15f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            ) {
+                // Un badge no se parte nunca, pase lo que pase con el ancho: si algún día
+                // vuelve a faltar sitio, que se recorte y se note, en vez de romperse en
+                // dos líneas y estirar la tarjeta en silencio.
+                Text(
+                    if (isPartial) t.partial else t.complete,
+                    color = trainingBadgeColor,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    softWrap = false,
+                )
             }
+            // Empuja los iconos a la derecha. La hora y el badge se quedan juntos a la
+            // izquierda, y como la hora no cambia de ancho, el badge no se mueve de sitio
+            // entre una tarjeta y otra.
+            Spacer(Modifier.weight(1f))
             if (session.exercises.isNotEmpty()) {
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
