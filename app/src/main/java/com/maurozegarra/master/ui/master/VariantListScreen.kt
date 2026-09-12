@@ -159,7 +159,7 @@ private fun VariantRow(
                 .background(AppTheme.colors.surface)
                 // Con otra fila abierta, el primer tap solo la cierra.
                 .clickable { if (!swipeController.consumeTapIfOpen()) onOpen() }
-                .padding(16.dp),
+                .padding(Dims.rowPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {

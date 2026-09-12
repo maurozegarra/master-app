@@ -198,7 +198,7 @@ fun SessionRow(
                     }
                 }
             )
-            .padding(16.dp),
+            .padding(Dims.rowPadding),
     ) {
         // El nombre tiene su propia línea, a todo el ancho de la tarjeta.
         //

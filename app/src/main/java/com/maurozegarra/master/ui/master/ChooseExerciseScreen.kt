@@ -101,7 +101,7 @@ private fun ExercisePickRow(
             .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .clickable(onClick = onClick)
-            .padding(12.dp),
+            .padding(Dims.rowPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Aquí no hay `showVideo` que respetar: eso es de la instancia dentro de un
@@ -125,7 +125,7 @@ private fun CreateCustomRow(name: String, accent: Color, t: Strings, onClick: ()
             .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .clickable(onClick = onClick)
-            .padding(12.dp),
+            .padding(Dims.rowPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(Icons.Filled.Add, contentDescription = null, tint = accent)

@@ -145,7 +145,7 @@ private fun WorkoutPickRow(workout: Workout, t: Strings, onClick: () -> Unit) {
             .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
             .clickable(onClick = onClick)
-            .padding(12.dp),
+            .padding(Dims.rowPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {

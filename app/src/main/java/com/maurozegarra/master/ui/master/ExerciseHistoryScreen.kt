@@ -98,7 +98,7 @@ private fun ExerciseSessionCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
-            .padding(16.dp),
+            .padding(Dims.rowPadding),
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {

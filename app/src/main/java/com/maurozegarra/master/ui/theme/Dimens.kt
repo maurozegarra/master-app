@@ -22,6 +22,19 @@ object Dims {
     /** Fila de una lista: sesiones, workouts, variantes, ejercicios, trainings. */
     val row = 16.dp
 
+    /**
+     * Espacio entre el borde de una fila y su contenido.
+     *
+     * 16dp porque es lo que Material 3 especifica como inset de un *list item*, no porque
+     * fuera lo más repetido: estaba a 12 en cinco filas, a 16 en cuatro y a 14 en una, y
+     * contar cuál ganaba solo habría consagrado el que se copió más veces.
+     *
+     * Además encaja en la rejilla de 8dp de Material, donde 4 es la subdivisión para
+     * elementos pequeños. El 14 que había en la tarjeta del preview no estaba en ninguna
+     * de las dos: no es múltiplo de 4.
+     */
+    val rowPadding = 16.dp
+
     val button = 28.dp
     val buttonSmall = 12.dp
     val field = 12.dp

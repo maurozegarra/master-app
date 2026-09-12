@@ -498,7 +498,9 @@ private fun TrainingCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
-            .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(18.dp))
+            // El mismo radio que el clip de arriba: si no, el contorno se dibuja por fuera
+            // de la forma recortada y las esquinas se ven dobles.
+            .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(Dims.row))
             .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(8.dp),

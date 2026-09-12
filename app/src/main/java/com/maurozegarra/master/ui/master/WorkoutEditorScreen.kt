@@ -173,7 +173,7 @@ private fun ExerciseRow(
             // Con el panel abierto, el primer tap lo cierra en vez de abrir el ejercicio:
             // si no, tocar la fila para cerrar te metía en el editor sin querer.
             .clickable { if (!swipeController.consumeTapIfOpen()) onOpen() }
-            .padding(12.dp),
+            .padding(Dims.rowPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val exLabel = ExerciseCatalog.display(exercise.exerciseId, exercise.name, t.locale.language)

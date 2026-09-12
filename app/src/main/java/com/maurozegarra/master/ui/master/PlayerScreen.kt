@@ -213,7 +213,7 @@ private fun WorkoutGroupCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(Dims.row))
             .background(AppTheme.colors.surface)
-            .padding(14.dp)
+            .padding(Dims.rowPadding)
             .animateContentSize(),
     ) {
         Row(
