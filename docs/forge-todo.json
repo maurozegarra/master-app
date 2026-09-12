@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-082",
+      "title": "Fix: la tarjeta de History crece y el badge se parte con nombres largos",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "Reportado por el usuario en la pantalla History: el badge salia partido ('Complet' / 'e') y la tarjeta crecia; con un training llamado 'COLUMNA (asignado)(copy)' ocupaba casi el alto de tres tarjetas. Su regla: la tarjeta debe medir igual para todos y no crecer en ningun escenario. DOS FALLOS DISTINTOS EN LA MISMA FILA. El del badge no era cosmetico: en un Row de Compose los hijos SIN peso se miden primero y con todo el ancho disponible, asi que el nombre se lo quedaba entero y al badge le sobraba sitio para tres letras. Al dar weight al nombre el orden se invierte: el badge se mide a su tamano natural y el nombre se queda con lo que reste. Se usa fill=false para que un nombre corto no empuje el badge al borde derecho. El segundo fallo es que al nombre le faltaba maxLines, asi que envolvia a varias lineas y estiraba la tarjeta. SE MIRO LA FILA DE DENTRO, la de WorkoutGroupSection, y tenia el defecto a medias: ya llevaba weight -por eso su badge nunca se partio- pero no maxLines, asi que un nombre de workout largo seguia estirando la seccion. Corregidas las dos, mas maxLines y softWrap en los dos badges, para que si algun dia vuelve a faltar sitio se recorte y se note en vez de romperse en dos lineas y estirar la tarjeta en silencio. SessionRow se usa en HistoryScreen y en el day sheet de MasterScreen, asi que el arreglo cae en los dos."
+    },
+    {
       "id": "TD-081",
       "title": "Unificar los dos botones de la franja del player (instrucciones y editar)",
       "category": "Feature",

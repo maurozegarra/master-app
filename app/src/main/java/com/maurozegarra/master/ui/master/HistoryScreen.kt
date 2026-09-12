@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
@@ -155,11 +156,26 @@ fun SessionRow(
         ) {
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // `weight` aquí es lo que arregla el badge partido, y no es cosmético:
+                    // en un Row, los hijos SIN peso se miden primero y con todo el ancho
+                    // disponible. Sin peso, el nombre se lo quedaba entero y al badge le
+                    // sobraba sitio para tres letras, así que "Complete" se partía. Con
+                    // peso el orden se invierte: el badge se mide a su tamaño natural y el
+                    // nombre se queda con lo que reste.
+                    //
+                    // `fill = false` para que un nombre corto no empuje el badge al borde
+                    // derecho: se quedan juntos, con los 8dp del Arrangement.
+                    //
+                    // Y una línea como mucho: la tarjeta tiene que medir igual para todos.
+                    // "COLUMNA (asignado)(copy)" la estiraba a casi el triple.
                     Text(
                         session.trainingName.ifBlank { t.noName },
                         color = AppTheme.colors.textPrimary,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
                     val isPartial = session.status == SessionStatus.PARTIAL
                     val trainingBadgeColor = if (isPartial) accent else Color(0xFF4CAF50)
@@ -169,11 +185,16 @@ fun SessionRow(
                             .background(trainingBadgeColor.copy(alpha = 0.15f))
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
+                        // Un badge no se parte nunca, pase lo que pase con el ancho: si
+                        // algún día vuelve a faltar sitio, que se recorte y se note, en
+                        // vez de romperse en dos líneas y estirar la tarjeta en silencio.
                         Text(
                             if (isPartial) t.partial else t.complete,
                             color = trainingBadgeColor,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            softWrap = false,
                         )
                     }
                 }
@@ -285,11 +306,16 @@ private fun WorkoutGroupSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            // Esta fila ya tenía el `weight`, y por eso su badge nunca se partió. Le
+            // faltaba el límite de línea: un nombre de workout largo seguía estirando la
+            // sección a lo alto.
             Text(
                 workoutName,
                 color = AppTheme.colors.textPrimary,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
             Box(
@@ -303,6 +329,8 @@ private fun WorkoutGroupSection(
                     color = badgeColor,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    softWrap = false,
                 )
             }
             Icon(
