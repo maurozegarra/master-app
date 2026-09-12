@@ -65,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -472,6 +473,16 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     val isPaused = !step.manual && !vm.playerRunning
     val dimAlpha by animateFloatAsState(if (isPaused) 0.55f else 0f, label = "pauseDim")
     val bg = lerp(color, Color.Black, 0.12f)
+    // Lectura de un mapa en memoria: esto se evalua en cada recomposicion, varias
+    // veces por segundo mientras corre el reloj, y no puede tocar disco ni red.
+    // step.showVideo es de este ejercicio en ESTE training: apagarlo en una copia no
+    // toca al training del que salió.
+    val videoFile = if (step.showVideo && step.ownerName.isNotBlank()) {
+        vm.videoFileFor(step.ownerExerciseId)
+    } else {
+        null
+    }
+    val showVideo = videoFile != null
     Box(
         Modifier
             .fillMaxSize()
@@ -497,6 +508,56 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                 }
             },
     ) {
+        // El vídeo, en su propia capa y al fondo: se queda con la pantalla entera en vez
+        // de pelear por la altura que sobre en la columna. `aspectRatio` sigue mandando,
+        // así que no se recorta; al no caber por alto pasa a ajustar por ancho y deja
+        // color de etapa arriba y abajo. El chrome va después, o sea encima.
+        if (videoFile != null) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                ExerciseVideo(
+                    file = videoFile,
+                    // Solo se mueve mientras se ejecuta: en PREP, REST y COOLDOWN queda
+                    // el primer fotograma quieto.
+                    playing = step.kind == StepKind.WORK,
+                    paused = isPaused,
+                    modifier = Modifier.clip(RoundedCornerShape(16.dp)),
+                )
+            }
+            // Degradados hacia el COLOR DE ETAPA, no hacia negro: el chrome se lee sobre
+            // cualquier fotograma y la fase se sigue distinguiendo, que es justo lo que
+            // se perdería tirando de negro. Solo existen cuando hay vídeo detrás; sobre
+            // el fondo liso no tendrían nada que resolver y solo lo ensuciarían.
+            //
+            // El tramo opaco cubre la franja de color que el vídeo deja libre (~75dp
+            // arriba y abajo) y se desvanece ya sobre la imagen, para no apagarla.
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(SCRIM_TOP)
+                    .align(Alignment.TopCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            0f to bg,
+                            0.30f to bg.copy(alpha = 0.85f),
+                            1f to Color.Transparent,
+                        ),
+                    ),
+            )
+            // Más alto que el de arriba porque abajo se apilan reloj, controles y "Next".
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(SCRIM_BOTTOM)
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            0.70f to bg.copy(alpha = 0.85f),
+                            1f to bg,
+                        ),
+                    ),
+            )
+        }
         RoutineProgressBar(vm, accent) {
             InstructionsButton(vm, step.ownerExerciseId, ownerNameFor(step, t), t)
             EditExerciseButton(vm, step, t)
@@ -524,12 +585,6 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         }
         Spacer(Modifier.height(8.dp))
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
-        // Lectura de un mapa en memoria: esto se evalua en cada recomposicion, varias
-        // veces por segundo mientras corre el reloj, y no puede tocar disco ni red.
-        // step.showVideo es de este ejercicio en ESTE training: apagarlo en una copia no
-        // toca al training del que salió.
-        val videoFile = if (step.showVideo) vm.videoFileFor(step.ownerExerciseId) else null
-        val showVideo = videoFile != null && step.ownerName.isNotBlank()
         if (!showVideo && step.kind != StepKind.WORK && step.ownerName.isNotBlank()) {
             ExerciseGlyph(name = ownerLabel, color = step.colorArgb, sizeDp = 40, exerciseId = step.ownerExerciseId)
             Spacer(Modifier.height(8.dp))
@@ -557,26 +612,11 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
-        if (showVideo && videoFile != null) {
-            // El vídeo se queda con el hueco elástico y el reloj baja justo encima de los
-            // controles: así el vídeo crece con la pantalla y el número queda al alcance
-            // de la vista sin competir con él por el centro. El fondo sigue siendo el
-            // color de etapa, que es la señal de en qué fase estás, no decoración.
-            Spacer(Modifier.height(12.dp))
-            Box(
-                Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                ExerciseVideo(
-                    file = videoFile,
-                    // Solo se mueve mientras se ejecuta: en PREP, REST y COOLDOWN queda
-                    // el primer fotograma quieto.
-                    playing = step.kind == StepKind.WORK,
-                    paused = isPaused,
-                    modifier = Modifier.clip(RoundedCornerShape(16.dp)),
-                )
-            }
-            Spacer(Modifier.height(12.dp))
+        if (videoFile != null) {
+            // El vídeo ya no está en la columna: vive en su propia capa, al fondo del Box.
+            // Aquí solo queda el hueco elástico que empuja el reloj junto a los controles,
+            // donde está al alcance de la vista sin disputarle el centro al vídeo.
+            Spacer(Modifier.weight(1f))
             ClockOrReps(vm, step, repByRep, padClock, t)
         } else {
             Spacer(Modifier.height(20.dp))
@@ -707,6 +747,17 @@ private fun fitTitleSize(measurer: TextMeasurer, text: String, maxWidth: Int, ma
     }
     return TITLE_MIN_SIZE
 }
+
+/**
+ * Alto de los degradados que hacen legible el chrome sobre el vídeo.
+ *
+ * Salen de lo que ocupa el chrome, no de un número redondo: arriba, insets + padding +
+ * el hueco de la barra superpuesta + el título de dos líneas llegan a ~216dp; abajo, el
+ * reloj de 84sp, los controles, el "Next" y sus separaciones suman ~269dp. Se les da un
+ * poco de margen para que el borde del degradado no coincida con el del texto.
+ */
+private val SCRIM_TOP = 240.dp
+private val SCRIM_BOTTOM = 300.dp
 
 private val TITLE_MAX_SIZE = 48.sp
 private val TITLE_MIN_SIZE = 20.sp
