@@ -1,7 +1,7 @@
 {
-  "versionCode": 192,
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.212/master-1.0.212.apk",
+  "versionName": "1.0.212",
+  "changelog": "El video se queda con la pantalla del player. Reloj y controles superpuestos, unas 4x mas grande. Las franjas de arriba nacen ocultas y salen solo con el tap; los controles nunca se van. El sheet de instrucciones ya no se cierra solo. Fuera los emoji del player: nombre y video. En las listas, miniatura del propio video con emoji de reserva. Y volumen de los pitidos ajustable en Ajustes.",
   "minVersionCode": 1,
-  "changelog": "release: TD-070 ocultar el video por training, TD-073 editar el training en ejecucion",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.192/master-1.0.192.apk",
-  "versionName": "1.0.192"
+  "versionCode": 212
 }
