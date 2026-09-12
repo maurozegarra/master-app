@@ -1,6 +1,5 @@
 package com.maurozegarra.master.ui.master
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -483,6 +482,26 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         null
     }
     val showVideo = videoFile != null
+    // Auto-ocultado del chrome: a los OSD_HIDE_MS sin tocar nada, la barra de arriba, los
+    // controles y el "Next" se desvanecen y el vídeo queda limpio. El reloj y el nombre se
+    // quedan: son la información por la que estás mirando la pantalla, no adorno.
+    //
+    // `osdNonce` es lo que permite reprogramar la cuenta: al volver a mostrar algo que ya
+    // estaba visible, `playerControlsVisible` no cambia y la clave del efecto tampoco, así
+    // que sin el contador el temporizador no se reiniciaría con cada toque.
+    //
+    // En pausa o en un paso manual no se oculta nada, y por eso `chromeVisible` va por
+    // encima del flag en vez de tocar el estado del ViewModel: ahí los controles son justo
+    // lo que hace falta tener a mano, y al reanudar la cuenta sigue donde estaba.
+    val keepChrome = isPaused || step.manual
+    val chromeVisible = vm.playerControlsVisible || keepChrome
+    val chromeAlpha by animateFloatAsState(if (chromeVisible) 1f else 0f, label = "osdFade")
+    LaunchedEffect(vm.osdNonce, vm.playerControlsVisible, keepChrome) {
+        if (vm.playerControlsVisible && !keepChrome) {
+            delay(OSD_HIDE_MS)
+            vm.hidePlayerControls()
+        }
+    }
     Box(
         Modifier
             .fillMaxSize()
@@ -558,9 +577,17 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                     ),
             )
         }
-        RoutineProgressBar(vm, accent) {
-            InstructionsButton(vm, step.ownerExerciseId, ownerNameFor(step, t), t)
-            EditExerciseButton(vm, step, t)
+        // Va superpuesta en el Box, así que desvanecerla no mueve nada de sitio. Se deja
+        // de componer al llegar a 0 para que sus botones dejen de capturar el toque: si
+        // siguieran ahí, tocar donde estaba el lápiz abriría el editor en vez de devolver
+        // el chrome.
+        if (chromeAlpha > 0f) {
+            Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
+                RoutineProgressBar(vm, accent) {
+                    InstructionsButton(vm, step.ownerExerciseId, ownerNameFor(step, t), t)
+                    EditExerciseButton(vm, step, t)
+                }
+            }
         }
         if (dimAlpha > 0f) {
             Box(
@@ -580,8 +607,14 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // Con 12 aquí el nombre empezaba a 40dp, o sea dentro de ella. 44 + los 20 del
         // padding lo dejan ~17dp por debajo.
         Spacer(Modifier.height(44.dp))
-        AnimatedVisibility(visible = vm.playerControlsVisible && step.totalWorkouts > 1) {
-            WorkoutProgressBar(step, accent, t)
+        // Se desvanece en vez de colapsar: esto sí está en el flujo de la columna, y
+        // plegarlo cada cuatro segundos daría un salto al reloj y a los controles. El
+        // hueco se reserva mientras haya más de un workout, que es cuando la franja
+        // tiene algo que contar.
+        if (step.totalWorkouts > 1) {
+            Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
+                WorkoutProgressBar(step, accent, t)
+            }
         }
         Spacer(Modifier.height(8.dp))
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
@@ -633,9 +666,26 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             }
         }
 
-        Controls(vm, step, accent, t)
+        // Alto reservado y fijo: el de la fila, que lo marca el botón grande. Dejar de
+        // componer los botones al llegar a 0 es lo que hace que el toque vuelva a la capa
+        // de abajo y devuelva el chrome, en vez de pausar a ciegas. Reservando el hueco,
+        // el reloj no se mueve al desvanecerse.
+        Box(
+            Modifier.fillMaxWidth().height(CONTROLS_HEIGHT),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (chromeAlpha > 0f) {
+                Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
+                    Controls(vm, step, accent, t)
+                }
+            }
+        }
         Spacer(Modifier.height(8.dp))
-        NextExerciseLabel(vm, t)
+        // Este no captura toque, así que basta con atenuarlo y se queda compuesto: así
+        // conserva su hueco y nada salta.
+        Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
+            NextExerciseLabel(vm, t)
+        }
         Spacer(Modifier.height(8.dp))
     }
         AnimatedGlowBorder(cornerRadius = 0.dp, colors = glowColors(color), strokeWidth = 3.dp)
@@ -747,6 +797,22 @@ private fun fitTitleSize(measurer: TextMeasurer, text: String, maxWidth: Int, ma
     }
     return TITLE_MIN_SIZE
 }
+
+/**
+ * Cuánto aguanta el chrome visible sin que toques nada, antes de desvanecerse.
+ *
+ * Cuatro segundos: lo justo para leer en qué ejercicio vas y llegar a un botón, sin que
+ * el vídeo pase la mayor parte del tiempo tapado.
+ */
+private const val OSD_HIDE_MS = 4_000L
+
+/**
+ * Alto que la fila de controles reserva siempre, se vean o no.
+ *
+ * Es el del botón grande de play/pausa, que es quien marca la altura de la fila. Se
+ * reserva para que el reloj no baje cuando el chrome se desvanece.
+ */
+private val CONTROLS_HEIGHT = 72.dp
 
 /**
  * Alto de los degradados que hacen legible el chrome sobre el vídeo.
