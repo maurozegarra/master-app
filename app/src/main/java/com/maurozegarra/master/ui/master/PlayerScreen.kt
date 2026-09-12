@@ -28,8 +28,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -669,25 +667,21 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
-        // Un solo esqueleto para los tres casos, y lo único que cambia es qué llena el
-        // campo elástico: el vídeo —que va detrás, en su propia capa—, las instrucciones,
-        // o nada. El reloj siempre abajo, junto a los controles.
-        //
-        // Cuando no hay ni vídeo ni instrucciones el campo se queda vacío a propósito. Un
-        // hueco honesto dice "aquí todavía no hay nada que enseñarte"; llenarlo con un
-        // emoji gigante solo finge que sí.
-        Spacer(Modifier.height(12.dp))
-        Box(
-            Modifier.weight(1f).fillMaxWidth(),
-            contentAlignment = Alignment.TopCenter,
-        ) {
-            if (videoFile == null) {
-                val instructions = vm.mediaFor(step.ownerExerciseId)?.instructions.orEmpty()
-                if (instructions.isNotEmpty()) InstructionsPanel(instructions)
+        // Las instrucciones se probaron aquí, llenando el hueco del vídeo, y el usuario las
+        // descartó: viven detrás de su botón. Así que el hueco vuelve a ser solo del vídeo,
+        // y sin vídeo el reloj se queda con él, centrado, como antes de aquella prueba.
+        if (videoFile != null) {
+            // El vídeo no está en la columna: vive en su propia capa, al fondo del Box. Aquí
+            // solo queda el hueco elástico que empuja el reloj junto a los controles, donde
+            // está al alcance de la vista sin disputarle el centro al vídeo.
+            Spacer(Modifier.weight(1f))
+            ClockOrReps(vm, step, repByRep, padClock, t)
+        } else {
+            Spacer(Modifier.height(20.dp))
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                ClockOrReps(vm, step, repByRep, padClock, t)
             }
         }
-        Spacer(Modifier.height(12.dp))
-        ClockOrReps(vm, step, repByRep, padClock, t)
         Spacer(Modifier.height(16.dp))
 
         if (step.weighted) {
@@ -983,43 +977,6 @@ private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 56.sp)
         } else {
             Text("× ${step.reps}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 56.sp)
-        }
-    }
-}
-
-/**
- * Los pasos escritos del ejercicio, ocupando el hueco del vídeo cuando no hay vídeo.
- *
- * Es el sustituto de verdad: el vídeo enseña mostrando y el texto enseña contando, y las
- * dos responden la misma pregunta. Un emoji no responde ninguna.
- *
- * Mismo lenguaje que el sheet de instrucciones —círculo numerado y paso al lado— pero en
- * blanco sobre el color de etapa, que aquí es el fondo, en vez de sobre `surface`.
- *
- * Va con scroll porque el número de pasos lo pone el usuario: cuatro caben de sobra, doce
- * no, y desbordar en silencio dejaría los últimos fuera de la pantalla sin avisar.
- */
-@Composable
-private fun InstructionsPanel(steps: List<String>) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-        steps.forEachIndexed { i, s ->
-            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.18f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("${i + 1}", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                }
-                Text(
-                    s,
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(start = 12.dp),
-                )
-            }
         }
     }
 }
