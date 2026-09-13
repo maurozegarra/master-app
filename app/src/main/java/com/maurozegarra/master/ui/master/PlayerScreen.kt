@@ -684,30 +684,27 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
-        // Sube POR ENCIMA del spacer elástico, y ahí está el arreglo: abajo quedaba anclada
-        // al fondo junto a los controles, así que aparecer en un ejercicio con peso y
-        // desaparecer en el siguiente movía el reloj ~126dp. Aquí la absorbe el spacer y no
-        // desplaza a nadie.
-        if (step.weighted) {
-            WeightFeedback(vm, step, accent, t)
-            Spacer(Modifier.height(12.dp))
-        }
-
         // Las instrucciones se probaron aquí, llenando el hueco del vídeo, y el usuario las
         // descartó: viven detrás de su botón. Así que el hueco vuelve a ser solo del vídeo,
         // y sin vídeo el reloj se queda con él, centrado, como antes de aquella prueba.
-        if (videoFile != null) {
-            // El vídeo no está en la columna: vive en su propia capa, al fondo del Box. Aquí
-            // solo queda el hueco elástico que empuja el reloj junto a los controles, donde
-            // está al alcance de la vista sin disputarle el centro al vídeo.
-            Spacer(Modifier.weight(1f))
-            ClockOrReps(vm, step, repByRep, padClock, t)
-        } else {
-            Spacer(Modifier.height(20.dp))
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                ClockOrReps(vm, step, repByRep, padClock, t)
+        // EL RELOJ SIEMPRE EN EL MISMO SITIO, haya vídeo o no. Antes con vídeo iba abajo y
+        // sin vídeo se centraba en el hueco, así que saltaba al centro al pasar de un
+        // ejercicio con vídeo a uno sin: exactamente el salto que el lineamiento prohíbe.
+        // Venía de cuando se revirtió el panel de instrucciones y se le devolvió el centro.
+        //
+        // El hueco elástico es un Box y no un Spacer para poder colgar de él la tarjeta del
+        // peso: dentro de la zona elástica su alto no se lo quita a nadie, así que aparece
+        // pegada justo encima del reloj sin desplazar nada. Arriba del todo quedaba lejos de
+        // donde se mira, y abajo movía el reloj ~126dp al cambiar de ejercicio.
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            if (step.weighted) {
+                Box(Modifier.align(Alignment.BottomCenter)) {
+                    WeightFeedback(vm, step, accent, t)
+                }
             }
         }
+        Spacer(Modifier.height(12.dp))
+        ClockOrReps(vm, step, repByRep, padClock, t)
         Spacer(Modifier.height(16.dp))
 
         // Siempre visibles, en toda etapa y en cualquier modo: son el mando de la corrida.
