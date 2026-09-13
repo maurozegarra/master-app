@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -76,6 +77,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
@@ -853,9 +855,16 @@ private const val OSD_HIDE_MS = 4_000L
 private val SCRIM_TOP = 240.dp
 private val SCRIM_BOTTOM = 300.dp
 
+/** Tamaño del dato principal —reloj o repeticiones—, el mismo para los dos. */
+private val READOUT_SIZE = 84.sp
+
+/** La marca que lo acompaña: la «×» o el «REP». Más chica y apagada, porque acompaña. */
+private val READOUT_MARK_SIZE = 36.sp
+
+/** Aire entre la marca y el número. */
+private val READOUT_GAP = 10.dp
+
 /**
- * Tamaño máximo del nombre del ejercicio.
- *
  * Techo del nombre **cuando hay vídeo**: 28sp.
  *
  * Con vídeo el texto no debe competir: la imagen cuenta el ejercicio mejor que el nombre, y
@@ -1029,12 +1038,57 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
 
 @Composable
 private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (repByRep) {
-            Text(t.repLabel, color = TEXT_DIM, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-            Text("${step.setIndex + 1} / ${step.totalSets}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 56.sp)
-        } else {
-            Text("× ${step.reps}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 56.sp)
+    if (repByRep) {
+        BigReadout("${step.setIndex + 1} / ${step.totalSets}", t.repLabel)
+    } else {
+        BigReadout("${step.reps}", "×")
+    }
+}
+
+/**
+ * El dato principal de la corrida: el reloj o las repeticiones.
+ *
+ * Los dos son lo mismo —cuánto te queda de este paso— y por eso comparten tamaño y sitio.
+ * Que un ejercicio sea por tiempo o por repeticiones no puede encoger ese número ni moverlo
+ * de donde estaba: antes el reloj iba a 84sp y las reps a 56.
+ *
+ * [mark] es la marca que acompaña al valor —la «×» de «× 15», el «REP» del modo repetición
+ * a repetición— y va **al costado, sin contar para el centrado**. Centrar la cadena entera
+ * dejaría el número desplazado a la derecha respecto al reloj: lo que tiene que caer en el
+ * centro es el número, no el conjunto. Por eso se mide el valor y se cuelga la marca de su
+ * borde izquierdo, en vez de ponerlos en fila.
+ */
+@Composable
+private fun BigReadout(value: String, mark: String? = null) {
+    val measurer = rememberTextMeasurer()
+    val valueStyle = TextStyle(
+        color = Color.White,
+        fontWeight = FontWeight.Bold,
+        fontSize = READOUT_SIZE,
+    )
+    val markStyle = TextStyle(
+        color = TEXT_DIM,
+        fontWeight = FontWeight.Bold,
+        fontSize = READOUT_MARK_SIZE,
+    )
+    // Medir es lo que permite colgar la marca del borde del número sin que el número se
+    // entere. Se mide una vez por texto: esto repinta varias veces por segundo.
+    val valueHalf = remember(value) { measurer.measure(value, valueStyle).size.width / 2 }
+    val markHalf = remember(mark) {
+        if (mark == null) 0 else measurer.measure(mark, markStyle).size.width / 2
+    }
+    val gap = with(LocalDensity.current) { READOUT_GAP.roundToPx() }
+
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Text(value, style = valueStyle)
+        if (mark != null) {
+            Text(
+                mark,
+                style = markStyle,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset { IntOffset(-(valueHalf + gap + markHalf), 0) },
+            )
         }
     }
 }
@@ -1044,7 +1098,7 @@ private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean) {
     val shown = if (step.display == DisplayMode.COUNTUP) {
         (step.durationSec * 1000L - remainingMs).coerceAtLeast(0L)
     } else remainingMs
-    Text(formatPlayerClock(shown, padded), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 84.sp)
+    BigReadout(formatPlayerClock(shown, padded))
 }
 
 @Composable
@@ -1117,33 +1171,31 @@ private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: St
             onClick = { vm.skipStep() },
             onLongClick = { showSkipDialog = true },
         )
-        if (!step.manual) {
-            GlassButton(
-                icon = if (vm.playerRunning) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
-                contentDescription = if (vm.playerRunning) t.pause else t.resume,
-                size = 72.dp,
-                iconSize = 36.dp,
-                onClick = {
-                    if (vm.playerRunning) vm.pausePlayer() else vm.resumePlayer()
-                },
-            )
-            GlassButton(
-                icon = Icons.Outlined.Check,
-                contentDescription = t.check,
-                size = 48.dp,
-                iconSize = 24.dp,
-                onClick = { vm.checkStep() },
-            )
-        } else {
-            GlassButton(
-                icon = Icons.Outlined.Check,
-                contentDescription = t.check,
-                size = 72.dp,
-                iconSize = 36.dp,
-                onClick = { vm.checkStep() },
-            )
-            Spacer(Modifier.size(48.dp))
+        // El hueco grande del centro se reserva SIEMPRE, tenga botón o no. En un ejercicio
+        // por repeticiones no hay nada que pausar, y antes el check se hinchaba y ocupaba
+        // ese centro: al cambiar de un ejercicio por tiempo a uno por reps, los tres
+        // controles cambiaban de sitio y de tamaño. Ahora la fila es siempre la misma
+        // —pequeño, grande, pequeño— y lo único que cambia es si el centro está vacío.
+        Box(Modifier.size(72.dp), contentAlignment = Alignment.Center) {
+            if (!step.manual) {
+                GlassButton(
+                    icon = if (vm.playerRunning) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
+                    contentDescription = if (vm.playerRunning) t.pause else t.resume,
+                    size = 72.dp,
+                    iconSize = 36.dp,
+                    onClick = {
+                        if (vm.playerRunning) vm.pausePlayer() else vm.resumePlayer()
+                    },
+                )
+            }
         }
+        GlassButton(
+            icon = Icons.Outlined.Check,
+            contentDescription = t.check,
+            size = 48.dp,
+            iconSize = 24.dp,
+            onClick = { vm.checkStep() },
+        )
     }
 
     if (showSkipDialog) {
