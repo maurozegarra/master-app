@@ -1,7 +1,6 @@
 package com.maurozegarra.master.update
 
 import android.content.Context
-import android.content.pm.PackageManager
 import com.maurozegarra.master.net.Downloader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

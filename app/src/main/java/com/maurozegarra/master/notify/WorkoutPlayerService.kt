@@ -17,7 +17,6 @@ import com.maurozegarra.master.PlayerCommand
 import com.maurozegarra.master.PlayerSnapshot
 import com.maurozegarra.master.R
 import com.maurozegarra.master.data.ExerciseMediaStore
-import com.maurozegarra.master.data.SharedFiles
 import com.maurozegarra.master.data.WorkoutStore
 import com.maurozegarra.master.model.ConfirmMode
 import com.maurozegarra.master.model.DisplayMode

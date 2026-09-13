@@ -1,7 +1,6 @@
 package com.maurozegarra.master
 
 import android.app.Application
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -23,8 +22,6 @@ import com.maurozegarra.master.data.VideoRepository
 import com.maurozegarra.master.data.VideoState
 import com.maurozegarra.master.data.WorkoutStore
 import com.maurozegarra.master.model.AlarmSound
-import com.maurozegarra.master.model.ConfirmMode
-import com.maurozegarra.master.model.DisplayMode
 import com.maurozegarra.master.model.Exercise
 import com.maurozegarra.master.model.ExerciseDef
 import com.maurozegarra.master.model.ExerciseMedia

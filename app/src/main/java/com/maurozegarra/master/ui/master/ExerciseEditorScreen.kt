@@ -34,7 +34,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -59,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
-import com.maurozegarra.master.model.AlarmSound
 import com.maurozegarra.master.model.ConfirmMode
 import com.maurozegarra.master.model.ACCENT_COLORS
 import com.maurozegarra.master.model.DisplayMode
