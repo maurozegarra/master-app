@@ -660,14 +660,20 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // cambia su opacidad. Fijarlo a ojo fue el error de la primera pasada —me quedé en
         // 52dp cuando con el relleno de fuente real pide ~63— y la segunda línea salía
         // cortada. Midiéndolo así no hay nada que recalcular si cambia un tamaño de texto.
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        // Alineados ARRIBA los dos. En un ejercicio sin vídeo el nombre llega a 48sp y pide
+        // ~104dp, mientras la tarjeta sigue midiendo sus ~63: el sobrante cae debajo y se
+        // lee como separación, no como una tarjeta descolocada en mitad de una banda.
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             if (step.totalWorkouts > 1) {
                 Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
                     WorkoutProgressBar(step, accent, t)
                 }
             }
+            // Con vídeo el nombre se queda pequeño: la imagen ya cuenta el ejercicio mejor
+            // que el texto, y un titular grande solo taparía lo que hay que ver. Sin vídeo
+            // el nombre ES el contenido, así que recupera los 48sp de antes.
             Box(Modifier.graphicsLayer { alpha = 1f - chromeAlpha }) {
-                ExerciseTitle(bigTitle)
+                ExerciseTitle(bigTitle, if (videoFile != null) TITLE_WITH_VIDEO else TITLE_ALONE)
             }
         }
         Spacer(Modifier.height(8.dp))
@@ -761,12 +767,12 @@ private fun ownerNameFor(step: PlayerStep, t: Strings): String =
  *   cambia el ejercicio. El texto va arriba y el hueco sobrante queda debajo.
  */
 @Composable
-private fun ExerciseTitle(text: String) {
+private fun ExerciseTitle(text: String, maxSize: TextUnit) {
     val measurer = rememberTextMeasurer()
     // El alto de dos líneas al tamaño máximo, MEDIDO y no calculado. 2 × interlineado se
     // quedaba corto por el relleno que la fuente añade arriba y abajo, y con la caja justa
     // Compose recortaba a una línea con puntos suspensivos: "COBRA TO C...".
-    val boxPx = remember(measurer) { measurer.measure("A\nA", titleStyle(TITLE_MAX_SIZE)).size.height }
+    val boxPx = remember(measurer, maxSize) { measurer.measure("A\nA", titleStyle(maxSize)).size.height }
     val boxHeight = with(LocalDensity.current) { boxPx.toDp() }
     BoxWithConstraints(
         Modifier.fillMaxWidth().height(boxHeight),
@@ -775,7 +781,7 @@ private fun ExerciseTitle(text: String) {
         val maxWidth = constraints.maxWidth
         // Se mide una vez por nombre y ancho, no en cada recomposición: el reloj repinta
         // esta pantalla varias veces por segundo.
-        val size = remember(text, maxWidth) { fitTitleSize(measurer, text, maxWidth, boxPx) }
+        val size = remember(text, maxWidth, maxSize) { fitTitleSize(measurer, text, maxWidth, boxPx, maxSize) }
         Text(
             text,
             style = titleStyle(size),
@@ -805,9 +811,15 @@ private fun titleStyle(size: TextUnit) = TextStyle(
  * donde caiga y aun así pueden salir dos líneas. Por eso primero se exige que la palabra
  * más ancha quepa entera, y después que el conjunto no pase de dos.
  */
-private fun fitTitleSize(measurer: TextMeasurer, text: String, maxWidth: Int, maxHeight: Int): TextUnit {
+private fun fitTitleSize(
+    measurer: TextMeasurer,
+    text: String,
+    maxWidth: Int,
+    maxHeight: Int,
+    maxSize: TextUnit,
+): TextUnit {
     val words = text.split(' ').filter { it.isNotBlank() }
-    var size = TITLE_MAX_SIZE.value
+    var size = maxSize.value
     while (size > TITLE_MIN_SIZE.value) {
         val style = titleStyle(size.sp)
         val widest = words.maxOfOrNull {
@@ -845,16 +857,28 @@ private val SCRIM_BOTTOM = 300.dp
 /**
  * Tamaño máximo del nombre del ejercicio.
  *
- * Baja de 48 a 22sp porque el nombre ya no tiene una caja propia de 104dp: ahora comparte
- * hueco con la tarjeta de workout, y el alto lo pone ella. El ajuste automático de TD-074
- * sigue funcionando igual —solo cambia el techo desde el que empieza a bajar—, así que un
- * nombre largo se sigue encogiendo en vez de partirse a mitad de palabra.
+ * Techo del nombre **cuando hay vídeo**: 28sp.
+ *
+ * Con vídeo el texto no debe competir: la imagen cuenta el ejercicio mejor que el nombre, y
+ * un titular grande solo taparía lo que hay que mirar. 28 es además lo máximo que cabe sin
+ * que el nombre pase a mandar sobre el alto de la franja —dos líneas piden 60.7dp y la
+ * tarjeta de workout mide ~63—, así que con vídeo la franja la sigue midiendo la tarjeta.
  */
-private val TITLE_MAX_SIZE = 22.sp
+private val TITLE_WITH_VIDEO = 28.sp
+
 /**
- * Suelo del ajuste automático. Baja de 20 a 12sp junto con el techo: con el máximo en 22,
- * un suelo de 20 dejaba un recorrido de un solo escalón y los nombres largos se quedaban
- * sin sitio adonde encogerse.
+ * Techo del nombre **cuando no hay vídeo**: los 48sp de siempre.
+ *
+ * Sin vídeo el nombre es el contenido de la pantalla, no un rótulo encima de otra cosa, así
+ * que no hay razón para encogerlo. Dos líneas piden ~104dp, más que la tarjeta, de modo que
+ * en estos ejercicios es el nombre quien marca el alto de la franja.
+ */
+private val TITLE_ALONE = 48.sp
+/**
+ * Suelo del ajuste automático, común a los dos techos.
+ *
+ * Baja de 20 a 12sp porque con vídeo el techo es 28: un suelo de 20 dejaba un recorrido de
+ * cuatro escalones y un nombre largo se quedaba sin sitio adonde encogerse.
  */
 private val TITLE_MIN_SIZE = 12.sp
 private const val TITLE_SIZE_STEP = 2f
