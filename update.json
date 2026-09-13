@@ -1,7 +1,7 @@
 {
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.212/master-1.0.212.apk",
-  "versionName": "1.0.212",
-  "changelog": "El video se queda con la pantalla del player. Reloj y controles superpuestos, unas 4x mas grande. Las franjas de arriba nacen ocultas y salen solo con el tap; los controles nunca se van. El sheet de instrucciones ya no se cierra solo. Fuera los emoji del player: nombre y video. En las listas, miniatura del propio video con emoji de reserva. Y volumen de los pitidos ajustable en Ajustes.",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.224/master-1.0.224.apk",
   "minVersionCode": 1,
-  "versionCode": 212
+  "versionName": "1.0.224",
+  "changelog": "Coherencia en toda la UI. Las cinco listas se manejan igual, con swipe: tambien History y el editor de workouts, que todavia usaban menu de tres puntos. El panel de acciones pasa a circulos huecos en blanco, sin bloques de color macizo. El texto deja de ser blanco puro para cansar menos la vista. La tarjeta de History baja de 99 a 75dp y ya no se parte el badge ni se corta el nombre. Chevron unico, un solo componente de etiqueta, y radios, paddings y tamanos de fila salidos de un token en vez de un numero por pantalla.",
+  "versionCode": 224
 }
