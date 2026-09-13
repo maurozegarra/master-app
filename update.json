@@ -1,7 +1,7 @@
 {
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.224/master-1.0.224.apk",
   "minVersionCode": 1,
-  "versionName": "1.0.224",
-  "changelog": "Coherencia en toda la UI. Las cinco listas se manejan igual, con swipe: tambien History y el editor de workouts, que todavia usaban menu de tres puntos. El panel de acciones pasa a circulos huecos en blanco, sin bloques de color macizo. El texto deja de ser blanco puro para cansar menos la vista. La tarjeta de History baja de 99 a 75dp y ya no se parte el badge ni se corta el nombre. Chevron unico, un solo componente de etiqueta, y radios, paddings y tamanos de fila salidos de un token en vez de un numero por pantalla.",
-  "versionCode": 224
+  "versionName": "1.0.233",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.233/master-1.0.233.apk",
+  "versionCode": 233,
+  "changelog": "El player deja de dar saltos. El nombre del ejercicio sube a la franja de arriba y deja de caer sobre la cabeza del video, y crece a 48sp cuando el ejercicio no tiene video. El reloj y las reps comparten tamano y sitio, con la unidad REPS al lado del numero. Y ningun control cambia de posicion al pasar de etapa o de ejercicio: ni el reloj entre un ejercicio con peso y uno sin, ni los botones al llegar al ultimo, ni la fila de controles entre tiempo y repeticiones. Fuera los labels PREPARE y COOLDOWN: el color de la etapa ya lo dice."
 }
