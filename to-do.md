@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **64 / 83** hechos, 19 pendientes.
+Progreso: **66 / 83** hechos, 17 pendientes.
 
 ## Pendientes
 
@@ -39,15 +39,11 @@ Progreso: **64 / 83** hechos, 19 pendientes.
 
 ### Fix
 
-- [ ] **TD-082** Fix: la tarjeta de History crece y el badge se parte con nombres largos
-  - Reportado por el usuario en la pantalla History: el badge salia partido ('Complet' / 'e') y la tarjeta crecia; con un training llamado 'COLUMNA (asignado)(copy)' ocupaba casi el alto de tres tarjetas. Su regla: la tarjeta debe medir igual para todos y no crecer en ningun escenario. DOS FALLOS DISTINTOS EN LA MISMA FILA. El del badge no era cosmetico: en un Row de Compose los hijos SIN peso se miden primero y con todo el ancho disponible, asi que el nombre se lo quedaba entero y al badge le sobraba sitio para tres letras. Al dar weight al nombre el orden se invierte: el badge se mide a su tamano natural y el nombre se queda con lo que reste. Se usa fill=false para que un nombre corto no empuje el badge al borde derecho. El segundo fallo es que al nombre le faltaba maxLines, asi que envolvia a varias lineas y estiraba la tarjeta. SE MIRO LA FILA DE DENTRO, la de WorkoutGroupSection, y tenia el defecto a medias: ya llevaba weight -por eso su badge nunca se partio- pero no maxLines, asi que un nombre de workout largo seguia estirando la seccion. Corregidas las dos, mas maxLines y softWrap en los dos badges, para que si algun dia vuelve a faltar sitio se recorte y se note en vez de romperse en dos lineas y estirar la tarjeta en silencio. SessionRow se usa en HistoryScreen y en el day sheet de MasterScreen, asi que el arreglo cae en los dos.
 - [ ] **TD-064** Fix: quitar rotativo a un workout borra todas las variantes menos la primera
   - makeWorkoutSimple conserva los ejercicios de la PRIMERA variante y descarta el resto: w.copy(rotating = false, exercises = w.variants.firstOrNull()?.exercises, variants = emptyList()). Un workout rotativo con 3 variantes pierde dos sin aviso y sin deshacer. EL COMPORTAMIENTO DESEADO, en palabras del usuario: 'rotativo es que los workouts rotan, si le quito el rotativo deberia simplemente no rotar, no borrar nada'. O sea que el flag gobierna COMO se recorren las variantes, no DONDE viven los ejercicios; quitarlo no puede ser una operacion destructiva. Se descarto anadir un dialogo de confirmacion: confirmar una perdida de datos no deseada no arregla que la perdida no deba ocurrir. El bug lleva ahi desde que existe la funcion y no se habia notado. NO ES SOLO ESTE FIX: al revisarlo el usuario pregunto 'cual es la interfaz para hacer de un workout una variante, no la ubico', y esa pregunta abre el modelo entero de workout/variante, que hoy tiene dos representaciones distintas para lo mismo (exercises sueltos cuando es simple, exercises dentro de variants cuando es rotativo) y es de donde nace la perdida de datos al convertir. Revisar el modelo y los flujos de conversion en su propio espacio antes de tocar codigo. CASO DE REFERENCIA, senalado por el usuario: el rotativo 'Strength' del training MASTER funciona como se espera y es el que hay que mirar al abordarlo. Precision de vocabulario: el usuario lo describe como 'dentro de Strength hay 2 workouts, uno lower y otro upper, cada uno con sus ejercicios independientes', pero en el modelo Strength es UN workout con rotating=true y dos VARIANTES, Lower (12 ejercicios) y Upper (5). Lo que el usuario llama workout ahi es lo que el codigo llama variante, y esa distancia entre el vocabulario del usuario y el del modelo es parte de lo que hay que resolver. Comprobado en sus datos del 30-ago-2026: MASTER tiene tambien 'Cardio' rotativo con 4 variantes (Rope Jumping, Tire Jumping, Shadow Boxing, Running), donde quitar el rotativo hoy borraria tres. Con Strength borraria los 5 ejercicios de Upper.
 
 ### Mantenimiento
 
-- [ ] **TD-083** Auditoria de coherencia UI: un solo mecanismo para todas las listas
-  - Pedido del usuario tras ver que History usa menu de 3 puntos mientras otras listas usan swipe: 'si es una lista, todas deberian funcionar bajo el mismo mecanismo o 3 puntos o swipe', y despues 'necesito que escanees todo el proyecto en busca de inconsistencias UI para no ir cazandolas una a una'. HALLAZGO PRINCIPAL: la decision YA ESTABA TOMADA y quedaron dos pantallas sin migrar. TD-039 puso swipe en las TrainingCards 'en reemplazo del menu de 3 puntos' y TD-057 lo extendio a WorkoutRow y VariantRow; nadie volvio a por WorkoutEditorScreen (ejercicios) ni HistoryScreen (sesiones). WorkoutEditorScreen es la mas llamativa porque arrastra para reordenar igual que las otras tres pero cambia de idioma al llegar a las acciones. En HistoryScreen el menu tiene UNA sola entrada, Delete, y ocupa 48dp. OTROS EJES ESCANEADOS, con archivo y linea en el informe: chevrons con dos gramaticas -el > que gira 90 grados en el preview del player contra ExpandMore/ExpandLess en History y ExerciseEditor-; cinco badges escritos a mano sin componente compartido, misma receta y colores distintos; cuatro colores fuera de AppTheme (verde completo, ambar saltado, verde del glifo, gris del switch), que por tanto no siguen el acento; nueve radios de esquina distintos, y en concreto la tarjeta de lista tiene dos valores segun la pantalla (14 y 16); titulo de fila en 18, 16 y 15sp, donde el 15 de ExerciseHistoryScreen parece heredado y no decidido; y padding de tarjeta 16dp salvo las dos del player, que van a 14. ORDEN PROPUESTO en el informe: 1) swipe en las dos pantallas que faltan, 2) chevron > en todas, 3) componente Badge compartido + colores de estado al tema, 4) radio y padding unicos, 5) tamano del titulo de fila. Los dos ultimos son barridos y conviene verlos juntos, no de uno en uno.
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
 - [ ] **TD-066** Opcional: script para publicar perfiles y asignaciones desde la PC
@@ -93,6 +89,7 @@ Progreso: **64 / 83** hechos, 19 pendientes.
 
 ### Fix
 
+- [x] **TD-082** Fix: la tarjeta de History crece y el badge se parte con nombres largos
 - [x] **TD-065** Fix: build-release.ps1 borraria el release de videos al publicar
 - [x] **TD-060** Respaldo: snapshot antes de importar y versionado por marca de tiempo
 - [x] **TD-052** build-debug.ps1 no debe desinstalar automaticamente
@@ -119,6 +116,7 @@ Progreso: **64 / 83** hechos, 19 pendientes.
 
 ### Mantenimiento
 
+- [x] **TD-083** Auditoria de coherencia UI: un solo mecanismo para todas las listas
 - [x] **TD-072** Ajustes: ensenar y liberar el espacio de los videos descargados
 - [x] **TD-069** Pendiente: comprobar en dispositivo los avisos y la entrega automatica
 - [x] **TD-056** Borrar handoff.md (TD-048 resuelto)
