@@ -858,8 +858,13 @@ private val SCRIM_BOTTOM = 300.dp
 /** Tamaño del dato principal —reloj o repeticiones—, el mismo para los dos. */
 private val READOUT_SIZE = 84.sp
 
-/** La marca que lo acompaña: la «×» o el «REP». Más chica y apagada, porque acompaña. */
-private val READOUT_MARK_SIZE = 36.sp
+/**
+ * La unidad que acompaña al número: «REPS».
+ *
+ * Bastante más chica que el número —que sigue siendo el dato— pero en blanco y lo bastante
+ * grande para leerse de un vistazo. Apagada no servía: era lo que fallaba con la «×».
+ */
+private val READOUT_MARK_SIZE = 26.sp
 
 /** Aire entre la marca y el número. */
 private val READOUT_GAP = 10.dp
@@ -1038,11 +1043,13 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
 
 @Composable
 private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings) {
-    if (repByRep) {
-        BigReadout("${step.setIndex + 1} / ${step.totalSets}", t.repLabel)
-    } else {
-        BigReadout("${step.reps}", "×")
-    }
+    // La unidad, no el simbolo. "15" a secas se confunde con un reloj en 15 —y mas con los
+    // ceros a la izquierda apagados—, y la "x" pequena y gris no peleaba contra eso. Una
+    // palabra no hay que interpretarla. El reloj no la necesita: se delata solo, porque baja.
+    BigReadout(
+        value = if (repByRep) "${step.setIndex + 1} / ${step.totalSets}" else "${step.reps}",
+        mark = if (repByRep) t.repLabel else t.repsUnit.uppercase(),
+    )
 }
 
 /**
@@ -1066,8 +1073,10 @@ private fun BigReadout(value: String, mark: String? = null) {
         fontWeight = FontWeight.Bold,
         fontSize = READOUT_SIZE,
     )
+    // En blanco, no apagada: si la unidad no se nota, volvemos a tener un numero suelto que
+    // se confunde con el reloj, que es justo lo que se quiere resolver.
     val markStyle = TextStyle(
-        color = TEXT_DIM,
+        color = Color.White,
         fontWeight = FontWeight.Bold,
         fontSize = READOUT_MARK_SIZE,
     )
@@ -1085,9 +1094,11 @@ private fun BigReadout(value: String, mark: String? = null) {
             Text(
                 mark,
                 style = markStyle,
+                // A la DERECHA del numero: asi se lee en el orden natural, "quince reps".
+                // A la izquierda obligaba a leer al reves.
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .offset { IntOffset(-(valueHalf + gap + markHalf), 0) },
+                    .offset { IntOffset(valueHalf + gap + markHalf, 0) },
             )
         }
     }
