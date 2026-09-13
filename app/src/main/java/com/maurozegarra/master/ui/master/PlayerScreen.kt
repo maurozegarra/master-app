@@ -630,39 +630,49 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // La barra de progreso de arriba va superpuesta y mide 55dp (6 + 36 + 4 + 3 + 6).
-        // Con 12 aquí el nombre empezaba a 40dp, o sea dentro de ella. 44 + los 20 del
-        // padding lo dejan ~17dp por debajo.
-        Spacer(Modifier.height(44.dp))
-        // Se desvanece en vez de colapsar: esto sí está en el flujo de la columna, y
-        // plegarlo cada cuatro segundos daría un salto al reloj y a los controles. El
-        // hueco se reserva mientras haya más de un workout, que es cuando la franja
-        // tiene algo que contar.
-        if (step.totalWorkouts > 1) {
-            Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
-                WorkoutProgressBar(step, accent, t)
-            }
-        }
-        Spacer(Modifier.height(8.dp))
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
         val repByRep = step.kind == StepKind.WORK && !step.timeBased && step.reps == 1 && step.totalSets > 1
         val bigTitle = when (step.kind) {
             StepKind.WORK -> step.title.ifBlank { t.exercise }
             else -> ownerLabel.ifBlank { stageLabel }
         }.uppercase()
-        val subStage = when (step.kind) {
-            StepKind.PREP -> t.prepare.uppercase()
-            StepKind.COOLDOWN -> t.cooldown.uppercase()
-            else -> ""
-        }
+        // PREPARE y COOLDOWN se fueron los dos: el color de la etapa ya es el indicador,
+        // y cada palabra ocupaba 40sp justo encima del video.
         val showSeries = (step.kind == StepKind.WORK || step.kind == StepKind.REST) &&
             step.totalSets > 1 && !repByRep
-        ExerciseTitle(bigTitle)
+
+        // La barra de rutina va superpuesta y mide 55dp (6 + 36 + 4 + 3 + 6): estos 44 más
+        // los 20 del padding dejan lo de abajo justo por fuera de ella.
+        Spacer(Modifier.height(44.dp))
+
+        // UN SOLO HUECO para dos cosas que nunca se ven a la vez: el nombre del ejercicio
+        // mientras el chrome está oculto, y la tarjeta de workout cuando sale.
+        //
+        // Antes el nombre vivía más abajo, en una caja de 104dp que en un vídeo vertical
+        // caía justo sobre la cabeza; y encima de él quedaba el hueco de la tarjeta, que
+        // desde TD-079 nace invisible, así que se veía un vacío que no explicaba nada.
+        //
+        // La regla de TD-079 sigue intacta —las franjas solo salen con el tap—; lo único
+        // nuevo es que al salir ocupan el sitio del nombre, que es literalmente el mismo.
+        // Se cruzan con el mismo alpha en vez de aparecer y desaparecer: así el cambio se
+        // lee como un relevo y no como un parpadeo.
+        // El alto lo pone la tarjeta, no un número escrito a mano: se compone SIEMPRE y solo
+        // cambia su opacidad. Fijarlo a ojo fue el error de la primera pasada —me quedé en
+        // 52dp cuando con el relleno de fuente real pide ~63— y la segunda línea salía
+        // cortada. Midiéndolo así no hay nada que recalcular si cambia un tamaño de texto.
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            if (step.totalWorkouts > 1) {
+                Box(Modifier.graphicsLayer { alpha = chromeAlpha }) {
+                    WorkoutProgressBar(step, accent, t)
+                }
+            }
+            Box(Modifier.graphicsLayer { alpha = 1f - chromeAlpha }) {
+                ExerciseTitle(bigTitle)
+            }
+        }
+        Spacer(Modifier.height(8.dp))
         if (step.note.isNotBlank()) {
             Text(step.note.uppercase(), color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp, textAlign = TextAlign.Center)
-        }
-        if (subStage.isNotBlank()) {
-            Text(subStage, color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
         if (showSeries) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
@@ -832,8 +842,21 @@ private const val OSD_HIDE_MS = 4_000L
 private val SCRIM_TOP = 240.dp
 private val SCRIM_BOTTOM = 300.dp
 
-private val TITLE_MAX_SIZE = 48.sp
-private val TITLE_MIN_SIZE = 20.sp
+/**
+ * Tamaño máximo del nombre del ejercicio.
+ *
+ * Baja de 48 a 22sp porque el nombre ya no tiene una caja propia de 104dp: ahora comparte
+ * hueco con la tarjeta de workout, y el alto lo pone ella. El ajuste automático de TD-074
+ * sigue funcionando igual —solo cambia el techo desde el que empieza a bajar—, así que un
+ * nombre largo se sigue encogiendo en vez de partirse a mitad de palabra.
+ */
+private val TITLE_MAX_SIZE = 22.sp
+/**
+ * Suelo del ajuste automático. Baja de 20 a 12sp junto con el techo: con el máximo en 22,
+ * un suelo de 20 dejaba un recorrido de un solo escalón y los nombres largos se quedaban
+ * sin sitio adonde encogerse.
+ */
+private val TITLE_MIN_SIZE = 12.sp
 private const val TITLE_SIZE_STEP = 2f
 private const val TITLE_LINES = 2
 /** 52/48: el interlineado que ya tenía el título. */
