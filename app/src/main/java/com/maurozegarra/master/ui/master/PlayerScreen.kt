@@ -1177,7 +1177,16 @@ private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: St
         // controles cambiaban de sitio y de tamaño. Ahora la fila es siempre la misma
         // —pequeño, grande, pequeño— y lo único que cambia es si el centro está vacío.
         Box(Modifier.size(72.dp), contentAlignment = Alignment.Center) {
-            if (!step.manual) {
+            if (step.manual) {
+                // Un hueco a secas grita "falta algo". El círculo apagado —solo borde, sin
+                // relleno ni icono— dice que ahí no hay nada que pulsar porque un ejercicio
+                // por repeticiones no se pausa, no que se haya perdido un botón.
+                Box(
+                    Modifier
+                        .size(72.dp)
+                        .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)), CircleShape),
+                )
+            } else {
                 GlassButton(
                     icon = if (vm.playerRunning) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
                     contentDescription = if (vm.playerRunning) t.pause else t.resume,
