@@ -684,6 +684,15 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         }
 
+        // Sube POR ENCIMA del spacer elástico, y ahí está el arreglo: abajo quedaba anclada
+        // al fondo junto a los controles, así que aparecer en un ejercicio con peso y
+        // desaparecer en el siguiente movía el reloj ~126dp. Aquí la absorbe el spacer y no
+        // desplaza a nadie.
+        if (step.weighted) {
+            WeightFeedback(vm, step, accent, t)
+            Spacer(Modifier.height(12.dp))
+        }
+
         // Las instrucciones se probaron aquí, llenando el hueco del vídeo, y el usuario las
         // descartó: viven detrás de su botón. Así que el hueco vuelve a ser solo del vídeo,
         // y sin vídeo el reloj se queda con él, centrado, como antes de aquella prueba.
@@ -700,13 +709,6 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             }
         }
         Spacer(Modifier.height(16.dp))
-
-        if (step.weighted) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                WeightFeedback(vm, step, accent, t)
-                Spacer(Modifier.height(12.dp))
-            }
-        }
 
         // Siempre visibles, en toda etapa y en cualquier modo: son el mando de la corrida.
         // Además es lo que hace innecesaria cualquier excepción en el auto-ocultado, porque
@@ -992,13 +994,24 @@ private fun InstructionsSheet(target: InstructionsTarget, onDismiss: () -> Unit)
 
 @Composable
 private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
+    // Cuando no hay siguiente se pinta VACIO, no se deja de pintar. Antes hacia `return` y
+    // en el ultimo ejercicio los controles, que estan justo encima, se descolgaban ~20dp:
+    // un control cambiando de sitio solo porque se acaba el training. Un Text vacio ocupa
+    // su linea igual, asi que el hueco es identico por construccion y no hay numero que
+    // mantener a mano.
     val steps = vm.playerSteps
-    if (steps.isEmpty()) return
     val idx = vm.playerIndex
     val nextWork = steps.drop(idx + 1).firstOrNull { it.kind == StepKind.WORK }
-    if (nextWork == null) return
-    val nextName = ExerciseCatalog.display(nextWork.ownerExerciseId, nextWork.title.ifBlank { nextWork.ownerName }, t.locale.language)
-    val text = "${t.nextLabel}: $nextName".uppercase()
+    val text = if (nextWork == null) {
+        ""
+    } else {
+        val nextName = ExerciseCatalog.display(
+            nextWork.ownerExerciseId,
+            nextWork.title.ifBlank { nextWork.ownerName },
+            t.locale.language,
+        )
+        "${t.nextLabel}: $nextName".uppercase()
+    }
 
     Text(
         text,
