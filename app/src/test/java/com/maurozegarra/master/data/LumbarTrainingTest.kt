@@ -125,4 +125,51 @@ class LumbarTrainingTest {
         assertTrue(pasos.any { it.contains("first hour after waking up") })
         assertTrue(pasos.any { it.contains("radiates down the leg") })
     }
+
+    @Test
+    fun `el id del training no se mueve`() {
+        // Es el que quedo sembrado en el dispositivo del usuario.
+        assertEquals(950016L, training.id)
+        assertEquals(MasterDefaults.LUMBAR_ID, training.id)
+    }
+
+    // ---------- La variante de dia malo (TD-088) ----------
+
+    private val badDay = MasterDefaults.lumbarBadDayTraining("en")
+
+    @Test
+    fun `el dia malo abre con movilidad y camina despues`() {
+        assertEquals(
+            listOf("Mobility", "Short Walk", "McGill Big 3", "Hip & Glute"),
+            badDay.workouts.map { it.name },
+        )
+    }
+
+    @Test
+    fun `el dia malo camina 6 minutos en vez de 12`() {
+        assertEquals(360, badDay.workouts[1].exercises.single().workValue)
+    }
+
+    @Test
+    fun `el dia malo no sube nada en McGill`() {
+        fun forma(t: com.maurozegarra.master.model.Training) =
+            t.workouts.first { it.name == "McGill Big 3" }.exercises.map {
+                Triple(it.exerciseId, it.sets to it.workValue, it.setList.map { s -> s.restSec })
+            }
+
+        assertEquals(forma(training), forma(badDay))
+    }
+
+    @Test
+    fun `el bloque de cadera va al final, donde se puede saltar`() {
+        assertEquals("Hip & Glute", badDay.workouts.last().name)
+    }
+
+    @Test
+    fun `los dos trainings lumbares no comparten ningun id`() {
+        fun ids(t: com.maurozegarra.master.model.Training) =
+            listOf(t.id) + t.workouts.flatMap { w -> listOf(w.id) + w.exercises.map { it.id } }
+
+        assertTrue(ids(training).none { it in ids(badDay) })
+    }
 }

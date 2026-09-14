@@ -327,6 +327,15 @@ object MasterDefaults {
 
 
     /**
+     * Ids fijos de los dos trainings lumbares.
+     *
+     * Van escritos y no salidos del contador para que reordenar el codigo no pueda moverlos:
+     * 950016 es el id con el que LUMBAR quedo sembrado en el dispositivo del usuario.
+     */
+    const val LUMBAR_ID = 950016L
+    const val LUMBAR_BAD_DAY_ID = 951016L
+
+    /**
      * Training "LUMBAR": la rutina de columna lumbar (McGill Big 3 + trabajo de cadera).
      *
      * Se siembra una vez, como Friki Niki, y a partir de ahi es del usuario: editarlo no
@@ -336,17 +345,74 @@ object MasterDefaults {
      * 4, otros 30 s, 2-, y eso cabe en UN ejercicio de 12 series gracias al descanso por
      * serie (TD-085). Antes hacian falta tres ejercicios por movimiento y el historial los
      * contaba como tres.
-     *
-     * Las notas van en ingles aunque los nombres sigan al catalogo: la app es English-only
-     * y [lang] solo decide como se llama cada cosa.
      */
     fun lumbarTraining(lang: String): Training {
-        // Fuera del rango de los otros defaults (1.. y 1000..) y muy por debajo de los ids
-        // que genera el reloj en tiempo de ejecucion.
-        var seq = 950000L
-        fun id(): Long = seq++
+        val b = LumbarBlocks(lang, seqStart = 950000L)
+        val now = System.currentTimeMillis()
+        return Training(
+            id = LUMBAR_ID,
+            name = "LUMBAR",
+            workouts = listOf(
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Brisk pace, arms loose"),
+                b.mobility(),
+                b.mcgill(),
+                b.hipGlute(),
+                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "Easy. No toe-touch stretching after"),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
 
-        fun ex(
+    /**
+     * Training "LUMBAR (bad day)": la misma rutina reordenada para un dia de crisis (TD-088).
+     *
+     * Sale de la primera corrida, el 13-sep-2026 (ver `docs/coach-log.md`): los 12 minutos
+     * de caminata de entrada no bajaron el dolor y lo que destrabo fue la movilidad, sobre
+     * todo la bisagra de cadera. Ademas la hizo media hora despues de levantarse tras una
+     * manana en cama, que es la peor ventana para cargar la columna.
+     *
+     * Por eso cambia el ORDEN y la dosis de la caminata, no el contenido: la movilidad
+     * abre, la caminata se acorta a 6 minutos y pasa detras, McGill se queda igual -no se
+     * sube nada en un dia malo- y el bloque de cadera va al final, donde se puede saltar
+     * con el skip del player si ese dia no toca. Saltar ya queda registrado, asi que el
+     * dato para la proxima decision se guarda solo.
+     *
+     * Es un training aparte y no una edicion del otro: el normal ya esta validado para un
+     * dia normal, y tener los dos permite comparar en la bitacora que paso con cada orden.
+     */
+    fun lumbarBadDayTraining(lang: String): Training {
+        val b = LumbarBlocks(lang, seqStart = 951000L)
+        val now = System.currentTimeMillis()
+        return Training(
+            id = LUMBAR_BAD_DAY_ID,
+            name = "LUMBAR (bad day)",
+            workouts = listOf(
+                b.mobility(),
+                b.walk(if (lang == "es") "Caminata corta" else "Short Walk", sec = 360, note = "After the mobility, not before"),
+                b.mcgill(),
+                b.hipGlute(),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
+     * Los bloques de la rutina lumbar, compartidos por los dos trainings.
+     *
+     * Existe porque las dos versiones son el **mismo contenido en otro orden** -eso es lo
+     * que cambia en un dia de crisis, no los ejercicios-, y duplicarlos dejaria dos sitios
+     * donde corregir la proxima vez que un dato pida ajustar algo.
+     *
+     * [seqStart] separa los ids de un training y del otro.
+     */
+    private class LumbarBlocks(private val lang: String, seqStart: Long) {
+
+        private var seq = seqStart
+        private fun id(): Long = seq++
+
+        private fun ex(
             exerciseId: String,
             note: String = "",
             sets: Int = 1,
@@ -369,12 +435,16 @@ object MasterDefaults {
             setList = setList,
         )
 
-        fun reps(exerciseId: String, count: Int, note: String = "", sets: Int = 1, rest: Int = 0, prep: Int = 0): Exercise =
+        private fun reps(exerciseId: String, count: Int, note: String = "", sets: Int = 1, rest: Int = 0, prep: Int = 0): Exercise =
             ex(exerciseId, note = note, sets = sets, mode = WorkMode.REPS, work = count, rest = rest, prep = prep)
 
         // Un movimiento de McGill entero: 12 aguantes de 10 s con 3 s entre ellos, y 30 s
         // al cerrar el bloque de 6 (serie 6) y el de 4 (serie 10). La ultima no descansa.
-        fun pyramid(exerciseId: String, note: String): Exercise = ex(
+        //
+        // Los 10 s no se tocan al progresar: se suben los aguantes por bloque (8/6/4,
+        // 10/8/6). Pasado ese tiempo la calidad del bracing cae y el ejercicio cobra mas
+        // de lo que da.
+        private fun pyramid(exerciseId: String, note: String): Exercise = ex(
             exerciseId,
             note = note,
             sets = 12,
@@ -386,15 +456,13 @@ object MasterDefaults {
             },
         )
 
-        val warmWalk = Workout(
+        fun walk(name: String, sec: Int, note: String): Workout = Workout(
             id = id(),
-            name = if (lang == "es") "Caminata de entrada" else "Warm Walk",
-            exercises = listOf(
-                ex("ex_walk", note = "Brisk pace, arms loose", work = 720),
-            ),
+            name = name,
+            exercises = listOf(ex("ex_walk", note = note, work = sec)),
         )
 
-        val mobility = Workout(
+        fun mobility(): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Movilidad" else "Mobility",
             exercises = listOf(
@@ -403,7 +471,7 @@ object MasterDefaults {
             ),
         )
 
-        val mcgill = Workout(
+        fun mcgill(): Workout = Workout(
             id = id(),
             name = "McGill Big 3",
             exercises = listOf(
@@ -414,7 +482,7 @@ object MasterDefaults {
             ),
         )
 
-        val hipGlute = Workout(
+        fun hipGlute(): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
             exercises = listOf(
@@ -422,23 +490,6 @@ object MasterDefaults {
                 reps("ex_suitcase_carry", 2, note = "One trip of 30-40 m per side", sets = 3, rest = 60, prep = 10),
                 reps("ex_box_squat", 8, note = "No weight, chest up", sets = 3, rest = 60, prep = 10),
             ),
-        )
-
-        val coolWalk = Workout(
-            id = id(),
-            name = if (lang == "es") "Caminata de cierre" else "Cool Walk",
-            exercises = listOf(
-                ex("ex_walk", note = "Easy. No toe-touch stretching after", work = 300),
-            ),
-        )
-
-        val now = System.currentTimeMillis()
-        return Training(
-            id = id(),
-            name = "LUMBAR",
-            workouts = listOf(warmWalk, mobility, mcgill, hipGlute, coolWalk),
-            createdAt = now,
-            updatedAt = now,
         )
     }
 

@@ -160,7 +160,9 @@ class MasterViewModel(
             trainings.add(MasterDefaults.masterTraining(lang()))
             trainings.add(MasterDefaults.frikiNikiTraining(lang()))
             trainings.add(MasterDefaults.lumbarTraining(lang()))
+            trainings.add(MasterDefaults.lumbarBadDayTraining(lang()))
             seedLumbarInstructions()
+            store.setLumbarBadDaySeeded()
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
             store.setMasterV3Seeded()
@@ -193,6 +195,11 @@ class MasterViewModel(
                 trainings.add(MasterDefaults.lumbarTraining(lang()))
                 seedLumbarInstructions()
                 store.setLumbarSeeded()
+                changed = true
+            }
+            if (!store.isLumbarBadDaySeeded()) {
+                trainings.add(MasterDefaults.lumbarBadDayTraining(lang()))
+                store.setLumbarBadDaySeeded()
                 changed = true
             }
             if (changed) persist()

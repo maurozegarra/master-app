@@ -81,6 +81,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isLumbarCleanupDone(): Boolean = prefs.getBoolean(KEY_LUMBAR_CLEANUP, false)
     fun setLumbarCleanupDone() { prefs.edit().putBoolean(KEY_LUMBAR_CLEANUP, true).apply() }
 
+    /** Marca de migracion: si ya se sembro el training "LUMBAR (bad day)" (TD-088). */
+    fun isLumbarBadDaySeeded(): Boolean = prefs.getBoolean(KEY_LUMBAR_BAD_DAY, false)
+    fun setLumbarBadDaySeeded() { prefs.edit().putBoolean(KEY_LUMBAR_BAD_DAY, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         val items = TrainingJson.decode(raw)
@@ -184,6 +188,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_MASTER_V3 = "master_v3_seeded"
         const val KEY_LUMBAR_SEEDED = "lumbar_seeded"
         const val KEY_LUMBAR_CLEANUP = "lumbar_cleanup_done"
+        const val KEY_LUMBAR_BAD_DAY = "lumbar_bad_day_seeded"
         const val MAX_SESSIONS = 200
     }
 }
