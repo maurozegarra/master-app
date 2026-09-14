@@ -57,6 +57,19 @@ object ExerciseCatalog {
         Triple("ex_kicks", "Patadas", "Kicks"),
         Triple("ex_cable_pull", "Polea", "Cable Pull"),
         Triple("ex_walking_dog", "Perro caminando", "Walking Dog"),
+        // Columna lumbar (McGill Big 3 + cadera)
+        Triple("ex_walk", "Caminata", "Walk"),
+        Triple("ex_hip_hinge", "Bisagra de cadera", "Hip Hinge"),
+        Triple("ex_curl_up", "Curl-up", "Curl-up"),
+        // Izquierda y derecha son dos entradas y no una con nota "cada lado" porque el
+        // historial agrupa por ejercicio dentro del workout: con un solo id, las series
+        // de un lado pisarian las del otro y se perderia la mitad del registro.
+        Triple("ex_side_plank_l", "Plancha lateral izquierda", "Side Plank L"),
+        Triple("ex_side_plank_r", "Plancha lateral derecha", "Side Plank R"),
+        Triple("ex_bird_dog", "Bird dog", "Bird Dog"),
+        Triple("ex_glute_bridge", "Puente de gluteos", "Glute Bridge"),
+        Triple("ex_suitcase_carry", "Suitcase carry", "Suitcase Carry"),
+        Triple("ex_box_squat", "Sentadilla a caja", "Box Squat"),
         // Movilidad de columna
         Triple("ex_kneeling_spine_extension", "Extensión de columna arrodillado", "Kneeling Spine Extension"),
         Triple("ex_cobra_to_child", "Cobra a postura del niño", "Cobra to Child's Pose"),

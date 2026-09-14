@@ -158,9 +158,12 @@ class MasterViewModel(
         if (firstRun && trainings.isEmpty()) {
             trainings.add(MasterDefaults.masterTraining(lang()))
             trainings.add(MasterDefaults.frikiNikiTraining(lang()))
+            trainings.add(MasterDefaults.lumbarTraining(lang()))
+            seedLumbarInstructions()
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
             store.setMasterV3Seeded()
+            store.setLumbarSeeded()
             persist()
         } else {
             var changed = false
@@ -185,6 +188,12 @@ class MasterViewModel(
                 store.setMasterV3Seeded()
                 changed = true
             }
+            if (!store.isLumbarSeeded()) {
+                trainings.add(MasterDefaults.lumbarTraining(lang()))
+                seedLumbarInstructions()
+                store.setLumbarSeeded()
+                changed = true
+            }
             if (changed) persist()
         }
         observePlayer()
@@ -197,6 +206,18 @@ class MasterViewModel(
         // que cualquier vuelta a primer plano. Ademas seria imposible: syncAssignments lee
         // `syncing`, que es un mutableStateOf declarado mas abajo, y los inicializadores
         // corren en orden de declaracion — desde el init su delegado todavia es null.
+    }
+
+    /**
+     * Instrucciones del training lumbar, sin pisar las que ya haya.
+     *
+     * El merge no es un detalle: `ex_cat_cow` es del catalogo y puede traer las que
+     * escribio el usuario, y sembrar encima se las borraria sin que las pidiera nadie.
+     */
+    private fun seedLumbarInstructions() {
+        val current = mediaStore.load()
+        val merged = current + MasterDefaults.lumbarInstructions().filterKeys { it !in current }
+        if (merged != current) mediaStore.save(merged)
     }
 
     private fun migrateRestorePrefs() {

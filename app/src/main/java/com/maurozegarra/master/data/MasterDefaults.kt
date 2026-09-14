@@ -1,6 +1,7 @@
 package com.maurozegarra.master.data
 
 import com.maurozegarra.master.model.Exercise
+import com.maurozegarra.master.model.ExerciseMedia
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.WorkMode
 import com.maurozegarra.master.model.WorkSet
@@ -323,6 +324,201 @@ object MasterDefaults {
             updatedAt = now,
         )
     }
+
+
+    /**
+     * Training "LUMBAR": la rutina de columna lumbar (McGill Big 3 + trabajo de cadera).
+     *
+     * Se siembra una vez, como Friki Niki, y a partir de ahi es del usuario: editarlo no
+     * lo devuelve a este estado.
+     *
+     * Los tres de McGill van en piramide descendente -6 aguantes de 10 s, 30 s de respiro,
+     * 4, otros 30 s, 2-, y eso cabe en UN ejercicio de 12 series gracias al descanso por
+     * serie (TD-085). Antes hacian falta tres ejercicios por movimiento y el historial los
+     * contaba como tres.
+     *
+     * Las notas van en ingles aunque los nombres sigan al catalogo: la app es English-only
+     * y [lang] solo decide como se llama cada cosa.
+     */
+    fun lumbarTraining(lang: String): Training {
+        // Fuera del rango de los otros defaults (1.. y 1000..) y muy por debajo de los ids
+        // que genera el reloj en tiempo de ejecucion.
+        var seq = 950000L
+        fun id(): Long = seq++
+
+        fun ex(
+            exerciseId: String,
+            note: String = "",
+            sets: Int = 1,
+            mode: WorkMode = WorkMode.TIME,
+            work: Int = 30,
+            prep: Int = 0,
+            rest: Int = 0,
+            setList: List<WorkSet> = emptyList(),
+        ): Exercise = Exercise(
+            id = id(),
+            exerciseId = exerciseId,
+            name = ExerciseCatalog.name(exerciseId, lang),
+            note = note,
+            prepareSec = prep,
+            sets = sets,
+            workMode = mode,
+            workValue = work,
+            restSec = rest,
+            restSkipOnLastSet = true,
+            setList = setList,
+        )
+
+        fun reps(exerciseId: String, count: Int, note: String = "", sets: Int = 1, rest: Int = 0, prep: Int = 0): Exercise =
+            ex(exerciseId, note = note, sets = sets, mode = WorkMode.REPS, work = count, rest = rest, prep = prep)
+
+        // Un movimiento de McGill entero: 12 aguantes de 10 s con 3 s entre ellos, y 30 s
+        // al cerrar el bloque de 6 (serie 6) y el de 4 (serie 10). La ultima no descansa.
+        fun pyramid(exerciseId: String, note: String): Exercise = ex(
+            exerciseId,
+            note = note,
+            sets = 12,
+            work = 10,
+            prep = 20,
+            rest = 3,
+            setList = (0 until 12).map { i ->
+                WorkSet(reps = 10, restSec = if (i == 5 || i == 9) 30 else null)
+            },
+        )
+
+        val warmWalk = Workout(
+            id = id(),
+            name = if (lang == "es") "Caminata de entrada" else "Warm Walk",
+            exercises = listOf(
+                ex("ex_walk", note = "Brisk pace, arms loose", work = 720),
+            ),
+        )
+
+        val mobility = Workout(
+            id = id(),
+            name = if (lang == "es") "Movilidad" else "Mobility",
+            exercises = listOf(
+                reps("ex_cat_cow", 8, note = "6-8 slow cycles", prep = 10),
+                reps("ex_hip_hinge", 10, note = "Stick on nape, mid-back and sacrum", prep = 10),
+            ),
+        )
+
+        val mcgill = Workout(
+            id = id(),
+            name = "McGill Big 3",
+            exercises = listOf(
+                pyramid("ex_curl_up", "Alternate the bent leg between blocks"),
+                pyramid("ex_side_plank_l", "Elbow under the shoulder, knees at 90"),
+                pyramid("ex_side_plank_r", "Elbow under the shoulder, knees at 90"),
+                pyramid("ex_bird_dog", "Alternate sides between holds"),
+            ),
+        )
+
+        val hipGlute = Workout(
+            id = id(),
+            name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
+            exercises = listOf(
+                reps("ex_glute_bridge", 12, note = "Push through the heels", sets = 3, rest = 60, prep = 10),
+                reps("ex_suitcase_carry", 2, note = "One trip of 30-40 m per side", sets = 3, rest = 60, prep = 10),
+                reps("ex_box_squat", 8, note = "No weight, chest up", sets = 3, rest = 60, prep = 10),
+            ),
+        )
+
+        val coolWalk = Workout(
+            id = id(),
+            name = if (lang == "es") "Caminata de cierre" else "Cool Walk",
+            exercises = listOf(
+                ex("ex_walk", note = "Easy. No toe-touch stretching after", work = 300),
+            ),
+        )
+
+        val now = System.currentTimeMillis()
+        return Training(
+            id = id(),
+            name = "LUMBAR",
+            workouts = listOf(warmWalk, mobility, mcgill, hipGlute, coolWalk),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
+     * Instrucciones de los ejercicios de [lumbarTraining], en ingles como el resto del app.
+     *
+     * Las dos reglas de la rutina -no entrenar en la primera hora tras levantarse, y que
+     * hacer si el dolor irradia a la pierna- viven en la caminata de entrada, que es el
+     * primer ejercicio del training y por tanto lo primero que se abre.
+     *
+     * Quien las siembre debe respetar lo que el usuario ya tenga escrito: eso es suyo.
+     */
+    fun lumbarInstructions(): Map<String, ExerciseMedia> = mapOf(
+        "ex_walk" to ExerciseMedia(
+            listOf(
+                "Brisk pace, arms loose. It hydrates the disc and warms the hip up.",
+                "If the pain drops while walking, good sign to carry on with the rest.",
+                "Do not train in the first hour after waking up: the disc is more hydrated and lumbar flexion is riskier there. Let 60-90 minutes pass.",
+                "If anything radiates down the leg, drop it for the day and write it down for the physio. If the pain centralises, from the leg back to the spine, you are on track.",
+            ),
+        ),
+        "ex_cat_cow" to ExerciseMedia(
+            listOf(
+                "6 to 8 slow cycles through a comfortable range.",
+                "It is lubrication, not a stretch: do not force the end range.",
+            ),
+        ),
+        "ex_hip_hinge" to ExerciseMedia(
+            listOf(
+                "Stick or broom against the nape, mid-back and sacrum.",
+                "Hinge at the hip keeping the three contact points.",
+                "This is the pattern that protects you the rest of the day.",
+            ),
+        ),
+        "ex_curl_up" to ExerciseMedia(
+            listOf(
+                "Hands under the lower back, palms down. One leg bent, the other straight.",
+                "Lift head and shoulders a few centimetres, as one rigid block.",
+                "The chin does not tuck into the chest and the lower back does not flatten.",
+                "Breathe normally through the hold: holding your breath means you are bracing too hard.",
+                "Alternate the bent leg between blocks.",
+            ),
+        ),
+        "ex_side_plank_l" to sidePlankSteps(),
+        "ex_side_plank_r" to sidePlankSteps(),
+        "ex_bird_dog" to ExerciseMedia(
+            listOf(
+                "Opposite arm and leg, up to shoulder and hip height, no higher.",
+                "The back stays still: if the hip tilts, you went lower than your control.",
+                "Alternate sides between holds.",
+            ),
+        ),
+        "ex_glute_bridge" to ExerciseMedia(
+            listOf(
+                "Push through the heels, squeeze the glute at the top.",
+                "If you feel the lower back working, you are not using the glute.",
+            ),
+        ),
+        "ex_suitcase_carry" to ExerciseMedia(
+            listOf(
+                "Dumbbell or anything with a handle, on one side only.",
+                "30-40 m per side, walking tall without leaning towards the weight.",
+                "One of the best there is for the core with minimal load on the spine.",
+            ),
+        ),
+        "ex_box_squat" to ExerciseMedia(
+            listOf(
+                "To a box or a chair, no weight.",
+                "Controlled on the way down until you touch, then stand up. Chest up.",
+            ),
+        ),
+    )
+
+    private fun sidePlankSteps() = ExerciseMedia(
+        listOf(
+            "Elbow under the shoulder, knees bent at 90 and resting on the floor.",
+            "Straight line shoulder, hip and knee.",
+            "Do not let the hip drop or rotate the chest towards the floor.",
+        ),
+    )
 
     private fun sideNote(lang: String) = if (lang == "es") "cada lado" else "each side"
     private fun altNote(lang: String) = if (lang == "es") "alternado" else "alternating"

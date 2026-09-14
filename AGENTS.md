@@ -105,8 +105,73 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 .\build-release.ps1 -Message "release: TD-NNN descripción"
 ```
 
+## Cómo poner contenido en el teléfono
+
+**Regla: los trainings, los ejercicios y los vídeos entran DESDE EL CÓDIGO. Nunca se le
+pide al usuario que importe un respaldo.** Importar (`Ajustes → Import data`) reemplaza
+*todos* sus datos, así que obliga a reconstruir su estado completo en un archivo, depende
+de que el respaldo esté al día y lo deja haciendo a mano algo que el repo ya automatiza.
+Si un asistente termina diciendo "cópialo tú al teléfono", se equivocó de camino: hay uno
+mejor y lleva aquí desde el principio.
+
+### Sembrar un training
+
+Tres archivos y un `build-debug.ps1`. El training aparece solo al abrir la app, sin tocar
+ningún dato del usuario.
+
+1. **`data/MasterDefaults.kt`** — una función que construye el `Training`. Mira
+   `lumbarTraining()` como plantilla: helpers locales `ex`/`reps` para no repetir campos,
+   `ExerciseCatalog.name(id, lang)` para el nombre, y `var seq` con un rango de ids propio
+   (Master usa 1.., Friki Niki 1000.., LUMBAR 950000..). El rango tiene que estar libre y
+   muy por debajo de los ids que genera el reloj en tiempo de ejecución
+   (`nextId = System.currentTimeMillis()`).
+2. **`data/WorkoutStore.kt`** — una marca de migración: `isXxxSeeded()` / `setXxxSeeded()`
+   sobre una `KEY_XXX_SEEDED` nueva. Es lo que hace que se siembre **una sola vez**: si el
+   usuario lo edita o lo borra, no vuelve.
+3. **`MasterViewModel.kt` (el `init`)** — agregarlo en las **dos** ramas: la de instalación
+   limpia (`firstRun`) y la de instalación existente (`if (!store.isXxxSeeded())`, con
+   `changed = true`). Olvidar la segunda es el error clásico: compila, pasa los tests, y en
+   el teléfono del usuario no aparece nada.
+
+Las **instrucciones** de los ejercicios se siembran igual, con `lumbarInstructions()` y
+`seedLumbarInstructions()` en el ViewModel, y van **con merge y sin pisar** lo que el
+usuario ya tenga escrito: un `exerciseId` del catálogo puede traer instrucciones suyas.
+
+Los **ejercicios nuevos** van al `ExerciseCatalog` (id `ex_*`, nombre ES y EN), no como
+ejercicios propios: así tienen id estable para el vídeo y salen en el selector.
+
+El training sembrado llega a **cualquier** instalación del app, incluidas las de otras
+personas. Si el contenido es solo para un teléfono, el camino no es sembrar sino asignar
+(TD-063 / TD-066).
+
+### Publicar un vídeo
+
+Los vídeos **no** viajan dentro del APK ni dentro del respaldo. Hay dos caminos y solo uno
+es automatizable:
+
+- **Publicado (`repo/`)** — el manifiesto `videos.json` de la raíz del repo. Es el que
+  puede hacer un asistente de punta a punta:
+  1. Renombrar el `.mp4` a `<exerciseId>.mp4` (el id del catálogo, tal cual: es el nombre
+     del archivo en la caché).
+  2. `gh release upload videos <exerciseId>.mp4` — el release fijo `videos`, el mismo que
+     `build-release.ps1` tiene prohibido borrar.
+  3. Agregar la entrada a `videos.json`: `file`, `rev` (subir `rev` reemplaza un vídeo ya
+     publicado; el nombre en caché cambia y la versión nueva convive con la vieja) y
+     `bytes` (permite detectar descargas cortadas).
+  4. Commit y push de `videos.json` a `main`. El app lo lee de
+     `raw.githubusercontent.com/.../main/videos.json` y descarga cada vídeo bajo demanda.
+     **No hace falta publicar una versión del app.**
+- **Propio (`own/`)** — el que el usuario asigna desde la ficha del ejercicio. Gana sobre
+  el publicado, pero vive en el directorio privado del app: no se puede escribir por `adb`
+  en un build de release, no viaja con la asignación y no se recupera solo. Es una
+  preferencia del dispositivo, no un camino para meter contenido.
+
 ## Reglas de oro
 
+- **Contenido nuevo se siembra desde el código, no se importa.** Trainings de prueba,
+  ejercicios y vídeos tienen su camino automatizado (ver "Cómo poner contenido en el
+  teléfono"). Pedirle al usuario que copie un archivo al teléfono y lo importe es
+  señal de haber elegido mal: importar reemplaza todos sus datos.
 - **No implementar sin autorización explícita del usuario.** Registrar el TD, mostrar qué se va a hacer y esperar confirmación antes de tocar código.
 - **Checklist pre-fix (antes de proponer cualquier cambio):**
   1. **¿Estoy parcheando el síntoma o arreglando la causa?** — Investigar el flujo completo antes de tocar código. No asumir que el primer punto de falla es la causa.
