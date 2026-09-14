@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-089",
+      "title": "Registrar como se sintio la sesion, no solo que series se hicieron",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "EL HUECO: el historial guarda que se entreno (SessionLog: series completadas, saltadas, peso, duracion) pero no COMO se sintio, que es el dato con el que se ajusta una rutina de rehabilitacion. Hoy lo unico parecido es el feedback de peso por ejercicio (feedbackDeltaKg, 'How did the weight feel?'), que no aplica a un training sin carga. POR QUE IMPORTA AHORA: el 13-sep-2026 el usuario paso a pedir que el asistente le arme y ajuste las rutinas (ver docs/coach.md). Ese ciclo se alimenta de dos cosas: lo que registra el app y lo que el cuenta. Lo segundo hoy vive solo en la conversacion, y una conversacion no se consulta dentro de seis semanas. QUE HARIA FALTA, minimo: al terminar una sesion, dolor antes y despues (0-10) y donde se siente -centrado en la espalda o irradiado a la pierna-. Esa segunda pregunta no es cosmetica: que el dolor se centralice o se irradie es lo que decide si un ejercicio sigue en la rutina. Opcionalmente, una nota libre por sesion. A DECIDIR ANTES DE IMPLEMENTAR: si va en SessionLog (viaja con el respaldo y con el historial, y hay que versionar SessionJson) o en un registro aparte; si se pregunta siempre o solo en los trainings marcados; y como se ensena despues, porque un numero por sesion sin una linea de tiempo al lado no dice nada. No confundir con TD-042 (resumen de stats en Historial), que es presentacion de lo que ya se guarda."
+    },
+    {
+      "id": "TD-088",
+      "title": "Variante de dia malo: la movilidad antes de la caminata",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "EVIDENCIA, de la primera corrida de LUMBAR el 13-sep-2026 con el usuario en plena crisis (ver docs/coach-log.md): los 12 minutos de caminata de entrada NO bajaron el dolor -'bajo de la caminadora y el dolor seguia'-, y lo que destrabo fue la movilidad: 'al terminar de hacer CAT-COW, empece a sentirme bien, y con HIP HINGE, el dolor se redujo drasticamente'. Al final de la rutina el dolor era minimo y el resto del dia estuvo tranquilo. LECTURA: el orden del PDF asume un dia normal, y ese no lo era -amanecio 'hecho un tronco, casi sin movilidad'-. En una espalda bloqueada, caminar 12 minutos antes de recuperar el patron de cadera es pedirle que se mueva con el patron que molesta. LA PROPUESTA: un segundo training, LUMBAR (bad day), para los dias de crisis: movilidad primero (gato-camello y bisagra de cadera), caminata corta despues (5-6 min en vez de 12), los tres de McGill igual pero sin subir volumen, y sin el bloque de cadera y gluteo. El usuario elige cual corre; no es rotativo, porque la rotacion avanza sola al completar y aqui la decision es suya cada dia. POR QUE DOS TRAININGS Y NO EDITAR EL QUE HAY: el que hay funciona para un dia normal y ya esta validado. Tener los dos permite comparar en la bitacora que paso con cada orden, que es justamente el dato que falta. PENDIENTE ANTES DE IMPLEMENTAR: confirmar con el usuario a que hora entreno respecto de levantarse (la rutina pide dejar pasar 60-90 min) y si el dolor se irradiaba a la pierna o se quedaba centrado. Las dos respuestas pueden cambiar la variante. Requiere su aprobacion explicita."
+    },
+    {
       "id": "TD-087",
       "title": "Borrar los cinco ejercicios propios que quedaron sin usar",
       "category": "Mantenimiento",

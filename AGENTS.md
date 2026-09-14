@@ -21,6 +21,11 @@ El Forge es el sistema de verificación y to-do del proyecto. Define:
 
 **MASTER** — App Android (Kotlin + Jetpack Compose, Material 3) para crear y ejecutar rutinas de entrenamiento con un player tipo timer con intervalos.
 
+El asistente no solo escribe el código: **también arma las rutinas del usuario y las ajusta
+con lo que pasa en cada sesión**. Ese rol tiene su propio protocolo en `docs/coach.md`, y su
+bitácora en `docs/coach-log.md`. Si el pedido es sobre la rutina y no sobre el app, empezar
+por ahí.
+
 - Paquete: `com.maurozegarra.master`
 - Dominio: `Training` > `Workout` > `Exercise` (los workouts pueden ser rotativos)
 - Idioma: solo inglés
@@ -234,6 +239,9 @@ es automatizable:
 
 ## Documentación
 
+- `docs/coach.md` — **el rol de coach**: de dónde sale la rutina, con qué datos se ajusta y
+  qué se le pide al usuario después de entrenar. Leer antes de proponer o tocar la rutina.
+- `docs/coach-log.md` — bitácora: cómo se sintió cada sesión y qué se cambió por eso.
 - `docs/master-forge.md` — sistema de verificación y to-do (leer antes de cambiar).
 - `docs/forge-todo.json` — fuente de verdad del to-do (no editar `to-do.md` directamente).
 - `docs/hoja-de-ruta.md` — historial del proyecto (Fases 0–8).
