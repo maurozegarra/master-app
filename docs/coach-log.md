@@ -38,9 +38,28 @@ No es un fallo de la rutina: es que el orden del PDF asume un día normal, y est
 **Qué se propone por esto:** una variante de día malo con la movilidad delante de la
 caminata (TD-088, pendiente de aprobación).
 
-**Lo que falta medir.** A qué hora entrenó respecto de levantarse (la rutina pide dejar
-pasar 60-90 min), y si el dolor iba a la pierna o se quedaba centrado. Preguntado; se
-completa cuando responda.
+**Los tres datos que faltaban, ya respondidos:**
+
+- **Horario.** Estuvo en cama hasta las 12:30 y empezó a caminar a la 1:00. Media hora
+  después de levantarse, tras una mañana entera acostado. Es la peor ventana posible para
+  cargar la columna: el disco está en su punto de mayor hidratación y la espalda, rígida.
+  La caminata no es que no sirva, es que se hizo cuando no tocaba.
+- **Irradiación: nunca.** En ningún escenario ha sentido que el dolor baje a la pierna. Es
+  la línea base más importante de este historial: el dolor es central, y **la primera vez
+  que aparezca algo en la pierna es señal, no ruido**.
+- **Hizo la rutina completa**, bloque de cadera y glúteo incluido, con suitcase carry y
+  sentadilla a caja. El dolor bajó progresivamente desde el gato-camello hasta el tercer
+  ejercicio de McGill (plancha lateral derecha) y **ahí se estabilizó: no volvió a subir**.
+
+**Lo que esto corrige.** La recomendación inicial de saltarse el bloque de cadera en día
+de crisis no se sostiene: lo hizo entero y no le empeoró nada. Lo que dice la curva es otra
+cosa —que el beneficio está en la primera mitad y que la segunda, ese día, fue
+mantenimiento— y eso es una razón para ordenar, no para recortar.
+
+**Contexto del atleta.** Ignoró la prohibición del médico de hace 15 años y ha entrenado
+con constancia desde entonces. No es una espalda desacondicionada: las dosis del PDF son
+conservadoras para él, y la progresión de McGill —más aguantes por bloque, nunca aguantes
+más largos— tiene margen en cuanto salga de la crisis.
 
 **Veredicto suyo:** *"he estado bastante tranquilo gracias a la rutina, así que me ha
 ayudado muchísimo"*.
