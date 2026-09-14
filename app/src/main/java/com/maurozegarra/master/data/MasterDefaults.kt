@@ -2,8 +2,14 @@ package com.maurozegarra.master.data
 
 import com.maurozegarra.master.model.Exercise
 import com.maurozegarra.master.model.ExerciseMedia
+import com.maurozegarra.master.model.ExerciseRecord
+import com.maurozegarra.master.model.SessionLog
+import com.maurozegarra.master.model.SessionStatus
+import com.maurozegarra.master.model.SetRecord
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.WorkMode
+import com.maurozegarra.master.model.setAt
+import com.maurozegarra.master.model.workSecAt
 import com.maurozegarra.master.model.WorkSet
 import com.maurozegarra.master.model.WeightType
 import com.maurozegarra.master.model.Workout
@@ -329,8 +335,10 @@ object MasterDefaults {
     /**
      * Ids fijos de los dos trainings lumbares.
      *
-     * Van escritos y no salidos del contador para que reordenar el codigo no pueda moverlos:
-     * 950016 es el id con el que LUMBAR quedo sembrado en el dispositivo del usuario.
+     * Van escritos y no salidos del contador porque **el historial apunta a ellos**: la
+     * sesion del 13-sep-2026 ([lumbarFirstSession]) guarda `trainingId = LUMBAR_ID`, y si
+     * ese numero se moviera al reordenar el codigo, la sesion dejaria de pertenecer a
+     * ningun training. 950016 es el que quedo sembrado en el dispositivo del usuario.
      */
     const val LUMBAR_ID = 950016L
     const val LUMBAR_BAD_DAY_ID = 951016L
@@ -397,6 +405,59 @@ object MasterDefaults {
             updatedAt = now,
         )
     }
+
+    /**
+     * La sesion del 13-sep-2026: la primera corrida de la rutina lumbar (TD-090).
+     *
+     * La hizo **sin el app** -el training no existia todavia- y pidio que quedara en el
+     * historial en vez de solo en la conversacion. Se reconstruye desde la propia rutina
+     * porque hizo todo lo prescrito: empezo a la 1:00 pm y le tomo unos 55 minutos.
+     *
+     * Es el unico registro del historial que no midio el player. Lo que se sabe de esa
+     * sesion -que el dolor bajo desde el gato-camello y se estabilizo en el tercer
+     * ejercicio de McGill- no cabe en un [SessionLog] y vive en `docs/coach-log.md`; el
+     * dia que exista TD-089 esto se podra anotar dentro del app.
+     */
+    fun lumbarFirstSession(lang: String): SessionLog {
+        val t = lumbarTraining(lang)
+        val exercises = mutableListOf<ExerciseRecord>()
+        t.workouts.forEachIndexed { wi, w ->
+            w.exercises.forEach { e ->
+                val porTiempo = e.workMode == WorkMode.TIME
+                exercises.add(
+                    ExerciseRecord(
+                        exerciseId = e.exerciseId,
+                        name = e.name,
+                        workoutName = w.name,
+                        workoutIndex = wi,
+                        setsCompleted = e.sets,
+                        totalSets = e.sets,
+                        sets = (0 until e.sets).map { i ->
+                            if (porTiempo) SetRecord(durationSec = e.workSecAt(i))
+                            else SetRecord(reps = e.setAt(i).reps)
+                        },
+                        timeBased = porTiempo,
+                        totalExercisesInWorkout = w.exercises.size,
+                    ),
+                )
+            }
+        }
+        return SessionLog(
+            id = FIRST_SESSION_ID,
+            trainingId = t.id,
+            trainingName = t.name,
+            startedAt = FIRST_SESSION_START,
+            completedAt = FIRST_SESSION_START + FIRST_SESSION_SEC * 1000L,
+            status = SessionStatus.COMPLETED,
+            exercises = exercises,
+            durationSec = FIRST_SESSION_SEC,
+        )
+    }
+
+    /** 13-sep-2026, 1:00 pm, hora de Peru: cuando se subio a la caminadora. */
+    private const val FIRST_SESSION_START = 1789322400000L
+    private const val FIRST_SESSION_SEC = 55 * 60
+    private const val FIRST_SESSION_ID = 950017L
 
     /**
      * Los bloques de la rutina lumbar, compartidos por los dos trainings.

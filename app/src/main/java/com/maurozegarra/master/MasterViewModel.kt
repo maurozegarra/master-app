@@ -29,6 +29,7 @@ import com.maurozegarra.master.model.ExerciseRecord
 import com.maurozegarra.master.model.PlayerStep
 import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.SessionLog
+import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.model.Training
@@ -163,6 +164,9 @@ class MasterViewModel(
             trainings.add(MasterDefaults.lumbarBadDayTraining(lang()))
             seedLumbarInstructions()
             store.setLumbarBadDaySeeded()
+            // Una instalacion limpia no es la del usuario: no hay sesion pasada que anotar,
+            // y sin esta marca la reconstruccion caeria en el segundo arranque.
+            store.setFirstSessionSeeded()
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
             store.setMasterV3Seeded()
@@ -204,6 +208,7 @@ class MasterViewModel(
             }
             if (changed) persist()
             cleanUpLumbarLeftovers()
+            seedFirstSession()
         }
         observePlayer()
         migrateRestorePrefs()
@@ -215,6 +220,37 @@ class MasterViewModel(
         // que cualquier vuelta a primer plano. Ademas seria imposible: syncAssignments lee
         // `syncing`, que es un mutableStateOf declarado mas abajo, y los inicializadores
         // corren en orden de declaracion — desde el init su delegado todavia es null.
+    }
+
+    /**
+     * Anota en el historial la sesion del 13-sep-2026, que el usuario hizo antes de que el
+     * training existiera en el app (TD-090).
+     *
+     * Es el unico registro que no midio el player, y va detras de su propia marca para que
+     * no se duplique. Si ese dia ya hay una sesion **completa** de LUMBAR -porque la corrio
+     * de verdad- no se anota nada: la medida gana sobre la reconstruida.
+     *
+     * La condicion pide COMPLETED y no una sesion cualquiera por lo que paso el 13-sep: el
+     * usuario corrio el training cuatro minutos para comprobar que se habia sembrado bien,
+     * y esa sesion parcial basto para que la version anterior de esto se callara y diera la
+     * siembra por hecha. Una corrida de prueba no es la sesion que se esta reconstruyendo.
+     */
+    private fun seedFirstSession() {
+        if (store.isFirstSessionSeeded()) return
+        val log = MasterDefaults.lumbarFirstSession(lang())
+        val yaEsta = store.loadSessions().any {
+            it.trainingId == log.trainingId &&
+                it.status == SessionStatus.COMPLETED &&
+                sameDay(it.completedAt, log.completedAt)
+        }
+        if (!yaEsta) store.addSession(log)
+        store.setFirstSessionSeeded()
+    }
+
+    private fun sameDay(a: Long, b: Long): Boolean {
+        val zone = java.time.ZoneId.systemDefault()
+        return java.time.Instant.ofEpochMilli(a).atZone(zone).toLocalDate() ==
+            java.time.Instant.ofEpochMilli(b).atZone(zone).toLocalDate()
     }
 
     /**

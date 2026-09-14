@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-090",
+      "title": "Anotar en el historial la sesion del 13-sep que se hizo sin el app",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PEDIDO DEL USUARIO, al aprobar TD-088: 'me gustaria que registres en el historico para tener el registro de lo que hice hoy y no solo quede en el volatil chat'. EL CASO: el 13-sep-2026 hizo la rutina lumbar completa SIN el app -el training no existia todavia, por eso TD-085 y TD-086-, asi que el historial no tiene nada de ese dia pese a ser la sesion que dio origen a todo. COMO: MasterDefaults.lumbarFirstSession() reconstruye el SessionLog desde la propia rutina, porque hizo todo lo prescrito; empezo a la 1:00 pm y le tomo unos 55 minutos. MasterViewModel.seedFirstSession() lo anota una sola vez, detras de WorkoutStore.isFirstSessionSeeded(), y **no anota nada si ese dia ya hay una sesion de LUMBAR**: si alguna vez la corre de verdad, la medida gana sobre la reconstruida. En instalacion limpia la marca se pone sin anotar: una instalacion nueva no es la suya y no tiene historial que reconstruir. EL ID FIJO: por esto LUMBAR paso a tener id escrito (MasterDefaults.LUMBAR_ID = 950016, el que quedo sembrado en su dispositivo) en vez de uno salido del contador. La sesion apunta a ese numero; si se moviera al reordenar el codigo, la sesion dejaria de pertenecer a ningun training y la lista dejaria de ordenarse por uso real. Hay test que lo fija. LO QUE NO ENTRA: que el dolor bajo desde el gato-camello y se estabilizo en el tercer ejercicio de McGill no cabe en un SessionLog. Vive en docs/coach-log.md hasta que exista TD-089. VERIFICACION: LumbarTrainingTest cubre que la sesion pertenece al training, que empieza el 13-sep-2026 a la 1:00 pm hora de Peru, que recoge los once ejercicios completos, que los aguantes quedan de 10 s y las reps sin duracion, y que sobrevive la ida y vuelta a JSON. En el dispositivo: aparece en Historial y el 13 se enciende en el calendario."
+    },
+    {
       "id": "TD-089",
       "title": "Registrar como se sintio la sesion, no solo que series se hicieron",
       "category": "Feature",

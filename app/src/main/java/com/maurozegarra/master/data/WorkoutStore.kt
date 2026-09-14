@@ -85,6 +85,16 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isLumbarBadDaySeeded(): Boolean = prefs.getBoolean(KEY_LUMBAR_BAD_DAY, false)
     fun setLumbarBadDaySeeded() { prefs.edit().putBoolean(KEY_LUMBAR_BAD_DAY, true).apply() }
 
+    /**
+     * Marca de migracion: si ya se anoto la sesion del 13-sep-2026 (TD-090).
+     *
+     * La clave lleva `_v2` porque la v1 se dio por hecha sin anotar nada: se topo con la
+     * corrida de prueba de cuatro minutos de ese mismo dia y se callo. Cambiar la clave es
+     * como se repite una siembra que quedo mal, igual que master_v2 y master_v3.
+     */
+    fun isFirstSessionSeeded(): Boolean = prefs.getBoolean(KEY_FIRST_SESSION, false)
+    fun setFirstSessionSeeded() { prefs.edit().putBoolean(KEY_FIRST_SESSION, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         val items = TrainingJson.decode(raw)
@@ -189,6 +199,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_LUMBAR_SEEDED = "lumbar_seeded"
         const val KEY_LUMBAR_CLEANUP = "lumbar_cleanup_done"
         const val KEY_LUMBAR_BAD_DAY = "lumbar_bad_day_seeded"
+        const val KEY_FIRST_SESSION = "lumbar_first_session_seeded_v2"
         const val MAX_SESSIONS = 200
     }
 }

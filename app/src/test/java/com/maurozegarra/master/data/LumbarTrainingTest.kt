@@ -3,6 +3,7 @@ package com.maurozegarra.master.data
 import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -128,7 +129,8 @@ class LumbarTrainingTest {
 
     @Test
     fun `el id del training no se mueve`() {
-        // Es el que quedo sembrado en el dispositivo del usuario.
+        // Es el que quedo sembrado en el dispositivo y al que apunta la sesion del
+        // historial: si cambia, esa sesion deja de pertenecer a ningun training.
         assertEquals(950016L, training.id)
         assertEquals(MasterDefaults.LUMBAR_ID, training.id)
     }
@@ -171,5 +173,62 @@ class LumbarTrainingTest {
             listOf(t.id) + t.workouts.flatMap { w -> listOf(w.id) + w.exercises.map { it.id } }
 
         assertTrue(ids(training).none { it in ids(badDay) })
+    }
+
+    // ---------- La sesion del 13-sep-2026 (TD-090) ----------
+
+    private val session = MasterDefaults.lumbarFirstSession("en")
+
+    @Test
+    fun `la sesion pertenece al training sembrado`() {
+        assertEquals(MasterDefaults.LUMBAR_ID, session.trainingId)
+        assertEquals("LUMBAR", session.trainingName)
+    }
+
+    @Test
+    fun `la sesion empieza a la una de la tarde del 13 de setiembre de 2026`() {
+        val zona = java.time.ZoneId.of("America/Lima")
+        val inicio = java.time.Instant.ofEpochMilli(session.startedAt).atZone(zona)
+
+        assertEquals(java.time.LocalDate.of(2026, 9, 13), inicio.toLocalDate())
+        assertEquals(13, inicio.hour)
+        assertEquals(0, inicio.minute)
+        assertEquals(55 * 60, session.durationSec)
+        assertEquals(session.durationSec * 1000L, session.completedAt - session.startedAt)
+    }
+
+    @Test
+    fun `la sesion recoge los once ejercicios, todos completos`() {
+        assertEquals(11, session.exercises.size)
+        assertTrue(session.exercises.all { it.setsCompleted == it.totalSets })
+        assertTrue(session.exercises.none { r -> r.sets.any { it.skipped } })
+        assertEquals(com.maurozegarra.master.model.SessionStatus.COMPLETED, session.status)
+    }
+
+    @Test
+    fun `cada movimiento de McGill queda con sus doce aguantes de diez segundos`() {
+        val curlUp = session.exercises.single { it.exerciseId == "ex_curl_up" }
+
+        assertEquals(12, curlUp.totalSets)
+        assertTrue(curlUp.timeBased)
+        assertTrue(curlUp.sets.all { it.durationSec == 10 })
+    }
+
+    @Test
+    fun `lo que va por repeticiones se anota con sus reps y sin duracion`() {
+        val puente = session.exercises.single { it.exerciseId == "ex_glute_bridge" }
+
+        assertFalse(puente.timeBased)
+        assertEquals(listOf(12, 12, 12), puente.sets.map { it.reps })
+        assertTrue(puente.sets.all { it.durationSec == 0 })
+    }
+
+    @Test
+    fun `la sesion sobrevive la ida y vuelta a json`() {
+        val back = com.maurozegarra.master.model.SessionJson
+            .decode(com.maurozegarra.master.model.SessionJson.encode(listOf(session)))
+            .single()
+
+        assertEquals(session, back)
     }
 }
