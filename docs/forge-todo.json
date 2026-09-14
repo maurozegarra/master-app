@@ -2,6 +2,41 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-097",
+      "title": "Caminata de cierre en la variante de dia malo",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PENDIENTE DE DECIDIR, ofrecido al usuario el 13-sep-2026 y todavia sin respuesta. LUMBAR (bad day) (TD-088) termina en el bloque de cadera y gluteo, sin la caminata de cierre de 5 minutos que si tiene el training normal. Se implemento asi porque es exactamente lo que el usuario aprobo -'movilidad, caminata de 6 min, McGill, y cadera al final'- y agregar lo que no se propuso es como se cuelan cambios que nadie pidio. EL ARGUMENTO A FAVOR: terminar una sesion caminando suave es lo que dice el PDF y en una crisis tiene sentido, sobre todo si el bloque de cadera se salta con el skip y la sesion acabaria de golpe. EL ARGUMENTO EN CONTRA: en un dia malo lo que sobra es tiempo de pie, y el propio dato del 13-sep dice que la caminata no fue lo que le hizo efecto. Es una linea de codigo en lumbarBadDayTraining(): un b.walk(...) mas al final. Pendiente solo de que el usuario elija."
+    },
+    {
+      "id": "TD-096",
+      "title": "Poder borrar un ejercicio propio desde la app",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "EL HUECO, encontrado al hacer TD-087: **el app sabe crear ejercicios propios y no sabe borrarlos**. No hay UI, no hay metodo en MasterViewModel, no hay nada: addCustomExercise() los agrega y ahi se quedan para siempre. LA CONSECUENCIA: cada intento de armar algo a mano deja basura en el selector de ejercicios para siempre. Al usuario le quedaron cinco del intento de armar la rutina lumbar y hubo que borrarlos con una migracion de codigo (TD-087), que es una respuesta desproporcionada para algo que deberia ser un swipe. LO QUE HAY QUE RESOLVER, y por eso no es solo agregar un boton: que pasa con un ejercicio propio que SI esta usado en algun training. Borrarlo dejaria a esas instancias sin nombre de catalogo y el player ensenaria el id crudo (ex_curl_up). Opciones: no dejar borrarlo y decir donde se usa; borrarlo y congelar el nombre en cada instancia, que es lo que ya hace ExerciseCatalog.display() con su fallback; o pedir confirmacion nombrando los trainings afectados. La segunda es la que encaja con como esta hecho hoy. Tambien hay que decidir que pasa con su video propio y sus instrucciones, que viven por exerciseId. Relacionado con TD-010 (catalogo expandido) y con el swipe-to-reveal que ya usan las otras listas (TD-039, TD-057)."
+    },
+    {
+      "id": "TD-095",
+      "title": "Modo distancia: ejercicios que se miden en metros",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "EL HUECO: WorkMode solo sabe de TIME y REPS. Un ejercicio que se mide en metros no se puede expresar. EL CASO QUE LO PIDIO: el suitcase carry de la rutina lumbar son '3 x 30-40 m por lado' y quedo como 2 repeticiones con avance manual y la nota 'One trip of 30-40 m per side' al lado. Funciona porque el usuario sabe lo que tiene que hacer, pero el player ensena '2 REPS', que no es lo que esta haciendo, y el historial guarda 2 reps, que no sirve para ver progreso: la carga real de ese ejercicio es el peso y los metros. DONDE TOCA: WorkMode gana DISTANCE; StepEngine trata el paso como manual igual que REPS; PlayerStep necesita llevar la distancia y su unidad; el editor, un campo mas; SetRecord, donde anotarla; y el historial, como ensenarla. Es mas ancho que TD-085 porque toca la UI del player, no solo el motor. A DECIDIR: si la unidad es fija (metros) o configurable, y si la distancia va por serie -como quedaron el trabajo y el descanso en TD-085- o es una sola del ejercicio. NO ES URGENTE: con la nota al lado la rutina se hace igual. Sube de prioridad en cuanto una rutina incluya caminatas o carries medidos, que es probable en cuanto el bloque de cadera crezca."
+    },
+    {
+      "id": "TD-094",
+      "title": "Publicar los videos de los nueve ejercicios del lumbar",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "LOS NUEVE MOVIMIENTOS que entraron al catalogo con TD-086 -ex_walk, ex_hip_hinge, ex_curl_up, ex_side_plank_l, ex_side_plank_r, ex_bird_dog, ex_glute_bridge, ex_suitcase_carry, ex_box_squat- no tienen video. El gato-camello si: usa ex_cat_cow, que ya estaba publicado desde TD-062. EL CAMINO, que es el unico automatizable y esta documentado en AGENTS.md ('Como poner contenido en el telefono'): renombrar cada mp4 a <exerciseId>.mp4, subirlo con 'gh release upload videos', agregar su entrada a videos.json con file, rev y bytes, y hacer push de videos.json a main. El app lee el manifiesto de GitHub raw y baja cada video la primera vez que hace falta. **No hay que publicar version nueva del app.** PENDIENTE DEL USUARIO: pasar los archivos. Los que ya estan publicados pesan entre 1.7 y 4.8 MB, que es la escala que conviene. DETALLE UTIL: si solo hay un clip de plancha lateral, las entradas de ex_side_plank_l y ex_side_plank_r pueden apuntar al mismo archivo; el app lo baja una vez por cada id. OJO: el push de videos.json necesita autorizacion explicita del usuario, como cualquier push."
+    },
+    {
+      "id": "TD-093",
+      "title": "Permisos por prefijo, para que los scripts dejen de pedir permiso",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "manual": "EL PROBLEMA, visto el 13-sep-2026: las tres reglas de .claude/settings.local.json son de coincidencia EXACTA, y una de ellas incluye el -Message completo de un build de hace meses ('release: TD-048 Live Update notification + TD-049 color naranja en Now Bar'). Como el mensaje cambia en cada build, esa regla no vuelve a coincidir nunca y todo termina evaluado caso por caso. Ese dia build-debug.ps1 se rechazo una vez -etiquetado como 'Git Destructive' pese a que el script no toca git- y paso sin problema al reintentarlo, y un adb push al almacenamiento compartido se rechazo y no se pudo completar. LO QUE HAY QUE HACER: reglas por PREFIJO para los scripts del repo (build-debug.ps1, build-release.ps1, verify-compile.ps1, run-tests.ps1, forge-status.ps1) con cualquier argumento, y para los adb de solo lectura que se usan a diario (devices, shell ls, pull, exec-out screencap). Y limpiar las dos entradas exactas que ya no le sirven a nadie. LO QUE NO: nada que borre datos del dispositivo. adb uninstall no entra en ninguna lista, por lo mismo de TD-052 y TD-054. POR QUE IMPORTA ahora mas que antes: el ciclo de coach (docs/coach.md) termina siempre en 'siembro y hago build', asi que cada rutina nueva pasa por ahi."
+    },
+    {
       "id": "TD-092",
       "title": "Fix: la nota del ejercicio se dibuja una linea encima de otra",
       "category": "Fix",
