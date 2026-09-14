@@ -568,7 +568,8 @@ object MasterDefaults {
             listOf(
                 "Brisk pace, arms loose. It hydrates the disc and warms the hip up.",
                 "If the pain drops while walking, good sign to carry on with the rest.",
-                "Do not train in the first hour after waking up: the disc is more hydrated and lumbar flexion is riskier there. Let 60-90 minutes pass.",
+                "First hour after waking up: what is risky then is loaded lumbar FLEXION, not moving. Mobility, walking and the McGill three are fine - the curl-up keeps the lower back from flattening on purpose. Waiting 60-90 minutes is still better when you can.",
+                "Training straight out of bed? Skip the suitcase carry or drop the weight. It is the only exercise with an external load, and compression is what costs most at that hour.",
                 "If anything radiates down the leg, drop it for the day and write it down for the physio. If the pain centralises, from the leg back to the spine, you are on track.",
             ),
         ),
@@ -621,6 +622,23 @@ object MasterDefaults {
                 "To a box or a chair, no weight.",
                 "Controlled on the way down until you touch, then stand up. Chest up.",
             ),
+        ),
+    )
+
+    /**
+     * Las indicaciones de la caminata **tal y como se sembraron el 13-sep-2026**, antes de
+     * TD-091.
+     *
+     * Existen para poder distinguir "esto lo escribio el app" de "esto lo escribio el
+     * usuario": la migracion solo reescribe el texto si sigue siendo palabra por palabra
+     * este, y si no, lo deja en paz.
+     */
+    val WALK_INSTRUCTIONS_V1 = ExerciseMedia(
+        listOf(
+            "Brisk pace, arms loose. It hydrates the disc and warms the hip up.",
+            "If the pain drops while walking, good sign to carry on with the rest.",
+            "Do not train in the first hour after waking up: the disc is more hydrated and lumbar flexion is riskier there. Let 60-90 minutes pass.",
+            "If anything radiates down the leg, drop it for the day and write it down for the physio. If the pain centralises, from the leg back to the spine, you are on track.",
         ),
     )
 

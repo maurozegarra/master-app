@@ -209,6 +209,7 @@ class MasterViewModel(
             if (changed) persist()
             cleanUpLumbarLeftovers()
             seedFirstSession()
+            updateWalkInstructions()
         }
         observePlayer()
         migrateRestorePrefs()
@@ -220,6 +221,29 @@ class MasterViewModel(
         // que cualquier vuelta a primer plano. Ademas seria imposible: syncAssignments lee
         // `syncing`, que es un mutableStateOf declarado mas abajo, y los inicializadores
         // corren en orden de declaracion — desde el init su delegado todavia es null.
+    }
+
+    /**
+     * Reescribe las indicaciones de la caminata (TD-091).
+     *
+     * Las primeras decian "no entrenes en la primera hora tras levantarte" a secas, y leido
+     * a las seis de la manana eso se entiende como "hoy no entrenes". Lo que la regla
+     * protege es la flexion lumbar con carga, no el movimiento, y esa diferencia es la que
+     * le permite decidir solo cuando no tiene margen para esperar.
+     *
+     * **Solo pisa el texto si sigue siendo palabra por palabra el que se sembro.** Si lo
+     * edito, es suyo: sembrar encima de lo que alguien escribio es la unica forma de que
+     * esto le quite algo en vez de darle.
+     */
+    private fun updateWalkInstructions() {
+        if (store.isWalkNoteUpdated()) return
+        val current = mediaStore.load()
+        val suyo = current["ex_walk"]
+        if (suyo == null || suyo == MasterDefaults.WALK_INSTRUCTIONS_V1) {
+            val nuevas = MasterDefaults.lumbarInstructions().getValue("ex_walk")
+            mediaStore.save(current + ("ex_walk" to nuevas))
+        }
+        store.setWalkNoteUpdated()
     }
 
     /**

@@ -95,6 +95,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isFirstSessionSeeded(): Boolean = prefs.getBoolean(KEY_FIRST_SESSION, false)
     fun setFirstSessionSeeded() { prefs.edit().putBoolean(KEY_FIRST_SESSION, true).apply() }
 
+    /** Marca de migracion: si ya se reescribieron las indicaciones de la caminata (TD-091). */
+    fun isWalkNoteUpdated(): Boolean = prefs.getBoolean(KEY_WALK_NOTE_V2, false)
+    fun setWalkNoteUpdated() { prefs.edit().putBoolean(KEY_WALK_NOTE_V2, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         val items = TrainingJson.decode(raw)
@@ -200,6 +204,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_LUMBAR_CLEANUP = "lumbar_cleanup_done"
         const val KEY_LUMBAR_BAD_DAY = "lumbar_bad_day_seeded"
         const val KEY_FIRST_SESSION = "lumbar_first_session_seeded_v2"
+        const val KEY_WALK_NOTE_V2 = "walk_instructions_v2"
         const val MAX_SESSIONS = 200
     }
 }

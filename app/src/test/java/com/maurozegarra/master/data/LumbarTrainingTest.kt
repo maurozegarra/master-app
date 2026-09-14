@@ -3,6 +3,7 @@ package com.maurozegarra.master.data
 import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -123,8 +124,28 @@ class LumbarTrainingTest {
     fun `el primer ejercicio lleva las dos reglas de la rutina`() {
         val pasos = MasterDefaults.lumbarInstructions().getValue("ex_walk").instructions
 
-        assertTrue(pasos.any { it.contains("first hour after waking up") })
+        assertTrue(pasos.any { it.contains("First hour after waking up") })
         assertTrue(pasos.any { it.contains("radiates down the leg") })
+    }
+
+    @Test
+    fun `la regla de la primera hora dice de que protege, no solo que no se entrene`() {
+        // Leida a las seis de la manana, "no entrenes en la primera hora" se entiende como
+        // "hoy no entrenes". Lo que cobra caro es la flexion lumbar con carga.
+        val pasos = MasterDefaults.lumbarInstructions().getValue("ex_walk").instructions
+
+        assertTrue(pasos.any { it.contains("FLEXION") })
+        assertTrue(pasos.any { it.contains("suitcase carry") })
+    }
+
+    @Test
+    fun `el texto viejo de la caminata se conserva para poder distinguirlo`() {
+        // Es lo que permite reescribirlo solo si el usuario no lo ha tocado.
+        assertNotEquals(
+            MasterDefaults.WALK_INSTRUCTIONS_V1,
+            MasterDefaults.lumbarInstructions().getValue("ex_walk"),
+        )
+        assertTrue(MasterDefaults.WALK_INSTRUCTIONS_V1.instructions.any { it.contains("Do not train in the first hour") })
     }
 
     @Test

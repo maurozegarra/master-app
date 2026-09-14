@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-092",
+      "title": "Fix: la nota del ejercicio se dibuja una linea encima de otra",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "REPORTADO POR EL USUARIO con captura del dispositivo el 13-sep-2026: 'el texto de la nota se esta apilando'. En la etapa PREPARE de Hip Hinge, la nota 'STICK ON NAPE, MID-BACK AND SACRUM' sale en tres lineas pintadas unas encima de otras, ilegible. CAUSA: el Text de la nota (PlayerScreen) pone fontSize 40sp pero no lineHeight, y la tipografia por defecto de Material -AppTypography = Typography() sin personalizar- trae un lineHeight ABSOLUTO de 20sp en bodyMedium. Con glifos de 40sp en cajas de linea de 20sp, la segunda linea se dibuja sobre la primera. No es un fallo nuevo: lleva ahi desde siempre y nunca se destapo porque las notas eran de dos o tres palabras ('each side', 'alternating') y nunca pasaban de una linea. Las notas del training lumbar (TD-086) son frases enteras y lo sacaron a la luz. EL TITULO YA LO RESOLVIA por su cuenta: titleStyle() escribe lineHeight = size * TITLE_LINE_RATIO, y el comentario de ExerciseTitle cuenta que medir el alto real de dos lineas costo una pasada en falso. A la nota le faltaba lo mismo. EL FIX: lineHeight explicito en la nota y en el contador de series, los dos con el mismo ratio del titulo, mas LineBreak.Heading en la nota para que reparta en lineas parejas en vez de dejar una palabra suelta al final. El contador de series va igual aunque hoy sea de una sola linea: comparte sitio y tamano con la nota, y su caja de linea tambien estaba a la mitad de sus glifos. NO MUEVE NADA MAS: la nota vive encima del hueco elastico, asi que crecer de una a tres lineas se lo come ese hueco y ni el reloj ni los controles cambian de sitio (lineamiento de MASTER). PENDIENTE APARTE: las notas del lumbar son largas para un slot pensado para dos palabras. Con el interlineado arreglado caben y se leen, pero si el usuario las quiere mas pequenas, eso es una decision de diseno aparte."
+    },
+    {
+      "id": "TD-091",
+      "title": "Las indicaciones de la caminata dicen de que protege la regla de la primera hora",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "EL PROBLEMA: las indicaciones sembradas decian 'Do not train in the first hour after waking up... Let 60-90 minutes pass'. Leido a las seis de la manana por alguien que ese dia NO tiene margen -el usuario aviso que por trabajo tiene que levantarse y entrenar de inmediato- eso se entiende como 'hoy no entrenes', que es justo lo contrario de lo que conviene en una crisis lumbar. LO QUE DICE AHORA: que lo que cobra caro en esa ventana es la FLEXION LUMBAR CON CARGA y no el movimiento; que la movilidad, la caminata y los tres de McGill entran -el curl-up esta disenado para que la lumbar no se aplane, por eso las manos van debajo-; que esperar 60-90 minutos sigue siendo mejor cuando se puede; y que si entrena recien levantado, el suitcase carry es el unico que toca saltar o aligerar, por ser el unico con carga externa. COMO LLEGA AL DISPOSITIVO: la siembra normal de instrucciones hace merge y NO pisa lo que ya existe -para no borrar lo que escriba el usuario-, asi que hace falta una migracion propia. MasterViewModel.updateWalkInstructions() reescribe la clave ex_walk una sola vez, detras de WorkoutStore.isWalkNoteUpdated(), y **solo si el texto sigue siendo palabra por palabra el que se sembro** (MasterDefaults.WALK_INSTRUCTIONS_V1). Si el usuario lo edito, se queda con el suyo. VERIFICACION: LumbarTrainingTest cubre que el texto nuevo nombra la flexion y el suitcase carry, y que el viejo se conserva aparte para poder distinguirlos. En el dispositivo: abrir las instrucciones de Walk y ver cinco pasos."
+    },
+    {
       "id": "TD-090",
       "title": "Anotar en el historial la sesion del 13-sep que se hizo sin el app",
       "category": "Feature",
