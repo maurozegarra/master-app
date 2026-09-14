@@ -5,6 +5,36 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-14 — plan para un dia sin margen (decidido la vispera)
+
+Aviso del usuario: por trabajo tiene que levantarse y entrenar **de inmediato**, sin los
+60-90 minutos que pide la rutina.
+
+**Decision: corre LUMBAR (bad day) tal cual**, con dos ajustes.
+
+El razonamiento, para no rederivarlo la proxima vez: la regla de la primera hora no
+prohibe moverse, prohibe **flexion lumbar, sobre todo con carga**, que es cuando el disco
+esta mas hidratado. Pasada la rutina por ese filtro, casi nada cae:
+
+- Gato-camello: sin carga y a rango medio. Es el primer movimiento del dia recomendado.
+- Bisagra de cadera: su razon de ser es la columna neutra. Lo contrario de lo prohibido.
+- Curl-up: las manos bajo la lumbar existen **para que no se aplane**. No flexiona.
+- Plancha lateral, bird dog, puente: cero flexion.
+- Caminata: de pie, carga suave y progresiva.
+- **Suitcase carry: el unico que toca moderar.** Peso externo y compresion, que es lo que
+  mas cuesta a esa hora. Saltarlo o bajarle bastante el peso.
+- Sentadilla a caja: sin peso y columna neutra, pero prescindible si duda.
+
+Si tiene que recortar por tiempo, el orden de prioridad sale de lo que paso el 13:
+**movilidad primero, McGill despues, caminata si queda.**
+
+**Pendiente de verificar al dia siguiente:** si el reorden funciona por si mismo o si lo
+del 13 fue sobre todo el horario. Este dia no lo despeja -entrena sin margen, con lo cual
+las dos variables se mueven a la vez-, pero si aun asi la movilidad vuelve a destrabar,
+refuerza que el orden importa.
+
+---
+
 ## 2026-09-13 — primera corrida de LUMBAR, en plena crisis
 
 **Contexto previo.** El 12-sep por la mañana la espalda baja se puso rígida de la nada y
