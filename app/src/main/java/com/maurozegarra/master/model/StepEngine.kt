@@ -19,7 +19,7 @@ object StepEngine {
                 val sets = e.sets.coerceAtLeast(1)
                 for (s in 0 until sets) {
                     if (e.workMode == WorkMode.TIME) {
-                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workValue, setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
+                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
                     } else {
                         val ws = e.setAt(s)
                         add(
@@ -35,8 +35,13 @@ object StepEngine {
                         )
                     }
                     val lastSet = s == sets - 1
-                    if (e.restSec > 0 && !(e.restSkipOnLastSet && lastSet)) {
-                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = e.restSec, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
+                    // El descanso que decide es el EFECTIVO de esta serie, no el del
+                    // ejercicio: si no, una serie con descanso propio no generaria etapa
+                    // en un ejercicio con restSec 0, que es justo como se escribe una
+                    // piramide (series pegadas y un respiro largo solo en dos de ellas).
+                    val rest = e.restSecAt(s)
+                    if (rest > 0 && !(e.restSkipOnLastSet && lastSet)) {
+                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
                     }
                 }
                 if (e.cooldownSec > 0) {

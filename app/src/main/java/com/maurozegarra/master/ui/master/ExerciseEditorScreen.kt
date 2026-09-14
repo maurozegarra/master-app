@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -67,6 +68,8 @@ import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.model.WeightType
 import com.maurozegarra.master.model.WorkMode
 import com.maurozegarra.master.model.WorkSet
+import com.maurozegarra.master.model.materializedSets
+import com.maurozegarra.master.model.normalizedSets
 import com.maurozegarra.master.model.setAt
 import com.maurozegarra.master.ui.AppStepButton
 import com.maurozegarra.master.ui.SwitchRow
@@ -314,12 +317,22 @@ private fun StageBasics(kind: StepKind, ex: Exercise, accent: Color, t: Strings,
                 options = listOf("TIME" to t.secUnit, "REPS" to t.repsUnit),
                 selected = ex.workMode.name,
                 accent = accent,
-            ) { onChange(ex.copy(workMode = WorkMode.valueOf(it))) }
+            ) { onChange(ex.copy(workMode = WorkMode.valueOf(it)).normalizedSets()) }
             VSpace(10)
             if (ex.workMode == WorkMode.TIME) {
-                DurationWheelField(t.secUnit, ex.workValue, accent, t, min = 1, max = 36000) { onChange(ex.copy(workValue = it)) }
+                DurationWheelField(t.secUnit, ex.workValue, accent, t, min = 1, max = 36000) { onChange(ex.copy(workValue = it).normalizedSets()) }
+                PerSetSection(
+                    ex = ex,
+                    inherited = ex.workValue,
+                    min = 1,
+                    accent = accent,
+                    t = t,
+                    valueOf = { it.sec },
+                    withValue = { ws, v -> ws.copy(sec = v) },
+                    onChange = onChange,
+                )
             } else {
-                Stepper(t.repsUnit, ex.workValue, accent, min = 1, max = 200) { onChange(ex.copy(workValue = it)) }
+                Stepper(t.repsUnit, ex.workValue, accent, min = 1, max = 200) { onChange(ex.copy(workValue = it).normalizedSets()) }
                 VSpace(14)
                 WeightSection(ex, accent, t, onChange)
             }
@@ -327,13 +340,107 @@ private fun StageBasics(kind: StepKind, ex: Exercise, accent: Color, t: Strings,
         StepKind.REST -> {
             DurationWheelField(t.secUnit, ex.restSec, accent, t, max = 1800) { onChange(ex.copy(restSec = it)) }
             // Divulgacion progresiva: "skip rest on last set" solo aplica si hay descanso.
-            if (ex.restSec > 0) {
+            // Cuenta tambien el descanso propio de una serie: un ejercicio con restSec 0
+            // y una serie de 30 s sigue teniendo descanso que saltarse.
+            if (ex.restSec > 0 || ex.setList.any { (it.restSec ?: 0) > 0 }) {
                 VSpace(10)
                 SwitchRow(t.restSkipLast, null, ex.restSkipOnLastSet, accent) { onChange(ex.copy(restSkipOnLastSet = it)) }
             }
+            PerSetSection(
+                ex = ex,
+                inherited = ex.restSec,
+                min = 0,
+                accent = accent,
+                t = t,
+                valueOf = { it.restSec },
+                withValue = { ws, v -> ws.copy(restSec = v) },
+                onChange = onChange,
+            )
         }
         StepKind.COOLDOWN ->
             DurationWheelField(t.secUnit, ex.cooldownSec, accent, t, max = 1800) { onChange(ex.copy(cooldownSec = it)) }
+    }
+}
+
+/**
+ * Lista de series en la que cada una puede llevar su propio valor.
+ *
+ * Nace colapsada salvo que ya haya alguna serie con valor propio: lo normal es que todas
+ * sigan al ejercicio, y un ejercicio de doce series le abriria doce filas a quien no las
+ * pidio. Cada fila ensena el valor EFECTIVO -el suyo, o el del ejercicio atenuado- para
+ * que se lea la secuencia entera de corrido sin recordar cual es cual, y la equis solo
+ * aparece donde hay algo que quitar.
+ *
+ * Con una sola serie no se dibuja: "por serie" no significa nada cuando no hay dos.
+ */
+@Composable
+private fun PerSetSection(
+    ex: Exercise,
+    inherited: Int,
+    min: Int,
+    accent: Color,
+    t: Strings,
+    valueOf: (WorkSet) -> Int?,
+    withValue: (WorkSet, Int?) -> WorkSet,
+    onChange: (Exercise) -> Unit,
+) {
+    if (ex.sets <= 1) return
+    // La clave es el ejercicio y no la lista: reabrir la seccion al editar una serie
+    // seria pelear con quien la cerro.
+    var expanded by remember(ex.id) { mutableStateOf(ex.setList.any { valueOf(it) != null }) }
+    val write: (Int, Int?) -> Unit = { i, v ->
+        val list = ex.materializedSets().toMutableList()
+        list[i] = withValue(list[i], v)
+        onChange(ex.copy(setList = list))
+    }
+
+    VSpace(14)
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(t.perSet, color = AppTheme.colors.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = AppTheme.colors.textDim,
+            modifier = Modifier.rotate(if (expanded) 90f else 0f),
+        )
+    }
+    AnimatedVisibility(visible = expanded) {
+        Column {
+            (0 until ex.sets).forEach { i ->
+                VSpace(10)
+                val own = valueOf(ex.setAt(i))
+                DurationWheelField(
+                    label = "SET ${i + 1}",
+                    value = own ?: inherited,
+                    accent = accent,
+                    t = t,
+                    min = min,
+                    max = 1800,
+                    dim = own == null,
+                    trailing = if (own == null) null else {
+                        {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { write(i, null) },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = t.reset,
+                                    tint = AppTheme.colors.textDim,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            }
+                        }
+                    },
+                ) { write(i, it) }
+            }
+        }
     }
 }
 
@@ -353,9 +460,11 @@ private fun WeightSection(ex: Exercise, accent: Color, t: Strings, onChange: (Ex
             accent = accent,
         ) { sel ->
             val type = WeightType.valueOf(sel)
-            val list = if (type == WeightType.NONE) emptyList()
-            else (0 until ex.sets).map { ex.setAt(it) }
-            onChange(ex.copy(weightType = type, setList = list))
+            // Quitar la carga ya no vacia la lista: ahi viven los tiempos propios de cada
+            // serie. normalizedSets se encarga de dejar los pesos en cero y las reps al
+            // dia; si no habia lista, sigue sin haberla.
+            val list = if (type == WeightType.NONE) ex.setList else ex.materializedSets()
+            onChange(ex.copy(weightType = type, setList = list).normalizedSets())
         }
 
         if (ex.weightType == WeightType.BARBELL) {

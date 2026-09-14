@@ -82,6 +82,13 @@ internal fun Stepper(
     onChange: (Int) -> Unit,
 ) = AppStepper(label, value, accent, modifier, min, max, step, format, onChange)
 
+/**
+ * Campo de duracion con rueda.
+ *
+ * [dim] atenua el valor para decir "esto no lo pusiste tu, lo hereda de otro sitio", y
+ * [trailing] deja colgar una accion a la derecha (hoy, quitar ese valor propio). Ambos
+ * llegan con valor por defecto: las llamadas que no los necesitan siguen escritas igual.
+ */
 @Composable
 internal fun DurationWheelField(
     label: String,
@@ -91,6 +98,8 @@ internal fun DurationWheelField(
     modifier: Modifier = Modifier,
     min: Int = 0,
     max: Int = 36000,
+    dim: Boolean = false,
+    trailing: (@Composable () -> Unit)? = null,
     onChange: (Int) -> Unit,
 ) {
     var editing by remember { mutableStateOf(false) }
@@ -107,7 +116,16 @@ internal fun DurationWheelField(
                 .padding(horizontal = 18.dp, vertical = 10.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(fmtSec(value), color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Text(
+                fmtSec(value),
+                color = if (dim) AppTheme.colors.textDim else AppTheme.colors.textPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+            )
+        }
+        trailing?.let {
+            Spacer(Modifier.size(8.dp))
+            it()
         }
     }
     if (editing) {

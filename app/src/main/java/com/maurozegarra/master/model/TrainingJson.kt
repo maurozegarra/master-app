@@ -109,7 +109,15 @@ object TrainingJson {
 
     private fun exerciseToJson(e: Exercise): JSONObject {
         val sets = JSONArray()
-        e.setList.forEach { sets.put(JSONObject().put("reps", it.reps).put("weight", it.weight)) }
+        e.setList.forEach { ws ->
+            val o = JSONObject().put("reps", ws.reps).put("weight", ws.weight)
+            // Solo si la serie se sale de lo que dice el ejercicio. Escribir el valor
+            // heredado congelaria una copia que dejaria de seguir al ejercicio en cuanto
+            // alguien lo editara.
+            ws.sec?.let { o.put("sec", it) }
+            ws.restSec?.let { o.put("restSec", it) }
+            sets.put(o)
+        }
         return JSONObject()
             .put("id", e.id)
             .put("exerciseId", e.exerciseId)
@@ -138,7 +146,16 @@ object TrainingJson {
         o.optJSONArray("setList")?.let { sa ->
             for (i in 0 until sa.length()) {
                 val s = sa.getJSONObject(i)
-                setList.add(WorkSet(reps = s.optInt("reps", 12), weight = s.optDouble("weight", 0.0)))
+                // optInt daria 0 al faltar el campo, y 0 es "sin descanso": lo que no
+                // esta tiene que quedar en null para seguir heredando del ejercicio.
+                setList.add(
+                    WorkSet(
+                        reps = s.optInt("reps", 12),
+                        weight = s.optDouble("weight", 0.0),
+                        sec = if (s.isNull("sec")) null else s.optInt("sec"),
+                        restSec = if (s.isNull("restSec")) null else s.optInt("restSec"),
+                    ),
+                )
             }
         }
         return Exercise(

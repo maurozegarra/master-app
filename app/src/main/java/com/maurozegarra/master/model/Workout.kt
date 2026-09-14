@@ -34,10 +34,24 @@ data class StageConfig(
     }
 }
 
-/** Una serie: repeticiones y peso "crudo" (su significado depende de [WeightType]). */
+/**
+ * Una serie: repeticiones y peso "crudo" (su significado depende de [WeightType]), y
+ * opcionalmente su propio trabajo y descanso.
+ *
+ * [sec] y [restSec] valen null salvo que esa serie se salga de lo que dice el ejercicio, y
+ * **null significa "usa el del ejercicio", que no es lo mismo que 0**: 0 es "sin
+ * descanso". Es esa distincion la que deja una piramide descendente -6x10s, 30s, 4x10s,
+ * 30s, 2x10s- en un solo ejercicio de 12 series donde solo dos llevan valor propio, y la
+ * que protege lo guardado antes de que estos campos existieran: sin ellos manda el
+ * ejercicio, igual que siempre.
+ */
 data class WorkSet(
     val reps: Int = 12,
     val weight: Double = 0.0,
+    /** Segundos de trabajo de esta serie (solo [WorkMode.TIME]); null = los del ejercicio. */
+    val sec: Int? = null,
+    /** Segundos de descanso tras esta serie; null = los del ejercicio. */
+    val restSec: Int? = null,
 )
 
 /**
@@ -238,6 +252,36 @@ fun Training.forPublishing(): Training = copy(
 
 /** Devuelve la serie [i] del ejercicio, con valores por defecto si falta. */
 fun Exercise.setAt(i: Int): WorkSet = setList.getOrElse(i) { WorkSet(reps = workValue) }
+
+/** Segundos de trabajo de la serie [i]: los suyos si los tiene, si no los del ejercicio. */
+fun Exercise.workSecAt(i: Int): Int = setAt(i).sec ?: workValue
+
+/** Segundos de descanso tras la serie [i]: los suyos si los tiene, si no los del ejercicio. */
+fun Exercise.restSecAt(i: Int): Int = setAt(i).restSec ?: restSec
+
+/**
+ * [setList] con exactamente una entrada por serie, rellenando las que falten.
+ *
+ * Lo necesita el editor: para darle valor propio a la serie 6 hay que tener las seis.
+ */
+fun Exercise.materializedSets(): List<WorkSet> = (0 until sets.coerceAtLeast(1)).map { setAt(it) }
+
+/**
+ * El ejercicio con su lista de series al dia despues de tocar el trabajo, el modo o el
+ * tipo de carga. El editor la llama tras cada uno de esos cambios.
+ *
+ * Sin carga, las repeticiones de cada serie no se ensenan en ninguna parte -la lista
+ * existe solo porque alguna serie se llevo su propio tiempo-, asi que no pueden quedarse
+ * en el valor que tenia el ejercicio el dia que se creo la lista: divergirian del numero
+ * de arriba sin que nadie pueda verlo ni arreglarlo. Con carga cada serie ensena las
+ * suyas y mandan ellas, que es lo de siempre.
+ *
+ * Lo que nunca hace es tirar la lista: ahi viven ahora los tiempos propios de cada serie,
+ * y quitarle el peso a un ejercicio no es motivo para perderlos.
+ */
+fun Exercise.normalizedSets(): Exercise =
+    if (setList.isEmpty() || weightType != WeightType.NONE) this
+    else copy(setList = setList.map { it.copy(reps = workValue, weight = 0.0) })
 
 /** Peso total (kg) de una serie según el tipo de carga del ejercicio. */
 fun Exercise.weightTotal(s: WorkSet): Double = when (weightType) {
