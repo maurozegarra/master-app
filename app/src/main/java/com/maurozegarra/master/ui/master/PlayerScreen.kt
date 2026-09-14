@@ -679,11 +679,31 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             }
         }
         Spacer(Modifier.height(8.dp))
+        // El interlineado va escrito, y no es cosmetica: la tipografia por defecto de
+        // Material trae un lineHeight ABSOLUTO de 20sp, asi que un texto de 40sp que ocupe
+        // dos lineas las dibuja una encima de otra. Una nota de tres palabras nunca lo
+        // destapo; "STICK ON NAPE, MID-BACK AND SACRUM" si. El titulo ya lo resolvia por su
+        // cuenta en [titleStyle]; aqui faltaba.
         if (step.note.isNotBlank()) {
-            Text(step.note.uppercase(), color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp, textAlign = TextAlign.Center)
+            Text(
+                step.note.uppercase(),
+                color = TEXT_DIM,
+                fontWeight = FontWeight.Bold,
+                fontSize = NOTE_SIZE,
+                lineHeight = NOTE_SIZE * TITLE_LINE_RATIO,
+                textAlign = TextAlign.Center,
+                // Reparte en lineas parejas en vez de dejar una palabra suelta al final.
+                style = LocalTextStyle.current.copy(lineBreak = LineBreak.Heading),
+            )
         }
         if (showSeries) {
-            Text("${step.setIndex + 1} / ${step.totalSets}", color = TEXT_DIM, fontWeight = FontWeight.Bold, fontSize = 40.sp)
+            Text(
+                "${step.setIndex + 1} / ${step.totalSets}",
+                color = TEXT_DIM,
+                fontWeight = FontWeight.Bold,
+                fontSize = NOTE_SIZE,
+                lineHeight = NOTE_SIZE * TITLE_LINE_RATIO,
+            )
         }
 
         // Las instrucciones se probaron aquí, llenando el hueco del vídeo, y el usuario las
@@ -898,6 +918,9 @@ private const val TITLE_SIZE_STEP = 2f
 private const val TITLE_LINES = 2
 /** 52/48: el interlineado que ya tenía el título. */
 private const val TITLE_LINE_RATIO = 52f / 48f
+
+/** Tamano de la nota del ejercicio y del contador de series, que comparten sitio y peso. */
+private val NOTE_SIZE = 40.sp
 
 /**
  * Editar el ejercicio en curso sin parar el reloj.
