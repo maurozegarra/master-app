@@ -348,6 +348,23 @@ data class SessionLog(
     val durationSec: Int = 0,
 )
 
+/**
+ * Los `exerciseId` que aparecen en algun training, variantes incluidas.
+ *
+ * Sirve para saber si un ejercicio propio esta en uso antes de tocarlo: borrar uno que
+ * algun training use dejaria a ese ejercicio sin nombre de catalogo.
+ */
+fun List<Training>.usedExerciseIds(): Set<String> {
+    val out = mutableSetOf<String>()
+    forEach { t ->
+        t.workouts.forEach { w ->
+            w.exercises.forEach { out.add(it.exerciseId) }
+            w.variants.forEach { v -> v.exercises.forEach { out.add(it.exerciseId) } }
+        }
+    }
+    return out
+}
+
 /** Fecha de la última sesión registrada de cada training (id → completedAt). */
 fun lastTrainedAt(sessions: List<SessionLog>): Map<Long, Long> {
     val out = HashMap<Long, Long>()

@@ -77,6 +77,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isLumbarSeeded(): Boolean = prefs.getBoolean(KEY_LUMBAR_SEEDED, false)
     fun setLumbarSeeded() { prefs.edit().putBoolean(KEY_LUMBAR_SEEDED, true).apply() }
 
+    /** Marca de migracion: si ya se limpiaron los ejercicios propios sueltos (TD-087). */
+    fun isLumbarCleanupDone(): Boolean = prefs.getBoolean(KEY_LUMBAR_CLEANUP, false)
+    fun setLumbarCleanupDone() { prefs.edit().putBoolean(KEY_LUMBAR_CLEANUP, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         val items = TrainingJson.decode(raw)
@@ -179,6 +183,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_MASTER_V2 = "master_v2_seeded"
         const val KEY_MASTER_V3 = "master_v3_seeded"
         const val KEY_LUMBAR_SEEDED = "lumbar_seeded"
+        const val KEY_LUMBAR_CLEANUP = "lumbar_cleanup_done"
         const val MAX_SESSIONS = 200
     }
 }

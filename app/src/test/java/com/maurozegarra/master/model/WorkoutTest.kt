@@ -316,4 +316,44 @@ class WorkoutTest {
 
         assertEquals("", back.single().uid)
     }
+
+    // ---------- Que ejercicios estan en uso (TD-087) ----------
+
+    private fun ex(exerciseId: String) = Exercise(id = 1, exerciseId = exerciseId, name = exerciseId)
+
+    @Test
+    fun `usedExerciseIds looks inside variants too`() {
+        val t = Training(
+            id = 1,
+            workouts = listOf(
+                Workout(id = 10, exercises = listOf(ex("ex_squat"))),
+                Workout(
+                    id = 11,
+                    rotating = true,
+                    variants = listOf(variant(20, "A", listOf(ex("custom_1")))),
+                ),
+            ),
+        )
+
+        assertEquals(setOf("ex_squat", "custom_1"), listOf(t).usedExerciseIds())
+    }
+
+    @Test
+    fun `usedExerciseIds is empty when nothing is placed`() {
+        assertTrue(listOf(Training(id = 1)).usedExerciseIds().isEmpty())
+    }
+
+    @Test
+    fun `an exercise in a rotating variant counts as used`() {
+        // Es la comprobacion que protege el borrado: un ejercicio propio metido en una
+        // variante no se ve en la lista de arriba y borrarlo lo dejaria sin nombre.
+        val t = Training(
+            id = 1,
+            workouts = listOf(
+                Workout(id = 10, rotating = true, variants = listOf(variant(20, "B", listOf(ex("custom_9"))))),
+            ),
+        )
+
+        assertTrue("custom_9" in listOf(t).usedExerciseIds())
+    }
 }

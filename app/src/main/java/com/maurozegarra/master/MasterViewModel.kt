@@ -32,6 +32,7 @@ import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.model.Training
+import com.maurozegarra.master.model.usedExerciseIds
 import com.maurozegarra.master.model.Workout
 import com.maurozegarra.master.model.activeExercises
 import com.maurozegarra.master.model.activeVariant
@@ -195,6 +196,7 @@ class MasterViewModel(
                 changed = true
             }
             if (changed) persist()
+            cleanUpLumbarLeftovers()
         }
         observePlayer()
         migrateRestorePrefs()
@@ -206,6 +208,28 @@ class MasterViewModel(
         // que cualquier vuelta a primer plano. Ademas seria imposible: syncAssignments lee
         // `syncing`, que es un mutableStateOf declarado mas abajo, y los inicializadores
         // corren en orden de declaracion — desde el init su delegado todavia es null.
+    }
+
+    /**
+     * Borra de una vez los ejercicios propios que quedaron del intento de armar la rutina
+     * lumbar a mano, antes de que existiera el training sembrado (TD-086).
+     *
+     * Solo se van los que **no use ningun training**: si alguno acabo dentro de uno, su
+     * ejercicio se quedaria sin nombre de catalogo y en el player se leeria el id.
+     *
+     * Va detras de su propia marca y no de la de la siembra porque son dos cosas
+     * distintas, y porque el dia que el app sepa borrar ejercicios propios desde la UI
+     * este metodo se va entero y la marca se queda donde esta.
+     */
+    private fun cleanUpLumbarLeftovers() {
+        if (store.isLumbarCleanupDone()) return
+        val used = trainings.toList().usedExerciseIds()
+        val sobran = LUMBAR_LEFTOVERS - used
+        if (sobran.isNotEmpty()) {
+            customExercises.removeAll { it.id in sobran }
+            store.saveCustomExercises(customExercises.toList())
+        }
+        store.setLumbarCleanupDone()
     }
 
     /**
@@ -1307,5 +1331,18 @@ class MasterViewModel(
     private companion object {
         /** Cuánto tiene que pasar para que volver a primer plano vuelva a mirar. */
         const val AUTO_SYNC_MIN_MS = 60_000L
+
+        /**
+         * Los cinco ejercicios propios que el usuario creo a mano el 13-sep-2026 para la
+         * rutina lumbar y nunca llego a colocar. "Rest" era el apano para meter los 30 s
+         * entre bloques de la piramide, que ya no hace falta.
+         */
+        val LUMBAR_LEFTOVERS = setOf(
+            "custom_1789324269985", // Cat Camel   -> lo cubre ex_cat_cow, que ademas tiene video
+            "custom_1789324269987", // Hip Hinge   -> ex_hip_hinge
+            "custom_1789324269989", // Curl Up     -> ex_curl_up
+            "custom_1789324269991", // Rest        -> ya no hace falta
+            "custom_1789324269998", // Side Plank  -> ex_side_plank_l / ex_side_plank_r
+        )
     }
 }
