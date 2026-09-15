@@ -5,6 +5,61 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-14 — segunda sesion, con el bad day y sin margen
+
+Desperto a las 5:00 y empezo a las **5:15**: quince minutos, margen practicamente cero. Y
+amanecio **con menos dolor que ayer**.
+
+**Dolor: antes 4, durante 3, despues 2.** Solo en la zona baja de la espalda, sin
+irradiacion (igual que siempre).
+
+Ejercicio por ejercicio, en sus palabras:
+
+| Ejercicio | Como fue |
+|---|---|
+| Gato-camello | alivio ligero |
+| Bisagra de cadera | "mas que ligero" |
+| Caminata (6 min) | **ni suma ni resta** |
+| Curl-up | alivio ligero |
+| Plancha lateral | *"siento que mis laterales se activan y protegen la zona lumbar"* |
+| Bird dog | normal |
+| Puente de gluteos | **muy suave, necesita resistencia** |
+| Suitcase carry | lo hizo con 7.5, 10 y 12.5 kg |
+| Sentadilla a caja | **igual, necesita resistencia** |
+
+Hizo todo lo programado.
+
+**Lo que confirma.** El alivio empieza desde el primer ejercicio y es progresivo; la
+movilidad vuelve a ser la que mas mueve la aguja. **La caminata es neutra por segunda vez**,
+y esta vez en un contexto completamente distinto -a las 5:15 de la manana, con margen cero,
+en vez de la 1 de la tarde tras una manana en cama-. Dos contextos opuestos, mismo
+resultado: para SU dolor, la caminata no hace el trabajo. No la saco -tiene su valor de
+cadera y de movimiento general- pero deja de ser candidata a explicar nada, y es lo primero
+que se recorta cuando falte tiempo.
+
+**Lo que desmiente.** Entrenar 15 minutos despues de despertar no le paso factura: el dolor
+bajo igual, de 4 a 2. Y **el suitcase carry lo hizo con carga ascendente hasta 12.5 kg**,
+justo lo que la vispera se le habia recomendado saltar o aligerar. No le hizo nada malo. La
+precaucion era razonable en general pero conservadora para el, y queda corregida: con este
+historial y esta seleccion de ejercicios, la ventana de la primera hora no le esta pesando.
+
+**La plancha lateral es la sorpresa del dia**, y no es casualidad: notar los laterales
+activandose para proteger la lumbar es literalmente el mecanismo que busca el ejercicio
+-oblicuos y cuadrado lumbar haciendo de cinturon-. Que lo sienta significa que lo esta
+haciendo bien.
+
+**La conclusion accionable.** El bloque de cadera y gluteo se le queda corto, y sus propios
+datos explican por que: en el training MASTER hace **hip thrust con 40, 50, 60 y 70 kg**, y
+en el lumbar esta haciendo puente de gluteos a peso corporal. Es una quinta parte de lo que
+su cadera mueve normalmente. Lo mismo la sentadilla a caja frente a sus bulgaras con carga.
+Propuesta en TD-098.
+
+**Lo que NO se toca todavia:** la piramide de McGill sigue en 6/4/2. Con dolor aun en 2 no
+es momento de subir volumen, y la progresion correcta es mas aguantes por bloque, nunca
+aguantes mas largos. Se revisa cuando el dolor llegue a 0-1.
+
+---
+
 ## 2026-09-14 — plan para un dia sin margen (decidido la vispera)
 
 Aviso del usuario: por trabajo tiene que levantarse y entrenar **de inmediato**, sin los
