@@ -162,22 +162,16 @@ class MasterViewModel(
         if (firstRun && trainings.isEmpty()) {
             trainings.add(MasterDefaults.masterTraining(lang()))
             trainings.add(MasterDefaults.frikiNikiTraining(lang()))
-            trainings.add(MasterDefaults.lumbarTraining(lang()))
-            trainings.add(MasterDefaults.lumbarBadDayTraining(lang()))
-            seedLumbarInstructions()
-            store.setLumbarBadDaySeeded()
-            // Una instalacion limpia no es la del usuario: no hay sesion pasada que anotar,
-            // y sin esta marca la reconstruccion caeria en el segundo arranque.
+            applyLumbarRevision()
+            // Una instalacion limpia no es la del usuario: no hay historial que marcar ni
+            // reordenar, ni sesion pasada que reconstruir. Sin estas marcas, todo eso caeria
+            // en el segundo arranque.
             store.setFirstSessionSeeded()
-            // La siembra ya trae el bloque cargado; no hay nada que migrar.
-            store.setHipGluteLoaded()
-            // Ni sesiones viejas que marcar o reordenar: no hay historial.
             store.setFirstSessionMarked()
             store.setLumbarSessionsReordered()
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
             store.setMasterV3Seeded()
-            store.setLumbarSeeded()
             persist()
         } else {
             var changed = false
@@ -202,22 +196,11 @@ class MasterViewModel(
                 store.setMasterV3Seeded()
                 changed = true
             }
-            if (!store.isLumbarSeeded()) {
-                trainings.add(MasterDefaults.lumbarTraining(lang()))
-                seedLumbarInstructions()
-                store.setLumbarSeeded()
-                changed = true
-            }
-            if (!store.isLumbarBadDaySeeded()) {
-                trainings.add(MasterDefaults.lumbarBadDayTraining(lang()))
-                store.setLumbarBadDaySeeded()
-                changed = true
-            }
             if (changed) persist()
+            applyLumbarRevision()
             cleanUpLumbarLeftovers()
             seedFirstSession()
             updateWalkInstructions()
-            loadHipGluteBlock()
             markReconstructedSession()
             reorderLumbarSessions()
         }
@@ -280,29 +263,6 @@ class MasterViewModel(
         }
         if (changed) store.saveSessions(nuevas)
         store.setLumbarSessionsReordered()
-    }
-
-    /**
-     * Sube la carga del bloque de cadera y gluteo de los dos lumbares (TD-098).
-     *
-     * Los trainings ya estan sembrados y la siembra no vuelve a correr, asi que cambiar el
-     * default solo llegaria a una instalacion nueva. El trabajo fino -conservar el id de
-     * cada instancia y no pisar lo que el usuario ya haya cargado- vive en
-     * [MasterDefaults.withHipGluteLoaded], que es puro y tiene test.
-     */
-    private fun loadHipGluteBlock() {
-        if (store.isHipGluteLoaded()) return
-        var changed = false
-        trainings.forEachIndexed { i, t ->
-            if (t.id != MasterDefaults.LUMBAR_ID && t.id != MasterDefaults.LUMBAR_BAD_DAY_ID) return@forEachIndexed
-            val cargado = MasterDefaults.withHipGluteLoaded(t, lang())
-            if (cargado != t) {
-                trainings[i] = cargado
-                changed = true
-            }
-        }
-        if (changed) persist()
-        store.setHipGluteLoaded()
     }
 
     /**
@@ -379,6 +339,28 @@ class MasterViewModel(
             store.saveCustomExercises(customExercises.toList())
         }
         store.setLumbarCleanupDone()
+    }
+
+    /**
+     * Pone la rutina lumbar al dia si el codigo trae una revision mas nueva (TD-103).
+     *
+     * Es el unico sitio por donde entra un cambio de la rutina. Sustituye a las tres
+     * migraciones que habia -sembrar LUMBAR, sembrar el bad day y cargar el bloque de
+     * cadera-: reemplazar por la definicion actual hace lo mismo que las tres y ademas
+     * cubre todo lo que venga, sin codigo nuevo por cada ajuste.
+     *
+     * Las instrucciones van con merge y sin pisar: son del usuario en cuanto las toca.
+     */
+    private fun applyLumbarRevision() {
+        if (store.lumbarRevision() >= MasterDefaults.LUMBAR_REVISION) return
+        val nuevos = MasterDefaults.withLumbarRevision(trainings.toList(), lang())
+        if (nuevos != trainings.toList()) {
+            trainings.clear()
+            trainings.addAll(nuevos)
+            persist()
+        }
+        seedLumbarInstructions()
+        store.setLumbarRevision(MasterDefaults.LUMBAR_REVISION)
     }
 
     /**

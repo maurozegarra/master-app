@@ -138,6 +138,15 @@ ningún dato del usuario.
    `changed = true`). Olvidar la segunda es el error clásico: compila, pasa los tests, y en
    el teléfono del usuario no aparece nada.
 
+**La rutina lumbar no usa este mecanismo, va por revisión.** `MasterDefaults.LUMBAR_REVISION`
+es un número; el dispositivo guarda el último aplicado, y al arrancar, si el código trae uno
+mayor, los dos trainings lumbares se reemplazan por la definición actual. Para cambiar la
+rutina: editar la función y **subir el número**. Sin migración, sin marca nueva. Es el
+mecanismo para contenido que se ajusta seguido, y el trato que lo sostiene es que esos
+trainings son **del coach**: el usuario no los edita en el app, pide el cambio y entra por
+el código. Lo que sí se conserva del que ya estaba en el teléfono es su `uid` y su
+`createdAt`.
+
 Las **instrucciones** de los ejercicios se siembran igual, con `lumbarInstructions()` y
 `seedLumbarInstructions()` en el ViewModel, y van **con merge y sin pisar** lo que el
 usuario ya tenga escrito: un `exerciseId` del catálogo puede traer instrucciones suyas.

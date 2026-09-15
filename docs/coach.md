@@ -26,8 +26,9 @@ se leen antes de entrenar. Ahí se quedan, y no se repiten en cada conversación
 3. **Propuesta** — se ajusta la rutina con lo que dicen 1 y 2, y se explica qué cambia y
    por qué.
 4. **Aprobación** — la suya, explícita, antes de tocar código.
-5. **Siembra** — `MasterDefaults` + marca en `WorkoutStore` + `build-debug.ps1`. Abre el
-   app y está.
+5. **Siembra** — editar la rutina en `MasterDefaults` y **subir `LUMBAR_REVISION`**, más
+   `build-debug.ps1`. Abre el app y está. No hace falta migración ni marca nueva por cada
+   ajuste: la revisión las sustituye a todas.
 6. Vuelta a 1.
 
 ## Qué se le pide después de entrenar
@@ -52,6 +53,11 @@ Cuatro cosas, y ninguna necesita que se acuerde de nada raro:
   sabe expresarlo (la pirámide necesitó TD-085; la distancia del suitcase carry todavía no
   existe y va como repeticiones con nota).
 - **Lo que no se pudo medir, se dice.** La bitácora no rellena huecos.
+- **Los dos trainings lumbares son del coach.** El usuario no los edita en el app: pide el
+  cambio y entra por el código, con una revisión nueva. Es lo que permite que cambiarlos
+  cueste tres líneas en vez de una migración, y lo que hay que respetar a cambio es no
+  pisarle nada suyo: las instrucciones que él escriba, su historial y sus otros trainings
+  quedan fuera de ese trato.
 
 ## Dónde vive cada cosa
 

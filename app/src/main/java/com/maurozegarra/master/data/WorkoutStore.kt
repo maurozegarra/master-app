@@ -73,17 +73,9 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isMasterV3Seeded(): Boolean = prefs.getBoolean(KEY_MASTER_V3, false)
     fun setMasterV3Seeded() { prefs.edit().putBoolean(KEY_MASTER_V3, true).apply() }
 
-    /** Marca de migracion: si ya se sembro el training "LUMBAR" (una sola vez). */
-    fun isLumbarSeeded(): Boolean = prefs.getBoolean(KEY_LUMBAR_SEEDED, false)
-    fun setLumbarSeeded() { prefs.edit().putBoolean(KEY_LUMBAR_SEEDED, true).apply() }
-
     /** Marca de migracion: si ya se limpiaron los ejercicios propios sueltos (TD-087). */
     fun isLumbarCleanupDone(): Boolean = prefs.getBoolean(KEY_LUMBAR_CLEANUP, false)
     fun setLumbarCleanupDone() { prefs.edit().putBoolean(KEY_LUMBAR_CLEANUP, true).apply() }
-
-    /** Marca de migracion: si ya se sembro el training "LUMBAR (bad day)" (TD-088). */
-    fun isLumbarBadDaySeeded(): Boolean = prefs.getBoolean(KEY_LUMBAR_BAD_DAY, false)
-    fun setLumbarBadDaySeeded() { prefs.edit().putBoolean(KEY_LUMBAR_BAD_DAY, true).apply() }
 
     /**
      * Marca de migracion: si ya se anoto la sesion del 13-sep-2026 (TD-090).
@@ -99,10 +91,6 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isWalkNoteUpdated(): Boolean = prefs.getBoolean(KEY_WALK_NOTE_V2, false)
     fun setWalkNoteUpdated() { prefs.edit().putBoolean(KEY_WALK_NOTE_V2, true).apply() }
 
-    /** Marca de migracion: si ya se cargo el bloque de cadera y gluteo (TD-098). */
-    fun isHipGluteLoaded(): Boolean = prefs.getBoolean(KEY_HIP_GLUTE_LOADED, false)
-    fun setHipGluteLoaded() { prefs.edit().putBoolean(KEY_HIP_GLUTE_LOADED, true).apply() }
-
     /** Marca de migracion: si la sesion reconstruida ya quedo marcada como tal (TD-101). */
     fun isFirstSessionMarked(): Boolean = prefs.getBoolean(KEY_FIRST_SESSION_MARKED, false)
     fun setFirstSessionMarked() { prefs.edit().putBoolean(KEY_FIRST_SESSION_MARKED, true).apply() }
@@ -110,6 +98,16 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     /** Marca de migracion: si las sesiones lumbares viejas ya se reordenaron (TD-102). */
     fun isLumbarSessionsReordered(): Boolean = prefs.getBoolean(KEY_SESSIONS_REORDERED, false)
     fun setLumbarSessionsReordered() { prefs.edit().putBoolean(KEY_SESSIONS_REORDERED, true).apply() }
+
+    /**
+     * Revision de la rutina lumbar ya aplicada en este dispositivo (TD-103).
+     *
+     * Sustituye a las tres marcas que habia -lumbar_seeded, lumbar_bad_day_seeded y
+     * hip_glute_loaded-: un numero que avanza dice lo mismo que ellas y ademas cubre todos
+     * los cambios que vengan, sin una marca nueva por cada uno. 0 = ninguna todavia.
+     */
+    fun lumbarRevision(): Int = prefs.getInt(KEY_LUMBAR_REVISION, 0)
+    fun setLumbarRevision(rev: Int) { prefs.edit().putInt(KEY_LUMBAR_REVISION, rev).apply() }
 
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
@@ -212,12 +210,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_FRIKI_SEEDED = "friki_seeded"
         const val KEY_MASTER_V2 = "master_v2_seeded"
         const val KEY_MASTER_V3 = "master_v3_seeded"
-        const val KEY_LUMBAR_SEEDED = "lumbar_seeded"
         const val KEY_LUMBAR_CLEANUP = "lumbar_cleanup_done"
-        const val KEY_LUMBAR_BAD_DAY = "lumbar_bad_day_seeded"
         const val KEY_FIRST_SESSION = "lumbar_first_session_seeded_v2"
         const val KEY_WALK_NOTE_V2 = "walk_instructions_v2"
-        const val KEY_HIP_GLUTE_LOADED = "hip_glute_loaded"
+        const val KEY_LUMBAR_REVISION = "lumbar_revision"
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"
         const val MAX_SESSIONS = 200

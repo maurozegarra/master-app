@@ -334,6 +334,23 @@ object MasterDefaults {
 
 
     /**
+     * Revision de la rutina lumbar. **Subir este numero es lo unico que hace falta para que
+     * un cambio de la rutina llegue al dispositivo** (TD-103).
+     *
+     * Antes, cada ajuste pedia su propia migracion con su propia marca: en dos dias el
+     * store acumulo ocho. Cargar el bloque de cadera (TD-098) costo una funcion, una marca,
+     * una migracion y sus tests, cuando lo unico que aportaba a la rutina eran tres lineas.
+     *
+     * El trato que lo hace posible: **los dos lumbares son del coach**. El usuario no los
+     * edita en el app; dice que quiere cambiar y el cambio entra por aqui. Si los editara,
+     * la siguiente revision los pisaria.
+     *
+     * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
+     * desconecta ninguna sesion ya registrada.
+     */
+    const val LUMBAR_REVISION = 1
+
+    /**
      * Ids fijos de los dos trainings lumbares.
      *
      * Van escritos y no salidos del contador porque **el historial apunta a ellos**: la
@@ -465,31 +482,30 @@ object MasterDefaults {
     const val FIRST_SESSION_ID = 950017L
 
     /**
-     * El training con el bloque de cadera y gluteo ya cargado (TD-098).
+     * La lista de trainings con los dos lumbares puestos al dia: reemplaza el que ya este y
+     * agrega el que falte, en su sitio y sin tocar el resto.
      *
-     * Hace falta porque los dos lumbares ya estan sembrados en el dispositivo y la siembra
-     * no vuelve a correr: cambiar [LumbarBlocks.hipGlute] solo llegaria a una instalacion
-     * nueva.
-     *
-     * Dos cuidados. Conserva el **id de cada instancia**, para que una corrida en marcha no
-     * pierda el sitio al rehacerse la cola de pasos. Y solo cambia los ejercicios que
-     * **siguen sin carga**: si el usuario ya les puso peso por su cuenta, ese numero es
-     * suyo y pisarlo seria quitarle algo.
-     *
-     * Los ids que genera el bloque aqui se descartan; solo se le piden los ejercicios.
+     * De lo que ya hay en el dispositivo conserva **lo que es suyo y no de la definicion**:
+     * [Training.uid], que es la identidad estable con la que viaja un training entre
+     * dispositivos y con la que se publica, y [Training.createdAt], que es cuando aparecio
+     * de verdad. Lo demas -workouts, ejercicios, cargas- lo manda el codigo.
      */
-    fun withHipGluteLoaded(t: Training, lang: String): Training {
-        val cargados = LumbarBlocks(lang, seqStart = 0L).hipGlute().exercises.associateBy { it.exerciseId }
-        return t.copy(
-            workouts = t.workouts.map { w ->
-                w.copy(
-                    exercises = w.exercises.map { e ->
-                        val nuevo = cargados[e.exerciseId]
-                        if (nuevo != null && e.weightType == WeightType.NONE) nuevo.copy(id = e.id) else e
-                    },
+    fun withLumbarRevision(trainings: List<Training>, lang: String): List<Training> {
+        val nuevos = listOf(lumbarTraining(lang), lumbarBadDayTraining(lang))
+        val out = trainings.toMutableList()
+        nuevos.forEach { nuevo ->
+            val i = out.indexOfFirst { it.id == nuevo.id }
+            if (i < 0) {
+                out.add(nuevo)
+            } else {
+                val viejo = out[i]
+                out[i] = nuevo.copy(
+                    uid = viejo.uid,
+                    createdAt = if (viejo.createdAt > 0L) viejo.createdAt else nuevo.createdAt,
                 )
-            },
-        )
+            }
+        }
+        return out
     }
 
     /**

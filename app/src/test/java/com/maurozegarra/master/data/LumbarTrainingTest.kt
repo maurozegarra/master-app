@@ -118,47 +118,6 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `la carga llega a un training ya sembrado sin cambiarle los ids`() {
-        // Es la migracion: los trainings ya estan en el dispositivo y la siembra no vuelve
-        // a correr.
-        val sinCarga = training.copy(
-            workouts = training.workouts.map { w ->
-                w.copy(exercises = w.exercises.map { it.copy(weightType = WeightType.NONE, setList = emptyList()) })
-            },
-        )
-
-        val cargado = MasterDefaults.withHipGluteLoaded(sinCarga, "en")
-
-        assertEquals(WeightType.BARBELL, cadera(cargado).getValue("ex_glute_bridge").weightType)
-        // Los ids de instancia se conservan: una corrida en marcha no pierde el sitio.
-        assertEquals(
-            sinCarga.workouts.flatMap { w -> w.exercises.map { it.id } },
-            cargado.workouts.flatMap { w -> w.exercises.map { it.id } },
-        )
-    }
-
-    @Test
-    fun `la migracion no pisa el peso que haya puesto el usuario`() {
-        val suyo = training.copy(
-            workouts = training.workouts.map { w ->
-                w.copy(
-                    exercises = w.exercises.map { e ->
-                        if (e.exerciseId == "ex_box_squat") {
-                            e.copy(weightType = WeightType.TOTAL, setList = listOf(WorkSet(reps = 8, weight = 30.0)))
-                        } else {
-                            e
-                        }
-                    },
-                )
-            },
-        )
-
-        val despues = MasterDefaults.withHipGluteLoaded(suyo, "en")
-
-        assertEquals(listOf(30.0), cadera(despues).getValue("ex_box_squat").setList.map { it.weight })
-    }
-
-    @Test
     fun `lo cronometrado suma 38 minutos y 58 segundos`() {
         assertEquals(2338, steps.sumOf { it.durationSec })
     }
@@ -272,6 +231,61 @@ class LumbarTrainingTest {
             listOf(t.id) + t.workouts.flatMap { w -> listOf(w.id) + w.exercises.map { it.id } }
 
         assertTrue(ids(training).none { it in ids(badDay) })
+    }
+
+    // ---------- La rutina va por revision (TD-103) ----------
+
+    @Test
+    fun `withLumbarRevision agrega los dos lumbares si no estan`() {
+        val otros = listOf(MasterDefaults.masterTraining("en"))
+
+        val out = MasterDefaults.withLumbarRevision(otros, "en")
+
+        assertEquals(3, out.size)
+        assertTrue(out.any { it.id == MasterDefaults.LUMBAR_ID })
+        assertTrue(out.any { it.id == MasterDefaults.LUMBAR_BAD_DAY_ID })
+    }
+
+    @Test
+    fun `withLumbarRevision reemplaza en su sitio y no toca a los demas`() {
+        val master = MasterDefaults.masterTraining("en")
+        val viejo = training.copy(workouts = emptyList())
+
+        val out = MasterDefaults.withLumbarRevision(listOf(viejo, master), "en")
+
+        assertEquals(3, out.size)
+        assertEquals(MasterDefaults.LUMBAR_ID, out[0].id)
+        assertEquals(5, out[0].workouts.size)
+        assertEquals(master, out[1])
+    }
+
+    @Test
+    fun `withLumbarRevision conserva el uid y la fecha de creacion`() {
+        // El uid es la identidad con la que un training viaja entre dispositivos: cambiarlo
+        // seria otro training. Y createdAt es cuando aparecio de verdad.
+        val viejo = training.copy(uid = "uid-de-siempre", createdAt = 111L, workouts = emptyList())
+
+        val out = MasterDefaults.withLumbarRevision(listOf(viejo), "en").first { it.id == MasterDefaults.LUMBAR_ID }
+
+        assertEquals("uid-de-siempre", out.uid)
+        assertEquals(111L, out.createdAt)
+        assertEquals(5, out.workouts.size)
+    }
+
+    @Test
+    fun `withLumbarRevision es idempotente`() {
+        val una = MasterDefaults.withLumbarRevision(emptyList(), "en")
+        val dos = MasterDefaults.withLumbarRevision(una, "en")
+
+        assertEquals(una.map { it.id }, dos.map { it.id })
+        assertEquals(una.map { it.workouts }, dos.map { it.workouts })
+    }
+
+    @Test
+    fun `la revision de la rutina no baja`() {
+        // Subir este numero es lo unico que hace falta para que un cambio llegue al
+        // dispositivo. El test esta para que nadie lo baje sin querer.
+        assertTrue(MasterDefaults.LUMBAR_REVISION >= 1)
     }
 
     // ---------- La sesion del 13-sep-2026 (TD-090) ----------
