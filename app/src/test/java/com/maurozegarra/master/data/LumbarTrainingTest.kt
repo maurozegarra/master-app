@@ -1,6 +1,9 @@
 package com.maurozegarra.master.data
 
 import com.maurozegarra.master.model.StepEngine
+import com.maurozegarra.master.model.WeightType
+import com.maurozegarra.master.model.WorkSet
+import com.maurozegarra.master.model.weightTotal
 import com.maurozegarra.master.model.StepKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -78,6 +81,81 @@ class LumbarTrainingTest {
             assertEquals(3, e.sets)
             assertEquals(60, e.restSec)
         }
+    }
+
+    // ---------- El bloque de cadera lleva carga (TD-098) ----------
+
+    private fun cadera(t: com.maurozegarra.master.model.Training) =
+        t.workouts.first { it.name == "Hip & Glute" }.exercises.associateBy { it.exerciseId }
+
+    @Test
+    fun `el puente de gluteos va con barra, de 20 a 40 kilos`() {
+        val e = cadera(training).getValue("ex_glute_bridge")
+
+        assertEquals(WeightType.BARBELL, e.weightType)
+        assertEquals(20.0, e.barWeight, 0.0)
+        // Los numeros de la serie son DISCOS: el total es la barra mas eso.
+        assertEquals(listOf(20.0, 30.0, 40.0), e.setList.map { e.weightTotal(it) })
+        assertTrue(e.setList.all { it.reps == 12 })
+    }
+
+    @Test
+    fun `la sentadilla y el carry van con mancuerna ascendente`() {
+        listOf("ex_box_squat", "ex_suitcase_carry").forEach { id ->
+            val e = cadera(training).getValue(id)
+
+            assertEquals(WeightType.TOTAL, e.weightType)
+            assertEquals(listOf(7.5, 10.0, 12.5), e.setList.map { it.weight })
+        }
+    }
+
+    @Test
+    fun `los dos lumbares comparten el bloque cargado`() {
+        assertEquals(
+            cadera(training).mapValues { (_, e) -> e.weightType to e.setList },
+            cadera(badDay).mapValues { (_, e) -> e.weightType to e.setList },
+        )
+    }
+
+    @Test
+    fun `la carga llega a un training ya sembrado sin cambiarle los ids`() {
+        // Es la migracion: los trainings ya estan en el dispositivo y la siembra no vuelve
+        // a correr.
+        val sinCarga = training.copy(
+            workouts = training.workouts.map { w ->
+                w.copy(exercises = w.exercises.map { it.copy(weightType = WeightType.NONE, setList = emptyList()) })
+            },
+        )
+
+        val cargado = MasterDefaults.withHipGluteLoaded(sinCarga, "en")
+
+        assertEquals(WeightType.BARBELL, cadera(cargado).getValue("ex_glute_bridge").weightType)
+        // Los ids de instancia se conservan: una corrida en marcha no pierde el sitio.
+        assertEquals(
+            sinCarga.workouts.flatMap { w -> w.exercises.map { it.id } },
+            cargado.workouts.flatMap { w -> w.exercises.map { it.id } },
+        )
+    }
+
+    @Test
+    fun `la migracion no pisa el peso que haya puesto el usuario`() {
+        val suyo = training.copy(
+            workouts = training.workouts.map { w ->
+                w.copy(
+                    exercises = w.exercises.map { e ->
+                        if (e.exerciseId == "ex_box_squat") {
+                            e.copy(weightType = WeightType.TOTAL, setList = listOf(WorkSet(reps = 8, weight = 30.0)))
+                        } else {
+                            e
+                        }
+                    },
+                )
+            },
+        )
+
+        val despues = MasterDefaults.withHipGluteLoaded(suyo, "en")
+
+        assertEquals(listOf(30.0), cadera(despues).getValue("ex_box_squat").setList.map { it.weight })
     }
 
     @Test

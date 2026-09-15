@@ -460,6 +460,34 @@ object MasterDefaults {
     private const val FIRST_SESSION_ID = 950017L
 
     /**
+     * El training con el bloque de cadera y gluteo ya cargado (TD-098).
+     *
+     * Hace falta porque los dos lumbares ya estan sembrados en el dispositivo y la siembra
+     * no vuelve a correr: cambiar [LumbarBlocks.hipGlute] solo llegaria a una instalacion
+     * nueva.
+     *
+     * Dos cuidados. Conserva el **id de cada instancia**, para que una corrida en marcha no
+     * pierda el sitio al rehacerse la cola de pasos. Y solo cambia los ejercicios que
+     * **siguen sin carga**: si el usuario ya les puso peso por su cuenta, ese numero es
+     * suyo y pisarlo seria quitarle algo.
+     *
+     * Los ids que genera el bloque aqui se descartan; solo se le piden los ejercicios.
+     */
+    fun withHipGluteLoaded(t: Training, lang: String): Training {
+        val cargados = LumbarBlocks(lang, seqStart = 0L).hipGlute().exercises.associateBy { it.exerciseId }
+        return t.copy(
+            workouts = t.workouts.map { w ->
+                w.copy(
+                    exercises = w.exercises.map { e ->
+                        val nuevo = cargados[e.exerciseId]
+                        if (nuevo != null && e.weightType == WeightType.NONE) nuevo.copy(id = e.id) else e
+                    },
+                )
+            },
+        )
+    }
+
+    /**
      * Los bloques de la rutina lumbar, compartidos por los dos trainings.
      *
      * Existe porque las dos versiones son el **mismo contenido en otro orden** -eso es lo
@@ -481,6 +509,7 @@ object MasterDefaults {
             work: Int = 30,
             prep: Int = 0,
             rest: Int = 0,
+            weightType: WeightType = WeightType.NONE,
             setList: List<WorkSet> = emptyList(),
         ): Exercise = Exercise(
             id = id(),
@@ -493,7 +522,35 @@ object MasterDefaults {
             workValue = work,
             restSec = rest,
             restSkipOnLastSet = true,
+            weightType = weightType,
             setList = setList,
+        )
+
+        /**
+         * Un ejercicio por repeticiones con carga que sube entre series (TD-098).
+         *
+         * Los pesos van por serie porque es como el usuario ya entrena -el 14-sep-2026 hizo
+         * el suitcase carry con 7.5, 10 y 12.5- y porque asi el historial guarda la carga
+         * real, que es lo que luego permite subirla con criterio en vez de a ojo.
+         *
+         * Con [WeightType.BARBELL] los numeros son DISCOS: el total es la barra mas eso.
+         */
+        private fun loaded(
+            exerciseId: String,
+            count: Int,
+            note: String,
+            weights: List<Double>,
+            weightType: WeightType = WeightType.TOTAL,
+        ): Exercise = ex(
+            exerciseId,
+            note = note,
+            sets = weights.size,
+            mode = WorkMode.REPS,
+            work = count,
+            prep = 10,
+            rest = 60,
+            weightType = weightType,
+            setList = weights.map { WorkSet(reps = count, weight = it) },
         )
 
         private fun reps(exerciseId: String, count: Int, note: String = "", sets: Int = 1, rest: Int = 0, prep: Int = 0): Exercise =
@@ -543,13 +600,26 @@ object MasterDefaults {
             ),
         )
 
+        /**
+         * El bloque de cadera y gluteo, con carga desde TD-098.
+         *
+         * A peso corporal se le quedaba corto y sus propios datos decian por que: en el
+         * training MASTER empuja hip thrust con 40, 50, 60 y 70 kg, y aqui estaba haciendo
+         * el puente a peso corporal. Empezar en 40 es conservador a proposito.
+         *
+         * Sigue siendo puente de SUELO y no hip thrust: menos recorrido de extension
+         * lumbar, que es lo que interesa en una rutina de columna. Y la sentadilla va
+         * goblet y no con barra porque el peso delante ayuda a mantener el pecho arriba y
+         * carga menos la espalda.
+         */
         fun hipGlute(): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
             exercises = listOf(
-                reps("ex_glute_bridge", 12, note = "Push through the heels", sets = 3, rest = 60, prep = 10),
-                reps("ex_suitcase_carry", 2, note = "One trip of 30-40 m per side", sets = 3, rest = 60, prep = 10),
-                reps("ex_box_squat", 8, note = "No weight, chest up", sets = 3, rest = 60, prep = 10),
+                // Discos: con la barra de 20 son 20, 30 y 40 kg.
+                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 10.0, 20.0), WeightType.BARBELL),
+                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(7.5, 10.0, 12.5)),
+                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(7.5, 10.0, 12.5)),
             ),
         )
     }

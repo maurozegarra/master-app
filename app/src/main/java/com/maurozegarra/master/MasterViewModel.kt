@@ -167,6 +167,8 @@ class MasterViewModel(
             // Una instalacion limpia no es la del usuario: no hay sesion pasada que anotar,
             // y sin esta marca la reconstruccion caeria en el segundo arranque.
             store.setFirstSessionSeeded()
+            // La siembra ya trae el bloque cargado; no hay nada que migrar.
+            store.setHipGluteLoaded()
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
             store.setMasterV3Seeded()
@@ -210,6 +212,7 @@ class MasterViewModel(
             cleanUpLumbarLeftovers()
             seedFirstSession()
             updateWalkInstructions()
+            loadHipGluteBlock()
         }
         observePlayer()
         migrateRestorePrefs()
@@ -221,6 +224,29 @@ class MasterViewModel(
         // que cualquier vuelta a primer plano. Ademas seria imposible: syncAssignments lee
         // `syncing`, que es un mutableStateOf declarado mas abajo, y los inicializadores
         // corren en orden de declaracion — desde el init su delegado todavia es null.
+    }
+
+    /**
+     * Sube la carga del bloque de cadera y gluteo de los dos lumbares (TD-098).
+     *
+     * Los trainings ya estan sembrados y la siembra no vuelve a correr, asi que cambiar el
+     * default solo llegaria a una instalacion nueva. El trabajo fino -conservar el id de
+     * cada instancia y no pisar lo que el usuario ya haya cargado- vive en
+     * [MasterDefaults.withHipGluteLoaded], que es puro y tiene test.
+     */
+    private fun loadHipGluteBlock() {
+        if (store.isHipGluteLoaded()) return
+        var changed = false
+        trainings.forEachIndexed { i, t ->
+            if (t.id != MasterDefaults.LUMBAR_ID && t.id != MasterDefaults.LUMBAR_BAD_DAY_ID) return@forEachIndexed
+            val cargado = MasterDefaults.withHipGluteLoaded(t, lang())
+            if (cargado != t) {
+                trainings[i] = cargado
+                changed = true
+            }
+        }
+        if (changed) persist()
+        store.setHipGluteLoaded()
     }
 
     /**
