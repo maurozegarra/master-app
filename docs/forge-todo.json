@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-104",
+      "title": "Inventariar el equipo disponible para poder disenar con lo que hay",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PEDIDO DEL USUARIO el 15-sep-2026: 'en su momento deberiamos inventariar lo que tengo para que puedas disenar diferentes rutinas'. POR QUE HACE FALTA, con el caso que lo destapo: ese dia el historial decia que habia hecho el puente de gluteos con 20/30/40 kg y lo que movio fueron 6/16/21. El app trae barWeight = 20 por defecto y su barra para ese ejercicio pesa 6. El numero inflado ademas le hizo bajar la carga -'me parecio mucho'-, asi que un dato mal puesto no solo ensucio el registro: cambio el entrenamiento. LO QUE SE SABE HOY, dicho por el y deducido de sus trainings: barras de 6, 7, 18 y 20 kg; mancuernas de 5, 7.5, 10 y 12.5; discos que llegan al menos a 30 por lado y permiten armar 15 (peso muerto con 0/10/20/30, hip thrust hasta 70 de total). Falta saber: granularidad real de los discos, si hay banco, caja o silla de altura conocida, banda, kettlebell, y con que barra hace cada ejercicio. QUE HAY QUE DECIDIR: donde vive el inventario. Tres opciones. (a) Un documento en docs/, que es barato y suficiente para que el asistente disene; no lo ve el app. (b) En Ajustes, como datos del usuario, para que el editor pueda ofrecer solo pesos que existen y que barWeight deje de ser un 20 por defecto que nadie mira. (c) Las dos: el documento primero y la pantalla cuando haya mas de un atleta. RECOMENDACION: empezar por (a) -docs/equipo.md, junto a coach.md-, porque el valor inmediato es que quien disena la rutina sepa con que cuenta, y eso no necesita UI. (b) sube de prioridad el dia que haya rutinas para otra persona, porque el equipo de NIKO no es el suyo. RELACIONADO: el barWeight por ejercicio ya existe en el modelo, asi que la parte urgente -que el puente diga 6 y no 20- se arregla con una revision de la rutina, sin esperar a este TD."
+    },
+    {
       "id": "TD-103",
       "title": "La rutina va por revision, no por una migracion en cada ajuste",
       "category": "Mantenimiento",
