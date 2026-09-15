@@ -399,6 +399,31 @@ fun List<Training>.usedExerciseIds(): Set<String> {
     return out
 }
 
+/**
+ * La sesión con sus ejercicios en el orden que manda [training], o **null si no se puede
+ * saber con certeza**.
+ *
+ * Las sesiones guardadas antes de TD-099 se escribieron por orden alfabético y su posición
+ * real no se guardó, pero sí se puede deducir: cada registro dice en qué workout estaba y
+ * de qué ejercicio era, y con eso se lee en qué posición va.
+ *
+ * Devuelve null en cuanto algo no cuadra —un workout que ya no existe, un ejercicio que no
+ * está donde decía el registro, o dos apariciones del mismo ejercicio en ese workout—
+ * porque entonces el training cambió desde aquel día y reordenar sería inventar. Mejor una
+ * sesión en alfabético que una reordenada a ciegas.
+ *
+ * Es idempotente: aplicarla a una sesión que ya está bien ordenada devuelve lo mismo.
+ */
+fun SessionLog.reorderedFrom(training: Training): SessionLog? {
+    val conPosicion = exercises.map { er ->
+        val w = training.workouts.getOrNull(er.workoutIndex) ?: return null
+        val enEseWorkout = w.exercises.withIndex().filter { it.value.exerciseId == er.exerciseId }
+        val unico = enEseWorkout.singleOrNull() ?: return null
+        er.copy(exerciseIndex = unico.index)
+    }
+    return copy(exercises = conPosicion.sortedWith(compareBy({ it.workoutIndex }, { it.exerciseIndex })))
+}
+
 /** Fecha de la última sesión registrada de cada training (id → completedAt). */
 fun lastTrainedAt(sessions: List<SessionLog>): Map<Long, Long> {
     val out = HashMap<Long, Long>()

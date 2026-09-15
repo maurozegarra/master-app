@@ -2,6 +2,7 @@ package com.maurozegarra.master.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -58,6 +59,91 @@ class SessionRecorderTest {
         val json = """[{"id":1,"trainingId":1,"trainingName":"T","completedAt":1,"status":"COMPLETED","exercises":[]}]"""
 
         assertEquals(SessionSource.MEASURED, SessionJson.decode(json).single().source)
+    }
+
+    // ---------- Devolverle el orden a una sesion vieja (TD-102) ----------
+
+    private fun record(id: String, name: String, workoutIndex: Int = 0) = ExerciseRecord(
+        exerciseId = id, name = name, workoutName = "W", workoutIndex = workoutIndex,
+        setsCompleted = 1, totalSets = 1, sets = listOf(SetRecord(reps = 1)), timeBased = false,
+    )
+
+    private fun trainingDe(vararg workouts: List<String>) = Training(
+        id = 1,
+        workouts = workouts.mapIndexed { wi, ids ->
+            Workout(id = wi.toLong(), name = "W$wi", exercises = ids.mapIndexed { i, id ->
+                Exercise(id = (wi * 100 + i).toLong(), exerciseId = id, name = id)
+            })
+        },
+    )
+
+    @Test
+    fun `reorderedFrom devuelve el orden que manda el training`() {
+        // Guardada en alfabetico, como quedaban antes de TD-099.
+        val s = SessionLog(
+            id = 1, trainingId = 1, trainingName = "LUMBAR", completedAt = 1L,
+            exercises = listOf(record("bird_dog", "Bird Dog"), record("curl_up", "Curl-up")),
+        )
+
+        val ordenada = s.reorderedFrom(trainingDe(listOf("curl_up", "bird_dog")))!!
+
+        assertEquals(listOf("Curl-up", "Bird Dog"), ordenada.exercises.map { it.name })
+        assertEquals(listOf(0, 1), ordenada.exercises.map { it.exerciseIndex })
+    }
+
+    @Test
+    fun `reorderedFrom es idempotente`() {
+        val t = trainingDe(listOf("curl_up", "bird_dog"))
+        val s = SessionLog(
+            id = 1, trainingId = 1, trainingName = "LUMBAR", completedAt = 1L,
+            exercises = listOf(record("bird_dog", "Bird Dog"), record("curl_up", "Curl-up")),
+        )
+
+        assertEquals(s.reorderedFrom(t), s.reorderedFrom(t)!!.reorderedFrom(t))
+    }
+
+    @Test
+    fun `reorderedFrom se rinde si el ejercicio ya no esta en ese workout`() {
+        // El training cambio desde aquel dia: reordenar seria inventar.
+        val s = SessionLog(
+            id = 1, trainingId = 1, trainingName = "LUMBAR", completedAt = 1L,
+            exercises = listOf(record("curl_up", "Curl-up"), record("ya_no_esta", "Otro")),
+        )
+
+        assertNull(s.reorderedFrom(trainingDe(listOf("curl_up", "bird_dog"))))
+    }
+
+    @Test
+    fun `reorderedFrom se rinde si el workout ya no existe`() {
+        val s = SessionLog(
+            id = 1, trainingId = 1, trainingName = "LUMBAR", completedAt = 1L,
+            exercises = listOf(record("curl_up", "Curl-up", workoutIndex = 7)),
+        )
+
+        assertNull(s.reorderedFrom(trainingDe(listOf("curl_up"))))
+    }
+
+    @Test
+    fun `reorderedFrom se rinde si el ejercicio aparece dos veces en el workout`() {
+        // Sin saber cual de las dos apariciones era, cualquier posicion es un invento.
+        val s = SessionLog(
+            id = 1, trainingId = 1, trainingName = "LUMBAR", completedAt = 1L,
+            exercises = listOf(record("walk", "Walk")),
+        )
+
+        assertNull(s.reorderedFrom(trainingDe(listOf("walk", "curl_up", "walk"))))
+    }
+
+    @Test
+    fun `reorderedFrom respeta el orden de los workouts`() {
+        val s = SessionLog(
+            id = 1, trainingId = 1, trainingName = "LUMBAR", completedAt = 1L,
+            exercises = listOf(record("b", "Del segundo", workoutIndex = 1), record("a", "Del primero", workoutIndex = 0)),
+        )
+
+        val ordenada = s.reorderedFrom(trainingDe(listOf("a"), listOf("b")))!!
+
+        assertEquals(listOf("Del primero", "Del segundo"), ordenada.exercises.map { it.name })
     }
 
     // ---------- El orden del historial es el de la rutina (TD-099) ----------

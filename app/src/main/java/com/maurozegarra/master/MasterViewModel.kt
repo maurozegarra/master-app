@@ -30,6 +30,7 @@ import com.maurozegarra.master.model.PlayerStep
 import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
+import com.maurozegarra.master.model.reorderedFrom
 import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
@@ -172,6 +173,7 @@ class MasterViewModel(
             store.setHipGluteLoaded()
             // Ni sesiones viejas que marcar o reordenar: no hay historial.
             store.setFirstSessionMarked()
+            store.setLumbarSessionsReordered()
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
             store.setMasterV3Seeded()
@@ -217,6 +219,7 @@ class MasterViewModel(
             updateWalkInstructions()
             loadHipGluteBlock()
             markReconstructedSession()
+            reorderLumbarSessions()
         }
         observePlayer()
         migrateRestorePrefs()
@@ -249,6 +252,34 @@ class MasterViewModel(
             )
         }
         store.setFirstSessionMarked()
+    }
+
+    /**
+     * Devuelve a las dos sesiones lumbares el orden de la rutina (TD-102).
+     *
+     * Se guardaron antes de TD-099, o sea por orden alfabetico. Se limita a los dos
+     * trainings lumbares **a proposito**: de ellos consta que no se reordenaron desde
+     * entonces -lo unico que cambio fue la carga del bloque de cadera-, y para cualquier
+     * otro training reconstruir el orden desde como esta hoy seria inventarlo.
+     *
+     * [reorderedFrom] devuelve null en cuanto algo no cuadra, y entonces esa sesion se
+     * queda como esta.
+     */
+    private fun reorderLumbarSessions() {
+        if (store.isLumbarSessionsReordered()) return
+        val lumbares = trainings.filter {
+            it.id == MasterDefaults.LUMBAR_ID || it.id == MasterDefaults.LUMBAR_BAD_DAY_ID
+        }.associateBy { it.id }
+        val sesiones = store.loadSessions()
+        var changed = false
+        val nuevas = sesiones.map { s ->
+            val t = lumbares[s.trainingId] ?: return@map s
+            val ordenada = s.reorderedFrom(t) ?: return@map s
+            if (ordenada != s) changed = true
+            ordenada
+        }
+        if (changed) store.saveSessions(nuevas)
+        store.setLumbarSessionsReordered()
     }
 
     /**

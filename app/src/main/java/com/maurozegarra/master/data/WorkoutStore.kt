@@ -107,6 +107,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isFirstSessionMarked(): Boolean = prefs.getBoolean(KEY_FIRST_SESSION_MARKED, false)
     fun setFirstSessionMarked() { prefs.edit().putBoolean(KEY_FIRST_SESSION_MARKED, true).apply() }
 
+    /** Marca de migracion: si las sesiones lumbares viejas ya se reordenaron (TD-102). */
+    fun isLumbarSessionsReordered(): Boolean = prefs.getBoolean(KEY_SESSIONS_REORDERED, false)
+    fun setLumbarSessionsReordered() { prefs.edit().putBoolean(KEY_SESSIONS_REORDERED, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         val items = TrainingJson.decode(raw)
@@ -215,6 +219,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_WALK_NOTE_V2 = "walk_instructions_v2"
         const val KEY_HIP_GLUTE_LOADED = "hip_glute_loaded"
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
+        const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"
         const val MAX_SESSIONS = 200
     }
 }
