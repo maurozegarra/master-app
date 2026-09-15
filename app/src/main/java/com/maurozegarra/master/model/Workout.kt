@@ -327,6 +327,15 @@ data class ExerciseRecord(
     val name: String,
     val workoutName: String,
     val workoutIndex: Int,
+    /**
+     * Posición del ejercicio dentro de su workout, que es como se ordena el historial.
+     *
+     * Antes se ordenaba por nombre, y el historial contaba una sesión que nadie hizo: en
+     * los tres de McGill el bird dog salía primero y el curl-up cuarto, por la B y la C.
+     * Los registros viejos llegan sin este campo y se quedan como se guardaron; su orden
+     * real ya no está en ninguna parte.
+     */
+    val exerciseIndex: Int = 0,
     val setsCompleted: Int,
     val totalSets: Int,
     val sets: List<SetRecord>,

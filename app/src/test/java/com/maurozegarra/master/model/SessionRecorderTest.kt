@@ -12,6 +12,7 @@ class SessionRecorderTest {
         ownerName: String = "Squat",
         workoutName: String = "Lower",
         workoutIndex: Int = 0,
+        exerciseIndex: Int = 0,
         setIndex: Int = 0,
         totalSets: Int = 3,
         reps: Int = 12,
@@ -26,6 +27,7 @@ class SessionRecorderTest {
         ownerExerciseId = exerciseId,
         workoutName = workoutName,
         workoutIndex = workoutIndex,
+        exerciseIndex = exerciseIndex,
         setIndex = setIndex,
         totalSets = totalSets,
         reps = reps,
@@ -34,6 +36,73 @@ class SessionRecorderTest {
         weighted = weighted,
         weightTotal = weightTotal,
     )
+
+    // ---------- El orden del historial es el de la rutina (TD-099) ----------
+
+    @Test
+    fun `los ejercicios salen en el orden de la rutina, no por nombre`() {
+        // Los tres de McGill: el curl-up abre y el bird dog cierra. Por nombre salia al
+        // reves, y el historial contaba una sesion que nadie hizo.
+        val r = SessionRecorder()
+        listOf(
+            "ex_curl_up" to "Curl-up",
+            "ex_side_plank_l" to "Side Plank L",
+            "ex_side_plank_r" to "Side Plank R",
+            "ex_bird_dog" to "Bird Dog",
+        ).forEachIndexed { i, (id, name) ->
+            r.onWorkStepCompleted(workStep(exerciseId = id, ownerName = name, exerciseIndex = i, totalSets = 1))
+        }
+
+        assertEquals(
+            listOf("Curl-up", "Side Plank L", "Side Plank R", "Bird Dog"),
+            r.build().map { it.name },
+        )
+    }
+
+    @Test
+    fun `volver atras a mitad de corrida no reordena el historial`() {
+        // Por eso se ordena y no se confia en el orden de insercion: quien salta adelante y
+        // vuelve registra los ejercicios en un orden que no es el de la rutina.
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(exerciseId = "c", ownerName = "Tercero", exerciseIndex = 2, totalSets = 1))
+        r.onWorkStepCompleted(workStep(exerciseId = "a", ownerName = "Primero", exerciseIndex = 0, totalSets = 1))
+        r.onWorkStepCompleted(workStep(exerciseId = "b", ownerName = "Segundo", exerciseIndex = 1, totalSets = 1))
+
+        assertEquals(listOf("Primero", "Segundo", "Tercero"), r.build().map { it.name })
+    }
+
+    @Test
+    fun `el workout manda sobre la posicion dentro de el`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(exerciseId = "z", ownerName = "Del segundo workout", workoutIndex = 1, exerciseIndex = 0, totalSets = 1))
+        r.onWorkStepCompleted(workStep(exerciseId = "y", ownerName = "Del primero", workoutIndex = 0, exerciseIndex = 9, totalSets = 1))
+
+        assertEquals(listOf("Del primero", "Del segundo workout"), r.build().map { it.name })
+    }
+
+    @Test
+    fun `la posicion sobrevive la ida y vuelta a json`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(exerciseId = "ex_curl_up", ownerName = "Curl-up", exerciseIndex = 3, totalSets = 1))
+        val log = SessionLog(id = 1, trainingId = 1, trainingName = "LUMBAR", completedAt = 1L, exercises = r.build())
+
+        val back = SessionJson.decode(SessionJson.encode(listOf(log))).single()
+
+        assertEquals(3, back.exercises.single().exerciseIndex)
+    }
+
+    @Test
+    fun `una sesion guardada antes de TD-099 se lee sin posicion y no se reordena`() {
+        val json = """[{"id":1,"trainingId":1,"trainingName":"T","completedAt":1,"status":"COMPLETED","exercises":[
+          {"exerciseId":"b","name":"Bird Dog","workoutIndex":0,"totalSets":1,"sets":[{"reps":0,"weightKg":0,"durationSec":10}]},
+          {"exerciseId":"c","name":"Curl-up","workoutIndex":0,"totalSets":1,"sets":[{"reps":0,"weightKg":0,"durationSec":10}]}
+        ]}]"""
+
+        val back = SessionJson.decode(json).single()
+
+        assertTrue(back.exercises.all { it.exerciseIndex == 0 })
+        assertEquals(listOf("Bird Dog", "Curl-up"), back.exercises.map { it.name })
+    }
 
     @Test
     fun `empty recorder builds empty list`() {
@@ -153,17 +222,23 @@ class SessionRecorderTest {
         assertTrue(r.isEmpty())
     }
 
+    /**
+     * Este test fijaba "por workoutIndex y luego por NOMBRE" hasta TD-099. Se cambia a
+     * proposito, no se borra: ordenar por nombre era justamente el fallo que el usuario
+     * reporto -en su sesion del 14-sep-2026 el bird dog salia antes que el curl-up-, y lo
+     * que tiene que mandar es la posicion del ejercicio dentro del workout.
+     */
     @Test
-    fun `build sorts by workoutIndex then name`() {
+    fun `build sorts by workoutIndex then position in the workout`() {
         val r = SessionRecorder()
-        r.onWorkStepCompleted(workStep(exerciseId = "press", ownerName = "Press", workoutIndex = 1))
-        r.onWorkStepCompleted(workStep(exerciseId = "squat", ownerName = "Squat", workoutIndex = 0))
-        r.onWorkStepCompleted(workStep(exerciseId = "deadlift", ownerName = "Deadlift", workoutIndex = 0))
+        r.onWorkStepCompleted(workStep(exerciseId = "press", ownerName = "Press", workoutIndex = 1, exerciseIndex = 0))
+        r.onWorkStepCompleted(workStep(exerciseId = "squat", ownerName = "Squat", workoutIndex = 0, exerciseIndex = 0))
+        r.onWorkStepCompleted(workStep(exerciseId = "deadlift", ownerName = "Deadlift", workoutIndex = 0, exerciseIndex = 1))
         val records = r.build()
         assertEquals(0, records[0].workoutIndex)
-        assertEquals("Deadlift", records[0].name)
+        assertEquals("Squat", records[0].name)
         assertEquals(0, records[1].workoutIndex)
-        assertEquals("Squat", records[1].name)
+        assertEquals("Deadlift", records[1].name)
         assertEquals(1, records[2].workoutIndex)
     }
 

@@ -28,6 +28,7 @@ object SessionJson {
                     .put("name", er.name)
                     .put("workoutName", er.workoutName)
                     .put("workoutIndex", er.workoutIndex)
+                    .put("exerciseIndex", er.exerciseIndex)
                     .put("setsCompleted", er.setsCompleted)
                     .put("totalSets", er.totalSets)
                     .put("sets", setsArr)
@@ -75,6 +76,10 @@ object SessionJson {
                         name = eo.optString("name", ""),
                         workoutName = eo.optString("workoutName", ""),
                         workoutIndex = eo.optInt("workoutIndex", 0),
+                        // Las sesiones guardadas antes de TD-099 no lo traen. Se quedan en
+                        // 0 y conservan el orden con el que se escribieron: su orden real
+                        // no esta en ninguna parte y inventarlo seria peor.
+                        exerciseIndex = eo.optInt("exerciseIndex", 0),
                         setsCompleted = eo.optInt("setsCompleted", sets.size),
                         totalSets = eo.optInt("totalSets", sets.size),
                         sets = sets,

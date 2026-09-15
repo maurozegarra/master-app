@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-099",
+      "title": "Fix: el historial ordena los ejercicios por nombre y no por la rutina",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "REPORTADO POR EL USUARIO el 14-sep-2026: 'en el historial noto que Bird Dog esta registrado primero cuando en realidad hice Curl up primero, como manda la rutina', y lo mismo en el bloque Hip & Glute. CAUSA: SessionRecorder.build() terminaba en .sortedWith(compareBy({ it.workoutIndex }, { it.name })). El segundo criterio era el NOMBRE, o sea orden alfabetico. En los tres de McGill eso deja Bird Dog, Curl-up, Side Plank L, Side Plank R -la B antes que la C- cuando la rutina va Curl-up, plancha izquierda, plancha derecha, bird dog. En cadera queda Box Squat, Glute Bridge, Suitcase Carry en vez de puente, carry, sentadilla. Comprobado en el respaldo de su dispositivo, sesion del 14-sep. POR QUE NO SE VEIA ANTES: en sus otros trainings el orden alfabetico coincidia de casualidad con el de la rutina, o la diferencia no saltaba a la vista. EL FIX: ExerciseRecord gana exerciseIndex -la posicion del ejercicio dentro de su workout- y build() ordena por (workoutIndex, exerciseIndex). El dato ya viajaba en PlayerStep.exerciseIndex desde TD-073, solo que el grabador no lo guardaba. POR QUE ORDENAR Y NO CONFIAR EN EL ORDEN DE INSERCION: los registros se insertan al completar la primera serie de cada ejercicio, asi que quien salta hacia delante y vuelve atras -que el player permite- los registraria en un orden que no es el de la rutina. LO QUE NO ARREGLA: las sesiones ya guardadas. Llegan sin el campo, se quedan en 0 y conservan el orden alfabetico con el que se escribieron. Su orden real no esta en ninguna parte y reconstruirlo desde el training de hoy seria inventarlo, porque el training pudo cambiar desde entonces. HALLAZGO RELACIONADO, NO TOCADO: SessionRecorder agrupa por (exerciseId, workoutIndex), asi que dos instancias del MISMO ejercicio dentro de un workout se funden en un registro y la segunda pisa a la primera. Es la razon por la que la plancha lateral necesito dos entradas de catalogo (TD-086). Ahora que el registro lleva exerciseIndex, meterlo en la clave lo resolveria, pero cambia como se cuenta el historial y merece su propia decision."
+    },
+    {
       "id": "TD-098",
       "title": "Cargar el bloque de cadera y gluteo, que se le queda corto",
       "category": "Feature",

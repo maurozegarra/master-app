@@ -54,6 +54,7 @@ class SessionRecorder {
             name = step.ownerName,
             workoutName = step.workoutName,
             workoutIndex = step.workoutIndex,
+            exerciseIndex = step.exerciseIndex,
             setsCompleted = completedCount,
             totalSets = step.totalSets,
             sets = orderedSets,
@@ -78,6 +79,16 @@ class SessionRecorder {
         return if (completedCount >= totalSets) ExerciseStatus.COMPLETED else ExerciseStatus.PARTIAL
     }
 
+    /**
+     * Los registros en el orden en que los manda la rutina, no en el que se completaron.
+     *
+     * Ordenar por nombre -como se hacia hasta TD-099- dejaba el historial contando una
+     * sesion que nadie hizo: dentro de los tres de McGill el bird dog salia primero por la
+     * B, y el curl-up, que es el que abre, cuarto.
+     *
+     * Y no vale con no ordenar y confiar en el orden de insercion: quien salta hacia
+     * delante y vuelve atras registra los ejercicios en un orden que no es el de la rutina.
+     */
     fun build(): List<ExerciseRecord> =
         records.values.map { er ->
             val key = ExerciseKey(er.exerciseId, er.workoutIndex)
@@ -87,7 +98,7 @@ class SessionRecorder {
                 sets = orderedSets,
                 status = deriveStatus(orderedSets, er.totalSets),
             )
-        }.sortedWith(compareBy({ it.workoutIndex }, { it.name }))
+        }.sortedWith(compareBy({ it.workoutIndex }, { it.exerciseIndex }))
 
     /**
      * Las series en orden, recorriendo **hasta la última registrada** aunque el plan diga
