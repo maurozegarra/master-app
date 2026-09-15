@@ -5,6 +5,50 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-15 — tercera sesion: la caminata si servia, era la velocidad
+
+Desperto a las 7:00 y empezo a las **7:16**. Mismo margen que ayer (16 min contra 15), asi
+que esa variable se mantiene constante entre las dos sesiones y no explica ninguna
+diferencia.
+
+**LUMBAR (bad day)**, 07:16 a 08:15, **58m 39s**, completa. Leido del historial del
+telefono; el registro dice los diez ejercicios al 100% y nada saltado.
+
+**Dolor: igual que ayer** (4 / 3 / 2). En sus palabras, *"lo cual para mi es bastante, la
+prioridad es no recaer"*. Sigue en la espalda baja, sin irradiacion. Dos dias seguidos en
+el mismo nivel: meseta, no retroceso.
+
+**EL HALLAZGO DEL DIA, y corrige lo que se habia concluido dos veces.** La caminata no era
+neutra: **estaba mal dosificada**. La velocidad, que no la habiamos preguntado nunca:
+
+| Dia | Velocidad | Como se sintio |
+|---|---|---|
+| 13-sep | 3 km/h | *"raro y nada util"* |
+| 14-sep | 4 km/h | neutral |
+| 15-sep | 5 km/h | *"mis caderas las senti mucho mas sueltas"* |
+
+Tres dias, tres velocidades, una respuesta que sube con cada una. El PDF pide "paso vivo" y
+a 3 km/h eso es un paseo, no una caminata. Las dos veces que se anoto "la caminata no hace
+el trabajo" el dato estaba bien y **la interpretacion mal**: no era el ejercicio, era la
+dosis. La nota del app decia "Brisk pace" sin un numero al lado, y un adjetivo no dosifica.
+
+**Los pesos, y aqui hay un error de registro.** Su barra pesa **6 kg**, no 20, que es lo que
+el app tiene puesto por defecto. El historial de hoy dice 20/30/40 en el puente y lo que de
+verdad movio fue **6, 16 y 21 kg**. En discos: la pauta pedia 0/10/20 y el puso 0/10/15.
+
+No se aventuro con el tercero, y la razon que da es buena: *"me parecio mucho, prefiero
+quedarme con la sensacion de que pude dar mas a la sensacion: no debi meterle tanto peso"*.
+Parte de que le pareciera mucho es que el app le enseniaba 40 kg cuando iban a ser 26.
+
+- **Suitcase carry**: los mismos de ayer, 7.5/10/12.5. Sin comentario.
+- **Box squat**: con los pesos sugeridos, y **"se sintio ligero"**. Ahi si hay margen.
+- **Puente**: falta saber como se sintio el de barra + 15.
+
+**Lo que NO se toca:** la piramide de McGill sigue en 6/4/2. El dolor esta en meseta y el ha
+dicho cual es su prioridad; subir volumen ahora es apostar contra eso.
+
+---
+
 ## 2026-09-14 — segunda sesion, con el bad day y sin margen
 
 Desperto a las 5:00 y empezo a las **5:15**: quince minutos, margen practicamente cero. Y

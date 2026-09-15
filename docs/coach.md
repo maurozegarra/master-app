@@ -42,6 +42,14 @@ Cuatro cosas, y ninguna necesita que se acuerde de nada raro:
 - **Qué ejercicio cambió algo.** El 13-sep-2026 fueron el gato-camello y la bisagra de
   cadera; la caminata no. Ese dato es el que ajusta el orden.
 - **Qué saltó y por qué.** El app registra que se saltó, no por qué.
+- **Si cambió la dosis, cuál usó de verdad.** El 15-sep-2026 el historial decía 20/30/40 kg
+  en el puente y lo que movió fueron 6/16/21: el app tenía la barra en 20 kg y la suya pesa
+  6. Un registro que no es lo que paso no sirve para decidir nada.
+
+**Y una pregunta por cada dosis que no sea un número en el app.** La caminata llevó tres
+sesiones en "no hace nada" hasta que resultó que la hacía a 3, 4 y 5 km/h; el dato estaba
+bien y la interpretación mal. **Un adjetivo no dosifica**: si la rutina dice "paso vivo" y
+no un número, esa es una variable suelta y hay que preguntarla o escribirla.
 
 ## Reglas del rol
 
