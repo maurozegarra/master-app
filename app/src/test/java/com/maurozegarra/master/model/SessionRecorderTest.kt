@@ -37,6 +37,29 @@ class SessionRecorderTest {
         weightTotal = weightTotal,
     )
 
+    // ---------- De donde salio el registro (TD-101) ----------
+
+    @Test
+    fun `una sesion es medida salvo que diga lo contrario`() {
+        assertEquals(SessionSource.MEASURED, SessionLog(id = 1, trainingId = 1, trainingName = "T", completedAt = 1L).source)
+    }
+
+    @Test
+    fun `el origen sobrevive la ida y vuelta a json`() {
+        val log = SessionLog(id = 1, trainingId = 1, trainingName = "T", completedAt = 1L, source = SessionSource.RECONSTRUCTED)
+
+        assertEquals(SessionSource.RECONSTRUCTED, SessionJson.decode(SessionJson.encode(listOf(log))).single().source)
+    }
+
+    @Test
+    fun `una sesion guardada antes de TD-101 se lee como medida`() {
+        // Y es verdad: todas las que hay guardadas las escribio el player. La unica
+        // excepcion se corrige en su propia migracion.
+        val json = """[{"id":1,"trainingId":1,"trainingName":"T","completedAt":1,"status":"COMPLETED","exercises":[]}]"""
+
+        assertEquals(SessionSource.MEASURED, SessionJson.decode(json).single().source)
+    }
+
     // ---------- El orden del historial es el de la rutina (TD-099) ----------
 
     @Test

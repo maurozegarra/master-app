@@ -54,6 +54,7 @@ import com.maurozegarra.master.ui.SwipeAction
 import com.maurozegarra.master.ui.SwipeActionsRow
 import com.maurozegarra.master.ui.SwipeRowsController
 import com.maurozegarra.master.ui.rememberSwipeRowsController
+import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
@@ -231,6 +232,15 @@ fun SessionRow(
                 text = if (isPartial) t.partial else t.complete,
                 color = if (isPartial) accent else STATUS_DONE,
             )
+            // Solo cuando NO la midio el player. Lo normal no lleva sello: un historial con
+            // una etiqueta en cada fila no distingue nada, y lo que hay que poder ver de un
+            // vistazo es la excepcion. Va en gris y no en el color de la etapa porque no es
+            // un estado del entrenamiento, es de donde salio el dato.
+            when (session.source) {
+                SessionSource.MEASURED -> Unit
+                SessionSource.RECONSTRUCTED -> StatusBadge(t.sourceRebuilt, AppTheme.colors.textDim)
+                SessionSource.EDITED -> StatusBadge(t.sourceEdited, AppTheme.colors.textDim)
+            }
             // Empuja los iconos a la derecha. La hora y el badge se quedan juntos a la
             // izquierda, y como la hora no cambia de ancho, el badge no se mueve de sitio
             // entre una tarjeta y otra.

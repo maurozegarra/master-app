@@ -45,6 +45,7 @@ object SessionJson {
                 .put("completedAt", s.completedAt)
                 .put("startedAt", s.startedAt)
                 .put("status", s.status.name)
+                .put("source", s.source.name)
                 .put("durationSec", s.durationSec)
                 .put("exercises", exercises))
         }
@@ -100,6 +101,9 @@ object SessionJson {
                 startedAt = o.optLong("startedAt", 0L),
                 status = runCatching { SessionStatus.valueOf(o.optString("status")) }
                     .getOrDefault(SessionStatus.COMPLETED),
+                // Sin el campo, MEASURED: lo guardado antes de TD-101 lo escribio el player.
+                source = runCatching { SessionSource.valueOf(o.optString("source")) }
+                    .getOrDefault(SessionSource.MEASURED),
                 exercises = exercises,
                 durationSec = o.optInt("durationSec", 0),
             )

@@ -4,6 +4,7 @@ import com.maurozegarra.master.model.Exercise
 import com.maurozegarra.master.model.ExerciseMedia
 import com.maurozegarra.master.model.ExerciseRecord
 import com.maurozegarra.master.model.SessionLog
+import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.SetRecord
 import com.maurozegarra.master.model.Training
@@ -451,13 +452,17 @@ object MasterDefaults {
             status = SessionStatus.COMPLETED,
             exercises = exercises,
             durationSec = FIRST_SESSION_SEC,
+            // No la midio el player: se dedujo de la rutina. Que se note es el punto entero
+            // de TD-101.
+            source = SessionSource.RECONSTRUCTED,
         )
     }
 
     /** 13-sep-2026, 1:00 pm, hora de Peru: cuando se subio a la caminadora. */
     private const val FIRST_SESSION_START = 1789322400000L
     private const val FIRST_SESSION_SEC = 55 * 60
-    private const val FIRST_SESSION_ID = 950017L
+    /** Id fijo de la sesion reconstruida: es como se la reconoce para marcarla (TD-101). */
+    const val FIRST_SESSION_ID = 950017L
 
     /**
      * El training con el bloque de cadera y gluteo ya cargado (TD-098).

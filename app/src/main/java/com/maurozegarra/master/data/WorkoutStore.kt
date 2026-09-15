@@ -103,6 +103,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isHipGluteLoaded(): Boolean = prefs.getBoolean(KEY_HIP_GLUTE_LOADED, false)
     fun setHipGluteLoaded() { prefs.edit().putBoolean(KEY_HIP_GLUTE_LOADED, true).apply() }
 
+    /** Marca de migracion: si la sesion reconstruida ya quedo marcada como tal (TD-101). */
+    fun isFirstSessionMarked(): Boolean = prefs.getBoolean(KEY_FIRST_SESSION_MARKED, false)
+    fun setFirstSessionMarked() { prefs.edit().putBoolean(KEY_FIRST_SESSION_MARKED, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         val items = TrainingJson.decode(raw)
@@ -210,6 +214,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_FIRST_SESSION = "lumbar_first_session_seeded_v2"
         const val KEY_WALK_NOTE_V2 = "walk_instructions_v2"
         const val KEY_HIP_GLUTE_LOADED = "hip_glute_loaded"
+        const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val MAX_SESSIONS = 200
     }
 }

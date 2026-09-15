@@ -30,6 +30,7 @@ import com.maurozegarra.master.model.PlayerStep
 import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
+import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.model.Training
@@ -169,6 +170,8 @@ class MasterViewModel(
             store.setFirstSessionSeeded()
             // La siembra ya trae el bloque cargado; no hay nada que migrar.
             store.setHipGluteLoaded()
+            // Ni sesiones viejas que marcar o reordenar: no hay historial.
+            store.setFirstSessionMarked()
             store.setFrikiSeeded()
             store.setMasterV2Seeded()
             store.setMasterV3Seeded()
@@ -213,6 +216,7 @@ class MasterViewModel(
             seedFirstSession()
             updateWalkInstructions()
             loadHipGluteBlock()
+            markReconstructedSession()
         }
         observePlayer()
         migrateRestorePrefs()
@@ -224,6 +228,27 @@ class MasterViewModel(
         // que cualquier vuelta a primer plano. Ademas seria imposible: syncAssignments lee
         // `syncing`, que es un mutableStateOf declarado mas abajo, y los inicializadores
         // corren en orden de declaracion — desde el init su delegado todavia es null.
+    }
+
+    /**
+     * Marca como reconstruida la sesion del 13-sep, que el player nunca midio (TD-101).
+     *
+     * La sembro TD-090 antes de que existiera [SessionSource], asi que quedo guardada sin
+     * el campo y al leerla se la tomaba por medida. Era justo la confusion que TD-101 viene
+     * a impedir, y encima la introdujo el asistente.
+     *
+     * Se reconoce por su id fijo. Si no esta -porque el usuario la borro- no se hace nada.
+     */
+    private fun markReconstructedSession() {
+        if (store.isFirstSessionMarked()) return
+        val sesiones = store.loadSessions()
+        val i = sesiones.indexOfFirst { it.id == MasterDefaults.FIRST_SESSION_ID }
+        if (i >= 0 && sesiones[i].source != SessionSource.RECONSTRUCTED) {
+            store.saveSessions(
+                sesiones.toMutableList().also { it[i] = it[i].copy(source = SessionSource.RECONSTRUCTED) },
+            )
+        }
+        store.setFirstSessionMarked()
     }
 
     /**

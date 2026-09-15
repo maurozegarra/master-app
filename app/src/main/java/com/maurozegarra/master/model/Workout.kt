@@ -307,6 +307,25 @@ data class ExerciseDef(
 /** Estado de una sesión registrada. */
 enum class SessionStatus { COMPLETED, PARTIAL }
 
+/**
+ * De dónde sale un registro del historial (TD-101).
+ *
+ * El historial tiene que ser **corregible pero auditable**: que se pueda arreglar un dato
+ * malo, y que nunca se confunda lo que se midió con lo que se dedujo. Sin esto, la sesión
+ * que se reconstruyó desde la rutina (TD-090) es indistinguible de las que cronometró el
+ * player, y dentro de unas semanas nadie sabría cuál es cuál.
+ */
+enum class SessionSource {
+    /** La midió el player de principio a fin. Es el caso normal. */
+    MEASURED,
+
+    /** Se armó desde la rutina, sin que el player estuviera delante. */
+    RECONSTRUCTED,
+
+    /** La midió el player y después se corrigió a mano. */
+    EDITED,
+}
+
 /** Una serie completada: reps, peso (kg) y duración (s) según corresponda. */
 data class SetRecord(
     val reps: Int = 0,
@@ -355,6 +374,12 @@ data class SessionLog(
     val status: SessionStatus = SessionStatus.COMPLETED,
     val exercises: List<ExerciseRecord> = emptyList(),
     val durationSec: Int = 0,
+    /**
+     * De dónde sale este registro. Por defecto [SessionSource.MEASURED], que es lo que son
+     * todas las sesiones guardadas antes de que el campo existiera: las escribió el player.
+     * La única excepción se corrige en su propia migración.
+     */
+    val source: SessionSource = SessionSource.MEASURED,
 )
 
 /**
