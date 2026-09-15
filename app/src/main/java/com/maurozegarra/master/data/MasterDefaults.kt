@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 1
+    const val LUMBAR_REVISION = 2
 
     /**
      * Ids fijos de los dos trainings lumbares.
@@ -379,7 +379,7 @@ object MasterDefaults {
             id = LUMBAR_ID,
             name = "LUMBAR",
             workouts = listOf(
-                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Brisk pace, arms loose"),
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "5 km/h, arms loose"),
                 b.mobility(),
                 b.mcgill(),
                 b.hipGlute(),
@@ -415,7 +415,10 @@ object MasterDefaults {
             name = "LUMBAR (bad day)",
             workouts = listOf(
                 b.mobility(),
-                b.walk(if (lang == "es") "Caminata corta" else "Short Walk", sec = 360, note = "After the mobility, not before"),
+                // La velocidad va en la nota y no solo en las instrucciones porque es lo que
+                // se lee en el player. "Paso vivo" costo tres sesiones: a 3 km/h no hacia
+                // nada, a 5 le solto las caderas. Un adjetivo no dosifica.
+                b.walk(if (lang == "es") "Caminata corta" else "Short Walk", sec = 360, note = "5 km/h, after the mobility"),
                 b.mcgill(),
                 b.hipGlute(),
             ),
@@ -482,6 +485,17 @@ object MasterDefaults {
     const val FIRST_SESSION_ID = 950017L
 
     /**
+     * La sesion del 15-sep-2026, que quedo registrada con pesos que no fueron (TD-105).
+     *
+     * El puente se guardo como 20/30/40 kg porque el ejercicio tenia la barra en 20, y la
+     * suya pesa 6: lo que de verdad movio fueron 6, 16 y 21. Se corrige y la sesion queda
+     * marcada como [SessionSource.EDITED], que es justo para lo que existe ese campo.
+     */
+    const val SESSION_15_SEP_ID = 1789478120939L
+    val SESSION_15_SEP_WRONG = listOf(20.0, 30.0, 40.0)
+    val SESSION_15_SEP_RIGHT = listOf(6.0, 16.0, 21.0)
+
+    /**
      * La lista de trainings con los dos lumbares puestos al dia: reemplaza el que ya este y
      * agrega el que falte, en su sitio y sin tocar el resto.
      *
@@ -531,6 +545,7 @@ object MasterDefaults {
             prep: Int = 0,
             rest: Int = 0,
             weightType: WeightType = WeightType.NONE,
+            barWeight: Double = 20.0,
             setList: List<WorkSet> = emptyList(),
         ): Exercise = Exercise(
             id = id(),
@@ -544,6 +559,7 @@ object MasterDefaults {
             restSec = rest,
             restSkipOnLastSet = true,
             weightType = weightType,
+            barWeight = barWeight,
             setList = setList,
         )
 
@@ -562,6 +578,7 @@ object MasterDefaults {
             note: String,
             weights: List<Double>,
             weightType: WeightType = WeightType.TOTAL,
+            barWeight: Double = 20.0,
         ): Exercise = ex(
             exerciseId,
             note = note,
@@ -571,6 +588,7 @@ object MasterDefaults {
             prep = 10,
             rest = 60,
             weightType = weightType,
+            barWeight = barWeight,
             setList = weights.map { WorkSet(reps = count, weight = it) },
         )
 
@@ -637,10 +655,19 @@ object MasterDefaults {
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
             exercises = listOf(
-                // Discos: con la barra de 20 son 20, 30 y 40 kg.
-                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 10.0, 20.0), WeightType.BARBELL),
+                // La barra del puente pesa 6 kg, no los 20 que trae el app por defecto. Ese
+                // 20 no solo ensuciaba el registro: el 15-sep el player le enseno "40 kg"
+                // cuando iban a ser 26, le parecio mucho y bajo la carga. Un numero mal
+                // puesto le cambio el entrenamiento.
+                //
+                // Discos 0/10/20 sobre esa barra: 6, 16 y 26 kg. La serie de barra sola es
+                // suya y se respeta -entrar al patron sin carga, en una rutina de columna,
+                // es buena idea-; lo unico que sube es la de arriba, de 21 a 26, porque dijo
+                // que bar+15 se sintio "como para subirle un poco mas".
+                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 10.0, 20.0), WeightType.BARBELL, barWeight = 6.0),
                 loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(7.5, 10.0, 12.5)),
-                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(7.5, 10.0, 12.5)),
+                // "Se sintio ligero" con 7.5/10/12.5, asi que sube entera.
+                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(10.0, 12.5, 15.0)),
             ),
         )
     }

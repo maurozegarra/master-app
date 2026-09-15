@@ -89,24 +89,33 @@ class LumbarTrainingTest {
         t.workouts.first { it.name == "Hip & Glute" }.exercises.associateBy { it.exerciseId }
 
     @Test
-    fun `el puente de gluteos va con barra, de 20 a 40 kilos`() {
+    fun `el puente de gluteos usa la barra de 6 kilos, no la de 20 por defecto`() {
         val e = cadera(training).getValue("ex_glute_bridge")
 
         assertEquals(WeightType.BARBELL, e.weightType)
-        assertEquals(20.0, e.barWeight, 0.0)
+        // 20 era el defecto del app y el 15-sep le enseno "40 kg" cuando iban a ser 26:
+        // le parecio mucho y bajo la carga. Un numero mal puesto le cambio el entrenamiento.
+        assertEquals(6.0, e.barWeight, 0.0)
         // Los numeros de la serie son DISCOS: el total es la barra mas eso.
-        assertEquals(listOf(20.0, 30.0, 40.0), e.setList.map { e.weightTotal(it) })
+        assertEquals(listOf(6.0, 16.0, 26.0), e.setList.map { e.weightTotal(it) })
         assertTrue(e.setList.all { it.reps == 12 })
     }
 
     @Test
-    fun `la sentadilla y el carry van con mancuerna ascendente`() {
-        listOf("ex_box_squat", "ex_suitcase_carry").forEach { id ->
-            val e = cadera(training).getValue(id)
-
-            assertEquals(WeightType.TOTAL, e.weightType)
-            assertEquals(listOf(7.5, 10.0, 12.5), e.setList.map { it.weight })
+    fun `el carry se queda y la sentadilla sube`() {
+        assertEquals(listOf(7.5, 10.0, 12.5), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
+        // "Se sintio ligero" el 15-sep.
+        assertEquals(listOf(10.0, 12.5, 15.0), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
+        listOf("ex_box_squat", "ex_suitcase_carry").forEach {
+            assertEquals(WeightType.TOTAL, cadera(training).getValue(it).weightType)
         }
+    }
+
+    @Test
+    fun `las caminatas llevan la velocidad en la nota, no un adjetivo`() {
+        // "Paso vivo" costo tres sesiones: a 3 km/h no hacia nada, a 5 le solto las caderas.
+        assertTrue(training.workouts.first().exercises.single().note.contains("5 km/h"))
+        assertTrue(badDay.workouts[1].exercises.single().note.contains("5 km/h"))
     }
 
     @Test
@@ -282,10 +291,18 @@ class LumbarTrainingTest {
     }
 
     @Test
+    fun `la correccion del 15-sep sabe que peso arreglar`() {
+        // 6 kg de barra mas 0, 10 y 15 de discos: lo que de verdad movio.
+        assertEquals(listOf(20.0, 30.0, 40.0), MasterDefaults.SESSION_15_SEP_WRONG)
+        assertEquals(listOf(6.0, 16.0, 21.0), MasterDefaults.SESSION_15_SEP_RIGHT)
+        assertEquals(3, MasterDefaults.SESSION_15_SEP_RIGHT.size)
+    }
+
+    @Test
     fun `la revision de la rutina no baja`() {
         // Subir este numero es lo unico que hace falta para que un cambio llegue al
         // dispositivo. El test esta para que nadie lo baje sin querer.
-        assertTrue(MasterDefaults.LUMBAR_REVISION >= 1)
+        assertTrue(MasterDefaults.LUMBAR_REVISION >= 2)
     }
 
     // ---------- La sesion del 13-sep-2026 (TD-090) ----------

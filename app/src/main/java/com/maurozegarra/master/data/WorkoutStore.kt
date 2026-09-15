@@ -109,6 +109,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun lumbarRevision(): Int = prefs.getInt(KEY_LUMBAR_REVISION, 0)
     fun setLumbarRevision(rev: Int) { prefs.edit().putInt(KEY_LUMBAR_REVISION, rev).apply() }
 
+    /** Marca de migracion: si ya se corrigieron los pesos del 15-sep (TD-105). */
+    fun isSep15Fixed(): Boolean = prefs.getBoolean(KEY_SEP15_FIXED, false)
+    fun setSep15Fixed() { prefs.edit().putBoolean(KEY_SEP15_FIXED, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         val items = TrainingJson.decode(raw)
@@ -216,6 +220,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_LUMBAR_REVISION = "lumbar_revision"
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"
+        const val KEY_SEP15_FIXED = "sep15_weights_fixed"
         const val MAX_SESSIONS = 200
     }
 }

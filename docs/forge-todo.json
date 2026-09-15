@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-105",
+      "title": "Revision 2 de la rutina, y corregir los pesos mal registrados del 15-sep",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "REVISION 2 DE LA RUTINA, primera vez que se usa el mecanismo de TD-103. Cuatro cambios, todos salidos de la sesion del 15-sep-2026 (ver docs/coach-log.md), y ninguno necesito migracion propia: se edito la definicion y se subio el numero. (1) LA BARRA DEL PUENTE PESA 6 KG, no los 20 que el app trae por defecto y que nadie habia mirado. El efecto no fue solo un registro sucio: el player le enseno '40 kg' cuando iban a ser 26, le parecio mucho y bajo la carga. Un numero mal puesto le cambio el entrenamiento. Con la barra correcta, los discos 0/10/20 son 6, 16 y 26 kg. (2) SOLO SUBE LA SERIE DE ARRIBA del puente, de 21 a 26. La serie de barra sola es suya y se respeta: entrar al patron sin carga, en una rutina de columna, es buena idea. Dijo que barra+15 se sintio 'como para subirle un poco mas'. (3) SENTADILLA A CAJA de 7.5/10/12.5 a 10/12.5/15: 'se sintio ligero'. (4) LA VELOCIDAD DE LA CAMINATA ENTRA EN LA NOTA, que es lo que se lee en el player: '5 km/h' en vez de 'paso vivo'. Tres sesiones a 3, 4 y 5 km/h con una respuesta que sube con cada una, y dos de ellas se habian interpretado como 'la caminata no hace el trabajo'. El dato estaba bien; la interpretacion mal. Un adjetivo no dosifica. LO QUE NO SE TOCA: la piramide de McGill sigue en 6/4/2. El dolor esta en meseta (4/3/2 dos dias seguidos) y el usuario dijo cual es su prioridad: 'no recaer'. APARTE, LA CORRECCION DEL REGISTRO: la sesion del 15-sep quedo guardada con 20/30/40 kg en el puente. Se corrige a 6/16/21 -lo que de verdad movio- y la sesion pasa a SessionSource.EDITED. Solo se toca si sigue teniendo exactamente los pesos malos. Es una correccion a mano de un dato concreto, o sea justo lo que habra que dejar de hacer por codigo cuando exista el nivel 2 de TD-101."
+    },
+    {
       "id": "TD-104",
       "title": "Inventariar el equipo disponible para poder disenar con lo que hay",
       "category": "Feature",

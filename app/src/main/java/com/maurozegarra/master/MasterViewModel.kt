@@ -203,6 +203,7 @@ class MasterViewModel(
             updateWalkInstructions()
             markReconstructedSession()
             reorderLumbarSessions()
+            fixSep15Weights()
         }
         observePlayer()
         migrateRestorePrefs()
@@ -235,6 +236,50 @@ class MasterViewModel(
             )
         }
         store.setFirstSessionMarked()
+    }
+
+    /**
+     * Corrige los pesos del puente en la sesion del 15-sep y la marca como editada (TD-105).
+     *
+     * Quedo guardada con 20/30/40 kg porque el ejercicio llevaba la barra en 20, que es el
+     * valor por defecto del app; la suya pesa 6, asi que movio 6, 16 y 21. El numero
+     * inflado ademas le hizo bajar la carga: un dato mal puesto no solo ensucio el
+     * registro, le cambio el entrenamiento.
+     *
+     * Solo toca la sesion si sigue teniendo exactamente los pesos malos. Y la deja en
+     * [SessionSource.EDITED]: corregir un registro esta bien, disimularlo no.
+     *
+     * Esto es una correccion a mano de un dato concreto, que es lo que habra que dejar de
+     * hacer por codigo cuando exista el nivel 2 de TD-101.
+     */
+    private fun fixSep15Weights() {
+        if (store.isSep15Fixed()) return
+        val sesiones = store.loadSessions()
+        val i = sesiones.indexOfFirst { it.id == MasterDefaults.SESSION_15_SEP_ID }
+        if (i >= 0) {
+            val s = sesiones[i]
+            val ejercicios = s.exercises.map { er ->
+                if (er.exerciseId != "ex_glute_bridge" ||
+                    er.sets.map { it.weightKg } != MasterDefaults.SESSION_15_SEP_WRONG
+                ) {
+                    er
+                } else {
+                    er.copy(
+                        sets = er.sets.mapIndexed { j, set ->
+                            set.copy(weightKg = MasterDefaults.SESSION_15_SEP_RIGHT[j])
+                        },
+                    )
+                }
+            }
+            if (ejercicios != s.exercises) {
+                store.saveSessions(
+                    sesiones.toMutableList().also {
+                        it[i] = s.copy(exercises = ejercicios, source = SessionSource.EDITED)
+                    },
+                )
+            }
+        }
+        store.setSep15Fixed()
     }
 
     /**
