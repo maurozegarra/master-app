@@ -682,22 +682,18 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             }
         }
         Spacer(Modifier.height(8.dp))
-        // El interlineado va escrito, y no es cosmetica: la tipografia por defecto de
-        // Material trae un lineHeight ABSOLUTO de 20sp, asi que un texto de 40sp que ocupe
-        // dos lineas las dibuja una encima de otra. Una nota de tres palabras nunca lo
-        // destapo; "STICK ON NAPE, MID-BACK AND SACRUM" si. El titulo ya lo resolvia por su
-        // cuenta en [titleStyle]; aqui faltaba.
+        // La nota se encoge para caber en dos lineas, igual que el nombre del ejercicio, y
+        // ocupa SIEMPRE el mismo alto.
+        //
+        // Arreglar su interlineado (TD-092) tuvo un efecto que no se vio venir: al dejar de
+        // dibujarse encimada, "BAR ON THE HIPS, PUSH THROUGH THE HEELS" paso de ocupar una
+        // linea a cuatro, y esos ~170dp salieron del hueco elastico, que es de donde cuelga
+        // la tarjeta del peso. La tarjeta se quedo sin sitio y sus botones -"how did the
+        // weight feel"- dejaron de dibujarse: el usuario no pudo contestar.
+        //
+        // Con alto fijo, el hueco elastico deja de depender de lo larga que sea la nota.
         if (step.note.isNotBlank()) {
-            Text(
-                step.note.uppercase(),
-                color = TEXT_DIM,
-                fontWeight = FontWeight.Bold,
-                fontSize = NOTE_SIZE,
-                lineHeight = NOTE_SIZE * TITLE_LINE_RATIO,
-                textAlign = TextAlign.Center,
-                // Reparte en lineas parejas en vez de dejar una palabra suelta al final.
-                style = LocalTextStyle.current.copy(lineBreak = LineBreak.Heading),
-            )
+            FittedText(step.note.uppercase(), NOTE_SIZE, TEXT_DIM)
         }
         if (showSeries) {
             Text(
@@ -791,7 +787,17 @@ private fun ownerNameFor(step: PlayerStep, t: Strings): String =
  *   cambia el ejercicio. El texto va arriba y el hueco sobrante queda debajo.
  */
 @Composable
-private fun ExerciseTitle(text: String, maxSize: TextUnit) {
+private fun ExerciseTitle(text: String, maxSize: TextUnit) = FittedText(text, maxSize, Color.White)
+
+/**
+ * Texto que se encoge hasta caber en [TITLE_LINES] lineas, dentro de una caja de alto FIJO:
+ * el que ocupan esas lineas al tamano maximo.
+ *
+ * El alto fijo es lo que hace que nada de abajo se mueva -ni el reloj, ni los controles, ni
+ * la tarjeta del peso- por larga que sea la frase de un ejercicio u otro.
+ */
+@Composable
+private fun FittedText(text: String, maxSize: TextUnit, color: Color) {
     val measurer = rememberTextMeasurer()
     // El alto de dos líneas al tamaño máximo, MEDIDO y no calculado. 2 × interlineado se
     // quedaba corto por el relleno que la fuente añade arriba y abajo, y con la caja justa
@@ -808,7 +814,7 @@ private fun ExerciseTitle(text: String, maxSize: TextUnit) {
         val size = remember(text, maxWidth, maxSize) { fitTitleSize(measurer, text, maxWidth, boxPx, maxSize) }
         Text(
             text,
-            style = titleStyle(size),
+            style = titleStyle(size, color),
             maxLines = TITLE_LINES,
             // Solo se llega aquí con un nombre absurdo que no cabe ni al tamaño mínimo:
             // mejor puntos suspensivos que una tercera línea.
@@ -817,8 +823,8 @@ private fun ExerciseTitle(text: String, maxSize: TextUnit) {
     }
 }
 
-private fun titleStyle(size: TextUnit) = TextStyle(
-    color = Color.White,
+private fun titleStyle(size: TextUnit, color: Color = Color.White) = TextStyle(
+    color = color,
     fontWeight = FontWeight.Bold,
     fontSize = size,
     lineHeight = size * TITLE_LINE_RATIO,
@@ -923,7 +929,14 @@ private const val TITLE_LINES = 2
 private const val TITLE_LINE_RATIO = 52f / 48f
 
 /** Tamano de la nota del ejercicio y del contador de series, que comparten sitio y peso. */
-private val NOTE_SIZE = 40.sp
+/**
+ * Techo de la nota y del contador de series, no su tamano: una nota corta -"each side"- sale
+ * a 28sp y una frase entera se encoge hasta caber en dos lineas.
+ *
+ * Baja de 40 a 28 porque la nota es apoyo del ejercicio, no un titular: a 40, una frase de
+ * seis palabras competia con el nombre y se comia la pantalla.
+ */
+private val NOTE_SIZE = 28.sp
 
 /**
  * Editar el ejercicio en curso sin parar el reloj.
