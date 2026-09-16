@@ -299,10 +299,19 @@ class LumbarTrainingTest {
     }
 
     @Test
+    fun `los dos lumbares preguntan como te fue`() {
+        assertTrue(training.tracksPain)
+        assertTrue(badDay.tracksPain)
+        // Y los demas no: la pregunta es sobre dolor y no pinta despues de un cardio.
+        assertFalse(MasterDefaults.masterTraining("en").tracksPain)
+        assertFalse(MasterDefaults.frikiNikiTraining("en").tracksPain)
+    }
+
+    @Test
     fun `la revision de la rutina no baja`() {
         // Subir este numero es lo unico que hace falta para que un cambio llegue al
         // dispositivo. El test esta para que nadie lo baje sin querer.
-        assertTrue(MasterDefaults.LUMBAR_REVISION >= 2)
+        assertTrue(MasterDefaults.LUMBAR_REVISION >= 3)
     }
 
     // ---------- La sesion del 13-sep-2026 (TD-090) ----------

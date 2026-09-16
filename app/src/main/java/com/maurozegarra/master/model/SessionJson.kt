@@ -46,6 +46,13 @@ object SessionJson {
                 .put("startedAt", s.startedAt)
                 .put("status", s.status.name)
                 .put("source", s.source.name)
+                // Solo lo contestado: un campo ausente es "no contesto", y eso no es un cero.
+                .apply {
+                    s.painBefore?.let { put("painBefore", it) }
+                    s.painAfter?.let { put("painAfter", it) }
+                    s.radiating?.let { put("radiating", it) }
+                    if (s.note.isNotBlank()) put("note", s.note)
+                }
                 .put("durationSec", s.durationSec)
                 .put("exercises", exercises))
         }
@@ -104,6 +111,10 @@ object SessionJson {
                 // Sin el campo, MEASURED: lo guardado antes de TD-101 lo escribio el player.
                 source = runCatching { SessionSource.valueOf(o.optString("source")) }
                     .getOrDefault(SessionSource.MEASURED),
+                painBefore = if (o.isNull("painBefore")) null else o.optInt("painBefore"),
+                painAfter = if (o.isNull("painAfter")) null else o.optInt("painAfter"),
+                radiating = if (o.isNull("radiating")) null else o.optBoolean("radiating"),
+                note = o.optString("note", ""),
                 exercises = exercises,
                 durationSec = o.optInt("durationSec", 0),
             )

@@ -38,6 +38,59 @@ class SessionRecorderTest {
         weightTotal = weightTotal,
     )
 
+    // ---------- Como se sintio la sesion (TD-089) ----------
+
+    @Test
+    fun `una sesion sin contestar no tiene feedback`() {
+        val s = SessionLog(id = 1, trainingId = 1, trainingName = "T", completedAt = 1L)
+
+        assertFalse(s.hasFeedback())
+        assertNull(s.painBefore)
+        assertNull(s.painAfter)
+        assertNull(s.radiating)
+    }
+
+    @Test
+    fun `un cero es un dato y se distingue de no haber contestado`() {
+        // Es lo que separa "hoy no me dolio" de "no lo apunte", y son cosas distintas.
+        val cero = SessionLog(id = 1, trainingId = 1, trainingName = "T", completedAt = 1L, painAfter = 0)
+
+        val back = SessionJson.decode(SessionJson.encode(listOf(cero))).single()
+
+        assertEquals(0, back.painAfter)
+        assertNull(back.painBefore)
+        assertTrue(back.hasFeedback())
+    }
+
+    @Test
+    fun `lo contestado sobrevive la ida y vuelta a json`() {
+        val s = SessionLog(
+            id = 1, trainingId = 1, trainingName = "LUMBAR", completedAt = 1L,
+            painBefore = 4, painAfter = 2, radiating = false, note = "5 km/h, caderas sueltas",
+        )
+
+        val back = SessionJson.decode(SessionJson.encode(listOf(s))).single()
+
+        assertEquals(s, back)
+    }
+
+    @Test
+    fun `una sesion guardada antes de TD-089 se lee sin feedback`() {
+        val json = """[{"id":1,"trainingId":1,"trainingName":"T","completedAt":1,"status":"COMPLETED","exercises":[]}]"""
+
+        val back = SessionJson.decode(json).single()
+
+        assertFalse(back.hasFeedback())
+        assertEquals("", back.note)
+    }
+
+    @Test
+    fun `solo se pregunta en los trainings que lo piden`() {
+        assertFalse(Training(id = 1).tracksPain)
+        val back = TrainingJson.decode(TrainingJson.encode(listOf(Training(id = 1, tracksPain = true)))).single()
+        assertTrue(back.tracksPain)
+    }
+
     // ---------- De donde salio el registro (TD-101) ----------
 
     @Test

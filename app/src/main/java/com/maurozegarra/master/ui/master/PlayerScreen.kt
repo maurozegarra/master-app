@@ -44,6 +44,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -1292,6 +1295,105 @@ private fun GlassButton(
     }
 }
 
+/**
+ * "Como te fue", en la pantalla de fin de sesion (TD-089).
+ *
+ * Se guarda **en cuanto toca cada cosa**, sin boton de enviar. El usuario lo pidio asi:
+ * "va a ayudar bastante que el registro sea en caliente, porque despues se vuelve un
+ * ejercicio de memoria y que muchas veces falla". Un formulario que hay que confirmar es
+ * una ocasion mas de olvidarse, y media respuesta guardada vale mas que una completa que
+ * no llego.
+ *
+ * Los numeros van en una rejilla de 0 a 10 y no en un stepper: llegar a 4 son cuatro
+ * toques con el stepper y uno aqui, y esto se contesta de pie y sudando.
+ *
+ * "Dolor antes" se pregunta al final, que sigue siendo memoria aunque sea de hace media
+ * hora. Preguntarlo al empezar es lo correcto y queda pendiente.
+ */
+@Composable
+private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
+    val saved = vm.lastSessionFeedback()
+    var note by remember(saved?.id) { mutableStateOf(saved?.note ?: "") }
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(AppTheme.colors.surface)
+            .padding(14.dp),
+    ) {
+        Text(t.howItWent, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Spacer(Modifier.height(12.dp))
+
+        PainScale(t.painBefore, saved?.painBefore, accent) { vm.saveHowItWent(painBefore = it) }
+        Spacer(Modifier.height(12.dp))
+        PainScale(t.painAfter, saved?.painAfter, accent) { vm.saveHowItWent(painAfter = it) }
+        Spacer(Modifier.height(12.dp))
+
+        Text(t.painWhere, color = AppTheme.colors.textDim, fontSize = 13.sp)
+        Spacer(Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FeedbackChip(t.painCentered, saved?.radiating == false, accent) { vm.saveHowItWent(radiating = false) }
+            FeedbackChip(t.painRadiating, saved?.radiating == true, accent) { vm.saveHowItWent(radiating = true) }
+        }
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = note,
+            onValueChange = { note = it },
+            label = { Text(t.sessionNote, fontSize = 13.sp) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = accent,
+                unfocusedBorderColor = AppTheme.colors.textFaded,
+                focusedTextColor = AppTheme.colors.textPrimary,
+                unfocusedTextColor = AppTheme.colors.textPrimary,
+                cursorColor = accent,
+                focusedLabelColor = accent,
+                unfocusedLabelColor = AppTheme.colors.textDim,
+            ),
+        )
+        // La nota se guarda al salir del campo: escribir letra a letra en disco no aporta
+        // nada, pero perderla por cerrar la pantalla si quita.
+        DisposableEffect(note) {
+            onDispose { vm.saveHowItWent(note = note) }
+        }
+    }
+}
+
+/** Los once numeros del dolor, de un toque. Dos filas para que quepan a 400dp. */
+@Composable
+private fun PainScale(label: String, value: Int?, accent: Color, onPick: (Int) -> Unit) {
+    Text(label, color = AppTheme.colors.textDim, fontSize = 13.sp)
+    Spacer(Modifier.height(6.dp))
+    (0..10).chunked(6).forEach { fila ->
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            fila.forEach { n ->
+                val activo = value == n
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (activo) accent else AppTheme.colors.track)
+                        .clickable { onPick(n) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        "$n",
+                        color = if (activo) AppTheme.colors.onAccent else AppTheme.colors.textDim,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                    )
+                }
+            }
+            // Rellena el hueco de la segunda fila para que los botones no se estiren.
+            repeat(6 - fila.size) { Spacer(Modifier.weight(1f)) }
+        }
+        Spacer(Modifier.height(6.dp))
+    }
+}
+
 @Composable
 private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
     val suggestions = vm.weightSuggestions()
@@ -1306,6 +1408,9 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
                 Text("🎉", fontSize = 56.sp)
                 Text(t.workoutComplete, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
                 Spacer(Modifier.height(8.dp))
+            }
+            if (vm.asksHowItWent()) {
+                item { HowItWent(vm, accent, t) }
             }
             if (suggestions.isNotEmpty()) {
                 item {

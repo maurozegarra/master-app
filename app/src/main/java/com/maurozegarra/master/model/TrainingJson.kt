@@ -29,6 +29,7 @@ object TrainingJson {
             .put("id", tr.id)
             .put("uid", tr.uid)
             .put("assigned", tr.assigned)
+            .put("tracksPain", tr.tracksPain)
             .put("name", tr.name)
             .put("createdAt", tr.createdAt)
             .put("updatedAt", tr.updatedAt)
@@ -46,6 +47,7 @@ object TrainingJson {
             // pone WorkoutStore al cargar, que es quien puede persistirlo.
             uid = o.optString("uid", ""),
             assigned = o.optBoolean("assigned", false),
+            tracksPain = o.optBoolean("tracksPain", false),
             name = o.optString("name", ""),
             workouts = workouts,
             createdAt = o.optLong("createdAt", 0L),

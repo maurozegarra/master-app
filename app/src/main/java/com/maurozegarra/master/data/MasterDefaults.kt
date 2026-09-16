@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 2
+    const val LUMBAR_REVISION = 3
 
     /**
      * Ids fijos de los dos trainings lumbares.
@@ -378,6 +378,7 @@ object MasterDefaults {
         return Training(
             id = LUMBAR_ID,
             name = "LUMBAR",
+            tracksPain = true,
             workouts = listOf(
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "5 km/h, arms loose"),
                 b.mobility(),
@@ -413,6 +414,7 @@ object MasterDefaults {
         return Training(
             id = LUMBAR_BAD_DAY_ID,
             name = "LUMBAR (bad day)",
+            tracksPain = true,
             workouts = listOf(
                 b.mobility(),
                 // La velocidad va en la nota y no solo en las instrucciones porque es lo que

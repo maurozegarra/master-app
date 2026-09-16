@@ -191,6 +191,14 @@ data class Training(
      * no tendria sentido porque la siguiente sincronizacion lo pisaria.
      */
     val assigned: Boolean = false,
+    /**
+     * Si al terminar se le pregunta cómo se sintió (TD-089).
+     *
+     * Va por training y no siempre porque la pregunta es sobre dolor: tiene sentido en una
+     * rutina de rehabilitación y no después de un cardio. Hoy solo la encienden los dos
+     * lumbares, desde el código; el editor todavía no la ofrece.
+     */
+    val tracksPain: Boolean = false,
 )
 
 /**
@@ -380,7 +388,22 @@ data class SessionLog(
      * La única excepción se corrige en su propia migración.
      */
     val source: SessionSource = SessionSource.MEASURED,
+    /**
+     * Cómo se sintió, preguntado al terminar (TD-089).
+     *
+     * Null es "no contestó", que no es lo mismo que cero: un cero es un dato y un hueco no.
+     * [radiating] es la pregunta que decide si un ejercicio sigue en la rutina —si el dolor
+     * baja hacia la pierna, sale ese día—, y por eso va aparte del número.
+     */
+    val painBefore: Int? = null,
+    val painAfter: Int? = null,
+    val radiating: Boolean? = null,
+    val note: String = "",
 )
+
+/** true si la sesión tiene algo anotado de cómo se sintió. */
+fun SessionLog.hasFeedback(): Boolean =
+    painBefore != null || painAfter != null || radiating != null || note.isNotBlank()
 
 /**
  * Los `exerciseId` que aparecen en algun training, variantes incluidas.

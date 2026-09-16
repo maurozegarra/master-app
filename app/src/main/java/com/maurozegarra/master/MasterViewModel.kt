@@ -781,6 +781,54 @@ class MasterViewModel(
         }
     }
 
+    // ---------- Como se sintio la sesion (TD-089) ----------
+
+    /** true si al training que se acaba de correr hay que preguntarle como se sintio. */
+    fun asksHowItWent(): Boolean = trainings.firstOrNull { it.id == playerTrainingId }?.tracksPain == true
+
+    /** Lo ya contestado de la sesion recien terminada, para que la pantalla lo ensene marcado. */
+    fun lastSessionFeedback(): SessionLog? = lastSessionIndex()?.let { sessions[it] }
+
+    /**
+     * Anota cómo se sintió la sesión recién terminada.
+     *
+     * Se guarda **en cuanto toca cada cosa**, sin botón de enviar: el usuario pidió que el
+     * registro fuera en caliente porque "después se vuelve un ejercicio de memoria y
+     * muchas veces falla", y un formulario que hay que confirmar es una ocasión más de
+     * olvidarse. Media respuesta guardada vale más que una completa que no llegó.
+     *
+     * Solo toca la última sesión de ESE training y solo si es de hace menos de una hora:
+     * la escribió el servicio hace un momento, y sin ese límite una pantalla vieja podría
+     * anotar sobre la sesión equivocada.
+     */
+    fun saveHowItWent(
+        painBefore: Int? = null,
+        painAfter: Int? = null,
+        radiating: Boolean? = null,
+        note: String? = null,
+    ) {
+        val i = lastSessionIndex() ?: return
+        val s = sessions[i]
+        val nueva = s.copy(
+            painBefore = painBefore ?: s.painBefore,
+            painAfter = painAfter ?: s.painAfter,
+            radiating = radiating ?: s.radiating,
+            note = note ?: s.note,
+        )
+        if (nueva == s) return
+        sessions[i] = nueva
+        store.saveSessions(sessions.toList())
+        snapshot()
+    }
+
+    private fun lastSessionIndex(): Int? {
+        val id = playerTrainingId ?: return null
+        val i = sessions.indexOfFirst { it.trainingId == id }
+        if (i < 0) return null
+        val edadMs = System.currentTimeMillis() - sessions[i].completedAt
+        return if (edadMs in 0..3_600_000) i else null
+    }
+
     // ---------- Respaldo: export / import ----------
 
     /** Contenido del archivo de respaldo (trainings + ejercicios propios + historial). */
