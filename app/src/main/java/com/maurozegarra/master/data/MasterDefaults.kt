@@ -351,6 +351,20 @@ object MasterDefaults {
     const val LUMBAR_REVISION = 3
 
     /**
+     * De quien es la rutina lumbar.
+     *
+     * Sembrar desde el codigo llega a CUALQUIER instalacion, y al publicar la v1.0.248 eso
+     * significaba que el telefono de NIKO iba a recibir dos trainings que no son suyos. Una
+     * rutina de rehabilitacion de la espalda de otro no es ruido neutro: es algo que alguien
+     * podria ponerse a hacer.
+     *
+     * Mientras la siembra siga siendo por codigo, el perfil es lo unico que distingue un
+     * telefono de otro. La solucion de fondo es TD-066: repartir por asignacion, donde cada
+     * quien recibe lo suyo y esto sobra.
+     */
+    const val LUMBAR_PROFILE = "mauro"
+
+    /**
      * Ids fijos de los dos trainings lumbares.
      *
      * Van escritos y no salidos del contador porque **el historial apunta a ellos**: la

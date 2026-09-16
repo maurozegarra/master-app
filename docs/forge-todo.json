@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-109",
+      "title": "La escala de dolor describe cada numero, no solo los extremos",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO DEL USUARIO el 15-sep-2026, viendo la escala recien hecha: 'si solo hay extremos igual no ayuda mucho, puedo estimar que 5 es medio pero 4 exactamente que es?'. Y la forma que sugirio: 'al hacerle clic al numero, se muestre el texto que describe ese numero... resaltalo que se note, tal vez un amarillo ambar'. POR QUE IMPORTA MAS ALLA DE LA COMODIDAD: sin un texto por numero, un 4 de hoy y un 4 de dentro de un mes no son el mismo 4, y la serie deja de servir para comparar, que es justo para lo que se guarda. QUE SE USO: los descriptores de la DVPRS (Defense and Veterans Pain Rating Scale), que es una escala numerica de uso clinico con texto por numero, en vez de inventarlos. El usuario lo pidio asi: 'usa lo que se use clinicamente'. COMO: al tocar un numero, su texto sale debajo en ambar (STATUS_SKIPPED, el mismo del badge de saltado) y en semibold. El hueco tiene alto fijo de dos lineas para que aparecer no empuje nada, y antes de elegir dice 'Tap a number to see what it means', que ademas ensena que se puede tocar."
+    },
+    {
+      "id": "TD-108",
+      "title": "La rutina lumbar solo se siembra en el telefono de su dueno",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "DETECTADO AL PUBLICAR la v1.0.248. Sembrar desde el codigo llega a CUALQUIER instalacion del app, asi que al actualizar, el telefono de NIKO iba a recibir LUMBAR y LUMBAR (bad day). Y una rutina de rehabilitacion de la espalda de otra persona no es ruido neutro: es algo que alguien podria ponerse a hacer. EL FIX: la siembra y la revision solo corren si AssignmentRepository.profileId es MasterDefaults.LUMBAR_PROFILE ('mauro'). Mientras la siembra sea por codigo, el perfil es lo unico que distingue un telefono de otro. En una instalacion sin perfil elegido tampoco se siembra, que es lo prudente. Y LIMPIA LO YA SEMBRADO: si el telefono no es el suyo y los dos trainings estan ahi, se retiran, **pero solo si no se han usado**. Si hay una sesion registrada contra ellos, alguien los entreno y borrarlos le quitaria su historial; en ese caso se quedan y que decida quien los tenga. LA SOLUCION DE FONDO ES TD-066: repartir por asignacion, donde cada quien recibe lo suyo y este parche sobra. Mientras tanto, NOTA PARA CUALQUIER RUTINA QUE SE SIEMBRE: lo que se siembra desde el codigo aterriza en todos los telefonos. Preguntarse de quien es antes de escribirla."
+    },
+    {
       "id": "TD-107",
       "title": "El centro del player cede sitio a la nota: contador junto a las reps y tarjeta de peso translucida",
       "category": "UI",

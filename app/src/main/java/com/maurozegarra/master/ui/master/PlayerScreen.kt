@@ -97,6 +97,7 @@ import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.ON_ACCENT
 import com.maurozegarra.master.ui.theme.SURFACE
+import com.maurozegarra.master.ui.theme.STATUS_SKIPPED
 import com.maurozegarra.master.ui.theme.TEXT_DIM
 import com.maurozegarra.master.ui.theme.TRACK
 import com.maurozegarra.master.util.formatPlayerClock
@@ -204,7 +205,7 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
             // bloquea el entrenamiento se contesta de cualquier forma con tal de pasar, y
             // ese dato vale menos que ninguno.
             if (vm.asksHowItWent()) {
-                PainScale(t.painNow, vm.pendingPainBefore, accent, t.painScaleHint) { vm.setPainBefore(it) }
+                PainScale(t.painNow, vm.pendingPainBefore, accent, t) { vm.setPainBefore(it) }
                 Spacer(Modifier.height(12.dp))
             }
             PrimaryButton(
@@ -1378,9 +1379,9 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
         Text(t.howItWent, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         Spacer(Modifier.height(12.dp))
 
-        PainScale(t.painBefore, saved?.painBefore, accent, t.painScaleHint) { vm.saveHowItWent(painBefore = it) }
+        PainScale(t.painBefore, saved?.painBefore, accent, t) { vm.saveHowItWent(painBefore = it) }
         Spacer(Modifier.height(12.dp))
-        PainScale(t.painAfter, saved?.painAfter, accent) { vm.saveHowItWent(painAfter = it) }
+        PainScale(t.painAfter, saved?.painAfter, accent, t) { vm.saveHowItWent(painAfter = it) }
         Spacer(Modifier.height(12.dp))
 
         Text(t.painWhere, color = AppTheme.colors.textDim, fontSize = 13.sp)
@@ -1423,11 +1424,20 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
  * explica sola- traida a una escala numerica, que para el dolor es lo estandar.
  */
 @Composable
-private fun PainScale(label: String, value: Int?, accent: Color, hint: String? = null, onPick: (Int) -> Unit) {
+private fun PainScale(label: String, value: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
     Text(label, color = AppTheme.colors.textDim, fontSize = 13.sp)
-    if (hint != null) {
-        Text(hint, color = AppTheme.colors.textFaded, fontSize = 11.sp)
-    }
+    // El texto del numero elegido, no un ancla en los extremos: "5 es medio" se estima, pero
+    // "4 exactamente que es" no se adivina, y sin eso un 4 de hoy y un 4 de dentro de un mes
+    // no son el mismo 4. En ambar y en su sitio fijo, para que al tocar un numero se note
+    // que la pantalla contesta y para que no empuje nada al aparecer.
+    Text(
+        value?.let { "$it · ${t.painScale.getOrElse(it) { "" }}" } ?: t.painScaleHint,
+        color = if (value != null) STATUS_SKIPPED else AppTheme.colors.textFaded,
+        fontWeight = if (value != null) FontWeight.SemiBold else FontWeight.Normal,
+        fontSize = 12.sp,
+        maxLines = 2,
+        minLines = 2,
+    )
     Spacer(Modifier.height(6.dp))
     (0..10).chunked(6).forEach { fila ->
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {

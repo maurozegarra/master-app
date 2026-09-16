@@ -397,6 +397,11 @@ class MasterViewModel(
      * Las instrucciones van con merge y sin pisar: son del usuario en cuanto las toca.
      */
     private fun applyLumbarRevision() {
+        // Solo en el telefono de su dueno. Ver MasterDefaults.LUMBAR_PROFILE.
+        if (assignments.profileId != MasterDefaults.LUMBAR_PROFILE) {
+            removeLumbarFromOtherPhone()
+            return
+        }
         if (store.lumbarRevision() >= MasterDefaults.LUMBAR_REVISION) return
         val nuevos = MasterDefaults.withLumbarRevision(trainings.toList(), lang())
         if (nuevos != trainings.toList()) {
@@ -406,6 +411,25 @@ class MasterViewModel(
         }
         seedLumbarInstructions()
         store.setLumbarRevision(MasterDefaults.LUMBAR_REVISION)
+    }
+
+    /**
+     * Quita la rutina lumbar de un telefono que no es el suyo, si llego a sembrarse.
+     *
+     * La v1.0.248 se publico antes de que la siembra mirara el perfil, asi que quien
+     * actualizara en esa ventana se llevo dos trainings ajenos. Esto los retira.
+     *
+     * **Solo si no se han usado.** Si hay una sesion registrada contra ellos, alguien los
+     * entreno y entonces ya no son un accidente: borrarlos le quitaria su historial. En ese
+     * caso se quedan y que decida quien los tenga.
+     */
+    private fun removeLumbarFromOtherPhone() {
+        val ajenos = setOf(MasterDefaults.LUMBAR_ID, MasterDefaults.LUMBAR_BAD_DAY_ID)
+        val usados = store.loadSessions().map { it.trainingId }.toSet()
+        val sobran = trainings.filter { it.id in ajenos && it.id !in usados }
+        if (sobran.isEmpty()) return
+        trainings.removeAll(sobran)
+        persist()
     }
 
     /**

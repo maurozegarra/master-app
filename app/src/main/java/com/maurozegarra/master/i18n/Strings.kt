@@ -163,6 +163,7 @@ data class Strings(
     val howItWent: String,
     val painNow: String,
     val painScaleHint: String,
+    val painScale: List<String>,
     val painBefore: String,
     val painAfter: String,
     val painWhere: String,
@@ -386,7 +387,23 @@ object I18n {
         sourceRebuilt = "REBUILT",
         howItWent = "How did it go?",
         painNow = "How is your back right now?",
-        painScaleHint = "0 = nothing  ·  10 = the worst you have felt",
+        painScaleHint = "Tap a number to see what it means",
+        // Descriptores de la DVPRS (Defense and Veterans Pain Rating Scale), que es una
+        // escala numerica con texto por numero y de uso clinico. Un extremo anclado no
+        // basta: "5 es medio" se estima, pero "4 exactamente que es" no se adivina.
+        painScale = listOf(
+            "No pain",
+            "Hardly notice it",
+            "I notice it, but it doesn't get in the way",
+            "It distracts me now and then",
+            "It distracts me, but I can do my usual things",
+            "It interrupts some of what I do",
+            "Hard to ignore, I avoid my usual things",
+            "It takes my attention, I can't do daily things",
+            "Awful, hard to do anything",
+            "I can't bear it, I can't do anything",
+            "As bad as it gets, nothing else matters",
+        ),
         painBefore = "Pain before",
         painAfter = "Pain now",
         painWhere = "Where",

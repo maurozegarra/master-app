@@ -308,6 +308,25 @@ class LumbarTrainingTest {
     }
 
     @Test
+    fun `la rutina lumbar tiene dueno`() {
+        // Sembrar desde el codigo llega a cualquier instalacion, y una rutina de
+        // rehabilitacion de la espalda de otro no es ruido neutro: es algo que alguien
+        // podria ponerse a hacer.
+        assertEquals("mauro", MasterDefaults.LUMBAR_PROFILE)
+    }
+
+    @Test
+    fun `la escala de dolor describe los once numeros`() {
+        val escala = com.maurozegarra.master.i18n.I18n.EN.painScale
+
+        assertEquals(11, escala.size)
+        assertTrue(escala.all { it.isNotBlank() })
+        // El 0 y el 10 son los extremos; lo que se pidio es que el 4 tambien diga algo.
+        assertEquals("No pain", escala.first())
+        assertTrue(escala[4].isNotBlank() && escala[4] != escala[5])
+    }
+
+    @Test
     fun `la revision de la rutina no baja`() {
         // Subir este numero es lo unico que hace falta para que un cambio llegue al
         // dispositivo. El test esta para que nadie lo baje sin querer.
