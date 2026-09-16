@@ -783,6 +783,23 @@ class MasterViewModel(
 
     // ---------- Como se sintio la sesion (TD-089) ----------
 
+    /**
+     * El dolor con el que empezo, contestado ANTES de darle a empezar (TD-089 nivel 2).
+     *
+     * Vive aqui y no en la sesion porque la sesion todavia no existe: la escribe el servicio
+     * al terminar. Se vuelca en cuanto aparece y se limpia.
+     *
+     * Preguntarlo al empezar y no al final era el punto entero: "mientras mas inmediata la
+     * pregunta, mas pegada a la realidad sera la respuesta". Al terminar, el numero de antes
+     * ya es un recuerdo de hace una hora.
+     */
+    var pendingPainBefore by mutableStateOf<Int?>(null)
+        private set
+
+    fun setPainBefore(n: Int) {
+        pendingPainBefore = n
+    }
+
     /** true si al training que se acaba de correr hay que preguntarle como se sintio. */
     fun asksHowItWent(): Boolean = trainings.firstOrNull { it.id == playerTrainingId }?.tracksPain == true
 
@@ -1499,6 +1516,11 @@ class MasterViewModel(
                         sessionReloaded = true
                         reload()
                         refreshSessions()
+                        // Ahora sí existe la sesión: el dolor de antes ya tiene dónde caer.
+                        pendingPainBefore?.let {
+                            saveHowItWent(painBefore = it)
+                            pendingPainBefore = null
+                        }
                         snapshot()
                     }
                 }

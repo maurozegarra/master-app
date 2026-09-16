@@ -152,7 +152,8 @@ object StepEngine {
     }
 
     private fun weightLabel(e: Exercise, s: WorkSet): String = when (e.weightType) {
-        WeightType.BARBELL -> "${fmtKg(e.barWeight)} + ${fmtKg(s.weight)}"
+        // Sin discos no hay nada que desglosar: "6 kg . 6 + 0" es ruido, el total ya lo dice.
+        WeightType.BARBELL -> if (s.weight == 0.0) "" else "${fmtKg(e.barWeight)} + ${fmtKg(s.weight)}"
         WeightType.DUMBBELL -> "2 × ${fmtKg(s.weight)}"
         WeightType.TOTAL, WeightType.NONE -> ""
     }

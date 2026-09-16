@@ -190,15 +190,30 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
                 WorkoutGroupCard(g, open, accent, t, vm::videoFileFor) { expanded[g.index] = !open }
             }
         }
-        PrimaryButton(
-            label = t.start,
-            accent = accent,
-            modifier = Modifier
+        Column(
+            Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(16.dp),
-            onClick = onStart,
-        )
+        ) {
+            // Se pregunta AQUI, en la pantalla previa, y no al terminar: "mientras mas
+            // inmediata la pregunta, mas pegada a la realidad sera la respuesta". Al final,
+            // el dolor de antes ya es un recuerdo de hace una hora.
+            //
+            // Contestar es opcional: el boton de empezar no espera a nadie. Una pregunta que
+            // bloquea el entrenamiento se contesta de cualquier forma con tal de pasar, y
+            // ese dato vale menos que ninguno.
+            if (vm.asksHowItWent()) {
+                PainScale(t.painNow, vm.pendingPainBefore, accent, t.painScaleHint) { vm.setPainBefore(it) }
+                Spacer(Modifier.height(12.dp))
+            }
+            PrimaryButton(
+                label = t.start,
+                accent = accent,
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onStart,
+            )
+        }
     }
 }
 
@@ -695,15 +710,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         if (step.note.isNotBlank()) {
             FittedText(step.note.uppercase(), NOTE_SIZE, TEXT_DIM)
         }
-        if (showSeries) {
-            Text(
-                "${step.setIndex + 1} / ${step.totalSets}",
-                color = TEXT_DIM,
-                fontWeight = FontWeight.Bold,
-                fontSize = NOTE_SIZE,
-                lineHeight = NOTE_SIZE * TITLE_LINE_RATIO,
-            )
-        }
+
 
         // Las instrucciones se probaron aquí, llenando el hueco del vídeo, y el usuario las
         // descartó: viven detrás de su botón. Así que el hueco vuelve a ser solo del vídeo,
@@ -725,7 +732,11 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             }
         }
         Spacer(Modifier.height(12.dp))
-        ClockOrReps(vm, step, repByRep, padClock, t)
+        // El contador de series va COLGADO del numero grande, a su izquierda, y ya no en una
+        // linea propia encima. Ocupaba el alto de una nota entera para decir "1 / 3", y la
+        // nota es lo que hay que leer mientras se entrena. Colgar no descentra el numero:
+        // igual que la unidad a la derecha, se mide y se desplaza.
+        ClockOrReps(vm, step, repByRep, padClock, t, lead = if (showSeries) "${step.setIndex + 1}/${step.totalSets}" else null)
         Spacer(Modifier.height(16.dp))
 
         // Siempre visibles, en toda etapa y en cualquier modo: son el mando de la corrida.
@@ -751,11 +762,12 @@ private fun ClockOrReps(
     repByRep: Boolean,
     padClock: Boolean,
     t: Strings,
+    lead: String? = null,
 ) {
     if (step.kind == StepKind.WORK && !step.timeBased) {
-        RepsDisplay(step, repByRep, t)
+        RepsDisplay(step, repByRep, t, lead)
     } else {
-        ClockDisplay(step, vm.playerRemainingMs, padClock)
+        ClockDisplay(step, vm.playerRemainingMs, padClock, lead)
     }
 }
 
@@ -933,10 +945,12 @@ private const val TITLE_LINE_RATIO = 52f / 48f
  * Techo de la nota y del contador de series, no su tamano: una nota corta -"each side"- sale
  * a 28sp y una frase entera se encoge hasta caber en dos lineas.
  *
- * Baja de 40 a 28 porque la nota es apoyo del ejercicio, no un titular: a 40, una frase de
- * seis palabras competia con el nombre y se comia la pantalla.
+ * Se queda en 40 a peticion del usuario: las notas son las pistas para ejecutar bien el
+ * ejercicio -"me dan las pistas claves"-, asi que mandan sobre lo demas. El sitio salio de
+ * dos cosas que ocupaban linea propia sin merecerla: el contador de series, que ahora cuelga
+ * del numero grande, y la tarjeta del peso, que paso de cuatro filas a dos.
  */
-private val NOTE_SIZE = 28.sp
+private val NOTE_SIZE = 40.sp
 
 /**
  * Editar el ejercicio en curso sin parar el reloj.
@@ -1081,13 +1095,14 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
 }
 
 @Composable
-private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings) {
+private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings, lead: String? = null) {
     // La unidad, no el simbolo. "15" a secas se confunde con un reloj en 15 —y mas con los
     // ceros a la izquierda apagados—, y la "x" pequena y gris no peleaba contra eso. Una
     // palabra no hay que interpretarla. El reloj no la necesita: se delata solo, porque baja.
     BigReadout(
         value = if (repByRep) "${step.setIndex + 1} / ${step.totalSets}" else "${step.reps}",
         mark = if (repByRep) t.repLabel else t.repsUnit.uppercase(),
+        lead = lead,
     )
 }
 
@@ -1105,7 +1120,7 @@ private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings) {
  * borde izquierdo, en vez de ponerlos en fila.
  */
 @Composable
-private fun BigReadout(value: String, mark: String? = null) {
+private fun BigReadout(value: String, mark: String? = null, lead: String? = null) {
     val measurer = rememberTextMeasurer()
     val valueStyle = TextStyle(
         color = Color.White,
@@ -1121,14 +1136,29 @@ private fun BigReadout(value: String, mark: String? = null) {
     )
     // Medir es lo que permite colgar la marca del borde del número sin que el número se
     // entere. Se mide una vez por texto: esto repinta varias veces por segundo.
+    // El contador de series va apagado: es contexto, no el dato. Si pesara lo mismo que la
+    // unidad, el ojo tendria que elegir entre tres cosas del mismo tamano.
+    val leadStyle = markStyle.copy(color = Color.White.copy(alpha = 0.7f))
     val valueHalf = remember(value) { measurer.measure(value, valueStyle).size.width / 2 }
     val markHalf = remember(mark) {
         if (mark == null) 0 else measurer.measure(mark, markStyle).size.width / 2
+    }
+    val leadHalf = remember(lead) {
+        if (lead == null) 0 else measurer.measure(lead, leadStyle).size.width / 2
     }
     val gap = with(LocalDensity.current) { READOUT_GAP.roundToPx() }
 
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Text(value, style = valueStyle)
+        if (lead != null) {
+            Text(
+                lead,
+                style = leadStyle,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset { IntOffset(-(valueHalf + gap + leadHalf), 0) },
+            )
+        }
         if (mark != null) {
             Text(
                 mark,
@@ -1144,33 +1174,43 @@ private fun BigReadout(value: String, mark: String? = null) {
 }
 
 @Composable
-private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean) {
+private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean, lead: String? = null) {
     val shown = if (step.display == DisplayMode.COUNTUP) {
         (step.durationSec * 1000L - remainingMs).coerceAtLeast(0L)
     } else remainingMs
-    BigReadout(formatPlayerClock(shown, padded))
+    BigReadout(formatPlayerClock(shown, padded), lead = lead)
 }
 
 @Composable
 private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color, t: Strings) {
     val current = vm.weightFeedback[vm.feedbackKey(step.ownerExerciseId, step.workoutIndex)]?.third
+    // Translucida y no negra: todo lo demas de esta pantalla -los controles, la franja de
+    // rutina- deja ver el color de la etapa, y un bloque solido rompia esa gramatica.
+    //
+    // Y de dos filas en vez de cuatro: el peso y la pregunta comparten linea, porque los
+    // tres botones de abajo ya dicen de que va. Lo que se ahorra se lo lleva la nota.
     Column(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(SURFACE)
-            .padding(14.dp),
+            .background(Color.White.copy(alpha = 0.10f))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            "${fmtKg(step.weightTotal)} ${t.kg}" + if (step.weightLabel.isNotBlank()) "  ·  ${step.weightLabel}" else "",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(t.howWeightFelt, color = TEXT_DIM, fontSize = 13.sp)
-        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "${fmtKg(step.weightTotal)} ${t.kg}" + if (step.weightLabel.isNotBlank()) "  ·  ${step.weightLabel}" else "",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+            )
+            Text(
+                "  ·  ${t.howWeightFelt}",
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 13.sp,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FeedbackChip("${t.tooHeavy} ↓", current == -2.5, accent) {
                 vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, -2.5)
@@ -1190,7 +1230,7 @@ private fun FeedbackChip(label: String, active: Boolean, accent: Color, onClick:
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(if (active) accent else TRACK)
+            .background(if (active) accent else Color.White.copy(alpha = 0.15f))
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center,
@@ -1338,7 +1378,7 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
         Text(t.howItWent, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         Spacer(Modifier.height(12.dp))
 
-        PainScale(t.painBefore, saved?.painBefore, accent) { vm.saveHowItWent(painBefore = it) }
+        PainScale(t.painBefore, saved?.painBefore, accent, t.painScaleHint) { vm.saveHowItWent(painBefore = it) }
         Spacer(Modifier.height(12.dp))
         PainScale(t.painAfter, saved?.painAfter, accent) { vm.saveHowItWent(painAfter = it) }
         Spacer(Modifier.height(12.dp))
@@ -1374,10 +1414,20 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
     }
 }
 
-/** Los once numeros del dolor, de un toque. Dos filas para que quepan a 400dp. */
+/**
+ * Los once numeros del dolor, de un toque. Dos filas para que quepan a 400dp.
+ *
+ * [hint] ancla los extremos -"0 = nada, 10 = lo peor que has sentido"- y no es adorno: sin
+ * anclas, un 4 de hoy y un 4 de dentro de un mes no son el mismo 4, y la serie deja de
+ * servir para comparar. Es la idea que Freeletics aplica con palabras -cada opcion se
+ * explica sola- traida a una escala numerica, que para el dolor es lo estandar.
+ */
 @Composable
-private fun PainScale(label: String, value: Int?, accent: Color, onPick: (Int) -> Unit) {
+private fun PainScale(label: String, value: Int?, accent: Color, hint: String? = null, onPick: (Int) -> Unit) {
     Text(label, color = AppTheme.colors.textDim, fontSize = 13.sp)
+    if (hint != null) {
+        Text(hint, color = AppTheme.colors.textFaded, fontSize = 11.sp)
+    }
     Spacer(Modifier.height(6.dp))
     (0..10).chunked(6).forEach { fila ->
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {

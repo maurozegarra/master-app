@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **76 / 106** hechos, 30 pendientes.
+Progreso: **76 / 107** hechos, 31 pendientes.
 
 ## Pendientes
 
@@ -76,6 +76,11 @@ Progreso: **76 / 106** hechos, 30 pendientes.
   - TD-063 dejo el app recibiendo asignaciones, pero los archivos users.json y users/<id>.json se generaron A MANO desde un backup del dispositivo. Asi no es usable: cada cambio de asignacion exige que alguien edite JSON. Falta un publish-profiles.ps1 que lea los trainings de una fuente -el export del usuario, o docs/ si se decide tenerlos versionados-, cruce una tabla de asignaciones tipo docs/assignments.json ({ 'niko': ['<uid>', '<uid>'] }) y genere los archivos listos para publicar, con la misma mecanica que build-release.ps1. Ojo con dos cosas al escribirlo: el uid de cada training publicado tiene que ser ESTABLE entre publicaciones, porque es la clave con la que el dispositivo empareja y conserva el id local que enlaza el historial; y publicar una lista vacia para alguien le retira sus trainings asignados, asi que conviene que el script avise de cuantos quita antes de escribir. BAJA A OPCIONAL con TD-067: asignar pasa a hacerse desde el telefono contra Supabase, asi que este script deja de ser el camino y queda como herramienta alterna para cuando estes en la PC, y solo si despues de TD-067 sigue haciendo falta.
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
   - Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez.
+
+### UI
+
+- [ ] **TD-107** El centro del player cede sitio a la nota: contador junto a las reps y tarjeta de peso translucida
+  - PEDIDO DEL USUARIO el 15-sep-2026, viendo la captura de Glute Bridge: 'el contador de series, creo que es momento de reubicarlo... yo sugiero que este al lado izquierdo de las reps, al reubicarlo recuperamos espacio para las notas que se han vuelto pistas importantes'. Y sobre la tarjeta del peso: 'el fondo negro de esa card no me convence, tenemos objetos que son transparencias y ese objeto se ve solido y en negro, como que rompe'. LA JERARQUIA QUE FIJA ESTE TD, dicha por el: **la nota manda**. 'Las notas son mas importantes, me dan las pistas claves para ejecutar el ejercicio correctamente'. Todo lo demas del centro de la pantalla cede sitio antes que ella. TRES CAMBIOS. (1) El contador de series deja de ocupar una linea propia encima de la nota y pasa a colgar del numero grande, a su izquierda y apagado, con la misma tecnica que ya usaba la unidad a la derecha: se mide y se desplaza, asi que el numero no se descentra y nada salta. Ocupaba el alto de una nota entera para decir '1 / 3'. (2) La tarjeta del peso pasa de cuatro filas a dos -el peso y la pregunta comparten linea, porque los tres botones ya dicen de que va- y de negro solido a translucido al 10%, como los controles y la franja de rutina: todo lo demas de esa pantalla deja ver el color de la etapa. Los chips tambien. (3) Con ese sitio, el techo de la nota vuelve a 40sp. APARTE: con la barra sin discos la etiqueta decia '6 kg . 6 + 0'. El '+ 0' se va; sin discos no hay nada que desglosar.
 
 ## Hechos
 
