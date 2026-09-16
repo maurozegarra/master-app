@@ -59,6 +59,8 @@ import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.STATUS_DONE
+import com.maurozegarra.master.model.hasFeedback
+import androidx.compose.ui.text.font.FontStyle
 import com.maurozegarra.master.ui.theme.STATUS_SKIPPED
 import java.time.Instant
 import java.time.LocalDate
@@ -241,6 +243,21 @@ fun SessionRow(
                 SessionSource.RECONSTRUCTED -> StatusBadge(t.sourceRebuilt, AppTheme.colors.textDim)
                 SessionSource.EDITED -> StatusBadge(t.sourceEdited, AppTheme.colors.textDim)
             }
+            // El dolor de entrada y el de salida, que es el dato por el que se hace todo
+            // esto. Verde si bajo, ambar si subio, apagado si se quedo igual: la direccion
+            // es lo que se lee de un vistazo, el numero viene despues.
+            val antes = session.painBefore
+            val despues = session.painAfter
+            if (antes != null && despues != null) {
+                StatusBadge(
+                    text = "$antes → $despues",
+                    color = when {
+                        despues < antes -> STATUS_DONE
+                        despues > antes -> STATUS_SKIPPED
+                        else -> AppTheme.colors.textDim
+                    },
+                )
+            }
             // Empuja los iconos a la derecha. La hora y el badge se quedan juntos a la
             // izquierda, y como la hora no cambia de ancho, el badge no se mueve de sitio
             // entre una tarjeta y otra.
@@ -256,6 +273,14 @@ fun SessionRow(
                     modifier = Modifier.rotate(if (expanded) 90f else 0f),
                 )
             }
+        }
+
+        AnimatedVisibility(
+            visible = expanded && session.hasFeedback(),
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+        ) {
+            SessionFeedback(session, t)
         }
 
         AnimatedVisibility(
@@ -303,6 +328,39 @@ fun SessionRow(
                 }
             },
         )
+    }
+}
+
+/**
+ * Lo que contesto el usuario de esa sesion: el dolor con su descripcion, donde, y su nota.
+ *
+ * Existe porque sin esto el dato entraba y desaparecia de su vista: el contestaba antes y
+ * despues de entrenar y no habia ninguna pantalla donde volver a verlo. El numero suelto de
+ * un dia dice poco; la serie es lo que dice algo, y para eso hay que poder mirarla.
+ *
+ * Lo que no se contesto no se rellena: un hueco es un hueco.
+ */
+@Composable
+private fun SessionFeedback(session: SessionLog, t: Strings) {
+    Column(
+        Modifier.fillMaxWidth().padding(top = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        listOfNotNull(
+            session.painBefore?.let { "${t.painBefore}: $it · ${t.painScale.getOrElse(it) { "" }}" },
+            session.painAfter?.let { "${t.painAfter}: $it · ${t.painScale.getOrElse(it) { "" }}" },
+            session.radiating?.let { if (it) t.painRadiating else t.painCentered },
+        ).forEach {
+            Text(it, color = AppTheme.colors.textDim, fontSize = 13.sp)
+        }
+        if (session.note.isNotBlank()) {
+            Text(
+                session.note,
+                color = AppTheme.colors.textPrimary,
+                fontSize = 14.sp,
+                fontStyle = FontStyle.Italic,
+            )
+        }
     }
 }
 
