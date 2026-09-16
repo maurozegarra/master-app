@@ -1,7 +1,7 @@
 {
+  "versionName": "1.0.248",
   "minVersionCode": 1,
-  "versionName": "1.0.233",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.233/master-1.0.233.apk",
-  "versionCode": 233,
-  "changelog": "El player deja de dar saltos. El nombre del ejercicio sube a la franja de arriba y deja de caer sobre la cabeza del video, y crece a 48sp cuando el ejercicio no tiene video. El reloj y las reps comparten tamano y sitio, con la unidad REPS al lado del numero. Y ningun control cambia de posicion al pasar de etapa o de ejercicio: ni el reloj entre un ejercicio con peso y uno sin, ni los botones al llegar al ultimo, ni la fila de controles entre tiempo y repeticiones. Fuera los labels PREPARE y COOLDOWN: el color de la etapa ya lo dice."
+  "changelog": "release: rutina lumbar con seguimiento de dolor, y el historial cuenta lo que paso de verdad",
+  "versionCode": 248,
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.248/master-1.0.248.apk"
 }
