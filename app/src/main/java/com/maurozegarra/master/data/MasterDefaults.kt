@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 3
+    const val LUMBAR_REVISION = 4
 
     /**
      * De quien es la rutina lumbar.
@@ -434,7 +434,7 @@ object MasterDefaults {
                 // La velocidad va en la nota y no solo en las instrucciones porque es lo que
                 // se lee en el player. "Paso vivo" costo tres sesiones: a 3 km/h no hacia
                 // nada, a 5 le solto las caderas. Un adjetivo no dosifica.
-                b.walk(if (lang == "es") "Caminata corta" else "Short Walk", sec = 360, note = "5 km/h, after the mobility"),
+                b.walk(if (lang == "es") "Caminata corta" else "Short Walk", sec = 360, note = "6 km/h, after the mobility"),
                 b.mcgill(),
                 b.hipGlute(),
             ),
@@ -676,11 +676,12 @@ object MasterDefaults {
                 // cuando iban a ser 26, le parecio mucho y bajo la carga. Un numero mal
                 // puesto le cambio el entrenamiento.
                 //
-                // Discos 0/10/20 sobre esa barra: 6, 16 y 26 kg. La serie de barra sola es
+                // Discos 0/10/25 sobre esa barra: 6, 16 y 31 kg. La serie de barra sola es
                 // suya y se respeta -entrar al patron sin carga, en una rutina de columna,
-                // es buena idea-; lo unico que sube es la de arriba, de 21 a 26, porque dijo
-                // que bar+15 se sintio "como para subirle un poco mas".
-                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 10.0, 20.0), WeightType.BARBELL, barWeight = 6.0),
+                // es buena idea-; lo unico que sube es la de arriba. Iba 21 -> 26 el 15-sep,
+                // y el 16-sep los 26 "se sintieron normal" y pidio +5 con estas palabras:
+                // "quiero ir con prudencia". 31 son 12.5 kg de disco por lado.
+                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 10.0, 25.0), WeightType.BARBELL, barWeight = 6.0),
                 loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(7.5, 10.0, 12.5)),
                 // "Se sintio ligero" con 7.5/10/12.5, asi que sube entera.
                 loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(10.0, 12.5, 15.0)),

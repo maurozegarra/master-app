@@ -5,6 +5,81 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-17 — plan (decidido la vispera)
+
+**Un solo cambio: el puente de gluteos sube a 6 / 16 / 31.** Discos 0 / 10 / 25 sobre la
+barra de 6 kg; la de arriba son 12.5 kg por lado. El pidio +5 y pidio prudencia, y +5 sobre
+26 es exactamente eso: un 19% en el ejercicio mas cargado de la rutina, en el bloque que
+lleva cuatro sesiones sin dar un solo problema. La serie de barra sola no se toca.
+
+**Lo demas queda igual a proposito.** McGill sigue en 6/4/2 -el dolor acaba de bajar, no es
+el dia de cobrar-, el suitcase y la sentadilla se quedan donde estan, y la caminata sigue en
+6 minutos. La nota de la caminata pasa a decir **6 km/h**, que es lo que ya hizo hoy: no es
+subir la dosis, es escribir la que ya funciono.
+
+**Si manana a 6 km/h se siente ligero otra vez, que NO la suba.** Manana ya hay un cambio
+arriba, y dos a la vez dejan el dato sin leer. Lo de la velocidad se decide el viernes.
+
+**Y el viernes 18, LUMBAR normal.** Es el dia que trabaja en casa, que es justo lo que pide
+el training normal: 12 minutos de caminata delante y 5 de cierre son 17 contra los 6 de
+ahora, y eso no cabe en una manana de oficina. Ademas el bad day nacio de una premisa que ya
+sabemos falsa -que la caminata de entrada no servia-, asi que volver al orden normal es la
+pregunta abierta mas grande que queda. Ese dia se decide tambien TD-097.
+
+---
+
+## 2026-09-16 — cuarta sesion: se rompe la meseta
+
+**LUMBAR (bad day)**, 05:18 a 06:13, **54m 49s**, completa, nada saltado. Leido del
+historial del telefono; diez ejercicios al 100%.
+
+Se levanto y entreno mas temprano que nunca: **05:18**, contra 05:13 / 07:16 / 13:00 de los
+tres dias anteriores.
+
+**Dolor: 3 -> 1.** Sin irradiacion. Primer registro tomado dentro del app y no por chat.
+
+| Dia | Al empezar | Al terminar |
+|---|---|---|
+| 14-sep | 4 | 2 |
+| 15-sep | 4 | 2 |
+| **16-sep** | **3** | **1** |
+
+Lo importante no es el 1, es el **3**. Los dos dias anteriores termino en 2 y volvio a
+empezar en 4: lo que ganaba la sesion lo devolvia entre sesiones. Hoy arranco un punto mas
+abajo, y eso es lo primero que dice que la mejora se esta quedando. El 1 ademas es el numero
+mas bajo de todo el historial.
+
+**La caminata, tercera confirmacion seguida de que era dosis y no orden.** Empezo a 5 km/h,
+a los dos minutos le parecio ligero y **subio a 6**. Cuatro dias, cuatro velocidades:
+
+| Dia | Velocidad | Como se sintio |
+|---|---|---|
+| 13-sep | 3 km/h | "raro y nada util" |
+| 14-sep | 4 km/h | neutral |
+| 15-sep | 5 km/h | "las caderas mucho mas sueltas" |
+| 16-sep | 5 -> 6 km/h | a 5 le sobraba |
+
+Cuatro subidas y ninguna le ha costado nada. Eso dice que el techo todavia no aparece, pero
+tambien que hay que buscarlo con criterio y no a ciegas: **la senial de parar de subir es que
+el dolor deje de bajar durante la sesion, o que la zancada se estire hasta parecer trote**.
+Caminar rapido es el objetivo; correr no lo es.
+
+**Los pesos, con su respuesta.** El puente fue 6 / 16 / 26 kg -la pauta nueva completa,
+incluido el tercero que la vispera no se animo a hacer- y **26 "se sintio normal"**. Pide
+subir 5 kg mas y lo enmarca el mismo: *"quiero ir con prudencia"*. La sentadilla a caja
+aterrizo en 10 / 12.5 / 15 sin comentario, que despues del "se sintio ligero" de ayer es la
+respuesta que se buscaba. El suitcase sigue en 7.5 / 10 / 12.5.
+
+**McGill intacto:** 12 aguantes de 10 s en los cuatro movimientos, piramide 6/4/2 sin tocar.
+Cuatro sesiones con el mismo volumen y el dolor bajando; no hay razon para moverlo todavia.
+
+**Lo que este dia deja como deuda.** El historial decia "26 kg" y no se podia saber si era lo
+que movio o lo que el app le propuso: el player guarda el numero que estaba en pantalla, asi
+que cumplir la pauta y no tocar el dial se ven igual. Hubo que preguntarselo, que es justo lo
+que este registro existe para evitar. Queda como **TD-111**.
+
+---
+
 ## 2026-09-15 — tercera sesion: la caminata si servia, era la velocidad
 
 Desperto a las 7:00 y empezo a las **7:16**. Mismo margen que ayer (16 min contra 15), asi

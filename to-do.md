@@ -4,14 +4,30 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **76 / 110** hechos, 34 pendientes.
+Progreso: **77 / 112** hechos, 35 pendientes.
 
 ## Pendientes
 
 ### Feature
 
-- [ ] **TD-110** El historial ensena el dolor y la nota de cada sesion
-  - EL HUECO QUE DEJABA TD-089: el usuario contesta el dolor antes y despues de entrenar, y **no habia ninguna pantalla donde volver a verlo**. El dato entraba y desaparecia de su vista; solo lo leia el asistente, del respaldo. Contestar a ciegas es la mejor forma de dejar de contestar. COMO QUEDA: en la fila de cada sesion, una insignia con el antes y el despues -'4 -> 2'- en verde si bajo, ambar si subio y apagada si se quedo igual. La direccion es lo que se lee de un vistazo; el numero viene despues. Al desplegar la sesion: los dos numeros con su descripcion de la escala DVPRS, donde se sentia, y la nota en cursiva. Lo que no se contesto no se rellena: un hueco es un hueco. POR QUE IMPORTA MAS ADELANTE QUE HOY: el numero de un dia dice poco. Lo que dice algo es la columna -4 -> 2, 4 -> 2, 3 -> 1- y para eso hay que poder mirarla. Es tambien lo que TD-042 (resumen de stats) deberia acabar graficando.
+- [ ] **TD-112** Revision 4 de la rutina: el puente sube a 31 kg y la caminata corta lleva su velocidad
+  - CAMBIO DE PAUTA, no de codigo: la rutina sube una revision porque el cuerpo lo pidio, y eso es lo que TD-103 dejo barato. Sale de la sesion del 16-sep-2026 (ver docs/coach-log.md).
+
+1. PUENTE DE GLUTEOS 6/16/26 -> 6/16/31. Discos 0/10/25 sobre la barra de 6 kg; la serie de arriba son 12.5 kg por lado. Los 26 'se sintieron normal' y pidio +5 con estas palabras: 'quiero ir con prudencia'. La serie de barra sola y la intermedia no se tocan: lo que sube es una sola serie de un solo ejercicio.
+
+2. LA CAMINATA CORTA PASA DE 5 A 6 KM/H en la nota. No es subir la dosis, es escribir la que ya corrio: ese dia empezo a 5, a los dos minutos le parecio ligero y subio a 6. Cuarta velocidad en cuatro sesiones (3, 4, 5, 6) y ninguna le ha costado nada.
+
+LO QUE NO SE TOCA Y POR QUE: McGill sigue en 6/4/2. El dolor acaba de romper la meseta -3 -> 1, y el 3 de arranque es el dato bueno- y subir volumen el dia siguiente es apostar contra lo unico que el ha dicho que le importa: no recaer. Un cambio a la vez.
+
+EL TEST DE LA VELOCIDAD SE REESCRIBIO en vez de clavarlo al 6: ahora comprueba que la nota lleva un NUMERO y no un adjetivo, que es la regla de verdad. Clavarlo a una velocidad concreta convertiria cada ajuste de dosis en un test roto.
+- [ ] **TD-111** El historial no distingue la pauta de lo que de verdad movio
+  - EL HUECO, destapado el 16-sep-2026 al leer la sesion del telefono. El historial guardo 'puente de gluteos 12 x 26 kg' y el coach no pudo saber si eso era lo que MOVIO o lo que el app le PROPUSO: el player escribe en el registro el peso que estaba en pantalla, y si el usuario no toca el dial, la pauta y lo hecho son el mismo numero. La vispera la diferencia era real -la pauta pedia 26 y se quedo en 21 porque le parecio mucho- y solo se supo porque lo conto por chat.
+
+POR QUE IMPORTA MAS DE LO QUE PARECE: la unica razon de ser de este historial es que el coach pueda leerlo SIN preguntar. Un campo que puede significar dos cosas obliga a una pregunta por sesion, que es exactamente lo que se queria quitar. Y al reves: cuando el usuario SI baja la carga, ese es el dato mas valioso del dia -dice donde esta el limite- y hoy se pierde salvo que lo mencione.
+
+QUE HARIA FALTA: que SetRecord recuerde ademas el numero prescrito, y que el historial marque la serie cuando lo hecho y lo pautado no coinciden (una flecha, un color). Con eso 'cumplio la pauta' y 'no la toco' dejan de verse igual, y el coach ve de un vistazo donde el cuerpo dijo que no.
+
+OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que si los movio y que 26 se sintio normal. Ese registro es correcto; lo que falta es poder saberlo sin preguntar.
 - [ ] **TD-104** Inventariar el equipo disponible para poder disenar con lo que hay
   - PEDIDO DEL USUARIO el 15-sep-2026: 'en su momento deberiamos inventariar lo que tengo para que puedas disenar diferentes rutinas'. POR QUE HACE FALTA, con el caso que lo destapo: ese dia el historial decia que habia hecho el puente de gluteos con 20/30/40 kg y lo que movio fueron 6/16/21. El app trae barWeight = 20 por defecto y su barra para ese ejercicio pesa 6. El numero inflado ademas le hizo bajar la carga -'me parecio mucho'-, asi que un dato mal puesto no solo ensucio el registro: cambio el entrenamiento. LO QUE SE SABE HOY, dicho por el y deducido de sus trainings: barras de 6, 7, 18 y 20 kg; mancuernas de 5, 7.5, 10 y 12.5; discos que llegan al menos a 30 por lado y permiten armar 15 (peso muerto con 0/10/20/30, hip thrust hasta 70 de total). Falta saber: granularidad real de los discos, si hay banco, caja o silla de altura conocida, banda, kettlebell, y con que barra hace cada ejercicio. QUE HAY QUE DECIDIR: donde vive el inventario. Tres opciones. (a) Un documento en docs/, que es barato y suficiente para que el asistente disene; no lo ve el app. (b) En Ajustes, como datos del usuario, para que el editor pueda ofrecer solo pesos que existen y que barWeight deje de ser un 20 por defecto que nadie mira. (c) Las dos: el documento primero y la pantalla cuando haya mas de un atleta. RECOMENDACION: empezar por (a) -docs/equipo.md, junto a coach.md-, porque el valor inmediato es que quien disena la rutina sepa con que cuenta, y eso no necesita UI. (b) sube de prioridad el dia que haya rutinas para otra persona, porque el equipo de NIKO no es el suyo. RELACIONADO: el barWeight por ejercicio ya existe en el modelo, asi que la parte urgente -que el puente diga 6 y no 20- se arregla con una revision de la rutina, sin esperar a este TD.
 - [ ] **TD-101** Control sobre el historial: corregir, anotar y saber de donde salio cada registro
@@ -101,6 +117,7 @@ Progreso: **76 / 110** hechos, 34 pendientes.
 
 ### Feature
 
+- [x] **TD-110** El historial ensena el dolor y la nota de cada sesion
 - [x] **TD-105** Revision 2 de la rutina, y corregir los pesos mal registrados del 15-sep
 - [x] **TD-098** Cargar el bloque de cadera y gluteo, que se le queda corto
 - [x] **TD-090** Anotar en el historial la sesion del 13-sep que se hizo sin el app
