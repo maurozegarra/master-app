@@ -61,6 +61,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -72,7 +73,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.LineBreak
@@ -172,10 +176,17 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
         )
     }
 
+    // El bloque de abajo -la pregunta del dolor y el boton de empezar- flota encima de la
+    // lista, asi que la lista tiene que terminar donde ese bloque empieza. Su alto se MIDE y
+    // no se escribe: con un 96.dp fijo, pensado para cuando ahi solo habia un boton, la
+    // pregunta del dolor (TD-089) tapaba la ultima tarjeta del training.
+    var bottomPx by remember { mutableStateOf(0) }
+    val bottomHeight = with(LocalDensity.current) { bottomPx.toDp() }
+
     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
+            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, bottomHeight + 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
@@ -195,6 +206,11 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
             Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                .onSizeChanged { bottomPx = it.height }
+                // Opaco a proposito: aunque la lista ya termine donde este bloque empieza,
+                // al hacer scroll las tarjetas pasan por detras, y sin fondo se leerian
+                // encima de la pregunta.
+                .background(AppTheme.colors.bg)
                 .padding(16.dp),
         ) {
             // Se pregunta AQUI, en la pantalla previa, y no al terminar: "mientras mas
@@ -1067,15 +1083,34 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
     val steps = vm.playerSteps
     val idx = vm.playerIndex
     val nextWork = steps.drop(idx + 1).firstOrNull { it.kind == StepKind.WORK }
-    val text = if (nextWork == null) {
-        ""
-    } else {
+    // El peso de la siguiente serie va AQUI.
+    //
+    // Entre series es cuando se cambian los discos, y hasta ahora el numero no aparecia
+    // hasta que el descanso terminaba y empezaba el trabajo: "tengo que esperar que pasen
+    // los tiempos para ver: ah, eran x kilos que tenia que ponerle". Se lee justo cuando
+    // sirve para algo, que es mientras todavia se puede ajustar la barra.
+    //
+    // Destaca por BRILLO y no por color: el peso va en blanco puro y en negrita, y el resto
+    // de la linea baja a un blanco apagado. El acento no vale aqui -el fondo del player ES
+    // el acento, asi que el numero se hundia en el: "el color no quedo bien"-, y como cada
+    // training trae el suyo, cualquier color elegido chocaria con alguno. El blanco se lee
+    // sobre todos.
+    val text = buildAnnotatedString {
+        if (nextWork == null) return@buildAnnotatedString
         val nextName = ExerciseCatalog.display(
             nextWork.ownerExerciseId,
             nextWork.title.ifBlank { nextWork.ownerName },
             t.locale.language,
         )
-        "${t.nextLabel}: $nextName".uppercase()
+        withStyle(SpanStyle(color = Color.White.copy(alpha = 0.72f))) {
+            append("${t.nextLabel}: $nextName".uppercase())
+        }
+        if (nextWork.weightTotal > 0.0) {
+            withStyle(SpanStyle(color = Color.White.copy(alpha = 0.72f))) { append("  ·  ") }
+            withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
+                append("${fmtKg(nextWork.weightTotal)} ${t.kg}".uppercase())
+            }
+        }
     }
 
     Text(
@@ -1269,13 +1304,18 @@ private fun Controls(vm: MasterViewModel, step: PlayerStep, accent: Color, t: St
         // —pequeño, grande, pequeño— y lo único que cambia es si el centro está vacío.
         Box(Modifier.size(72.dp), contentAlignment = Alignment.Center) {
             if (step.manual) {
-                // Un hueco a secas grita "falta algo". El círculo apagado —solo borde, sin
-                // relleno ni icono— dice que ahí no hay nada que pulsar porque un ejercicio
-                // por repeticiones no se pausa, no que se haya perdido un botón.
-                Box(
-                    Modifier
-                        .size(72.dp)
-                        .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)), CircleShape),
+                // El boton se queda, apagado. Antes era un circulo de solo borde, y con el
+                // cristal encima del video no se distinguia del fondo: "es tan imperceptible
+                // que igual ni se nota". Un boton deshabilitado —mismo cristal, icono al 30%,
+                // sin responder al toque— dice lo que pasa: aqui no hay nada que pausar
+                // porque un ejercicio por repeticiones no corre contra el reloj.
+                GlassButton(
+                    icon = Icons.Outlined.Pause,
+                    contentDescription = t.pause,
+                    size = 72.dp,
+                    iconSize = 36.dp,
+                    enabled = false,
+                    onClick = {},
                 )
             } else {
                 GlassButton(
@@ -1327,14 +1367,21 @@ private fun GlassButton(
     modifier: Modifier = Modifier,
     size: androidx.compose.ui.unit.Dp = 56.dp,
     iconSize: androidx.compose.ui.unit.Dp = 28.dp,
+    /**
+     * Apagado, el boton NO se va: se queda con su mismo cristal y apaga el icono y el borde.
+     * Es como lo resuelve YouTube, y es lo que hacia falta aqui: un hueco, o un circulo de
+     * solo borde, se confunden con el fondo y parece que falta un boton.
+     */
+    enabled: Boolean = true,
 ) {
     Box(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.15f))
-            .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)), CircleShape)
+            .border(BorderStroke(1.dp, Color.White.copy(alpha = if (enabled) 0.25f else 0.12f)), CircleShape)
             .combinedClickable(
+                enabled = enabled,
                 onClick = onClick,
                 onLongClick = onLongClick,
             ),
@@ -1343,7 +1390,7 @@ private fun GlassButton(
         Icon(
             icon,
             contentDescription = contentDescription,
-            tint = Color.White,
+            tint = Color.White.copy(alpha = if (enabled) 1f else 0.30f),
             modifier = Modifier.size(iconSize),
         )
     }
@@ -1425,21 +1472,47 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
  */
 @Composable
 private fun PainScale(label: String, value: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
+    val measurer = rememberTextMeasurer()
+    // El MISMO estilo con el que se pinta, no uno parecido: Text parte del estilo del tema y
+    // le fusiona lo que se le pase, asi que un TextStyle construido a mano trae otra familia
+    // y otro interlineado, y midiendo con el sale un alto que el texto de verdad no respeta.
+    val estiloDescriptor = LocalTextStyle.current.merge(TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold))
+
     Text(label, color = AppTheme.colors.textDim, fontSize = 13.sp)
     // El texto del numero elegido, no un ancla en los extremos: "5 es medio" se estima, pero
     // "4 exactamente que es" no se adivina, y sin eso un 4 de hoy y un 4 de dentro de un mes
     // no son el mismo 4. En ambar y en su sitio fijo, para que al tocar un numero se note
     // que la pantalla contesta y para que no empuje nada al aparecer.
-    Text(
-        value?.let { "$it · ${t.painScale.getOrElse(it) { "" }}" } ?: t.painScaleHint,
-        color = if (value != null) STATUS_SKIPPED else AppTheme.colors.textFaded,
-        fontWeight = if (value != null) FontWeight.SemiBold else FontWeight.Normal,
-        fontSize = 12.sp,
-        maxLines = 2,
-        minLines = 2,
-    )
+    //
+    // El sitio fijo sale de los propios descriptores: cuantas lineas necesita el mas largo
+    // de los once a este ancho. Antes eran dos reservadas a mano y ninguno llega a dos, asi
+    // que debajo quedaba siempre una linea vacia.
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val ancho = constraints.maxWidth
+        // Se miden LINEAS, no pixeles, y el alto lo reserva el propio Text con minLines. Un
+        // alto en pixeles obliga a acertar al pixel con el estilo, el relleno de la fuente y
+        // la densidad, y si se falla por poco el texto sale recortado -paso: la "y" de
+        // "Hardly" se quedo sin cola-. Contando lineas, equivocarse cuesta una linea de mas,
+        // nunca una letra partida.
+        val lineas = remember(ancho, t, estiloDescriptor) {
+            (t.painScale.mapIndexed { i, d -> "$i · $d" } + t.painScaleHint).maxOf {
+                measurer.measure(it, estiloDescriptor, constraints = Constraints(maxWidth = ancho), maxLines = 2).lineCount
+            }
+        }
+        Text(
+            value?.let { "$it · ${t.painScale.getOrElse(it) { "" }}" } ?: t.painScaleHint,
+            color = if (value != null) STATUS_SKIPPED else AppTheme.colors.textFaded,
+            fontWeight = if (value != null) FontWeight.SemiBold else FontWeight.Normal,
+            fontSize = 12.sp,
+            maxLines = lineas,
+            minLines = lineas,
+        )
+    }
     Spacer(Modifier.height(6.dp))
-    (0..10).chunked(6).forEach { fila ->
+    (0..10).chunked(6).forEachIndexed { indice, fila ->
+        // El hueco va ENTRE las filas y no despues de cada una: el de despues de la ultima
+        // se sumaba al que ya pone quien coloca la escala, y eran seis puntos de nada.
+        if (indice > 0) Spacer(Modifier.height(6.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             fila.forEach { n ->
                 val activo = value == n
@@ -1463,7 +1536,6 @@ private fun PainScale(label: String, value: Int?, accent: Color, t: Strings, onP
             // Rellena el hueco de la segunda fila para que los botones no se estiren.
             repeat(6 - fila.size) { Spacer(Modifier.weight(1f)) }
         }
-        Spacer(Modifier.height(6.dp))
     }
 }
 

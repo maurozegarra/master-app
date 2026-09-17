@@ -4,12 +4,20 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **77 / 112** hechos, 35 pendientes.
+Progreso: **81 / 116** hechos, 35 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-116** El control NEXT dice el peso de la siguiente serie
+  - PEDIDO el 16-sep-2026: 'para los ejercicios con peso, en el control NEXT indicame el peso. Resulta valioso entre series saber que peso ir ajustando, porque como esta actualmente tengo que esperar que pasen los tiempos para ver: ah, eran x kilos que tenia que ponerle'.
+
+EL PROBLEMA: el peso solo se veia al empezar la serie, y para entonces ya no sirve. El momento util es el DESCANSO, que es cuando se cambian los discos; hasta ahora habia que esperar a que el descanso terminara para enterarse de cuanto habia que poner.
+
+EL CAMBIO: la etiqueta 'NEXT: <ejercicio>' pasa a decir 'NEXT: GLUTE BRIDGE - 16 KG', con el peso en el color de acento para que se lea de un vistazo. Solo aparece cuando el siguiente trabajo lleva peso (weightTotal > 0), asi que en el resto de la rutina la etiqueta es la de siempre.
+
+Sale del peso del SIGUIENTE paso de trabajo, que es el que ya calcula StepEngine serie a serie, asi que en una piramide como la del puente -6, 16, 31- cada descanso enseña el numero de la serie que viene, no el del ejercicio.
 - [ ] **TD-112** Revision 4 de la rutina: el puente sube a 31 kg y la caminata corta lleva su velocidad
   - CAMBIO DE PAUTA, no de codigo: la rutina sube una revision porque el cuerpo lo pidio, y eso es lo que TD-103 dejo barato. Sale de la sesion del 16-sep-2026 (ver docs/coach-log.md).
 
@@ -75,10 +83,40 @@ OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que
 
 ### Fix
 
-- [ ] **TD-108** La rutina lumbar solo se siembra en el telefono de su dueno
-  - DETECTADO AL PUBLICAR la v1.0.248. Sembrar desde el codigo llega a CUALQUIER instalacion del app, asi que al actualizar, el telefono de NIKO iba a recibir LUMBAR y LUMBAR (bad day). Y una rutina de rehabilitacion de la espalda de otra persona no es ruido neutro: es algo que alguien podria ponerse a hacer. EL FIX: la siembra y la revision solo corren si AssignmentRepository.profileId es MasterDefaults.LUMBAR_PROFILE ('mauro'). Mientras la siembra sea por codigo, el perfil es lo unico que distingue un telefono de otro. En una instalacion sin perfil elegido tampoco se siembra, que es lo prudente. Y LIMPIA LO YA SEMBRADO: si el telefono no es el suyo y los dos trainings estan ahi, se retiran, **pero solo si no se han usado**. Si hay una sesion registrada contra ellos, alguien los entreno y borrarlos le quitaria su historial; en ese caso se quedan y que decida quien los tenga. LA SOLUCION DE FONDO ES TD-066: repartir por asignacion, donde cada quien recibe lo suyo y este parche sobra. Mientras tanto, NOTA PARA CUALQUIER RUTINA QUE SE SIEMBRE: lo que se siembra desde el codigo aterriza en todos los telefonos. Preguntarse de quien es antes de escribirla.
-- [ ] **TD-106** Fix: la tarjeta del peso se quedo sin sus botones al crecer la nota
-  - REPORTADO POR EL USUARIO el 15-sep-2026 con captura: en la pantalla de Glute Bridge, la tarjeta del peso pregunta 'How did the weight feel?' y **no tiene debajo ninguna opcion para contestar**. Los tres botones -pesado, bien, liviano- no se dibujaban. CAUSA, y la introdujo el asistente el dia anterior: TD-092 le puso interlineado a la nota para que dejara de dibujarse una linea sobre otra. Al dejar de encimarse, 'BAR ON THE HIPS, PUSH THROUGH THE HEELS' paso de ocupar el alto de una linea a cuatro, y esos ~170dp salieron del hueco elastico (Box con weight(1f)), que es justo de donde cuelga la tarjeta del peso. La tarjeta se quedo sin altura y sus botones se recortaron. LO QUE COSTO: el 15-sep no hay ni un feedback de peso en el historial, y al leerlo se le dijo al usuario 'no lo tocaste'. No es que no lo tocara: **no se podia**. Es el precio de mirar solo lo que el cambio movia -el reloj y los controles, que efectivamente no saltaron- y no lo que compartia sitio con ello. EL FIX: la nota pasa a encajarse como el nombre del ejercicio (FittedText, extraido de ExerciseTitle): se encoge hasta caber en dos lineas y ocupa SIEMPRE el mismo alto, con lo que el hueco elastico deja de depender de lo larga que sea la frase. Y el techo de la nota baja de 40sp a 28: es apoyo del ejercicio, no un titular. PENDIENTE MENOR, visto en la misma captura: con la barra sin discos la etiqueta dice '6 kg . 6 + 0'. El '+ 0' sobra.
+- [ ] **TD-115** El boton central no desaparece en los ejercicios por reps: se apaga
+  - REPORTADO el 16-sep-2026, y tambien lo llevaba aguantando dias: 'el boton central de los controles, que desaparece en los ejercicios con reps, supuestamente le pusimos un circulo para no dejarlo vacio pero es tan imperceptible que igual ni se nota'.
+
+DE DONDE VENIA: el hueco del centro se reserva siempre para que los controles no cambien de sitio al pasar de un ejercicio por tiempo a uno por repeticiones, y en los manuales se rellenaba con un circulo de SOLO BORDE al 12% de blanco. Sobre un video, eso no se ve.
+
+EL CAMBIO: el boton se queda, deshabilitado. Mismo cristal translucido, mismo icono de pausa al 30% y sin responder al toque. Es como lo resuelve YouTube y fue el quien lo trajo: 'pense que como son botones translucidos era imposible representar un boton deshabilitado y translucido PERO veo que YouTube lo hace'. GlassButton gana un parametro 'enabled', asi que cualquier otro control puede apagarse igual en vez de desaparecer.
+
+POR QUE UN BOTON APAGADO Y NO UN HUECO: un hueco dice 'falta algo'. Un boton apagado dice que ahi no hay nada que pausar porque un ejercicio por repeticiones no corre contra el reloj, que es la verdad.
+- [ ] **TD-114** Fix: el indicador de refrescar salta al desplazarse y se queda girando
+  - REPORTADO el 16-sep-2026, y lo llevaba aguantando dias sin decirlo porque habia otras prioridades: 'justo arriba de LUMBAR (bad day) hay un circulo de progreso que se queda ahi girando y girando, se activa al yo apenas desplazarme hacia arriba en la lista, es como si estuviera muy sensible... la idea era que eso salga cuando hiciera un swipe down deliberado, pero no al querer ver el primer registro de la lista'.
+
+DOS CAUSAS, no una.
+
+1. EL SOBRANTE DE UN IMPULSO CONTABA COMO TIRON. onPostScroll aceptaba deltas vinieran del dedo o de un fling. Al subir la lista de un manotazo, esta llegaba al tope con carrera y el sobrante inflaba el tiron SOLO. Y como onPreFling -el unico sitio donde el tiron se soltaba- ya habia pasado antes de ese fling, nadie lo bajaba: el indicador se quedaba puesto. De ahi el 'girando y girando' sin que el hubiera tirado de nada. Arreglado filtrando por NestedScrollSource.Drag, y con un onPostFling de red de seguridad para que nada pueda quedarse desplegado despues de un impulso.
+
+2. NO HABIA ZONA MUERTA. Estando arriba del todo, el primer pixel de arrastre hacia abajo ya pintaba indicador, y mirar el primer training de la lista se pasa del tope sin querer. Ahora los primeros 32dp de arrastre no cuentan.
+
+Y DE PASO, LA RUEDA. Era un CircularProgressIndicator siempre, asi que giraba tambien mientras se tiraba: le decia al usuario 'estoy sincronizando' cuando no habia empezado nada. Ahora mientras se tira hay una flecha que se endereza hasta apuntar arriba al llegar al umbral, y la rueda gira SOLO mientras se sincroniza de verdad.
+
+NOTA PARA LA PROXIMA: lo aguanto varios dias sin reportarlo. Cuando algo del app le moleste, mejor saberlo aunque no sea prioridad; anotarlo cuesta menos que aguantarlo.
+- [ ] **TD-113** Fix: la pregunta del dolor se dibuja encima de la ultima tarjeta del training
+  - BUG, visto en captura del telefono el 16-sep-2026: en la pantalla previa del training, 'How is your back right now?' se dibujaba ENCIMA de la ultima tarjeta del training. En LUMBAR se leia el texto de la pregunta atravesando el '1 Exercise - 5:00' de Cool Walk.
+
+LA CAUSA: el bloque de abajo -pregunta + boton de empezar- flota sobre la lista, y la lista reservaba para el un hueco ESCRITO A MANO, 96.dp, medido cuando ahi solo habia un boton. La escala de dolor (TD-089) anadio etiqueta, descriptor y dos filas de numeros, y el hueco se quedo a menos de la mitad de lo que hacia falta.
+
+EL ARREGLO: el alto del bloque se MIDE con onSizeChanged y alimenta el contentPadding de la lista, asi que el hueco se ajusta solo a lo que ese bloque ocupe -con la pregunta o sin ella, en un idioma o en otro-. Ademas el bloque pasa a ser opaco: aunque la lista termine donde el empieza, al hacer scroll las tarjetas pasan por detras y sin fondo se leerian encima de la pregunta.
+
+LA LECCION, que ya se habia pagado con TD-106: cada vez que algo crece en una pantalla, lo que le reservaba sitio con un numero fijo se queda corto en silencio. Medir en vez de escribir el numero.
+
+Y DE PASO, viendo la captura del arreglo: 'creo que tenemos espacio perdido, mira debajo de 0 - No pain'. El descriptor reservaba DOS lineas escritas a mano para que al cambiar de numero no empujara los botones, y ninguno de los once llega a dos lineas: debajo quedaba siempre una linea vacia. Ahora ese alto se mide -el del descriptor mas largo a ese ancho-, asi que la caja ocupa lo que de verdad hace falta y sigue sin empujar nada. Mismo error que el hueco de 96.dp, dos veces en la misma pantalla. Ademas el hueco entre las filas de numeros pasa a ir ENTRE ellas: el de despues de la ultima se sumaba al que ya pone quien coloca la escala.
+
+Y UNA TERCERA, que el vio venir -'y vamos por una tercera'-: al medir el alto del descriptor se uso un TextStyle construido a mano (12.sp, SemiBold) en vez del estilo con el que Text pinta de verdad, que es el del tema fusionado con esos valores. Otra familia y otro interlineado: el alto salio corto y el texto se dibujo recortado, sin la cola de la 'y' de 'Hardly'. Arreglado midiendo LINEAS en vez de pixeles y dejando que el propio Text reserve el alto con minLines; equivocarse asi cuesta una linea de mas, nunca una letra partida.
+
+LAS TRES SON EL MISMO ERROR: un numero puesto a mano para reservarle sitio a otra cosa -96.dp, dos lineas, un alto en pixeles-. Cada vez que lo de al lado crece, ese numero se queda corto EN SILENCIO y solo se ve en una captura. La regla que queda: el sitio lo reserva el componente con lo que ya sabe (onSizeChanged, minLines), y si hay que medir texto se mide con LocalTextStyle.current.merge(...), el mismo estilo con el que se pinta.
 - [ ] **TD-100** Dos instancias del mismo ejercicio en un workout se funden en un registro
   - ENCONTRADO al arreglar TD-099 y levantado a peticion del usuario. SessionRecorder agrupa por ExerciseKey (exerciseId, workoutIndex), asi que si un workout repite el mismo ejercicio del catalogo, las dos apariciones escriben en la MISMA casilla: la segunda pisa las series de la primera y en el historial queda un solo registro, con el nombre y las series de la ultima. Se pierde la mitad del trabajo hecho. DONDE MUERDE HOY: es la razon por la que la plancha lateral de la rutina lumbar necesito dos entradas de catalogo, ex_side_plank_l y ex_side_plank_r (TD-086), en vez de una con nota 'cada lado' como hace el resto del catalogo. Se eligio asi a proposito para no perder las series de un lado, pero es rodear el fallo, no arreglarlo. EL FIX APARENTE: meter exerciseIndex en la clave, que desde TD-099 ya viaja en el registro. Dos apariciones del mismo ejercicio pasan a ser dos filas. LO QUE HAY QUE PENSAR ANTES, porque cambia como se cuenta el historial: - Con la clave nueva, un workout con 'Pushups' dos veces pasa de una fila a dos. Es mas fiel, pero es un cambio visible en trainings que el usuario ya tiene (MASTER repite ejercicios en varios sitios: comprobarlo antes). - ExerciseHistoryScreen agrupa por ejercicio a lo largo del tiempo; hay que ver si dos filas por sesion le estropean la serie o la mejoran. - Las sesiones ya guardadas no se pueden separar hacia atras: lo que se fundio, se fundio. - Si se arregla, la plancha lateral podria volver a ser UNA entrada de catalogo con nota, y el catalogo quedaria mas limpio. Eso seria un cambio aparte y posterior. Relacionado con TD-101, que es el que decide que se puede tocar del historial y que no.
 - [ ] **TD-092** Fix: la nota del ejercicio se dibuja una linea encima de otra
@@ -96,13 +134,6 @@ OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que
   - TD-063 dejo el app recibiendo asignaciones, pero los archivos users.json y users/<id>.json se generaron A MANO desde un backup del dispositivo. Asi no es usable: cada cambio de asignacion exige que alguien edite JSON. Falta un publish-profiles.ps1 que lea los trainings de una fuente -el export del usuario, o docs/ si se decide tenerlos versionados-, cruce una tabla de asignaciones tipo docs/assignments.json ({ 'niko': ['<uid>', '<uid>'] }) y genere los archivos listos para publicar, con la misma mecanica que build-release.ps1. Ojo con dos cosas al escribirlo: el uid de cada training publicado tiene que ser ESTABLE entre publicaciones, porque es la clave con la que el dispositivo empareja y conserva el id local que enlaza el historial; y publicar una lista vacia para alguien le retira sus trainings asignados, asi que conviene que el script avise de cuantos quita antes de escribir. BAJA A OPCIONAL con TD-067: asignar pasa a hacerse desde el telefono contra Supabase, asi que este script deja de ser el camino y queda como herramienta alterna para cuando estes en la PC, y solo si despues de TD-067 sigue haciendo falta.
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
   - Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez.
-
-### UI
-
-- [ ] **TD-109** La escala de dolor describe cada numero, no solo los extremos
-  - PEDIDO DEL USUARIO el 15-sep-2026, viendo la escala recien hecha: 'si solo hay extremos igual no ayuda mucho, puedo estimar que 5 es medio pero 4 exactamente que es?'. Y la forma que sugirio: 'al hacerle clic al numero, se muestre el texto que describe ese numero... resaltalo que se note, tal vez un amarillo ambar'. POR QUE IMPORTA MAS ALLA DE LA COMODIDAD: sin un texto por numero, un 4 de hoy y un 4 de dentro de un mes no son el mismo 4, y la serie deja de servir para comparar, que es justo para lo que se guarda. QUE SE USO: los descriptores de la DVPRS (Defense and Veterans Pain Rating Scale), que es una escala numerica de uso clinico con texto por numero, en vez de inventarlos. El usuario lo pidio asi: 'usa lo que se use clinicamente'. COMO: al tocar un numero, su texto sale debajo en ambar (STATUS_SKIPPED, el mismo del badge de saltado) y en semibold. El hueco tiene alto fijo de dos lineas para que aparecer no empuje nada, y antes de elegir dice 'Tap a number to see what it means', que ademas ensena que se puede tocar.
-- [ ] **TD-107** El centro del player cede sitio a la nota: contador junto a las reps y tarjeta de peso translucida
-  - PEDIDO DEL USUARIO el 15-sep-2026, viendo la captura de Glute Bridge: 'el contador de series, creo que es momento de reubicarlo... yo sugiero que este al lado izquierdo de las reps, al reubicarlo recuperamos espacio para las notas que se han vuelto pistas importantes'. Y sobre la tarjeta del peso: 'el fondo negro de esa card no me convence, tenemos objetos que son transparencias y ese objeto se ve solido y en negro, como que rompe'. LA JERARQUIA QUE FIJA ESTE TD, dicha por el: **la nota manda**. 'Las notas son mas importantes, me dan las pistas claves para ejecutar el ejercicio correctamente'. Todo lo demas del centro de la pantalla cede sitio antes que ella. TRES CAMBIOS. (1) El contador de series deja de ocupar una linea propia encima de la nota y pasa a colgar del numero grande, a su izquierda y apagado, con la misma tecnica que ya usaba la unidad a la derecha: se mide y se desplaza, asi que el numero no se descentra y nada salta. Ocupaba el alto de una nota entera para decir '1 / 3'. (2) La tarjeta del peso pasa de cuatro filas a dos -el peso y la pregunta comparten linea, porque los tres botones ya dicen de que va- y de negro solido a translucido al 10%, como los controles y la franja de rutina: todo lo demas de esa pantalla deja ver el color de la etapa. Los chips tambien. (3) Con ese sitio, el techo de la nota vuelve a 40sp. APARTE: con la barra sin discos la etiqueta decia '6 kg . 6 + 0'. El '+ 0' se va; sin discos no hay nada que desglosar.
 
 ## Hechos
 
@@ -149,6 +180,8 @@ OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que
 
 ### Fix
 
+- [x] **TD-108** La rutina lumbar solo se siembra en el telefono de su dueno
+- [x] **TD-106** Fix: la tarjeta del peso se quedo sin sus botones al crecer la nota
 - [x] **TD-102** Reordenar las dos sesiones lumbares que quedaron en alfabetico
 - [x] **TD-099** Fix: el historial ordena los ejercicios por nombre y no por la rutina
 - [x] **TD-082** Fix: la tarjeta de History crece y el badge se parte con nombres largos
@@ -208,4 +241,6 @@ OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que
 
 ### UI
 
+- [x] **TD-109** La escala de dolor describe cada numero, no solo los extremos
+- [x] **TD-107** El centro del player cede sitio a la nota: contador junto a las reps y tarjeta de peso translucida
 - [x] **TD-074** Nombre del ejercicio en el player: dos lineas como mucho, sin cortar palabras y con alto fijo
