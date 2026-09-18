@@ -360,20 +360,93 @@ class SessionRecorderTest {
         assertTrue(r.isEmpty())
     }
 
+    // ---------- Feedback del peso por serie (TD-117) ----------
+    //
+    // Los dos tests de antes probaban justo el orden en que NO se usa: marcar DESPUES de
+    // completar la serie. En el player la tarjeta se toca DURANTE la serie, y en ese orden
+    // no sobrevivia ningun toque -el 17-sep el usuario marco casi todas las series y en el
+    // historial no habia ni una-. "setFeedback on non-existing record is no-op" afirmaba
+    // como correcto el agujero que perdia la primera serie. Se sustituyen por los que
+    // siguen, que reproducen el uso real.
+
     @Test
-    fun `setFeedback attaches delta to existing record`() {
+    fun `lo marcado durante la primera serie sobrevive a completarla`() {
         val r = SessionRecorder()
-        r.onWorkStepCompleted(workStep(exerciseId = "squat", workoutIndex = 0))
-        r.setFeedback("squat", 0, -2.5)
-        val er = r.build()[0]
-        assertEquals(-2.5, er.feedbackDeltaKg!!, 0.001)
+        r.setFeedback("bridge", 0, 0, 2.5)
+        r.onWorkStepCompleted(workStep(exerciseId = "bridge", setIndex = 0, weightTotal = 6.0))
+        assertEquals(2.5, r.build()[0].sets[0].feedbackDeltaKg!!, 0.001)
     }
 
     @Test
-    fun `setFeedback on non-existing record is no-op`() {
+    fun `lo marcado en una serie sobrevive a las series siguientes`() {
         val r = SessionRecorder()
-        r.setFeedback("squat", 0, -2.5)
+        r.setFeedback("bridge", 0, 0, 2.5)
+        r.onWorkStepCompleted(workStep(exerciseId = "bridge", setIndex = 0))
+        r.onWorkStepCompleted(workStep(exerciseId = "bridge", setIndex = 1))
+        r.onWorkStepCompleted(workStep(exerciseId = "bridge", setIndex = 2))
+        assertEquals(2.5, r.build()[0].sets[0].feedbackDeltaKg!!, 0.001)
+    }
+
+    @Test
+    fun `cada serie guarda lo suyo, y la que no se marco queda en null`() {
+        // La piramide del puente del 17-sep: el 6 ligero, el 16 ligero, el 31 sin marcar.
+        val r = SessionRecorder()
+        listOf(6.0, 16.0, 31.0).forEachIndexed { i, kg ->
+            if (i < 2) r.setFeedback("bridge", 0, i, 2.5)
+            r.onWorkStepCompleted(workStep(exerciseId = "bridge", setIndex = i, weightTotal = kg))
+        }
+        val sets = r.build()[0].sets
+        assertEquals(2.5, sets[0].feedbackDeltaKg!!, 0.001)
+        assertEquals(2.5, sets[1].feedbackDeltaKg!!, 0.001)
+        // No marcar no es "justo": un 0 seria un dato que nadie dio.
+        assertNull(sets[2].feedbackDeltaKg)
+    }
+
+    @Test
+    fun `volver a tocar la tarjeta en la misma serie se queda con el ultimo toque`() {
+        val r = SessionRecorder()
+        r.setFeedback("bridge", 0, 0, -2.5)
+        r.setFeedback("bridge", 0, 0, 0.0)
+        r.onWorkStepCompleted(workStep(exerciseId = "bridge", setIndex = 0))
+        assertEquals(0.0, r.build()[0].sets[0].feedbackDeltaKg!!, 0.001)
+    }
+
+    @Test
+    fun `el resumen del ejercicio es el de la ultima serie marcada`() {
+        val r = SessionRecorder()
+        r.setFeedback("bridge", 0, 0, 2.5)
+        r.setFeedback("bridge", 0, 1, 0.0)
+        (0..2).forEach { r.onWorkStepCompleted(workStep(exerciseId = "bridge", setIndex = it)) }
+        assertEquals(0.0, r.build()[0].feedbackDeltaKg!!, 0.001)
+    }
+
+    @Test
+    fun `marcar sin completar ninguna serie no inventa un ejercicio`() {
+        val r = SessionRecorder()
+        r.setFeedback("bridge", 0, 0, 2.5)
         assertTrue(r.isEmpty())
+    }
+
+    @Test
+    fun `el feedback no se cruza entre ejercicios ni entre workouts`() {
+        val r = SessionRecorder()
+        r.setFeedback("bridge", 3, 0, 2.5)
+        r.onWorkStepCompleted(workStep(exerciseId = "bridge", workoutIndex = 3, setIndex = 0))
+        r.onWorkStepCompleted(workStep(exerciseId = "bridge", workoutIndex = 5, setIndex = 0))
+        r.onWorkStepCompleted(workStep(exerciseId = "carry", workoutIndex = 3, setIndex = 0))
+        val porClave = r.build().associateBy { it.exerciseId to it.workoutIndex }
+        assertEquals(2.5, porClave.getValue("bridge" to 3).sets[0].feedbackDeltaKg!!, 0.001)
+        assertNull(porClave.getValue("bridge" to 5).sets[0].feedbackDeltaKg)
+        assertNull(porClave.getValue("carry" to 3).sets[0].feedbackDeltaKg)
+    }
+
+    @Test
+    fun `clear tambien olvida el feedback`() {
+        val r = SessionRecorder()
+        r.setFeedback("bridge", 0, 0, 2.5)
+        r.clear()
+        r.onWorkStepCompleted(workStep(exerciseId = "bridge", setIndex = 0))
+        assertNull(r.build()[0].sets[0].feedbackDeltaKg)
     }
 
     @Test

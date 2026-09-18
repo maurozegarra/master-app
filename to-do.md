@@ -4,12 +4,26 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **81 / 116** hechos, 35 pendientes.
+Progreso: **81 / 121** hechos, 40 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-118** El historial en corto: la serie en una linea y el feedback en icono
+  - PEDIDO el 17-sep-2026, al ver el feedback por serie de TD-117 en el historial: 'en vez de Too light me gustaria que fueramos mas de iconos, porque siento que estamos cargando mucho con texto'. Se le propusieron dos niveles y eligio los dos.
+
+A. EL FEEDBACK EN ICONO: flecha arriba ligero, check justo, flecha abajo pesado. Son las mismas flechas que los botones del player, que es donde se aprende que significan; en el historial solo se reconoce lo que se toco. Las palabras quedan como descripcion de accesibilidad.
+
+B. LA LINEA DE LA SERIE, COMPACTA: de 'Set 1 - 12 reps - 6 kg' a '1   12 x 6 kg'. El 'Set', los puntos y el 'reps' se repetian en cada fila sin decir nada que la columna no dijera ya. En las series por tiempo ya no sale el numero de reps, que ahi no mide nada -en McGill decia '10 reps - 10s' en cada uno de los doce aguantes-, y el tiempo sale con fmtSec (6:00 y no 360s).
+
+Los botones del PLAYER se quedan con texto a proposito: ahi se decide, y el texto es lo que enseña que significa cada flecha. Si con los dias le sobra, se quita tambien.
+
+Las dos pantallas de historial pintaban la serie cada una a su manera; ahora comparten SetLine y setSummary en MasterComponents, con su test.
+
+LOS COLORES, pedidos en la misma sesion y con su sentido: 'flecha arriba verde, luz verde para subir en peso o dificultad; check ambar, estas repitiendo el peso o la dificultad, es como una advertencia, ese ambar no deberia permanecer asi por meses, es una senal de que hay algo que modificar en el ejercicio; flecha abajo rojo, mucho peso, muy dificil'. Quedan como FEEL_UP, FEEL_STEADY y FEEL_DOWN en Color.kt, fijos y no del acento, con ese texto como documentacion.
+
+IDEA QUE SALE DE AHI, sin hacer: si el ambar sostenido es la señal de un ejercicio estancado, el historial por ejercicio podria avisar cuando un ejercicio lleva N sesiones seguidas en 'justo' sin cambiar de carga.
 - [ ] **TD-116** El control NEXT dice el peso de la siguiente serie
   - PEDIDO el 16-sep-2026: 'para los ejercicios con peso, en el control NEXT indicame el peso. Resulta valioso entre series saber que peso ir ajustando, porque como esta actualmente tengo que esperar que pasen los tiempos para ver: ah, eran x kilos que tenia que ponerle'.
 
@@ -18,6 +32,10 @@ EL PROBLEMA: el peso solo se veia al empezar la serie, y para entonces ya no sir
 EL CAMBIO: la etiqueta 'NEXT: <ejercicio>' pasa a decir 'NEXT: GLUTE BRIDGE - 16 KG', con el peso en el color de acento para que se lea de un vistazo. Solo aparece cuando el siguiente trabajo lleva peso (weightTotal > 0), asi que en el resto de la rutina la etiqueta es la de siempre.
 
 Sale del peso del SIGUIENTE paso de trabajo, que es el que ya calcula StepEngine serie a serie, asi que en una piramide como la del puente -6, 16, 31- cada descanso enseña el numero de la serie que viene, no el del ejercicio.
+
+EL COLOR, corregido en la misma sesion. Primero se puso el peso en el color de acento y quedo peor: 'el color no quedo bien'. La razon es que EL FONDO DEL PLAYER ES EL ACENTO -el paso de trabajo pinta la pantalla entera de ese color-, asi que el numero se hundia en el fondo. Y como cada training trae su propio acento, cualquier color elegido chocaria con alguno.
+
+Ahora destaca por BRILLO: el peso en blanco puro y negrita, y el resto de la linea en blanco al 72%. El contraste de luminosidad funciona sobre cualquier fondo saturado, que es lo unico que se puede dar por hecho en esta pantalla.
 - [ ] **TD-112** Revision 4 de la rutina: el puente sube a 31 kg y la caminata corta lleva su velocidad
   - CAMBIO DE PAUTA, no de codigo: la rutina sube una revision porque el cuerpo lo pidio, y eso es lo que TD-103 dejo barato. Sale de la sesion del 16-sep-2026 (ver docs/coach-log.md).
 
@@ -83,6 +101,37 @@ OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que
 
 ### Fix
 
+- [ ] **TD-121** Fix: borrar una sesion, y las correcciones al arrancar, no escriben respaldo
+  - ENCONTRADO DE PASO el 17-sep-2026, verificando TD-120: el ultimo respaldo del telefono seguia siendo de las 21:30 aunque despues el usuario borro la sesion de prueba de las 21:29 y el app corrio la correccion del 17-sep. deleteSession y clearHistory guardan en el store y no llaman a snapshot(); las correcciones del init tampoco, a proposito (snapshotReady evita escribir durante el arranque).
+
+POR QUE IMPORTA: el respaldo automatico es la red de seguridad. Si hoy se restaurara, volveria la sesion borrada y se perderia la correccion. Y el coach lee el historial desde ese respaldo: tras una correccion no hay forma de verificarla hasta que el usuario hace algo que si dispare uno.
+
+Reportado sin tocar, pendiente de su OK.
+- [ ] **TD-120** Escribir en la sesion del 17-sep el feedback que el app boto
+  - La sesion del 17-sep-2026 se grabo con la version que botaba lo marcado en la tarjeta del peso (TD-117). El usuario lo conto por chat serie por serie esa noche y pidio escribirlo: puente ligero/ligero/sin marcar, carry y sentadilla ligero en las tres.
+
+Como TD-105: una correccion de un dato concreto, una sola vez, y la sesion queda EDITED. La logica es pura (MasterDefaults.withSep17Feedback) y tiene test, porque toca datos reales: solo escribe en ejercicios sin nada marcado y con el numero de series que coincide; si el usuario lo hubiera marcado distinto, lo suyo gana. Lo del 16-sep no se reconstruye porque no se conto serie por serie.
+- [ ] **TD-119** Borrar una sesion del historial solo se desliza con la tarjeta cerrada
+  - PROPUESTO por el usuario el 17-sep-2026, con captura: 'el boton de borrar, no crees que deberia aparecer solo cuando esta colapsado?'. Si.
+
+LO QUE SE VEIA: con la sesion expandida, deslizar a la izquierda arrastraba la tarjeta entera -las series quedaban cortadas por el borde- y el tacho aparecia flotando a media altura de una tarjeta muy alta. Y la sesion expandida es justo la que se esta leyendo: un gesto lateral sin querer mientras se hace scroll le ponia 'borrar' delante.
+
+EL CAMBIO: SwipeActionsRow gana un parametro 'enabled'; apagado, la fila no se desliza y si estaba abierta se cierra. En el historial se apaga mientras la sesion esta expandida. Se apaga en vez de quitar las acciones para no cambiar la forma del arbol de Compose, que rehace el contenido entero y pierde el estado que lleve dentro. Las demas listas que usan el mismo componente no cambian.
+- [ ] **TD-117** Fix: lo que se marca en 'How did the weight feel?' nunca llega al historial
+  - BUG, destapado el 17-sep-2026. El usuario marco en la tarjeta 'How did the weight feel?' casi todas las series de la sesion -puente 6 'muy ligero', 16 'ligero'; carry y sentadilla 'ligero' en las tres- y en el respaldo NO HAY NI UNA. En todo el historial no existe un solo feedbackDeltaKg. Lo que marca se pierde, siempre.
+
+LA CAUSA, dos agujeros en SessionRecorder:
+1. setFeedback solo escribe si el registro del ejercicio YA existe (records[key]?.let). El registro nace al completar la primera serie, y la tarjeta se toca DURANTE la serie: lo marcado en la primera serie se descarta en silencio.
+2. putSet reconstruye el registro desde cero en cada serie completada, sin copiar el feedback que ya tenia. Lo marcado en la serie 2 se guarda y al terminar esa serie se borra.
+Entre los dos no hay momento en que un toque sobreviva.
+
+Y UN LIMITE DE DISENO: el feedback es UNO por ejercicio (el ultimo toque gana), pero la tarjeta sale en cada serie y el la usa por serie. En una piramide 6/16/31 'el 6 muy ligero' y 'el 31 bien' son datos distintos, y el modelo solo guardaria uno. Ademas el chip marcado en la serie 2 enseña lo que se eligio en la 1.
+
+LO QUE SE PERDIO: todo lo marcado hasta hoy. De las sesiones del 16 y 17-sep solo queda lo que el conto por chat, anotado en docs/coach-log.md.
+
+EL ARREGLO (v1.0.258). El feedback se guarda POR SERIE en SetRecord.feedbackDeltaKg, y en SessionRecorder vive en un mapa propio, aparte de los registros: espera a que su serie se complete y se le pega al armar el registro, sin importar el orden. El comando FEEDBACK lleva la serie, la tarjeta marca el chip de ESA serie -antes enseñaba el de la anterior-, y los dos historiales dicen al lado de cada serie lo que se marco, con las mismas palabras que los botones. El feedback por ejercicio queda como resumen (el de la ultima serie marcada) y para leer registros viejos. No marcar sigue siendo null: no es un 'justo'.
+
+LOS TESTS: los dos que habia probaban el orden en que NO se usa -marcar despues de completar- y uno afirmaba como correcto el agujero ('setFeedback on non-existing record is no-op'). Se sustituyeron, con la razon escrita, por ocho que reproducen el uso real, mas dos del JSON.
 - [ ] **TD-115** El boton central no desaparece en los ejercicios por reps: se apaga
   - REPORTADO el 16-sep-2026, y tambien lo llevaba aguantando dias: 'el boton central de los controles, que desaparece en los ejercicios con reps, supuestamente le pusimos un circulo para no dejarlo vacio pero es tan imperceptible que igual ni se nota'.
 

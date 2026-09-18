@@ -113,6 +113,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isSep15Fixed(): Boolean = prefs.getBoolean(KEY_SEP15_FIXED, false)
     fun setSep15Fixed() { prefs.edit().putBoolean(KEY_SEP15_FIXED, true).apply() }
 
+    /** Marca de migracion: si ya se escribio el feedback del 17-sep (TD-120). */
+    fun isSep17FeedbackFilled(): Boolean = prefs.getBoolean(KEY_SEP17_FEEDBACK, false)
+    fun setSep17FeedbackFilled() { prefs.edit().putBoolean(KEY_SEP17_FEEDBACK, true).apply() }
+
     fun loadTrainings(): List<Training> {
         val raw = prefs.getString(KEY_TRAININGS, null) ?: return emptyList()
         val items = TrainingJson.decode(raw)
@@ -221,6 +225,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"
         const val KEY_SEP15_FIXED = "sep15_weights_fixed"
+        const val KEY_SEP17_FEEDBACK = "sep17_feedback_filled"
         const val MAX_SESSIONS = 200
     }
 }

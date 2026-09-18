@@ -11,9 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,15 +32,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.data.ExerciseIcons
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.model.SetRecord
 import com.maurozegarra.master.ui.AppOutlineButton
 import com.maurozegarra.master.ui.AppPrimaryButton
 import com.maurozegarra.master.ui.AppStepper
 import com.maurozegarra.master.ui.WheelTimePicker
 import com.maurozegarra.master.ui.theme.AppTheme
+import com.maurozegarra.master.ui.theme.FEEL_DOWN
+import com.maurozegarra.master.ui.theme.FEEL_STEADY
+import com.maurozegarra.master.ui.theme.FEEL_UP
+import com.maurozegarra.master.ui.theme.STATUS_SKIPPED
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.util.pad2
 
@@ -50,6 +62,66 @@ internal fun fmtSec(s: Int): String = if (s < 60) "${s}s" else "${s / 60}:${pad2
 internal fun fmtKg(d: Double): String {
     val r = (d * 10).toLong()
     return if (r % 10 == 0L) (r / 10).toString() else (r / 10.0).toString()
+}
+
+/**
+ * Lo que dice una serie, en corto: "12 × 6 kg", "12 reps", "0:10" o "0:30 · 6 kg" (TD-118).
+ *
+ * Antes era "Set 1 · 12 reps · 6 kg": el "Set", los puntos y el "reps" se repetían en cada
+ * fila sin decir nada que la columna no dijera ya. En las series por tiempo ya no sale el
+ * número de reps, que ahí no mide nada -en McGill decía "10 reps · 10s" en cada aguante-.
+ */
+internal fun setSummary(sr: SetRecord, timeBased: Boolean, t: Strings): String {
+    val kg = if (sr.weightKg > 0) "${fmtKg(sr.weightKg)} ${t.kg}" else null
+    return when {
+        timeBased -> listOfNotNull(fmtSec(sr.durationSec), kg).joinToString("  \u00b7  ")
+        kg != null -> "${sr.reps} \u00d7 $kg"
+        else -> "${sr.reps} ${t.repLabel}"
+    }
+}
+
+/**
+ * Una serie del historial en una línea: número, lo que se hizo y cómo se sintió (TD-118).
+ *
+ * El feedback va en ÍCONO -↑ ligero en verde, ✓ justo en ámbar, ↓ pesado en rojo; ver
+ * [FEEL_UP]- y no en palabras: "Too light ↑" en
+ * cada fila cargaba la lista de texto. Son las mismas flechas que los botones del player,
+ * que es donde se aprende qué significan; aquí ya solo se reconoce lo que se tocó. Las
+ * palabras siguen como descripción de accesibilidad. Sin marcar, no sale nada: no marcar
+ * no es "justo".
+ */
+@Composable
+internal fun SetLine(index: Int, sr: SetRecord, timeBased: Boolean, t: Strings, fontSize: TextUnit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("${index + 1}", color = AppTheme.colors.textFaded, fontSize = fontSize, modifier = Modifier.width(20.dp))
+        Text(setSummary(sr, timeBased, t), color = AppTheme.colors.textDim, fontSize = fontSize)
+        val feel = sr.feedbackDeltaKg
+        if (feel != null) {
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                when {
+                    feel < 0 -> Icons.Filled.ArrowDownward
+                    feel > 0 -> Icons.Filled.ArrowUpward
+                    else -> Icons.Filled.Check
+                },
+                contentDescription = when {
+                    feel < 0 -> t.tooHeavy
+                    feel > 0 -> t.tooLight
+                    else -> t.justRight
+                },
+                tint = when {
+                    feel < 0 -> FEEL_DOWN
+                    feel > 0 -> FEEL_UP
+                    else -> FEEL_STEADY
+                },
+                modifier = Modifier.size(14.dp),
+            )
+        }
+        if (sr.skipped) {
+            Spacer(Modifier.width(6.dp))
+            StatusBadge(text = t.skipped, color = STATUS_SKIPPED)
+        }
+    }
 }
 
 @Composable

@@ -182,7 +182,11 @@ fun SessionRow(
     // desplegable que había aquí gastaba 48dp en ofrecer exactamente eso mismo.
     val actions = listOf(SwipeAction(Icons.Outlined.Delete, t.delete) { confirmDelete = true })
 
-    SwipeActionsRow(actions = actions, controller = swipeController) {
+    // Borrar se desliza solo con la sesion CERRADA (TD-119). Abierta, la tarjeta es alta y
+    // el deslizamiento arrastraba todo su contenido -las series quedaban cortadas por el
+    // borde- y dejaba el tacho flotando a media altura. Y es cuando se esta leyendo: un
+    // gesto lateral sin querer al hacer scroll ponia "borrar" delante de lo que se revisa.
+    SwipeActionsRow(actions = actions, controller = swipeController, enabled = !expanded) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -465,24 +469,10 @@ private fun ExerciseDetailRow(er: ExerciseRecord, accent: Color, t: Strings, onC
             )
         }
         Spacer(Modifier.height(4.dp))
-        er.sets.forEachIndexed { i, sr ->
-            val setLabel = "Set ${i + 1}"
-            val detail = if (er.timeBased) {
-                if (sr.weightKg > 0) "$setLabel  ·  ${sr.reps} reps  ·  ${fmtKgHistory(sr.weightKg)} ${t.kg}  ·  ${sr.durationSec}s"
-                else "$setLabel  ·  ${sr.reps} reps  ·  ${sr.durationSec}s"
-            } else {
-                if (sr.weightKg > 0) "$setLabel  ·  ${sr.reps} ${t.repLabel}  ·  ${fmtKgHistory(sr.weightKg)} ${t.kg}"
-                else "$setLabel  ·  ${sr.reps} ${t.repLabel}"
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(detail, color = AppTheme.colors.textDim, fontSize = 12.sp)
-                if (sr.skipped) {
-                    Spacer(Modifier.width(6.dp))
-                    StatusBadge(text = t.skipped, color = STATUS_SKIPPED)
-                }
-            }
-        }
-        if (er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {
+        er.sets.forEachIndexed { i, sr -> SetLine(i, sr, er.timeBased, t, 12.sp) }
+        // Solo para registros de antes de TD-117, que guardaban uno por ejercicio. Los de
+        // ahora ya lo dicen serie a serie arriba, y repetirlo aqui seria contarlo dos veces.
+        if (er.sets.none { it.feedbackDeltaKg != null } && er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {
             Spacer(Modifier.height(2.dp))
             val arrow = if (er.feedbackDeltaKg > 0) "\u2191" else "\u2193"
             Text(

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -121,18 +122,9 @@ private fun ExerciseSessionCard(
             }
         }
         Spacer(Modifier.height(8.dp))
-        er.sets.forEachIndexed { i, sr ->
-            val setLabel = "Set ${i + 1}"
-            val detail = if (er.timeBased) {
-                if (sr.weightKg > 0) "$setLabel  ·  ${sr.reps} reps  ·  ${fmtKgEx(sr.weightKg)} ${t.kg}  ·  ${sr.durationSec}s"
-                else "$setLabel  ·  ${sr.reps} reps  ·  ${sr.durationSec}s"
-            } else {
-                if (sr.weightKg > 0) "$setLabel  ·  ${sr.reps} ${t.repLabel}  ·  ${fmtKgEx(sr.weightKg)} ${t.kg}"
-                else "$setLabel  ·  ${sr.reps} ${t.repLabel}"
-            }
-            Text(detail, color = AppTheme.colors.textDim, fontSize = 13.sp)
-        }
-        if (er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {
+        er.sets.forEachIndexed { i, sr -> SetLine(i, sr, er.timeBased, t, 13.sp) }
+        // Solo para registros de antes de TD-117 (uno por ejercicio); los de ahora van por serie.
+        if (er.sets.none { it.feedbackDeltaKg != null } && er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {
             Spacer(Modifier.height(4.dp))
             val arrow = if (er.feedbackDeltaKg > 0) "\u2191" else "\u2193"
             Text(

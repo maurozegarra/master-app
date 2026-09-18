@@ -61,3 +61,22 @@ val STATUS_SKIPPED = Color(0xFFFFA000)
  * es una palabra, no un bloque.
  */
 val ACTION_DELETE = Color(0xFFD93A32)
+
+/**
+ * Los tres colores de "How did the weight feel?" en el historial (TD-118), con el sentido
+ * que les dio el usuario el 17-sep-2026:
+ *
+ * - [FEEL_UP], verde: ligero. Luz verde para subir el peso o la dificultad.
+ * - [FEEL_STEADY], ambar: justo. Se esta repitiendo la carga, y es una ADVERTENCIA: "ese
+ *   ambar no deberia permanecer asi por meses, es una senal de que hay algo que modificar
+ *   en el ejercicio". Justo hoy esta bien; justo siempre es un ejercicio estancado.
+ * - [FEEL_DOWN], rojo: mucho peso, muy dificil.
+ *
+ * Fijos y no del acento por la misma razon que los estados de sesion: tienen que decir lo
+ * mismo en cualquier perfil. Son los mismos valores que [STATUS_DONE], [STATUS_SKIPPED] y
+ * [ACTION_DELETE], pero con su propio nombre: significan otra cosa, y si un dia cambia el
+ * verde de "completo" no tiene por que cambiar el de "subele".
+ */
+val FEEL_UP = Color(0xFF4CAF50)
+val FEEL_STEADY = Color(0xFFFFA000)
+val FEEL_DOWN = Color(0xFFD93A32)

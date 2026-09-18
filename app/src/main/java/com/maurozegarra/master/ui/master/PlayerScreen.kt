@@ -1219,7 +1219,7 @@ private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean, l
 
 @Composable
 private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color, t: Strings) {
-    val current = vm.weightFeedback[vm.feedbackKey(step.ownerExerciseId, step.workoutIndex)]?.third
+    val current = vm.weightFeedback[vm.feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex)]?.deltaKg
     // Translucida y no negra: todo lo demas de esta pantalla -los controles, la franja de
     // rutina- deja ver el color de la etapa, y un bloque solido rompia esa gramatica.
     //
@@ -1249,13 +1249,13 @@ private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color,
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FeedbackChip("${t.tooHeavy} ↓", current == -2.5, accent) {
-                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, -2.5)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, -2.5)
             }
             FeedbackChip(t.justRight, current == 0.0, accent) {
-                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, 0.0)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 0.0)
             }
             FeedbackChip("${t.tooLight} ↑", current == 2.5, accent) {
-                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.ownerName, step.weightTotal, 2.5)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 2.5)
             }
         }
     }

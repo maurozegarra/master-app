@@ -11,6 +11,18 @@ class SessionRecorder {
 
     private val records = mutableMapOf<ExerciseKey, ExerciseRecord>()
     private val sets = mutableMapOf<ExerciseKey, MutableMap<Int, SetRecord>>()
+
+    /**
+     * Lo marcado en "How did the weight feel?", por serie (TD-117).
+     *
+     * Va APARTE de [records] y [sets] porque ahí no sobrevivía: el registro de un ejercicio
+     * nace al completar su primera serie y se reconstruye entero en cada serie siguiente, y
+     * la tarjeta se toca DURANTE la serie. Lo marcado en la primera se descartaba por no
+     * haber registro todavía, y lo marcado después se borraba al terminar esa serie. En
+     * todo el historial no había quedado ni un toque. Guardado aquí, espera a su serie y se
+     * le pega al armar el registro, sea cual sea el orden.
+     */
+    private val feedback = mutableMapOf<ExerciseKey, MutableMap<Int, Double>>()
     private var totalExercisesByWorkout = mutableMapOf<Int, Int>()
 
     private data class ExerciseKey(
@@ -47,7 +59,7 @@ class SessionRecorder {
         val key = ExerciseKey(step.ownerExerciseId, step.workoutIndex)
         val setMap = sets.getOrPut(key) { mutableMapOf() }
         setMap[step.setIndex] = setRecord
-        val orderedSets = ordered(setMap, step.totalSets)
+        val orderedSets = orderedWithFeedback(key, setMap, step.totalSets)
         val completedCount = orderedSets.count { !it.skipped }
         records[key] = ExerciseRecord(
             exerciseId = step.ownerExerciseId,
@@ -64,11 +76,14 @@ class SessionRecorder {
         )
     }
 
-    fun setFeedback(exerciseId: String, workoutIndex: Int, deltaKg: Double) {
-        val key = ExerciseKey(exerciseId, workoutIndex)
-        records[key]?.let { existing ->
-            records[key] = existing.copy(feedbackDeltaKg = deltaKg)
-        }
+    /** Lo marcado en la serie [setIndex]; si se vuelve a tocar, gana el último toque. */
+    fun setFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, deltaKg: Double) {
+        feedback.getOrPut(ExerciseKey(exerciseId, workoutIndex)) { mutableMapOf() }[setIndex] = deltaKg
+    }
+
+    private fun orderedWithFeedback(key: ExerciseKey, setMap: Map<Int, SetRecord>, totalSets: Int): List<SetRecord> {
+        val marked = feedback[key].orEmpty()
+        return ordered(setMap.mapValues { (i, sr) -> marked[i]?.let { sr.copy(feedbackDeltaKg = it) } ?: sr }, totalSets)
     }
 
     private fun deriveStatus(orderedSets: List<SetRecord>, totalSets: Int): ExerciseStatus {
@@ -92,10 +107,12 @@ class SessionRecorder {
     fun build(): List<ExerciseRecord> =
         records.values.map { er ->
             val key = ExerciseKey(er.exerciseId, er.workoutIndex)
-            val orderedSets = sets[key]?.let { ordered(it, er.totalSets) } ?: er.sets
+            val orderedSets = sets[key]?.let { orderedWithFeedback(key, it, er.totalSets) } ?: er.sets
             er.copy(
                 setsCompleted = orderedSets.count { !it.skipped },
                 sets = orderedSets,
+                feedbackDeltaKg = orderedSets.lastOrNull { it.feedbackDeltaKg != null }?.feedbackDeltaKg
+                    ?: er.feedbackDeltaKg,
                 status = deriveStatus(orderedSets, er.totalSets),
             )
         }.sortedWith(compareBy({ it.workoutIndex }, { it.exerciseIndex }))
@@ -119,5 +136,6 @@ class SessionRecorder {
     fun clear() {
         records.clear()
         sets.clear()
+        feedback.clear()
     }
 }

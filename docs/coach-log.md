@@ -5,6 +5,86 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-19 — plan: sube el bloque de cadera (decidido el 17)
+
+**El cambio del sabado es el de las cargas**, y va el sabado y no el viernes por la regla de
+un cambio a la vez: el viernes ya cambia el orden y los minutos de caminata. Si el sabado
+amanece peor, tiene que poderse saber cual de las dos cosas fue.
+
+Lo que pide el dato del 17-sep, que es contundente: **todo el bloque se le queda corto.**
+
+- **Puente:** 6 / 16 / 31 -> **6 / 16 / 36**. Los 31 "se sintieron bien, como para subirle 5
+  mas", y las dos primeras las marco ligeras.
+- **Suitcase carry:** las tres "ligero" (7.5 / 10 / 12.5). Sube un escalon.
+- **Sentadilla a caja:** las tres "ligero" (10 / 12.5 / 15). Sube un escalon.
+
+Los numeros exactos del carry y la sentadilla se deciden el viernes por la noche con lo que
+marque en la tarjeta del peso, que desde la v1.0.258 si se guarda (TD-117).
+
+---
+
+## 2026-09-18 — plan: vuelve LUMBAR normal (decidido el 16, confirmado el 17)
+
+**LUMBAR normal**, el de las dos caminatas: 12 minutos al empezar y 5 de cierre. El cambio
+es el orden y los minutos de caminata; **las cargas se quedan como el 17**.
+
+La caminata de entrada pasa a decir **6 km/h** en la nota (revision 5). No es subirla: es la
+velocidad a la que ya camina desde el 16. Dejarla en 5 habria sido un cambio mas.
+
+Por que ahora: el *bad day* nacio de una premisa que ya se sabe falsa -que la caminata de
+entrada no servia; lo que no servia era caminar a 3 km/h-. El dolor lleva cuatro dias
+bajando y el de arranque ya esta en 2. Es el dia para comprobar si el orden normal aguanta.
+Ese dia se decide tambien TD-097.
+
+---
+
+## 2026-09-17 — quinta sesion: el arranque sigue bajando
+
+**LUMBAR (bad day)**, 05:18 a 06:14, **55m 38s**, completa, nada saltado. Leido del
+historial del telefono.
+
+**Dolor: 2 -> 1.** Sin irradiacion.
+
+| Dia | Al empezar | Al terminar |
+|---|---|---|
+| 14-sep | 4 | 2 |
+| 15-sep | 4 | 2 |
+| 16-sep | 3 | 1 |
+| **17-sep** | **2** | **1** |
+
+El de arranque baja por segundo dia: **4, 4, 3, 2**. Lo que gana la sesion ya no se devuelve
+de noche. El de cierre se queda en 1, y es logico que ahi baje mas despacio: esta cerca del
+piso.
+
+**Las cargas, con como se sintio cada serie** (lo conto por chat; ver abajo por que):
+
+| Ejercicio | Series | Como se sintio |
+|---|---|---|
+| Puente | 6 / 16 / 31 | muy ligero / ligero / **bien, "como para subirle 5 mas"** |
+| Suitcase carry | 7.5 / 10 / 12.5 | ligero / ligero / ligero |
+| Sentadilla a caja | 10 / 12.5 / 15 | ligero / ligero / ligero |
+
+**Lectura:** el bloque de cadera entero se le queda corto. El puente acaba de pasar por dos
+subidas (26 y 31) sin costarle nada, y el carry y la sentadilla no se han movido desde
+TD-098. Sube el sabado (ver el plan de arriba).
+
+McGill intacto: 12/12 en los cuatro, piramide 6/4/2.
+
+**LO QUE SE DESTAPO: el app botaba todo lo que marcaba.** El usuario marco en la tarjeta
+"How did the weight feel?" casi todas las series, y en el respaldo no habia ni una. En todo el
+historial no quedaba un solo toque: el registro del ejercicio nace al completar la primera
+serie y se reconstruye en cada serie siguiente, y la tarjeta se toca DURANTE la serie. Lo de
+la primera se descartaba y lo de las demas se borraba. Arreglado en **TD-117**, ahora por
+serie. Lo marcado el 16 y el 17 se perdio; lo de esta tabla es lo que conto.
+Lo del 17 quedo escrito en el registro desde lo que conto, con la sesion marcada como
+editada (TD-120).
+
+**TD-111 queda en pausa a proposito.** Con el feedback por serie funcionando, si marca cada
+serie ya se sabe que la hizo y como se sintio, que es casi todo lo que pedia TD-111. Solo
+queda el caso de BAJAR la carga, que necesita poder escribir el peso real en el player.
+
+---
+
 ## 2026-09-17 — plan (decidido la vispera)
 
 **Un solo cambio: el puente de gluteos sube a 6 / 16 / 31.** Discos 0 / 10 / 25 sobre la

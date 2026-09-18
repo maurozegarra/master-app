@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 4
+    const val LUMBAR_REVISION = 5
 
     /**
      * De quien es la rutina lumbar.
@@ -394,7 +394,7 @@ object MasterDefaults {
             name = "LUMBAR",
             tracksPain = true,
             workouts = listOf(
-                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "5 km/h, arms loose"),
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "6 km/h, arms loose"),
                 b.mobility(),
                 b.mcgill(),
                 b.hipGlute(),
@@ -510,6 +510,44 @@ object MasterDefaults {
     const val SESSION_15_SEP_ID = 1789478120939L
     val SESSION_15_SEP_WRONG = listOf(20.0, 30.0, 40.0)
     val SESSION_15_SEP_RIGHT = listOf(6.0, 16.0, 21.0)
+
+    /**
+     * La sesion del 17-sep-2026, y lo que marco en la tarjeta del peso ese dia (TD-120).
+     *
+     * Lo marco en el player y el app lo boto -ese era el bug de TD-117-; lo que queda es lo
+     * que conto por chat esa misma noche, serie por serie: el puente 6 "muy ligero", 16
+     * "ligero" y 31 sin marcar; carry y sentadilla "ligero" en las tres. "Muy ligero" entra
+     * como ligero porque la tarjeta no tiene un "muy". Null es la serie que no marco.
+     */
+    const val SESSION_17_SEP_ID = 1789643650309L
+    val SESSION_17_SEP_FEEDBACK: Map<String, List<Double?>> = mapOf(
+        "ex_glute_bridge" to listOf(2.5, 2.5, null),
+        "ex_suitcase_carry" to listOf(2.5, 2.5, 2.5),
+        "ex_box_squat" to listOf(2.5, 2.5, 2.5),
+    )
+
+    /**
+     * [session] con el feedback del 17-sep escrito, marcada [SessionSource.EDITED]; o null
+     * si no hay nada que escribir.
+     *
+     * Solo escribe en un ejercicio que no tenga NADA marcado y cuyo numero de series
+     * coincida con lo contado: si el usuario lo hubiera marcado de otra forma, o la sesion
+     * no fuera la que se cree, lo suyo gana y no se toca.
+     */
+    fun withSep17Feedback(session: SessionLog): SessionLog? {
+        if (session.id != SESSION_17_SEP_ID) return null
+        val ejercicios = session.exercises.map { er ->
+            val contado = SESSION_17_SEP_FEEDBACK[er.exerciseId]
+            if (contado == null || contado.size != er.sets.size || er.sets.any { it.feedbackDeltaKg != null }) {
+                er
+            } else {
+                val sets = er.sets.mapIndexed { i, set -> set.copy(feedbackDeltaKg = contado[i]) }
+                er.copy(sets = sets, feedbackDeltaKg = sets.lastOrNull { it.feedbackDeltaKg != null }?.feedbackDeltaKg)
+            }
+        }
+        if (ejercicios == session.exercises) return null
+        return session.copy(exercises = ejercicios, source = SessionSource.EDITED)
+    }
 
     /**
      * La lista de trainings con los dos lumbares puestos al dia: reemplaza el que ya este y

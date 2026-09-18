@@ -340,6 +340,15 @@ data class SetRecord(
     val weightKg: Double = 0.0,
     val durationSec: Int = 0,
     val skipped: Boolean = false,
+    /**
+     * Lo que se marcó en "How did the weight feel?" en ESTA serie (TD-117): -2.5 pesado,
+     * 0 justo, +2.5 ligero. Null es que no se marcó nada.
+     *
+     * Va por serie y no por ejercicio porque la tarjeta sale en cada serie y se usa así:
+     * en una pirámide 6/16/31, "el 6 muy ligero" y "el 31 bien" son datos distintos, y
+     * guardar uno solo por ejercicio se quedaba con el último toque y perdía el resto.
+     */
+    val feedbackDeltaKg: Double? = null,
 )
 
 enum class ExerciseStatus {
@@ -368,6 +377,10 @@ data class ExerciseRecord(
     val sets: List<SetRecord>,
     val timeBased: Boolean,
     val totalExercisesInWorkout: Int = 0,
+    /**
+     * El de la ÚLTIMA serie marcada. El detalle vive en [SetRecord.feedbackDeltaKg]; este
+     * queda como resumen y para leer registros de antes de TD-117, que lo tenían aquí.
+     */
     val feedbackDeltaKg: Double? = null,
     val status: ExerciseStatus = ExerciseStatus.COMPLETED,
 )

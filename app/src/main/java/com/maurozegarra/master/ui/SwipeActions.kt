@@ -128,6 +128,12 @@ fun SwipeActionsRow(
     actions: List<SwipeAction>,
     controller: SwipeRowsController,
     modifier: Modifier = Modifier,
+    /**
+     * Apagado, la fila no se desliza y, si estaba abierta, se cierra. Se apaga en vez de
+     * quitar las acciones para no cambiar la forma del arbol: quitarlas cambia el Box que
+     * envuelve el contenido y Compose lo rehace entero, con el estado que lleve dentro.
+     */
+    enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     if (actions.isEmpty()) {
@@ -198,7 +204,7 @@ fun SwipeActionsRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .offsetX { offset.roundToInt() }
-                .anchoredDraggable(state, Orientation.Horizontal),
+                .anchoredDraggable(state, Orientation.Horizontal, enabled = enabled),
         ) {
             content()
 
@@ -233,6 +239,8 @@ fun SwipeActionsRow(
     // Si cambia el número de acciones (p. ej. un workout deja de ser rotativo) las anclas
     // se recrean, y la fila debe volver a su sitio en vez de quedar desplazada a medias.
     LaunchedEffect(actions.size) { state.animateTo(SwipeState.Closed) }
+
+    LaunchedEffect(enabled) { if (!enabled) state.animateTo(SwipeState.Closed) }
 }
 
 private fun Modifier.offsetX(offset: () -> Int): Modifier = layout { measurable, constraints ->

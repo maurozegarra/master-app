@@ -21,6 +21,7 @@ object SessionJson {
                         .put("weightKg", sr.weightKg)
                         .put("durationSec", sr.durationSec)
                     if (sr.skipped) setObj.put("skipped", true)
+                    sr.feedbackDeltaKg?.let { setObj.put("feedbackDeltaKg", it) }
                     setsArr.put(setObj)
                 }
                 val erObj = JSONObject()
@@ -76,6 +77,9 @@ object SessionJson {
                                 weightKg = so.optDouble("weightKg", 0.0),
                                 durationSec = so.optInt("durationSec", 0),
                                 skipped = so.optBoolean("skipped", false),
+                                // Ausente es "no se marco", y eso no es un "justo".
+                                feedbackDeltaKg = if (so.has("feedbackDeltaKg"))
+                                    so.optDouble("feedbackDeltaKg", 0.0) else null,
                             ))
                         }
                     }

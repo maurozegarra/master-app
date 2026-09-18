@@ -148,7 +148,7 @@ class WorkoutPlayerService : Service() {
                     PlayerCommand.SKIP_STEP -> skipStep()
                     PlayerCommand.SKIP_EXERCISE -> skipExercise()
                     PlayerCommand.STOP -> stopPlayer()
-                    is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.deltaKg)
+                    is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.deltaKg)
                 }
             }
         }
@@ -639,9 +639,7 @@ class WorkoutPlayerService : Service() {
                             weightTotal = sr.weightKg,
                         )
                         if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step)
-                    }
-                    if (er.feedbackDeltaKg != null) {
-                        recorder.setFeedback(er.exerciseId, er.workoutIndex, er.feedbackDeltaKg)
+                        sr.feedbackDeltaKg?.let { recorder.setFeedback(er.exerciseId, er.workoutIndex, setIdx, it) }
                     }
                 }
             }
@@ -685,9 +683,7 @@ class WorkoutPlayerService : Service() {
                         weightTotal = sr.weightKg,
                     )
                     if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step)
-                }
-                if (er.feedbackDeltaKg != null) {
-                    recorder.setFeedback(er.exerciseId, er.workoutIndex, er.feedbackDeltaKg)
+                    sr.feedbackDeltaKg?.let { recorder.setFeedback(er.exerciseId, er.workoutIndex, setIdx, it) }
                 }
             }
         }

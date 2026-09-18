@@ -91,6 +91,29 @@ class SessionJsonTest {
     }
 
     @Test
+    fun `el feedback viaja serie a serie, y la no marcada vuelve como null`() {
+        val er = sampleExercise().copy(
+            sets = listOf(
+                SetRecord(reps = 12, weightKg = 6.0, feedbackDeltaKg = 2.5),
+                SetRecord(reps = 12, weightKg = 16.0, feedbackDeltaKg = 0.0),
+                SetRecord(reps = 12, weightKg = 31.0),
+            ),
+        )
+        val sets = SessionJson.decode(SessionJson.encode(listOf(sampleSession(exercises = listOf(er)))))[0]
+            .exercises[0].sets
+        assertEquals(2.5, sets[0].feedbackDeltaKg!!, 0.001)
+        // Un "justo" es un dato: tiene que volver como 0 y no perderse como si no se marcara.
+        assertEquals(0.0, sets[1].feedbackDeltaKg!!, 0.001)
+        assertNull(sets[2].feedbackDeltaKg)
+    }
+
+    @Test
+    fun `una serie guardada antes de TD-117 se lee sin feedback`() {
+        val viejo = """[{"id":1,"exercises":[{"exerciseId":"x","sets":[{"reps":12,"weightKg":6,"durationSec":0}]}]}]"""
+        assertNull(SessionJson.decode(viejo)[0].exercises[0].sets[0].feedbackDeltaKg)
+    }
+
+    @Test
     fun `round-trip with null feedbackDeltaKg`() {
         val original = listOf(sampleSession(exercises = listOf(sampleExercise(feedbackDeltaKg = null))))
         val decoded = SessionJson.decode(SessionJson.encode(original))

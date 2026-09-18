@@ -204,6 +204,7 @@ class MasterViewModel(
             markReconstructedSession()
             reorderLumbarSessions()
             fixSep15Weights()
+            fillSep17Feedback()
         }
         observePlayer()
         migrateRestorePrefs()
@@ -280,6 +281,25 @@ class MasterViewModel(
             }
         }
         store.setSep15Fixed()
+    }
+
+    /**
+     * Escribe en la sesion del 17-sep lo que el usuario marco y el app boto (TD-120).
+     *
+     * La logica vive en [MasterDefaults.withSep17Feedback], que es pura y tiene su test;
+     * aqui solo se aplica una vez. Igual que [fixSep15Weights], es una correccion a mano
+     * de un dato concreto, y la sesion queda en [SessionSource.EDITED].
+     */
+    private fun fillSep17Feedback() {
+        if (store.isSep17FeedbackFilled()) return
+        val sesiones = store.loadSessions()
+        val i = sesiones.indexOfFirst { it.id == MasterDefaults.SESSION_17_SEP_ID }
+        if (i >= 0) {
+            MasterDefaults.withSep17Feedback(sesiones[i])?.let { corregida ->
+                store.saveSessions(sesiones.toMutableList().also { it[i] = corregida })
+            }
+        }
+        store.setSep17FeedbackFilled()
     }
 
     /**
@@ -1370,22 +1390,33 @@ class MasterViewModel(
         if (playerControlsVisible) hidePlayerControls() else showPlayerControls()
     }
 
-    /** Feedback de peso recogido durante el run: "exerciseId:workoutIndex" -> (name, peso, delta kg). */
-    val weightFeedback = mutableStateMapOf<String, Triple<String, Double, Double>>()
+    /**
+     * Feedback de peso recogido durante el run, POR SERIE (TD-117). La clave lleva la serie
+     * para que el chip marcado en la serie 2 sea el de la serie 2: antes era uno por
+     * ejercicio, y al empezar una serie nueva aparecía marcado lo que se eligió en la otra.
+     */
+    val weightFeedback = mutableStateMapOf<String, SetFeedback>()
 
-    fun feedbackKey(exerciseId: String, workoutIndex: Int) = "$exerciseId:$workoutIndex"
+    fun feedbackKey(exerciseId: String, workoutIndex: Int, setIndex: Int) = "$exerciseId:$workoutIndex:$setIndex"
 
-    fun recordFeedback(exerciseId: String, workoutIndex: Int, name: String, weight: Double, deltaKg: Double) {
-        val key = feedbackKey(exerciseId, workoutIndex)
-        weightFeedback[key] = Triple(name, weight, deltaKg)
-        sendFeedback(exerciseId, workoutIndex, deltaKg)
+    fun recordFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, name: String, weight: Double, deltaKg: Double) {
+        weightFeedback[feedbackKey(exerciseId, workoutIndex, setIndex)] =
+            SetFeedback(name, "$exerciseId:$workoutIndex", setIndex, weight, deltaKg)
+        sendFeedback(exerciseId, workoutIndex, setIndex, deltaKg)
     }
 
-    /** Sugerencias de ajuste para la próxima vez (solo las que cambian). */
+    /**
+     * Sugerencias de ajuste para la próxima vez (solo las que cambian).
+     *
+     * Una por ejercicio, la de su ÚLTIMA serie marcada: en una pirámide es la serie de
+     * arriba, que es la que decide si el ejercicio sube.
+     */
     fun weightSuggestions(): List<Triple<String, Double, Double>> =
-        weightFeedback.entries
-            .filter { it.value.third != 0.0 }
-            .map { Triple(it.value.first, it.value.second, it.value.second + it.value.third) }
+        weightFeedback.values
+            .groupBy { it.exerciseKey }
+            .map { (_, marcadas) -> marcadas.maxBy { it.setIndex } }
+            .filter { it.deltaKg != 0.0 }
+            .map { Triple(it.name, it.weight, it.weight + it.deltaKg) }
 
     /** Evita recargar los índices de rotación más de una vez por corrida (finished puede repetir). */
     private var sessionReloaded = false
@@ -1431,8 +1462,8 @@ class MasterViewModel(
     fun skipStep() = PlayerBus.command.tryEmit(PlayerCommand.SKIP_STEP)
     fun skipExercise() = PlayerBus.command.tryEmit(PlayerCommand.SKIP_EXERCISE)
     fun prevStep() = PlayerBus.command.tryEmit(PlayerCommand.PREV)
-    fun sendFeedback(exerciseId: String, workoutIndex: Int, deltaKg: Double) =
-        PlayerBus.command.tryEmit(PlayerCommand.FEEDBACK(exerciseId, workoutIndex, deltaKg))
+    fun sendFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, deltaKg: Double) =
+        PlayerBus.command.tryEmit(PlayerCommand.FEEDBACK(exerciseId, workoutIndex, setIndex, deltaKg))
 
     fun closePlayer() {
         pendingSessionRefresh = true
@@ -1616,3 +1647,13 @@ class MasterViewModel(
         )
     }
 }
+
+/** Lo marcado en la tarjeta del peso en una serie concreta. */
+data class SetFeedback(
+    val name: String,
+    /** "exerciseId:workoutIndex": agrupa las series de un mismo ejercicio. */
+    val exerciseKey: String,
+    val setIndex: Int,
+    val weight: Double,
+    val deltaKg: Double,
+)
