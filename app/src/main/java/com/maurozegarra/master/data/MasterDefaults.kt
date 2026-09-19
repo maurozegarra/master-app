@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 8
+    const val LUMBAR_REVISION = 9
 
     /**
      * De quien es la rutina lumbar.
@@ -562,10 +562,24 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 3
+    const val NIKO_REVISION = 4
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
+    const val NIKO_MUAY_THAI_ID = 960002L
+
+    /**
+     * Los dias de NIKO que ya existen, en orden (ver docs/niko.md).
+     *
+     * La semana base tiene seis, pero se siembran **de a uno, el dia anterior**: el usuario
+     * no quiere pasarle seis rutinas de golpe, sino solo la siguiente, y cada una se ajusta
+     * con lo que paso en la anterior. Agregar el dia que toca es agregarlo aqui y subir
+     * [NIKO_REVISION].
+     */
+    fun nikoTrainings(lang: String): List<Training> = listOf(
+        nikoGluteHeavy(lang),
+        nikoMuayThai(lang),
+    )
 
     /**
      * NIKO - Gluteo pesado: el primer dia de su semana nueva (ver docs/niko.md).
@@ -589,8 +603,142 @@ object MasterDefaults {
      * bisagra se aprende antes de cargarse.
      */
     fun nikoGluteHeavy(lang: String): Training {
-        var seq = 960100L
+        val b = NikoBlocks(lang, seqStart = 960100L)
+
+        val now = System.currentTimeMillis()
+        return Training(
+            id = NIKO_GLUTE_ID,
+            // Numerado y no con nombre de dia: si un dia no puede, al siguiente sigue con el
+            // numero que le toca, en vez de tener que saltarse "el lunes".
+            name = "NIKO 1 · Glúteo pesado",
+            workouts = listOf(
+                b.warmup(),
+                Workout(
+                    id = b.id(),
+                    name = "Despertar glúteos",
+                    exercises = listOf(
+                        b.ex("ex_glute_bridge", "Aprieta 2 s arriba. En el glúteo, no en los muslos", 15, sets = 2, rest = 30),
+                        b.ex("ex_hip_abduction", "De lado, tobillera de 1 kg. Lento", 20, sets = 2, rest = 30),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Bisagra de cadera",
+                    exercises = listOf(
+                        // Revision 2 (19-sep-2026): su barra es la EZ de 6 kg, y la revision 1
+                        // no lo pregunto. El hip thrust iba en kilos TOTALES -45/55/65/70- y 70
+                        // sobre una barra de 6 no se puede armar: son 64 de disco, 32 por lado,
+                        // y con discos de 1.25 hacia arriba no hay forma. El usuario hizo la
+                        // cuenta entre series y le salio 71. El rumano asumia la barra de 20 por
+                        // defecto, el mismo error que el 15-sep le costo al otro atleta.
+                        //
+                        // Ahora son discos sobre la barra de 6 y todos se arman:
+                        // hip thrust 46/56/66/71 = 20, 25, 30 y 32.5 por lado.
+                        b.ex(
+                            "ex_hip_thrust", "PAUSA de 2 s arriba, en cada repetición", 8, rest = 120,
+                            weightType = WeightType.BARBELL, barWeight = 6.0, weights = listOf(40.0, 50.0, 60.0, 65.0),
+                        ),
+                        // Rumano 26/31/36/36 = 10, 12.5 y 15 por lado. Conservador: la bisagra
+                        // es nueva para ella y se aprende antes de cargarse.
+                        b.ex(
+                            "ex_romanian_deadlift", "Cadera atrás, rodillas casi rectas. Barra pegada a las piernas", 10, rest = 120,
+                            weightType = WeightType.BARBELL, barWeight = 6.0, weights = listOf(20.0, 25.0, 30.0, 30.0),
+                        ),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Una pierna",
+                    exercises = listOf(
+                        b.ex(
+                            "ex_bulgarian_split_squat", "PECHO ADELANTE y paso largo. Cada pierna", 10, rest = 90,
+                            weightType = WeightType.DUMBBELL, weights = listOf(5.0, 7.5, 10.0),
+                        ),
+                        // A 45 grados: la banca es regulable, y el usuario pidio que ella lo
+                        // tenga presente al armarla.
+                        b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 12, sets = 3, rest = 60),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Cuello",
+                    exercises = listOf(
+                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta. Adelante, atrás, derecha, izquierda", 20, sets = 4, rest = 15, mode = WorkMode.TIME),
+                    ),
+                ),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
+     * NIKO 2 · Muay Thai: rounds de shadow y saco, pies con la llanta y core rotacional.
+     *
+     * Rounds de 3 minutos con 1 de descanso, que es el formato del deporte. El saco lleva
+     * una progresion por round en la nota -de las manos a las rodillas-, porque entrena sola
+     * y sin profesor: sin un orden, cada round termina siendo el mismo.
+     *
+     * El core es ROTACIONAL porque la patada sale de ahi, y era el hueco de su rutina
+     * anterior. El pallof press, que seria lo ideal, espera a las bandas.
+     */
+    fun nikoMuayThai(lang: String): Training {
+        val b = NikoBlocks(lang, seqStart = 960200L)
+        val now = System.currentTimeMillis()
+        return Training(
+            id = NIKO_MUAY_THAI_ID,
+            name = "NIKO 2 · Muay Thai",
+            workouts = listOf(
+                b.warmup(),
+                Workout(
+                    id = b.id(),
+                    name = "Rounds",
+                    exercises = listOf(
+                        b.ex("ex_shadow_boxing", "Guardia arriba siempre. Manos y pies", 180, sets = 3, rest = 60, mode = WorkMode.TIME),
+                        b.ex("ex_heavy_bag", "R1 jab-recto · R2 +gancho · R3 +teep · R4 rodillas · R5 libre", 180, sets = 5, rest = 60, mode = WorkMode.TIME),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Pies",
+                    exercises = listOf(
+                        b.ex("ex_tire_jumping", "Ligera, sobre la punta de los pies", 30, sets = 6, rest = 15, mode = WorkMode.TIME),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Core rotacional",
+                    exercises = listOf(
+                        b.ex(
+                            "ex_russian_twist", "10 por lado. Gira el pecho, no solo los brazos", 20, rest = 45,
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(5.0, 5.0, 5.0),
+                        ),
+                        b.ex("ex_side_plank_l", "Codo bajo el hombro, cuerpo recto", 30, sets = 3, rest = 20, mode = WorkMode.TIME),
+                        b.ex("ex_side_plank_r", "Codo bajo el hombro, cuerpo recto", 30, sets = 3, rest = 20, mode = WorkMode.TIME),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Cuello",
+                    exercises = listOf(
+                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta. Adelante, atrás, derecha, izquierda", 20, sets = 4, rest = 15, mode = WorkMode.TIME),
+                    ),
+                ),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
+     * Lo que comparten los dias de NIKO: el constructor de ejercicios y el calentamiento.
+     *
+     * [seqStart] separa los ids de un dia y del otro, igual que en [LumbarBlocks].
+     */
+    private class NikoBlocks(private val lang: String, seqStart: Long) {
+        private var seq = seqStart
         fun id(): Long = seq++
+
         fun ex(
             exerciseId: String,
             note: String,
@@ -601,6 +749,7 @@ object MasterDefaults {
             mode: WorkMode = WorkMode.REPS,
             weightType: WeightType = WeightType.NONE,
             barWeight: Double = 20.0,
+            dumbbellCount: Int = 2,
             weights: List<Double> = emptyList(),
         ): Exercise = Exercise(
             id = id(),
@@ -615,75 +764,27 @@ object MasterDefaults {
             restSkipOnLastSet = true,
             weightType = weightType,
             barWeight = barWeight,
+            dumbbellCount = dumbbellCount,
             setList = weights.map { WorkSet(reps = count, weight = it) },
         )
 
-        val now = System.currentTimeMillis()
-        return Training(
-            id = NIKO_GLUTE_ID,
-            name = "NIKO - Día de glúteo",
-            workouts = listOf(
-                Workout(
-                    id = id(),
-                    name = "Despertar glúteos",
-                    exercises = listOf(
-                        ex("ex_glute_bridge", "Aprieta 2 s arriba. En el glúteo, no en los muslos", 15, sets = 2, rest = 30),
-                        ex("ex_hip_abduction", "De lado, tobillera de 1 kg. Lento", 20, sets = 2, rest = 30),
-                    ),
-                ),
-                Workout(
-                    id = id(),
-                    name = "Bisagra de cadera",
-                    exercises = listOf(
-                        // Revision 2 (19-sep-2026): su barra es la EZ de 6 kg, y la revision 1
-                        // no lo pregunto. El hip thrust iba en kilos TOTALES -45/55/65/70- y 70
-                        // sobre una barra de 6 no se puede armar: son 64 de disco, 32 por lado,
-                        // y con discos de 1.25 hacia arriba no hay forma. El usuario hizo la
-                        // cuenta entre series y le salio 71. El rumano asumia la barra de 20 por
-                        // defecto, el mismo error que el 15-sep le costo al otro atleta.
-                        //
-                        // Ahora son discos sobre la barra de 6 y todos se arman:
-                        // hip thrust 46/56/66/71 = 20, 25, 30 y 32.5 por lado.
-                        ex(
-                            "ex_hip_thrust", "PAUSA de 2 s arriba, en cada repetición", 8, rest = 120,
-                            weightType = WeightType.BARBELL, barWeight = 6.0, weights = listOf(40.0, 50.0, 60.0, 65.0),
-                        ),
-                        // Rumano 26/31/36/36 = 10, 12.5 y 15 por lado. Conservador: la bisagra
-                        // es nueva para ella y se aprende antes de cargarse.
-                        ex(
-                            "ex_romanian_deadlift", "Cadera atrás, rodillas casi rectas. Barra pegada a las piernas", 10, rest = 120,
-                            weightType = WeightType.BARBELL, barWeight = 6.0, weights = listOf(20.0, 25.0, 30.0, 30.0),
-                        ),
-                    ),
-                ),
-                Workout(
-                    id = id(),
-                    name = "Una pierna",
-                    exercises = listOf(
-                        ex(
-                            "ex_bulgarian_split_squat", "PECHO ADELANTE y paso largo. Cada pierna", 10, rest = 90,
-                            weightType = WeightType.DUMBBELL, weights = listOf(5.0, 7.5, 10.0),
-                        ),
-                        ex("ex_back_extension", "Aprieta los glúteos arriba. No arquees la espalda baja", 12, sets = 3, rest = 60),
-                    ),
-                ),
-                Workout(
-                    id = id(),
-                    name = "Cuello",
-                    exercises = listOf(
-                        ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta. Adelante, atrás, derecha, izquierda", 20, sets = 4, rest = 15, mode = WorkMode.TIME),
-                    ),
-                ),
+        /** Cinco minutos, el mismo todos los dias: la cuerda sube la temperatura y el resto abre cadera y hombros. */
+        fun warmup(): Workout = Workout(
+            id = id(),
+            name = "Calentamiento",
+            exercises = listOf(
+                ex("ex_rope_jumping", "Suave, para entrar en calor", 120, prep = 10, mode = WorkMode.TIME),
+                ex("ex_hip_rotation", "Cada lado", 10, prep = 5),
+                ex("ex_90_90", "Lento, sin forzar", 10, prep = 5),
+                ex("ex_shoulder_rotation", "Cada lado", 10, prep = 5),
             ),
-            createdAt = now,
-            updatedAt = now,
         )
     }
 
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 2
+    const val CATALOG_INSTRUCTIONS_REVISION = 5
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -765,6 +866,38 @@ object MasterDefaults {
                 "Baja lento, controlando con la pierna de arriba.",
             ),
         ),
+        "ex_heavy_bag" to ExerciseMedia(
+            listOf(
+                "Guardia arriba antes, durante y después de cada golpe: la mano que no golpea protege la cara.",
+                "Distancia: a un brazo del saco. Si lo empujas en vez de golpearlo, estás muy cerca.",
+                "Golpea y vuelve a la guardia. La mano regresa por el mismo camino por el que salió.",
+                "Muévete entre combinaciones: un paso, cambia el ángulo, vuelve a entrar.",
+                "Cada round tiene su tarea, en la nota. Respira al golpear, soltando el aire.",
+            ),
+        ),
+        "ex_russian_twist" to ExerciseMedia(
+            listOf(
+                "En el piso, con las rodillas dobladas y los talones apoyados. Inclina el torso atrás hasta sentir el abdomen trabajando.",
+                "La mancuerna al centro del pecho, con las dos manos.",
+                "Gira el PECHO hacia un lado y después al otro. Los brazos acompañan; no son los que giran.",
+                "Espalda recta todo el tiempo: si se encorva, inclínate menos hacia atrás.",
+                "Para hacerlo más difícil, levanta los pies del piso.",
+            ),
+        ),
+        "ex_side_plank_l" to ExerciseMedia(
+            listOf(
+                "De lado, sobre el antebrazo izquierdo, con el codo justo debajo del hombro.",
+                "Sube la cadera hasta que el cuerpo quede en línea recta de la cabeza a los pies.",
+                "Aguanta sin dejar caer la cadera. Si no puedes con las piernas estiradas, apoya las rodillas dobladas.",
+            ),
+        ),
+        "ex_side_plank_r" to ExerciseMedia(
+            listOf(
+                "De lado, sobre el antebrazo derecho, con el codo justo debajo del hombro.",
+                "Sube la cadera hasta que el cuerpo quede en línea recta de la cabeza a los pies.",
+                "Aguanta sin dejar caer la cadera. Si no puedes con las piernas estiradas, apoya las rodillas dobladas.",
+            ),
+        ),
         "ex_glute_bridge" to ExerciseMedia(
             listOf(
                 "Échate boca arriba, con las rodillas dobladas y los pies planos al ancho de la cadera.",
@@ -782,7 +915,42 @@ object MasterDefaults {
      * Paso a español el 19-sep-2026, el mismo dia: *"urge las instrucciones en español,
      * niko no maneja el ingles"*.
      */
-    fun catalogInstructionsV1(): Map<String, ExerciseMedia> = mapOf(
+    fun catalogInstructionsV1(): Map<String, ExerciseMedia> = catalogInstructionsV1Map
+
+    /**
+     * Las versiones viejas que se pueden cambiar por las del catalogo, por ejercicio: las
+     * que se sembraron y nadie toco. Lo editado a mano no coincide con ninguna y se respeta.
+     *
+     * Ademas de la inglesa del catalogo (V1) entran las de la plancha lateral de la rutina
+     * LUMBAR: en el telefono del coach venian de ahi, en ingles, y NIKO 2 las ensenaba asi.
+     * El usuario lo acepto para el suyo tambien: *"imagino que ese cambio tambien me afecta
+     * a mi, pero no hay problema"*. El puente de la lumbar NO entra: no se pidio.
+     */
+    fun supersededInstructions(): Map<String, List<ExerciseMedia>> {
+        val lumbar = lumbarInstructions()
+        val out = catalogInstructionsV1Map.mapValues { (_, m) -> listOf(m) }.toMutableMap()
+        listOf("ex_side_plank_l", "ex_side_plank_r").forEach { id ->
+            lumbar[id]?.let { out[id] = out[id].orEmpty() + it }
+        }
+        // Revisiones 3 y 4 del catalogo: escritas en femenino pensando en NIKO -"apoyada",
+        // "sentada"-, cuando las del catalogo le llegan a todos. Se sembraron en el telefono
+        // del coach el 19-sep y se reconocen para cambiarlas por las neutras.
+        feminineV3().forEach { (id, m) -> out[id] = out[id].orEmpty() + m }
+        return out
+    }
+
+    private fun feminineV3(): Map<String, ExerciseMedia> {
+        val actual = catalogInstructions()
+        fun conPrimerPaso(id: String, primero: String) =
+            actual.getValue(id).let { it.copy(instructions = listOf(primero) + it.instructions.drop(1)) }
+        return mapOf(
+            "ex_russian_twist" to conPrimerPaso("ex_russian_twist", """Sentada en el piso, rodillas dobladas, talones apoyados. Inclina el torso atrás hasta sentir el abdomen trabajando."""),
+            "ex_side_plank_l" to conPrimerPaso("ex_side_plank_l", """De lado, apoyada en el antebrazo izquierdo, con el codo justo debajo del hombro."""),
+            "ex_side_plank_r" to conPrimerPaso("ex_side_plank_r", """De lado, apoyada en el antebrazo derecho, con el codo justo debajo del hombro."""),
+        )
+    }
+
+    private val catalogInstructionsV1Map: Map<String, ExerciseMedia> = mapOf(
         "ex_hip_thrust" to ExerciseMedia(
             listOf(
                 "Upper back on the edge of the bench, just below the shoulder blades. Bar over the hip crease, with a pad.",
@@ -860,16 +1028,17 @@ object MasterDefaults {
 
     /** Igual que [withLumbarRevision], para las rutinas de NIKO. */
     fun withNikoRevision(trainings: List<Training>, lang: String): List<Training> {
-        val nuevo = nikoGluteHeavy(lang)
         val out = trainings.toMutableList()
-        val i = out.indexOfFirst { it.id == nuevo.id }
-        if (i < 0) {
-            out.add(nuevo)
-        } else {
-            out[i] = nuevo.copy(
-                uid = out[i].uid,
-                createdAt = if (out[i].createdAt > 0L) out[i].createdAt else nuevo.createdAt,
-            )
+        nikoTrainings(lang).forEach { nuevo ->
+            val i = out.indexOfFirst { it.id == nuevo.id }
+            if (i < 0) {
+                out.add(nuevo)
+            } else {
+                out[i] = nuevo.copy(
+                    uid = out[i].uid,
+                    createdAt = if (out[i].createdAt > 0L) out[i].createdAt else nuevo.createdAt,
+                )
+            }
         }
         return out
     }
@@ -1034,20 +1203,24 @@ object MasterDefaults {
                 // cuando iban a ser 26, le parecio mucho y bajo la carga. Un numero mal
                 // puesto le cambio el entrenamiento.
                 //
-                // Discos 0/15/30 sobre esa barra: 6, 21 y 36 kg. La serie de barra sola es
+                // Discos 0/20/35 sobre esa barra: 6, 26 y 41 kg. La serie de barra sola es
                 // suya y se respeta -entrar al patron sin carga, en una rutina de columna,
-                // es buena idea-. La de arriba fue 21 -> 26 -> 31 -> 36, y cada subida la
-                // pidio el cuerpo: el 18-sep marco los 31 como LIGEROS en el player. La
-                // intermedia sube de 16 a 21 para que el salto hasta la de arriba no quede
-                // tan largo.
-                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 15.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
+                // es buena idea-. La de arriba fue 21 -> 26 -> 31 -> 36 -> 41, cada subida
+                // pedida por el cuerpo: el 19-sep marco LIGERAS las nueve series del bloque.
+                //
+                // 41 ya se acerca a su hip thrust de MASTER (40-70). Hasta aqui se estaba
+                // alcanzando su nivel real; cuando llegue, cargar la cadera los siete dias deja
+                // de tener sentido y el bloque pasa a tres por semana (ver coach-log 19-sep).
+                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 20.0, 35.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
                 // y el player no podia decir "1 de 10". El numero por serie es el mismo, asi
                 // que el historial no se parte.
-                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(10.0, 12.5, 15.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(12.5, 15.0, 17.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
-                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(12.5, 15.0, 17.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                // Despues de 20 viene la de 22.5 -no estaba en el inventario del 18-sep; la
+                // agrego el usuario el 19- y despues 25. El salto de 22.5 a 25 es de 11%.
+                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
             ),
         )
     }

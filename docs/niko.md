@@ -136,28 +136,115 @@ las que de verdad le van a cambiar la sensacion:
    que tiene. Eso son bandas de bucle, que ya estaban recomendadas por el trabajo de cadera
    del otro atleta: ahora son dos razones.
 
-## La semana propuesta
+## La semana base (aprobada el 19-sep-2026)
 
-Seis dias, como ya hace. **Pero de 75 a 90 minutos con proposito, no dos horas de catalogo.**
-No es recortarle el gusto por entrenar: para los 3 kg de musculo que pide la balanza cuenta
-la intensidad y la comida, no los minutos. Si quiere usar las dos horas, el rato extra va a
-tecnica y movilidad, no a mas series.
+Seis dias, de 75 a 90 minutos con proposito, no dos horas de catalogo. No es recortarle el
+gusto por entrenar: para los 3 kg de musculo que pide la balanza cuenta la intensidad y la
+comida, no los minutos. Si quiere usar las dos horas, el rato extra va a tecnica y
+movilidad, no a mas series.
 
-| Dia | Foco |
+### La dinamica: un dia a la vez, asignado la vispera
+
+**Se le asigna solo el dia siguiente, el dia anterior.** Decision del usuario: *"no quiero
+pasarle 6 rutinas, solo la siguiente"*. Es la misma dinamica que con el: el plan base es el
+punto de partida y cada dia se ajusta con lo que paso en el anterior.
+
+- **Dias numerados, no con nombre de dia** (NIKO 1 a NIKO 6). Si un dia no puede, al
+  siguiente sigue con el numero que le toca. El domingo no entrena: trabaja de 8 a 10.
+- **Como se siembra:** cada dia es una funcion en `MasterDefaults` (`nikoGluteHeavy`,
+  `nikoMuayThai`...) y entra a `nikoTrainings()` **el dia anterior**, subiendo
+  `NIKO_REVISION`. Aparece en el telefono del coach y se le asigna desde ahi
+  (lista de trainings → deslizar a la izquierda → **Assign to**).
+- **Todos abren con el mismo calentamiento** de 5 minutos: cuerda 2 min, rotacion de
+  cadera, 90/90 y rotacion de hombros.
+- **Rounds de 3 minutos con 1 de descanso**, el formato del Muay Thai.
+- **Gluteo dos veces, separado 72 horas** (dias 1 y 4), con los de Muay Thai en medio para
+  que llegue a patear con las piernas frescas.
+
+### Estado
+
+| Dia | Training | Estado |
+|---|---|---|
+| 1 | NIKO 1 · Glúteo pesado | asignado el 19-sep como "NIKO - Día de glúteo"; el nombre numerado le llega al reasignarlo |
+| 2 | NIKO 2 · Muay Thai | **sembrado el 19-sep para el lunes 21** |
+| 3 | NIKO 3 · Tren superior | plan base |
+| 4 | NIKO 4 · Glúteo a una pierna | plan base |
+| 5 | NIKO 5 · Muay Thai y potencia | plan base |
+| 6 | NIKO 6 · Mixto y movilidad | plan base |
+
+### Los seis dias
+
+**NIKO 1 · Gluteo pesado**
+| Ejercicio | Series | Carga |
+|---|---|---|
+| Puente de activacion · abduccion | 2×15 · 2×20 | tobillera 1 kg |
+| Hip thrust, pausa 2 s | 4×8 | 46 · 56 · 66 · 71 (barra de 6) |
+| Peso muerto rumano | 4×10 | 26 · 31 · 36 · 36 (barra de 6) |
+| Bulgara, pecho adelante | 3×10 por pierna | 2 × 5 · 7.5 · 10 |
+| Hiperextension, **banca a 45°** | 3×12 | su peso |
+| Cuello isometrico | 4×20 s | — |
+
+**NIKO 2 · Muay Thai**
+| Ejercicio | Series |
 |---|---|
-| **Lun** | **Gluteo pesado** - hip thrust, peso muerto rumano, bulgara inclinada, abduccion, cuello |
-| **Mar** | **Muay Thai** - rounds de shadow y saco, pies con la llanta, core rotacional |
-| **Mie** | **Tren superior** - dominada asistida, remo, press, agarre para el clinch, cuello |
-| **Jue** | **Gluteo unilateral** - step-up alto, hip thrust a una pierna, hiperextension, pantorrilla |
-| **Vie** | **Muay Thai + potencia** - llanta, rodillas y clinch al saco, teep y patada baja, cuerda |
-| **Sab** | **Mixto** - rounds de defensa personal, movilidad de cadera y tobillo |
+| Shadow | 3 rounds × 3 min |
+| Saco — R1 jab-recto · R2 +gancho · R3 +teep · R4 rodillas · R5 libre | 5 rounds × 3 min |
+| Llanta | 6 × 30 s |
+| Giro ruso | 3 × 20, 1 × 5 kg |
+| Plancha lateral izq/der | 3 × 30 s cada lado |
+| Cuello isometrico | 4 × 20 s |
 
-**Dos dias de gluteo separados por 48 horas**, uno pesado y otro de volumen unilateral. Los
-dos de Muay Thai caen lejos de la pierna pesada, para que llegue a patear con piernas
-frescas.
+**NIKO 3 · Tren superior** — traccion para el clinch, el hueco mas grande
+| Ejercicio | Series | Carga |
+|---|---|---|
+| Remo invertido (barra del rack a la cadera) | 4 × 8 | su peso |
+| Remo con mancuerna | 4 × 10 por lado | 7.5 · 7.5 · 10 · 10 |
+| Push-ups, 1 s abajo | 3 × 15 | — |
+| Press de hombro | 3 × 10 | 2 × 4 · 5 · 5 |
+| Paseo del granjero | 3 × 40 s | 2 × 10 |
+| Colgarse de la barra (subiendo al cajon: la barra esta a 2.3 m y ella mide 1.55) | 3 × 25 s | — |
+| Cuello isometrico | 4 × 20 s | — |
 
-**Los rounds son de 3 minutos con 1 de descanso**, que es el formato del deporte: el formato
-transfiere tanto como el contenido.
+**NIKO 4 · Gluteo a una pierna**
+| Ejercicio | Series | Carga |
+|---|---|---|
+| Puente de activacion · abduccion | 2×15 · 2×20 | tobillera 1 kg |
+| Subida al cajon de 51 cm | 3 × 10 por pierna | 2 × 5 · 5 · 7.5 |
+| Hip thrust a una pierna | 3 × 10 por pierna | su peso |
+| Peso muerto a una pierna | 3 × 8 por pierna | 1 × 7.5 |
+| Hiperextension, **banca a 45°** | 3 × 12 | su peso |
+| Pantorrilla sentado | 4 × 12 | 5 · 7.5 · 7.5 · 10 |
+
+**NIKO 5 · Muay Thai y potencia**
+| Ejercicio | Series |
+|---|---|
+| Salto al cajon (51 cm) | 4 × 5 |
+| Rodillas largas · rodillas profundas, al saco | 5 × 30 s · 4 × 30 s |
+| Patadas: teep y patada baja | 4 × 10 por lado |
+| Cuerda | 3 rounds × 3 min |
+| Elevacion de piernas | 3 × 12 |
+
+**NIKO 6 · Mixto y movilidad**
+| Ejercicio | Series |
+|---|---|
+| Shadow | 2 rounds × 3 min |
+| Saco, combinaciones libres | 4 rounds × 3 min |
+| Burpee (sprawl) | 4 × 30 s |
+| 90/90 · Cossack · rotacion de cadera · estiramiento | movilidad, sin prisa |
+
+### Lo que hay que saber del plan
+
+- **Las cargas de tren superior son un punto de partida conservador:** no se sabe cuanto
+  mueve ella. Se ajustan con lo que marque en la primera sesion de ese dia.
+- **El sabado no puede ser un circuito de verdad.** Lo ideal seria alternar saco → sprawl
+  → saco, pero el app hace un ejercicio con todas sus series y recien pasa al siguiente.
+  Limitacion del modelo: TD-137.
+- **Con las bandas** (ver `equipo.md`, compra del lunes 21) entran el pallof press en el
+  dia 2 y la caminata lateral en el dia 4.
+- **Ejercicios nuevos para ella** -saco, giro ruso, remo invertido, remo con mancuerna,
+  paseo del granjero, colgarse, hip thrust a una pierna, peso muerto a una pierna, salto al
+  cajon- entran al catalogo con instrucciones en español **el dia que se siembra el suyo**,
+  no antes.
 
 ### Lo que el coach NO puede dar
 
@@ -165,10 +252,19 @@ La correccion tecnica necesita ojos. El acondicionamiento, la estructura de roun
 fuerza se programan; que baje la guardia o gire mal la cadera al patear, no se ve desde
 aqui. Que se grabe en video, o clases de vez en cuando.
 
-## Su historial no se puede leer todavia
+## Su historial llega al coach (TD-126)
 
-Ella registra sus sesiones, pero **el historial se queda en su telefono**: Supabase lleva
-perfiles, trainings y asignaciones, todo hacia abajo, y las sesiones nunca suben. Sin eso su
-rutina se ajusta por lo que ella cuente, y contar no es medir. Es **TD-126**, y es lo que
-desbloquea entrenarla igual que al otro atleta.
+Desde el 19-sep-2026: su telefono **sube cada sesion de un training asignado** al terminarla,
+y la vuelve a subir si despues completa el dolor o el feedback. El telefono del coach las baja
+al sincronizar y las guarda aparte de las suyas, en el respaldo, bajo `athleteSessions`. Es
+por donde se leen, igual que las de el.
 
+Las dos reglas, decididas con el usuario:
+
+- **Solo el coach las lee.** Llevan el dolor de cada dia. El telefono de ella solo puede subir
+  las suyas, por una funcion que no deja leer ni borrar nada.
+- **Solo suben las de trainings asignados.** Lo que ella entrene por su cuenta se queda en su
+  telefono. El servidor lo comprueba otra vez.
+
+Para que funcione, **su telefono tiene que tener la version con TD-126** (v1.0.282 o
+posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.

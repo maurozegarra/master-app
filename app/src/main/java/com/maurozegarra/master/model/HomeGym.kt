@@ -11,6 +11,9 @@ object HomeGym {
     /** Las barras, en kg. Todas de disco olimpico. */
     val BARS = listOf(6.0, 10.0, 15.0, 20.0, 22.5)
 
-    /** Mancuernas fijas, en kg. Entre 20 y 25 no hay nada. */
-    val DUMBBELLS = listOf(1.0, 2.0, 2.5, 3.0, 4.0, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0, 25.0)
+    /**
+     * Mancuernas fijas, en kg. La de 22.5 no estaba en el inventario del 18-sep; la agrego el
+     * usuario el 19, y es la que evita el salto de 20 a 25.
+     */
+    val DUMBBELLS = listOf(1.0, 2.0, 2.5, 3.0, 4.0, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0, 22.5, 25.0)
 }

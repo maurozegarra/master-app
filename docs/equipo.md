@@ -31,7 +31,8 @@ daban para armarlas.
 | Recta | 2.2 m | 20 kg |
 | Hexagonal (trap) | 1.4 m | 22.5 kg |
 
-La de 6 kg es la del puente de glúteos de la rutina lumbar.
+La de 6 kg es la del puente de glúteos de la rutina lumbar, y la del hip thrust y el peso
+muerto rumano de NIKO.
 
 ### Discos — pares, en kg
 
@@ -47,7 +48,9 @@ La de 6 kg es la del puente de glúteos de la rutina lumbar.
 
 ### Mancuernas — fijas, cabeza hexagonal, pares
 
-1 · 2 · 2.5 · 3 · 4 · 5 · 7.5 · 10 · 12.5 · 15 · 17.5 · 20 · 25 kg
+1 · 2 · 2.5 · 3 · 4 · 5 · 7.5 · 10 · 12.5 · 15 · 17.5 · 20 · **22.5** · 25 kg
+
+La de 22.5 no entro en el inventario del 18-sep; la agrego el 19.
 
 ### Otros pesos
 
@@ -104,16 +107,15 @@ Sobre la barra de 6 kg, que es la de la rutina lumbar:
 
 Entre esos hay escalones de 2.5 (8.5, 13.5, 18.5…) si alguna vez hace falta afinar.
 
-### Con mancuerna — el salto NO es constante
+### Con mancuerna — de 2.5 en 2.5 hasta 25
 
-Es la restricción de verdad, porque son fijas:
+Son fijas, así que solo existen estos pesos:
 
 1 · 2 · 2.5 · 3 · 4 · 5 → de 1 en 1 más o menos
-5 → 7.5 → 10 → 12.5 → 15 → 17.5 → 20 → **salto a 25**
+5 → 7.5 → 10 → 12.5 → 15 → 17.5 → 20 → 22.5 → 25
 
-**Entre 20 y 25 no hay nada.** Cuando el suitcase carry o la sentadilla goblet lleguen a
-20 kg, el siguiente escalón es un +25% de golpe. Ahí tocará progresar por otra vía —más
-metros, más series, pausa— o comprar la de 22.5.
+Saltos de 2.5 hasta 25. Lo que se pensaba que era un hueco entre 20 y 25 no existe: la de
+22.5 estaba, solo faltaba en el inventario.
 
 ### Alturas para sentadilla a caja
 
@@ -129,8 +131,16 @@ sentadilla.
 - **Todo lo prescrito hoy se puede armar.** El puente de 36 kg son 10 + 5 por lado; el
   carry de 15 y la sentadilla de 17.5 existen como mancuerna fija.
 - **El puente tiene recorrido largo por delante**: 41, 46 y más con la misma barra.
-- **El techo de las mancuernas llega antes**: 20 kg, y después un salto feo.
+- **El techo de las mancuernas es 25 kg**, con saltos de 2.5 hasta ahí.
 - **La caminadora no es el límite**: 18 km/h contra los 6 que camina hoy.
-- **Falta una banda de verdad.** La que hay es ligera y está en uso. Un juego de bandas de
-  bucle corto (mini bands) ligera/media/fuerte abre el trabajo de glúteo medio y cadera,
-  que es lo que sostiene una espalda baja, y cuesta poco. Es la única compra que hace falta.
+- **Faltan bandas.** La que hay es ligera y está en uso. Es la única compra que hace falta,
+  y se hace el lunes 21-sep:
+
+  | Qué | Detalle | Para qué |
+  |---|---|---|
+  | **Bandas de tela para glúteo, set de 3** | Circulares, de **tela** con goma antideslizante por dentro (no de látex delgado: se enrollan y se rompen). Ligera, media y fuerte. Talla M, unos 38 cm de largo en plano (≈76 cm de circunferencia) | Caminata lateral, abducción, clamshell, activación antes del glúteo. Para los dos |
+  | **Banda larga de látex, 1.3 cm de ancho** | "Power band" o "superband", bucle de **208 cm**. Ligera (≈7-16 kg según marca) | Pallof press anclada al rack, pull-apart, face pull |
+  | **Banda larga de látex, 3.2 cm de ancho** | Misma banda de 208 cm, media (≈16-38 kg según marca) | Dominada asistida para NIKO, pallof más pesado |
+
+  La resistencia en kilos cambia de marca a marca; lo que se compra es el **ancho** y el
+  **largo**, que sí son estándar.

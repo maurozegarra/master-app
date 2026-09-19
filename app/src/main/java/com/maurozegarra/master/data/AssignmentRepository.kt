@@ -7,6 +7,8 @@ import com.maurozegarra.master.model.AssignedTrainingsJson
 import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.ProfileDirectoryJson
 import com.maurozegarra.master.model.Training
+import com.maurozegarra.master.model.SessionSync
+import com.maurozegarra.master.model.AthleteSession
 import com.maurozegarra.master.model.TrainingJson
 import com.maurozegarra.master.model.forPublishing
 import com.maurozegarra.master.net.Http
@@ -84,6 +86,57 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
         runCatching { AssignmentRowsJson.count(get(assignmentQuery(profileId, select = "training_uid"))) }
             .onFailure { Log.w(TAG, "no se pudo contar lo asignado a $profileId", it) }
             .getOrNull()
+
+    // ---------- Sesiones (TD-126) ----------
+
+    /**
+     * Sube una sesion de un training asignado. true si se guardo, false si el servidor la
+     * rechazo por no estar asignado ese training a ese perfil, null si fallo la red.
+     *
+     * Va SIN sesion de entrenador, con la clave publica: el telefono de un atleta no tiene
+     * cuenta. Por eso no escribe en la tabla sino que llama a upload_session, que solo sabe
+     * guardar una sesion y no deja leer ni borrar nada (docs/supabase/td-126-sessions.sql).
+     */
+    fun uploadSession(profileId: String, pending: SessionSync.Pending): Boolean? {
+        val body = JSONObject()
+            .put("p_profile_id", profileId)
+            .put("p_session_id", pending.session.id)
+            .put("p_training_uid", pending.trainingUid)
+            .put("p_completed_at", java.time.Instant.ofEpochMilli(pending.session.completedAt).toString())
+            .put("p_payload", JSONObject(pending.payload))
+            .toString()
+        val res = runCatching {
+            Http.request("POST", "${Supabase.REST}rpc/upload_session", Supabase.headers(), body)
+        }.onFailure { Log.w(TAG, "no se pudo subir la sesion ${pending.session.id}", it) }.getOrNull()
+            ?: return null
+        if (!res.ok) {
+            Log.w(TAG, "upload_session rechazo: HTTP ${res.code} ${res.body}")
+            return null
+        }
+        return res.body.trim() == "true"
+    }
+
+    /**
+     * Las sesiones de todos los atletas, para el coach. Null si no hay sesion de
+     * entrenador o fallo la red: sin sesion, la tabla ni siquiera deja leer.
+     */
+    fun athleteSessions(): List<AthleteSession>? {
+        val token = auth.accessToken() ?: return null
+        val res = runCatching {
+            Http.request(
+                "GET",
+                "${Supabase.REST}sessions?select=profile_id,payload&order=completed_at.desc",
+                Supabase.headers(token),
+            )
+        }.onFailure { Log.w(TAG, "no se pudieron bajar las sesiones", it) }.getOrNull() ?: return null
+        if (!res.ok) {
+            // Sin esto, un rechazo -sesion de entrenador caducada, politica mal puesta- se
+            // veria igual que "no hay sesiones nuevas", y no habria por donde empezar a buscar.
+            Log.w(TAG, "bajar sesiones: HTTP ${res.code} ${res.body}")
+            return null
+        }
+        return SessionSync.parseRows(res.body)
+    }
 
     // ---------- Escritura (solo entrenador) ----------
 

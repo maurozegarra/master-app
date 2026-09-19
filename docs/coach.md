@@ -105,5 +105,8 @@ dos ejercicios y hacer cuentas entre series. Su resumen: *"no le pusiste cariño
 | Lo que busca a largo plazo, y su pesaje | `docs/objetivos.md` |
 | Todo lo de NIKO | `docs/niko.md` |
 
-Su historial se lee del respaldo de su teléfono. El de NIKO **todavía no se puede leer**:
-se queda en su teléfono hasta TD-126.
+Su historial se lee del respaldo de su teléfono. **El de NIKO también, desde TD-126:** su
+teléfono sube cada sesión de un training asignado, el del coach las baja al sincronizar, y
+quedan en el mismo respaldo del coach bajo `athleteSessions`. Si ahí no aparece una sesión que
+ella dice haber hecho, lo primero es mirar si su teléfono tiene la versión con TD-126 y si ese
+training estaba asignado.

@@ -21,8 +21,7 @@ class RoutinesFitEquipmentTest {
     private val rutinas = listOf(
         MasterDefaults.lumbarTraining("en"),
         MasterDefaults.lumbarBadDayTraining("en"),
-        MasterDefaults.nikoGluteHeavy("en"),
-    )
+    ) + MasterDefaults.nikoTrainings("en")
 
     @Test
     fun `cada peso con barra se arma con los discos que hay, sobre una barra que existe`() {
@@ -71,7 +70,14 @@ class RoutinesFitEquipmentTest {
         // faltaban. Y ella no lee ingles, asi que tienen que venir en espanol.
         val catalogo = MasterDefaults.catalogInstructions()
         val v1Ingles = MasterDefaults.catalogInstructionsV1()
-        MasterDefaults.nikoGluteHeavy("en").workouts.flatMap { it.exercises }.forEach { e ->
+        // Los que ya hacia en su rutina anterior: los conoce, y no hace falta explicarselos.
+        val conocidos = setOf(
+            "ex_rope_jumping", "ex_hip_rotation", "ex_90_90", "ex_shoulder_rotation",
+            "ex_shadow_boxing", "ex_tire_jumping",
+        )
+        MasterDefaults.nikoTrainings("en").flatMap { it.workouts }.flatMap { it.exercises }
+            .filter { it.exerciseId !in conocidos }
+            .forEach { e ->
             val m = catalogo[e.exerciseId]
             assertTrue("${e.name} no tiene instrucciones en el catalogo", m != null && !m.isEmpty)
             assertTrue("${e.name} sigue con las instrucciones en ingles", m != v1Ingles[e.exerciseId])
@@ -79,9 +85,36 @@ class RoutinesFitEquipmentTest {
     }
 
     @Test
+    fun `la plancha lateral de la lumbar se cambia por la del catalogo, el puente no`() {
+        // El 19-sep NIKO 2 ensenaba la plancha lateral en ingles en el telefono del coach,
+        // porque ahi venia de la rutina lumbar. El acepto el cambio para el suyo. El puente
+        // de la lumbar tambien se superpone con el catalogo, pero ese no se pidio.
+        val viejas = MasterDefaults.supersededInstructions()
+        val lumbar = MasterDefaults.lumbarInstructions()
+        listOf("ex_side_plank_l", "ex_side_plank_r").forEach {
+            assertTrue("$it: la de la lumbar no se reemplaza", lumbar.getValue(it) in viejas.getValue(it))
+        }
+        assertTrue(lumbar.getValue("ex_glute_bridge") !in viejas["ex_glute_bridge"].orEmpty())
+    }
+
+    @Test
+    fun `las instrucciones del catalogo no le hablan a una sola persona`() {
+        // Son para todos los telefonos. Las primeras de la plancha y del giro ruso decian
+        // "apoyada" y "sentada", escritas pensando en NIKO, y le llegaban tambien al coach.
+        // Las viejas se reconocen para cambiarlas en los telefonos donde ya estaban.
+        val primeras = MasterDefaults.catalogInstructions().values.map { it.instructions.first() }
+        listOf("De lado, apoyada", "Sentada en el piso").forEach { frase ->
+            assertTrue("sigue diciendo '$frase'", primeras.none { it.startsWith(frase) })
+        }
+        val viejas = MasterDefaults.supersededInstructions()
+        assertTrue(viejas.getValue("ex_russian_twist").any { it.instructions.first().startsWith("Sentada") })
+        assertTrue(viejas.getValue("ex_side_plank_l").any { it.instructions.first().startsWith("De lado, apoyada") })
+    }
+
+    @Test
     fun `ninguna barra de NIKO se queda en los 20 por defecto`() {
         // El defecto no es un dato de nadie. Ella usa la EZ de 6 para hip thrust y rumano.
-        MasterDefaults.nikoGluteHeavy("en").workouts.flatMap { it.exercises }
+        MasterDefaults.nikoTrainings("en").flatMap { it.workouts }.flatMap { it.exercises }
             .filter { it.weightType == WeightType.BARBELL }
             .forEach { assertTrue("${it.name} usa la barra por defecto", it.barWeight == 6.0) }
     }

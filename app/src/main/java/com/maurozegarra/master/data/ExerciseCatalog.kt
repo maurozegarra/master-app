@@ -44,6 +44,9 @@ object ExerciseCatalog {
         Triple("ex_hip_abduction", "Abducción de cadera", "Hip Abduction"),
         Triple("ex_step_up", "Subida al cajón", "Step-Up"),
         Triple("ex_neck_iso", "Cuello isométrico", "Neck Isometric"),
+        // Muay Thai y core rotacional (NIKO 2).
+        Triple("ex_heavy_bag", "Saco", "Heavy Bag"),
+        Triple("ex_russian_twist", "Giro ruso", "Russian Twist"),
         Triple("ex_nordic_curl", "Curl nórdico", "Nordic Curl"),
         Triple("ex_seated_calf", "Pantorrilla sentado", "Seated Calf"),
         Triple("ex_donkey_calf", "Pantorrilla burro", "Donkey Calf"),

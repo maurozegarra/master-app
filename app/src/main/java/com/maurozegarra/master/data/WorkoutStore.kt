@@ -9,6 +9,8 @@ import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.TrainingJson
 import com.maurozegarra.master.model.withUids
+import com.maurozegarra.master.model.SessionSync
+import com.maurozegarra.master.model.AthleteSession
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -197,12 +199,36 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
      * de instalarse y pisó la única copia buena que había. Un archivo que el usuario
      * controla es lo único que sobrevive a eso.
      */
+    // ---------- Sesiones que suben y bajan (TD-126) ----------
+
+    /** Por sesion, la huella del payload que ya se subio. Ver [SessionSync.pending]. */
+    fun uploadLedger(): Map<Long, Int> = runCatching {
+        val o = org.json.JSONObject(prefs.getString(KEY_UPLOAD_LEDGER, "{}") ?: "{}")
+        o.keys().asSequence().associate { it.toLong() to o.getInt(it) }
+    }.getOrDefault(emptyMap())
+
+    fun markUploaded(sessionId: Long, fingerprint: Int) {
+        val o = runCatching { org.json.JSONObject(prefs.getString(KEY_UPLOAD_LEDGER, "{}") ?: "{}") }
+            .getOrDefault(org.json.JSONObject())
+        o.put(sessionId.toString(), fingerprint)
+        prefs.edit().putString(KEY_UPLOAD_LEDGER, o.toString()).apply()
+    }
+
+    /** Las sesiones de los atletas, tal como las bajo el coach. Se reemplazan enteras. */
+    fun loadAthleteSessions(): List<AthleteSession> =
+        SessionSync.decodeAthleteSessions(prefs.getString(KEY_ATHLETE_SESSIONS, "[]") ?: "[]")
+
+    fun saveAthleteSessions(list: List<AthleteSession>) {
+        prefs.edit().putString(KEY_ATHLETE_SESSIONS, SessionSync.encodeAthleteSessions(list)).apply()
+    }
+
     fun exportJson(): String = BackupJson.encode(
         BackupData(
             trainings = loadTrainings(),
             customExercises = loadCustomExercises(),
             sessions = loadSessions(),
             exerciseMedia = media.load(),
+            athleteSessions = loadAthleteSessions(),
         ),
         exportedAt = System.currentTimeMillis(),
     )
@@ -222,6 +248,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         // Solo instrucciones: los videos no viajan en el respaldo, se vuelven a descargar
         // del manifiesto en cuanto hagan falta.
         media.save(data.exerciseMedia)
+        saveAthleteSessions(data.athleteSessions)
         return ImportSummary(trainings = data.trainings.size, sessions = data.sessions.size)
     }
 
@@ -237,6 +264,8 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_WALK_NOTE_V2 = "walk_instructions_v2"
         const val KEY_LUMBAR_REVISION = "lumbar_revision"
         const val KEY_NIKO_REVISION = "niko_revision"
+        const val KEY_UPLOAD_LEDGER = "session_upload_ledger"
+        const val KEY_ATHLETE_SESSIONS = "athlete_sessions_json"
         const val KEY_CATALOG_INSTRUCTIONS = "catalog_instructions_revision"
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"

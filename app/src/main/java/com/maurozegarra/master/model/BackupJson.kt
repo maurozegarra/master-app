@@ -13,6 +13,12 @@ data class BackupData(
      * archivos en `Movies/MASTER/` y sobreviven por su cuenta.
      */
     val exerciseMedia: Map<String, ExerciseMedia> = emptyMap(),
+    /**
+     * Las sesiones de los atletas que bajó el coach (formato 3, TD-126). Van en el respaldo
+     * porque es por donde el asistente lee el historial: sin esto, el de NIKO seguiría sin
+     * poder leerse aunque ya llegara al teléfono del coach.
+     */
+    val athleteSessions: List<AthleteSession> = emptyList(),
 )
 
 /**
@@ -23,10 +29,10 @@ data class BackupData(
 object BackupJson {
 
     /**
-     * Versión del formato. La 2 añadió `exerciseMedia`; [decode] acepta desde la 1, así
-     * que los respaldos viejos se siguen importando sin perder nada.
+     * Versión del formato. La 2 añadió `exerciseMedia`, la 3 `athleteSessions`; [decode]
+     * acepta desde la 1, así que los respaldos viejos se siguen importando sin perder nada.
      */
-    const val FORMAT = 2
+    const val FORMAT = 3
 
     fun encode(data: BackupData, exportedAt: Long): String {
         val custom = JSONArray()
@@ -40,6 +46,7 @@ object BackupJson {
             .put("customExercises", custom)
             .put("sessions", JSONArray(SessionJson.encode(data.sessions)))
             .put("exerciseMedia", JSONObject(ExerciseMediaJson.encode(data.exerciseMedia)))
+            .put("athleteSessions", JSONArray(SessionSync.encodeAthleteSessions(data.athleteSessions)))
             .toString(2)
     }
 
@@ -78,11 +85,17 @@ object BackupJson {
             ?.let { ExerciseMediaJson.decode(it.toString()) }
             ?: emptyMap()
 
+        // Ausente antes del formato 3.
+        val athletes = root.optJSONArray("athleteSessions")
+            ?.let { SessionSync.decodeAthleteSessions(it.toString()) }
+            ?: emptyList()
+
         return BackupData(
             trainings = trainings,
             customExercises = custom,
             sessions = sessions,
             exerciseMedia = media,
+            athleteSessions = athletes,
         )
     }
 }

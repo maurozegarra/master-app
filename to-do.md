@@ -4,12 +4,24 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **84 / 135** hechos, 51 pendientes.
+Progreso: **84 / 137** hechos, 53 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-137** Circuitos: alternar ejercicios por rounds en vez de terminar uno para empezar otro
+  - LIMITACION DEL MODELO, encontrada al diseñar el dia 6 de NIKO (19-sep-2026). Lo ideal para defensa personal es un circuito: saco 60 s → sprawl 30 s → saco 60 s..., repetido por rounds. El player hace un ejercicio con TODAS sus series y recien pasa al siguiente, asi que un circuito no se puede expresar: hoy va como series seguidas de cada ejercicio.
+
+Es la regla del coach -'lo que se propone tiene que entrar en el modelo'- aplicada: se diseña con lo que hay y se anota lo que falta, como paso con la piramide de McGill (TD-085). Seria un workout con 'rounds': repetir su lista de ejercicios N veces, con descanso entre vueltas.
+- [ ] **TD-136** Semana base de NIKO, sembrada un dia a la vez
+  - APROBADA el 19-sep-2026 (ver docs/niko.md): seis dias numerados -gluteo pesado, Muay Thai, tren superior, gluteo a una pierna, Muay Thai y potencia, mixto-, de 75 a 90 minutos, con el mismo calentamiento de 5 minutos y rounds de 3 minutos con 1 de descanso.
+
+LA DINAMICA, decision del usuario: 'no quiero pasarle 6 rutinas, solo la siguiente'. Se siembra y se asigna SOLO el dia siguiente, la vispera, y cada dia se ajusta con lo que paso en el anterior. nikoTrainings() lista los dias que ya existen; agregar uno es agregarlo ahi y subir NIKO_REVISION. Numerados y no con nombre de dia: si un dia no puede, al siguiente sigue con el numero que le toca.
+
+EL 19-SEP: revision 4. NIKO 1 pasa a llamarse 'NIKO 1 · Glúteo pesado', gana el calentamiento y la nota de la hiperextension dice 'Banca a 45°' -la banca es regulable y el usuario pidio que ella lo tenga presente-. Se siembra NIKO 2 · Muay Thai para el lunes 21, con dos ejercicios nuevos en el catalogo -saco y giro ruso- y sus instrucciones en español, mas las de la plancha lateral. Los helpers pasan a NikoBlocks, como LumbarBlocks, para que cada dia nuevo sea solo su contenido. Los tests cubren todos los dias: pesos armables, barra de 6 y no la de 20, e instrucciones en español para todo lo que ella no conocia.
+
+MISMO DIA: la plancha lateral de NIKO 2 salia en INGLES en el telefono del coach, porque ahi venia de la rutina lumbar y las del catalogo no pisaban nada. El acepto el cambio para el suyo ('no hay problema de mi parte'): supersededInstructions() reconoce esas versiones como reemplazables. Su puente de la lumbar no entra, porque no se pidio. Y de paso: la plancha y el giro ruso estaban escritos en FEMENINO -'apoyada', 'sentada'- cuando las del catalogo le llegan a todos; pasan a neutro y las viejas tambien se reconocen. Verificado en su telefono, con un test que fija el alcance.
 - [ ] **TD-133** El app en español, para NIKO y para cualquiera que no lea ingles
   - PEDIDO el 19-sep-2026: 'niko no maneja el ingles, lo ideal seria que el app tenga soporte para español, apuntalo como un TD'. Para salir del paso ese dia se pusieron en español las instrucciones del catalogo (TD-131) y el texto libre de su rutina (TD-127 revision 3).
 
@@ -86,6 +98,16 @@ ETAPA 4 - Que el asistente lo lea sin el telefono de nadie. Con la 3 hecha, el s
 A DECIDIR ANTES DE EMPEZAR: si sube TODO el historial o solo las sesiones de trainings asignados. Lo segundo es lo defendible -lo que ella entrena por su cuenta no tiene por que ser asunto del coach- y es una condicion barata de escribir. Tambien hay que decidirlo con ella, no solo con quien disena.
 
 LO QUE HABILITA: entrenar a NIKO con datos desde la segunda semana en vez de por lo que cuente. Hoy su rutina se ajusta a ciegas.
+
+DECIDIDO el 19-sep, con el usuario: (1) las sesiones las LEE solo el coach autenticado -llevan el dolor de cada dia- y un telefono de atleta solo puede SUBIR las suyas, por una funcion que no deja leer ni borrar; (2) solo suben las de trainings ASIGNADOS, comprobado en el servidor. El SQL esta en docs/supabase/td-126-sessions.sql y lo corre el usuario una vez en el SQL Editor: el asistente no tiene ni debe tener la clave para crear tablas.
+
+HECHO el 19-sep (v1.0.282), etapas 1, 2 y 4 del plan. El usuario corrio el SQL y se verifico con la clave publica sin escribir nada: la funcion rechaza un training no asignado (false), la tabla no se deja leer sin sesion de coach, y escribir directo da 401 por RLS.
+
+EN EL APP: SessionSync (puro, con tests) decide que sube -solo trainings asignados, y solo lo que cambio desde la ultima subida, con una huella por sesion en un ledger- y como se leen las filas. AssignmentRepository.uploadSession llama a upload_session con la clave publica; athleteSessions baja las de todos con la sesion del coach. El ViewModel lo corre al arrancar, al terminar una sesion, al completar el dolor o el feedback, y en cada sincronizacion; una sola vez a la vez. Las sesiones bajadas van a un almacen APARTE -no al historial del coach, que contaria entrenamientos que no hizo- y al respaldo, formato 3, bajo athleteSessions: por ahi las lee el asistente.
+
+FALTA: la etapa 3, una pantalla para que el coach vea en el app el historial de cada atleta. Y la prueba de punta a punta, que necesita que el telefono de NIKO tenga esta version -release- y que entrene un training asignado. Primera oportunidad: NIKO 2, el lunes 21.
+
+UNA CAIDA EN EL CAMINO, el mismo 19-sep: la v1.0.283 no arrancaba -NullPointerException en un hilo de fondo, en bucle-. El init llama a refreshSessions -> syncSessions, que lanza un hilo que usa el candado de subida, y ese candado estaba declarado MAS ABAJO que el init: Kotlin inicializa en orden de aparicion y el hilo lo encontraba en null. Era una carrera: con la v1.0.282 no se cayo. Arreglado en la v1.0.284 declarandolo antes del init, verificado en el telefono -cero caidas, datos intactos- y anotado como regla en AGENTS.md. No llego a publicarse.
 - [ ] **TD-125** Medir el dolor al despertar, que es el que lleva anios
   - DE LA CONVERSACION del 18-sep-2026 sobre el 'dolor normalizado' (ver docs/coach-log.md). Todos los dias amanece con dolor en la zona lumbar, nivel 3, que se va en 10-15 minutos de moverse y lleva anios. Nunca se habia medido.
 

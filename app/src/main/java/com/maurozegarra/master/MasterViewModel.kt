@@ -33,6 +33,7 @@ import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.reorderedFrom
 import com.maurozegarra.master.model.SessionSource
+import com.maurozegarra.master.model.SessionSync
 import com.maurozegarra.master.model.SPEED_MAX
 import com.maurozegarra.master.model.SPEED_MIN
 import com.maurozegarra.master.model.StepEngine
@@ -155,6 +156,18 @@ class MasterViewModel(
      * el respaldo bueno que haya en Documents/MASTER/.
      */
     private var snapshotReady = false
+
+    /**
+     * Una sola subida de sesiones a la vez: el arranque, el fin de sesion y el sync pueden
+     * coincidir (TD-126).
+     *
+     * Declarado AQUI, antes del `init`, y no junto a [syncSessions]: Kotlin inicializa en
+     * orden de aparicion, y el `init` llama a refreshSessions -> syncSessions, que lanza un
+     * hilo que usa este candado. Declarado mas abajo, ese hilo lo encontraba todavia en null
+     * y el app se caia al arrancar, en bucle -paso con la v1.0.283 el 19-sep-. Es la misma
+     * trampa que el comentario del init ya advierte para `syncing`.
+     */
+    private val sessionSyncLock = kotlinx.coroutines.sync.Mutex()
 
     private fun newId(): Long = nextId++
 
@@ -503,12 +516,12 @@ class MasterViewModel(
     private fun seedCatalogInstructions() {
         if (store.catalogInstructionsRevision() >= MasterDefaults.CATALOG_INSTRUCTIONS_REVISION) return
         val current = mediaStore.load()
-        val v1 = MasterDefaults.catalogInstructionsV1()
-        // Se escribe donde no hay nada, o donde sigue la version inglesa tal cual se sembro:
+        val viejas = MasterDefaults.supersededInstructions()
+        // Se escribe donde no hay nada, o donde sigue una version vieja tal cual se sembro:
         // esa nadie la toco. Lo editado a mano no coincide con nada de esto y se queda.
         val merged = current + MasterDefaults.catalogInstructions().filterKeys { id ->
             val actual = current[id]
-            actual == null || actual.isEmpty || actual == v1[id]
+            actual == null || actual.isEmpty || actual in viejas[id].orEmpty()
         }
         if (merged != current) mediaStore.save(merged)
         store.setCatalogInstructionsRevision(MasterDefaults.CATALOG_INSTRUCTIONS_REVISION)
@@ -933,6 +946,9 @@ class MasterViewModel(
                 trainings.addAll(merged)
                 persist()
             }
+            // Cada vuelta a primer plano sincroniza asignaciones; es tambien el momento de
+            // reintentar lo que no subio y de bajar lo nuevo de los atletas.
+            syncSessions()
             onDone(SyncResult.Ok(assigned = incoming.size, changed = changed))
         }
     }
@@ -996,6 +1012,7 @@ class MasterViewModel(
         sessions[i] = nueva
         store.saveSessions(sessions.toList())
         snapshot()
+        syncSessions()
     }
 
     private fun lastSessionIndex(): Int? {
@@ -1147,6 +1164,48 @@ class MasterViewModel(
     private fun refreshSessions() {
         sessions.clear()
         sessions.addAll(store.loadSessions().sortedByDescending { it.completedAt })
+        // Se llama al arrancar y al terminar una sesion: los dos momentos en que puede haber
+        // algo nuevo que subir.
+        syncSessions()
+    }
+
+    /**
+     * Sube las sesiones pendientes de este telefono y, si es el del coach, baja las de sus
+     * atletas (TD-126).
+     *
+     * Subir: solo las de trainings ASIGNADOS y solo las que cambiaron desde la ultima vez
+     * -ver [SessionSync.pending]-, porque la sesion se sigue completando despues de
+     * guardarse. Sin red se corta y se reintenta la proxima vez; nada se pierde, porque la
+     * sesion ya esta en el telefono y la nube va despues.
+     *
+     * Bajar: van a un almacen APARTE y al respaldo, no al historial propio. Es por donde el
+     * asistente las lee; mezclarlas con las del coach le contaria entrenamientos que no hizo.
+     */
+    private fun syncSessions() {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (!sessionSyncLock.tryLock()) return@launch
+            try {
+                assignments.profileId?.let { perfil ->
+                    val pendientes = SessionSync.pending(store.loadSessions(), store.loadTrainings(), store.uploadLedger())
+                    for (p in pendientes) {
+                        // true se guardo, false no era un training asignado: en los dos casos
+                        // queda anotada y no se reintenta hasta que cambie. Null es la red.
+                        assignments.uploadSession(perfil, p) ?: break
+                        store.markUploaded(p.session.id, p.fingerprint)
+                    }
+                }
+                if (auth.isCoach) {
+                    assignments.athleteSessions()?.let { bajadas ->
+                        if (bajadas != store.loadAthleteSessions()) {
+                            store.saveAthleteSessions(bajadas)
+                            withContext(Dispatchers.Main) { snapshot() }
+                        }
+                    }
+                }
+            } finally {
+                sessionSyncLock.unlock()
+            }
+        }
     }
 
     // Borrar escribe el respaldo, igual que guardar (TD-121). Antes no, y el respaldo se
@@ -1569,6 +1628,7 @@ class MasterViewModel(
         sessions[0] = sesion.copy(exercises = ejercicios)
         store.saveSessions(sessions.toList())
         snapshot()
+        syncSessions()
     }
 
     /**

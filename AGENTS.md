@@ -260,6 +260,12 @@ es automatizable:
 - **Commits referencian el to-do**: `feat: TD-NNN ...`, `fix: TD-NNN ...`, `chore: TD-NNN ...`.
 - **Commits atómicos**: un commit = un cambio lógico (ver `.windsurf/workflows/commit.md`).
 - **Sin firma ni co-author en commits.** NUNCA incluir "Generated with Devin", "Co-Authored-By: Devin", ni ninguna variante. El commit es del usuario, no del asistente.
+- **En `MasterViewModel`, lo que usa el `init` se declara ANTES del `init`.** Kotlin inicializa
+  en orden de aparición, y el `init` lanza hilos de fondo (sincronizar, subir sesiones) que
+  pueden correr antes de que termine el constructor. Una propiedad declarada más abajo llega
+  en `null` y el app se cae al arrancar, en bucle. Pasó con `syncing` y otra vez el 19-sep
+  con el candado de las sesiones (v1.0.283). Es una carrera: a veces no se cae, y por eso
+  pasa las pruebas.
 - **No se borra un test para que pase el build.** Si un test falla, se arregla el código o se cambia el test con justificación explícita.
 
 ## Dispositivo de prueba

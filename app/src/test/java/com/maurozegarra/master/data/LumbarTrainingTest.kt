@@ -99,15 +99,17 @@ class LumbarTrainingTest {
         // Los numeros de la serie son DISCOS: el total es la barra mas eso.
         // 21 -> 26 -> 31 -> 36, cada subida pedida por el cuerpo: el 18-sep marco los 31
         // como ligeros en el player. La intermedia sube a 21 para acortar el salto.
-        assertEquals(listOf(6.0, 21.0, 36.0), e.setList.map { e.weightTotal(it) })
+        // Revision 9: 41 arriba, tras las nueve series marcadas ligeras del 19-sep.
+        assertEquals(listOf(6.0, 26.0, 41.0), e.setList.map { e.weightTotal(it) })
         assertTrue(e.setList.all { it.reps == 12 })
     }
 
     @Test
     fun `el carry se queda y la sentadilla sube`() {
-        // Los dos suben un escalon en la revision 6: "ligero" en las tres series el 17-sep.
-        assertEquals(listOf(10.0, 12.5, 15.0), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
-        assertEquals(listOf(12.5, 15.0, 17.5), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
+        // Suben en la revision 6 ("ligero" en las tres el 17-sep) y otra vez en la 9 (las nueve
+        // series del bloque marcadas ligeras el 19-sep).
+        assertEquals(listOf(12.5, 15.0, 17.5), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertEquals(listOf(15.0, 17.5, 20.0), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
         // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
         // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el
         // mismo -una mancuerna de 10 pesa 10-, asi que el historial no se parte.
