@@ -108,8 +108,13 @@ class LumbarTrainingTest {
         // Los dos suben un escalon en la revision 6: "ligero" en las tres series el 17-sep.
         assertEquals(listOf(10.0, 12.5, 15.0), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
         assertEquals(listOf(12.5, 15.0, 17.5), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
+        // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
+        // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el
+        // mismo -una mancuerna de 10 pesa 10-, asi que el historial no se parte.
         listOf("ex_box_squat", "ex_suitcase_carry").forEach {
-            assertEquals(WeightType.TOTAL, cadera(training).getValue(it).weightType)
+            val e = cadera(training).getValue(it)
+            assertEquals(WeightType.DUMBBELL, e.weightType)
+            assertEquals(1, e.dumbbellCount)
         }
     }
 

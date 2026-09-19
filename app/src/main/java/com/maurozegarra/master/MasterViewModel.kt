@@ -161,6 +161,10 @@ class MasterViewModel(
         val firstRun = store.isFirstRun()
         trainings.addAll(store.loadTrainings())
         customExercises.addAll(store.loadCustomExercises())
+        // Lo guardado ANTES de las correcciones del arranque, para saber al final si alguna
+        // cambio algo (TD-121). Se compara el resultado y no se avisa desde cada correccion:
+        // una lista de llamadas escrita a mano se queda atras en cuanto se agrega otra.
+        val antesDeCorregir = Triple(trainings.toList(), store.loadSessions(), mediaStore.load())
         if (firstRun && trainings.isEmpty()) {
             trainings.add(MasterDefaults.masterTraining(lang()))
             trainings.add(MasterDefaults.frikiNikiTraining(lang()))
@@ -200,6 +204,7 @@ class MasterViewModel(
             }
             if (changed) persist()
             applyLumbarRevision()
+            applyNikoRevision()
             cleanUpLumbarLeftovers()
             seedFirstSession()
             updateWalkInstructions()
@@ -208,12 +213,21 @@ class MasterViewModel(
             fixSep15Weights()
             fillSep17Feedback()
         }
+        // Fuera del if a proposito: tambien una instalacion limpia las necesita.
+        seedCatalogInstructions()
         observePlayer()
         migrateRestorePrefs()
         restorePlayerState()
         refreshSessions()
         exerciseMedia.putAll(mediaStore.load())
         snapshotReady = true
+        // Si una correccion del arranque cambio los datos, el respaldo tiene que decirlo: el
+        // coach lee el historial desde ahi, y un respaldo viejo le hace decir cosas que no
+        // son (TD-121). En una instalacion limpia NO: ahi lo unico que hay son los defaults,
+        // y escribirlos es justo lo que el guardia de [snapshot] existe para impedir.
+        if (!firstRun && Triple(trainings.toList(), store.loadSessions(), mediaStore.load()) != antesDeCorregir) {
+            snapshot()
+        }
         // Aqui NO se sincroniza. El arranque en frio lo cubre MainActivity.onStart, igual
         // que cualquier vuelta a primer plano. Ademas seria imposible: syncAssignments lee
         // `syncing`, que es un mutableStateOf declarado mas abajo, y los inicializadores
@@ -418,6 +432,25 @@ class MasterViewModel(
      *
      * Las instrucciones van con merge y sin pisar: son del usuario en cuanto las toca.
      */
+    /**
+     * Siembra las rutinas de NIKO en el telefono del COACH, para que las asigne (TD-127).
+     *
+     * Van al telefono de el y no al de ella a proposito: quien disena las revisa antes de
+     * repartirlas, y el reparto ya tiene su camino -asignar desde el telefono, que baja por
+     * Supabase-. Mismo perfil que la rutina lumbar porque es el mismo telefono.
+     */
+    private fun applyNikoRevision() {
+        if (assignments.profileId != MasterDefaults.LUMBAR_PROFILE) return
+        if (store.nikoRevision() >= MasterDefaults.NIKO_REVISION) return
+        val nuevos = MasterDefaults.withNikoRevision(trainings.toList(), lang())
+        if (nuevos != trainings.toList()) {
+            trainings.clear()
+            trainings.addAll(nuevos)
+            persist()
+        }
+        store.setNikoRevision(MasterDefaults.NIKO_REVISION)
+    }
+
     private fun applyLumbarRevision() {
         // Solo en el telefono de su dueno. Ver MasterDefaults.LUMBAR_PROFILE.
         if (assignments.profileId != MasterDefaults.LUMBAR_PROFILE) {
@@ -460,6 +493,26 @@ class MasterViewModel(
      * El merge no es un detalle: `ex_cat_cow` es del catalogo y puede traer las que
      * escribio el usuario, y sembrar encima se las borraria sin que las pidiera nadie.
      */
+    /**
+     * Las instrucciones del catalogo, en TODOS los telefonos y sin pisar nada (TD-131).
+     *
+     * Sin puerta de perfil a proposito: son del catalogo, no de nadie, y el telefono de un
+     * atleta asignado es justo donde mas hacen falta -asignar no las manda-.
+     */
+    private fun seedCatalogInstructions() {
+        if (store.catalogInstructionsRevision() >= MasterDefaults.CATALOG_INSTRUCTIONS_REVISION) return
+        val current = mediaStore.load()
+        val v1 = MasterDefaults.catalogInstructionsV1()
+        // Se escribe donde no hay nada, o donde sigue la version inglesa tal cual se sembro:
+        // esa nadie la toco. Lo editado a mano no coincide con nada de esto y se queda.
+        val merged = current + MasterDefaults.catalogInstructions().filterKeys { id ->
+            val actual = current[id]
+            actual == null || actual.isEmpty || actual == v1[id]
+        }
+        if (merged != current) mediaStore.save(merged)
+        store.setCatalogInstructionsRevision(MasterDefaults.CATALOG_INSTRUCTIONS_REVISION)
+    }
+
     private fun seedLumbarInstructions() {
         val current = mediaStore.load()
         val merged = current + MasterDefaults.lumbarInstructions().filterKeys { it !in current }
@@ -518,7 +571,13 @@ class MasterViewModel(
     }
 
     private fun persist() {
-        store.saveTrainings(trainings.toList())
+        // Se recoge lo que devuelve el store: viene con los uid rellenados, y sin eso la
+        // lista de la pantalla se queda con los huecos hasta el siguiente arranque.
+        val guardados = store.saveTrainings(trainings.toList())
+        if (guardados != trainings.toList()) {
+            trainings.clear()
+            trainings.addAll(guardados)
+        }
         snapshot()
     }
 
@@ -1039,14 +1098,20 @@ class MasterViewModel(
         sessions.addAll(store.loadSessions().sortedByDescending { it.completedAt })
     }
 
+    // Borrar escribe el respaldo, igual que guardar (TD-121). Antes no, y el respaldo se
+    // quedaba con sesiones que ya no existian: el 19-sep el coach leyo ahi una sesion de
+    // prueba que el usuario habia borrado y le dijo que su telefono la tenia. Los respaldos
+    // anteriores se conservan, asi que un borrado por error se sigue pudiendo recuperar.
     fun deleteSession(id: Long) {
         sessions.removeAll { it.id == id }
         store.saveSessions(sessions.toList())
+        snapshot()
     }
 
     fun clearHistory() {
         sessions.clear()
         store.saveSessions(emptyList())
+        snapshot()
     }
 
     // ---------- Lista de Trainings ----------

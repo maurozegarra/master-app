@@ -150,13 +150,16 @@ object StepEngine {
             rotating = rotating,
             secPerRep = secPerRep,
             speedKmh = speedKmh,
+            weightType = if (weighted) e.weightType else WeightType.NONE,
+            barWeight = if (weighted && e.weightType == WeightType.BARBELL) e.barWeight else 0.0,
+            dumbbellCount = e.dumbbellCount,
         )
     }
 
     private fun weightLabel(e: Exercise, s: WorkSet): String = when (e.weightType) {
         // Sin discos no hay nada que desglosar: "6 kg . 6 + 0" es ruido, el total ya lo dice.
         WeightType.BARBELL -> if (s.weight == 0.0) "" else "${fmtKg(e.barWeight)} + ${fmtKg(s.weight)}"
-        WeightType.DUMBBELL -> "2 × ${fmtKg(s.weight)}"
+        WeightType.DUMBBELL -> "${e.dumbbellCount} × ${fmtKg(s.weight)}"
         WeightType.TOTAL, WeightType.NONE -> ""
     }
 

@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 7
+    const val LUMBAR_REVISION = 8
 
     /**
      * De quien es la rutina lumbar.
@@ -558,6 +558,322 @@ object MasterDefaults {
      * dispositivos y con la que se publica, y [Training.createdAt], que es cuando aparecio
      * de verdad. Lo demas -workouts, ejercicios, cargas- lo manda el codigo.
      */
+    /**
+     * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
+     * cambiar la rutina es editar la funcion y subir este numero.
+     */
+    const val NIKO_REVISION = 3
+
+    /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
+    const val NIKO_GLUTE_ID = 960001L
+
+    /**
+     * NIKO - Gluteo pesado: el primer dia de su semana nueva (ver docs/niko.md).
+     *
+     * QUE PROBLEMA RESUELVE. Su queja es que las piernas las siente en el cuadriceps y no en
+     * el gluteo, y su rutina lo explica: el volumen de patron de RODILLA -bulgara erguida,
+     * knee stand, knee jump, burpees, sentadillas- aplasta al de CADERA, que son dos
+     * ejercicios contra muchos. Este dia es bisagra de cadera casi entero.
+     *
+     * LAS TRES COSAS QUE CAMBIAN LA SENSACION, y van en las notas porque sin ellas el
+     * ejercicio es el mismo pero el musculo es otro:
+     *  - El puente de activacion ABRE la sesion: si el gluteo no se enciende primero, el
+     *    cuadriceps toma el trabajo por defecto.
+     *  - El hip thrust lleva PAUSA de 2 s arriba. Sin pausa se pasa rapido justo por donde
+     *    el gluteo trabaja.
+     *  - La bulgara va con el TORSO INCLINADO y paso largo. Erguida y con paso corto es un
+     *    ejercicio de cuadriceps.
+     *
+     * Las cargas salen de lo que ya movia -hip thrust hasta 70 kg pesando 49.7- menos lo que
+     * cuesta la pausa. El peso muerto rumano es nuevo para ella y entra conservador: la
+     * bisagra se aprende antes de cargarse.
+     */
+    fun nikoGluteHeavy(lang: String): Training {
+        var seq = 960100L
+        fun id(): Long = seq++
+        fun ex(
+            exerciseId: String,
+            note: String,
+            count: Int,
+            sets: Int = 1,
+            rest: Int = 0,
+            prep: Int = 10,
+            mode: WorkMode = WorkMode.REPS,
+            weightType: WeightType = WeightType.NONE,
+            barWeight: Double = 20.0,
+            weights: List<Double> = emptyList(),
+        ): Exercise = Exercise(
+            id = id(),
+            exerciseId = exerciseId,
+            name = ExerciseCatalog.name(exerciseId, lang),
+            note = note,
+            prepareSec = prep,
+            sets = if (weights.isEmpty()) sets else weights.size,
+            workMode = mode,
+            workValue = count,
+            restSec = rest,
+            restSkipOnLastSet = true,
+            weightType = weightType,
+            barWeight = barWeight,
+            setList = weights.map { WorkSet(reps = count, weight = it) },
+        )
+
+        val now = System.currentTimeMillis()
+        return Training(
+            id = NIKO_GLUTE_ID,
+            name = "NIKO - Día de glúteo",
+            workouts = listOf(
+                Workout(
+                    id = id(),
+                    name = "Despertar glúteos",
+                    exercises = listOf(
+                        ex("ex_glute_bridge", "Aprieta 2 s arriba. En el glúteo, no en los muslos", 15, sets = 2, rest = 30),
+                        ex("ex_hip_abduction", "De lado, tobillera de 1 kg. Lento", 20, sets = 2, rest = 30),
+                    ),
+                ),
+                Workout(
+                    id = id(),
+                    name = "Bisagra de cadera",
+                    exercises = listOf(
+                        // Revision 2 (19-sep-2026): su barra es la EZ de 6 kg, y la revision 1
+                        // no lo pregunto. El hip thrust iba en kilos TOTALES -45/55/65/70- y 70
+                        // sobre una barra de 6 no se puede armar: son 64 de disco, 32 por lado,
+                        // y con discos de 1.25 hacia arriba no hay forma. El usuario hizo la
+                        // cuenta entre series y le salio 71. El rumano asumia la barra de 20 por
+                        // defecto, el mismo error que el 15-sep le costo al otro atleta.
+                        //
+                        // Ahora son discos sobre la barra de 6 y todos se arman:
+                        // hip thrust 46/56/66/71 = 20, 25, 30 y 32.5 por lado.
+                        ex(
+                            "ex_hip_thrust", "PAUSA de 2 s arriba, en cada repetición", 8, rest = 120,
+                            weightType = WeightType.BARBELL, barWeight = 6.0, weights = listOf(40.0, 50.0, 60.0, 65.0),
+                        ),
+                        // Rumano 26/31/36/36 = 10, 12.5 y 15 por lado. Conservador: la bisagra
+                        // es nueva para ella y se aprende antes de cargarse.
+                        ex(
+                            "ex_romanian_deadlift", "Cadera atrás, rodillas casi rectas. Barra pegada a las piernas", 10, rest = 120,
+                            weightType = WeightType.BARBELL, barWeight = 6.0, weights = listOf(20.0, 25.0, 30.0, 30.0),
+                        ),
+                    ),
+                ),
+                Workout(
+                    id = id(),
+                    name = "Una pierna",
+                    exercises = listOf(
+                        ex(
+                            "ex_bulgarian_split_squat", "PECHO ADELANTE y paso largo. Cada pierna", 10, rest = 90,
+                            weightType = WeightType.DUMBBELL, weights = listOf(5.0, 7.5, 10.0),
+                        ),
+                        ex("ex_back_extension", "Aprieta los glúteos arriba. No arquees la espalda baja", 12, sets = 3, rest = 60),
+                    ),
+                ),
+                Workout(
+                    id = id(),
+                    name = "Cuello",
+                    exercises = listOf(
+                        ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta. Adelante, atrás, derecha, izquierda", 20, sets = 4, rest = 15, mode = WorkMode.TIME),
+                    ),
+                ),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
+     * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
+     */
+    const val CATALOG_INSTRUCTIONS_REVISION = 2
+
+    /**
+     * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
+     *
+     * Las instrucciones viven en cada telefono y asignar un training no las manda: las del
+     * primer dia de NIKO, escritas en el telefono del coach, no le habrian llegado nunca. Y
+     * "como se hace un hip thrust" no es de nadie: es del catalogo, asi que viaja con el
+     * app. Se siembran solo donde el ejercicio no tiene instrucciones: lo que alguien haya
+     * escrito a mano no se pisa.
+     *
+     * Nacen de una pregunta que no debio hacer falta: *"como se ejecuta el hip abduction y
+     * con el neck isometric estoy aun mas perdido"*. Si el atleta tiene que preguntar,
+     * faltaban.
+     */
+    fun catalogInstructions(): Map<String, ExerciseMedia> = mapOf(
+        "ex_hip_thrust" to ExerciseMedia(
+            listOf(
+                "Apoya la parte alta de la espalda en el borde de la banca, justo debajo de los omóplatos. La barra sobre la cadera, con una almohadilla.",
+                "Pies planos, al ancho de los hombros. Arriba, las canillas deben quedar verticales.",
+                "Mentón metido y la mirada al frente, no al techo.",
+                "Empuja con los talones y sube la cadera hasta que rodillas, cadera y hombros formen una línea recta.",
+                "PAUSA de 2 segundos arriba, apretando los glúteos. No arquees la espalda baja para subir más.",
+                "Baja controlando.",
+            ),
+        ),
+        "ex_romanian_deadlift" to ExerciseMedia(
+            listOf(
+                "De pie, con la barra a la altura de la cadera, las manos justo por fuera de los muslos y los pies al ancho de la cadera.",
+                "Rodillas un poco dobladas, y así se quedan toda la repetición.",
+                "Lleva la cadera hacia ATRÁS, como si cerraras una puerta con el trasero. La barra baja pegada a los muslos.",
+                "Espalda recta y pecho arriba. Baja hasta sentir que la parte de atrás de los muslos se estira fuerte, normalmente un poco debajo de las rodillas.",
+                "Aprieta los glúteos para subir. Arriba no te eches hacia atrás.",
+            ),
+        ),
+        "ex_hip_abduction" to ExerciseMedia(
+            listOf(
+                "Échate de lado, con la cabeza apoyada en el brazo de abajo.",
+                "La pierna de abajo doblada, más o menos a 90 grados, para no rodar. La de arriba estirada, en línea con el cuerpo, con la tobillera.",
+                "Lo que decide todo: la pierna de arriba un poco HACIA ATRÁS de la línea del cuerpo, y la punta del pie mirando al frente o un poco al suelo. Nunca al techo: así trabaja el flexor de la cadera, no el glúteo.",
+                "Sube la pierna de 30 a 40 cm, no más. Un segundo arriba y baja lento, en 2 o 3 segundos, sin apoyarla.",
+                "La cadera de arriba no se va hacia atrás. Imagina que tienes la espalda pegada a una pared.",
+                "Tiene que arder el costado de la nalga, arriba y atrás del hueso de la cadera. ¿Arde el frente del muslo? Punta del pie más hacia el suelo y la pierna más atrás.",
+            ),
+        ),
+        "ex_bulgarian_split_squat" to ExerciseMedia(
+            listOf(
+                "El pie de atrás sobre la banca, con los cordones hacia abajo. El pie de adelante bien lejos: un paso LARGO.",
+                "Inclina el pecho hacia adelante, entre 30 y 45 grados, con la espalda recta.",
+                "Baja hasta que el muslo de adelante quede más o menos paralelo al piso.",
+                "Empuja con el talón de adelante para subir. Tiene que arder el glúteo de la pierna de adelante.",
+                "¿Solo lo sientes en el frente del muslo? Paso más largo y más inclinación. Con el cuerpo derecho y el paso corto, es un ejercicio de cuádriceps.",
+            ),
+        ),
+        "ex_back_extension" to ExerciseMedia(
+            listOf(
+                "La cadera sobre el cojín, justo debajo del pliegue de la cadera, para que pueda doblarse libre.",
+                "Pies un poco hacia afuera. Mentón metido.",
+                "Baja doblando la cadera.",
+                "Sube apretando los glúteos hasta que el cuerpo quede en línea recta. Ahí para: no te arquees más allá.",
+            ),
+        ),
+        "ex_neck_iso" to ExerciseMedia(
+            listOf(
+                "Isométrico: empujar sin moverse. La cabeza se queda quieta y la mano no la deja ir.",
+                "De pie o en una silla, con la espalda recta, la mirada al frente y el mentón un poco metido.",
+                "Cada serie es una dirección, en este orden. Serie 1, ADELANTE: la palma en la frente, empuja la cabeza hacia adelante contra ella.",
+                "Serie 2, ATRÁS: las manos entrelazadas en la nuca, empuja la cabeza hacia atrás contra ellas.",
+                "Serie 3, DERECHA: la palma derecha en la sien derecha, empuja como llevando la oreja al hombro.",
+                "Serie 4, IZQUIERDA: igual, del otro lado.",
+                "La mitad de tu fuerza, no toda. Respira normal todo el tiempo.",
+                "Si algo pica o baja por el brazo, para ahí.",
+            ),
+        ),
+        "ex_step_up" to ExerciseMedia(
+            listOf(
+                "Un cajón a la altura de la rodilla o un poco más alto. TODO el pie sobre el cajón.",
+                "Inclina un poco el pecho hacia adelante y empuja con el talón del pie de arriba.",
+                "Sube hasta quedar derecho, sin impulsarte con el pie de abajo.",
+                "Baja lento, controlando con la pierna de arriba.",
+            ),
+        ),
+        "ex_glute_bridge" to ExerciseMedia(
+            listOf(
+                "Échate boca arriba, con las rodillas dobladas y los pies planos al ancho de la cadera.",
+                "Empuja con los talones y aprieta el glúteo arriba.",
+                "Si sientes que trabaja la espalda baja, no estás usando el glúteo.",
+            ),
+        ),
+    )
+
+    /**
+     * La primera version, en ingles (revision 1). No se siembra: solo sirve para reconocer
+     * las instrucciones que nadie toco y cambiarlas por las de español. Lo que alguien haya
+     * editado a mano no coincide con esto y se respeta.
+     *
+     * Paso a español el 19-sep-2026, el mismo dia: *"urge las instrucciones en español,
+     * niko no maneja el ingles"*.
+     */
+    fun catalogInstructionsV1(): Map<String, ExerciseMedia> = mapOf(
+        "ex_hip_thrust" to ExerciseMedia(
+            listOf(
+                "Upper back on the edge of the bench, just below the shoulder blades. Bar over the hip crease, with a pad.",
+                "Feet flat, shoulder-width apart. At the top your shins should be vertical.",
+                "Chin tucked, eyes forward, not at the ceiling.",
+                "Drive through the heels and raise the hips until knees, hips and shoulders make a straight line.",
+                "PAUSE 2 seconds at the top, squeezing the glutes. Do not arch the lower back to go higher.",
+                "Lower under control.",
+            ),
+        ),
+        "ex_romanian_deadlift" to ExerciseMedia(
+            listOf(
+                "Stand tall holding the bar at hip height, hands just outside the thighs, feet hip-width apart.",
+                "Knees slightly bent, and they stay that way the whole rep.",
+                "Push the hips BACK, as if closing a car door with your backside. The bar slides down the thighs, close to the legs.",
+                "Back flat, chest proud. Go down until the back of the thighs stretch hard, usually just below the knees.",
+                "Squeeze the glutes to stand up. Do not lean back at the top.",
+            ),
+        ),
+        "ex_hip_abduction" to ExerciseMedia(
+            listOf(
+                "Lie on your side. Head resting on the bottom arm.",
+                "Bottom leg bent about 90 degrees for balance. Top leg straight, in line with the body, ankle weight on it.",
+                "The key: top leg slightly BEHIND the body line, toes pointing forward or a bit down. Never to the ceiling: that works the hip flexor, not the glute.",
+                "Lift the leg 30-40 cm, no higher. Hold 1 second, lower in 2-3 seconds without resting it.",
+                "The top hip does not roll back. Imagine your back against a wall.",
+                "You should feel it on the side of the glute, above and behind the hip bone. Feel it in the front of the thigh? Toes more down, leg further back.",
+            ),
+        ),
+        "ex_bulgarian_split_squat" to ExerciseMedia(
+            listOf(
+                "Rear foot on the bench, laces down. Front foot far forward: a LONG stride.",
+                "Lean the chest forward, 30 to 45 degrees, with the back flat.",
+                "Lower until the front thigh is about parallel to the floor.",
+                "Push through the front heel to stand. It should burn in the glute of the front leg.",
+                "Feeling it only in the front of the thigh? Longer stride and more lean. Upright with a short stride is a quad exercise.",
+            ),
+        ),
+        "ex_back_extension" to ExerciseMedia(
+            listOf(
+                "Hips on the pad, just below the hip crease, so the hips can bend freely.",
+                "Feet slightly turned out. Chin tucked.",
+                "Lower by bending at the hips.",
+                "Come up by squeezing the glutes until the body is a straight line. Stop there: do not arch past straight.",
+            ),
+        ),
+        "ex_neck_iso" to ExerciseMedia(
+            listOf(
+                "Isometric: push without moving. The head stays still, the hand does not let it go.",
+                "Sit or stand tall, eyes forward, chin slightly tucked.",
+                "Each set is one direction, in this order. Set 1, FRONT: palm on the forehead, push the head forward against it.",
+                "Set 2, BACK: hands clasped behind the head, push the head back against them.",
+                "Set 3, RIGHT: right palm on the right temple, push as if taking the ear to the shoulder.",
+                "Set 4, LEFT: the same on the other side.",
+                "Half your strength, not all of it. Breathe normally the whole time.",
+                "If something pinches or runs down the arm, stop there.",
+            ),
+        ),
+        "ex_step_up" to ExerciseMedia(
+            listOf(
+                "Box at knee height or a bit higher. The WHOLE foot on the box.",
+                "Lean the chest slightly forward and push through the heel of the top foot.",
+                "Stand up tall without pushing off the bottom foot.",
+                "Lower slowly, controlling it with the top leg.",
+            ),
+        ),
+        "ex_glute_bridge" to ExerciseMedia(
+            listOf(
+                "Lie on your back, knees bent, feet flat and hip-width apart.",
+                "Push through the heels and squeeze the glute at the top.",
+                "If you feel the lower back working, you are not using the glute.",
+            ),
+        ),
+    )
+
+    /** Igual que [withLumbarRevision], para las rutinas de NIKO. */
+    fun withNikoRevision(trainings: List<Training>, lang: String): List<Training> {
+        val nuevo = nikoGluteHeavy(lang)
+        val out = trainings.toMutableList()
+        val i = out.indexOfFirst { it.id == nuevo.id }
+        if (i < 0) {
+            out.add(nuevo)
+        } else {
+            out[i] = nuevo.copy(
+                uid = out[i].uid,
+                createdAt = if (out[i].createdAt > 0L) out[i].createdAt else nuevo.createdAt,
+            )
+        }
+        return out
+    }
+
     fun withLumbarRevision(trainings: List<Training>, lang: String): List<Training> {
         val nuevos = listOf(lumbarTraining(lang), lumbarBadDayTraining(lang))
         val out = trainings.toMutableList()
@@ -726,9 +1042,12 @@ object MasterDefaults {
                 // tan largo.
                 loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 15.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
-                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(10.0, 12.5, 15.0)),
+                // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
+                // y el player no podia decir "1 de 10". El numero por serie es el mismo, asi
+                // que el historial no se parte.
+                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(10.0, 12.5, 15.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
-                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(12.5, 15.0, 17.5)),
+                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(12.5, 15.0, 17.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
             ),
         )
     }

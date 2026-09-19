@@ -67,6 +67,28 @@ no un número, esa es una variable suelta y hay que preguntarla o escribirla.
   pisarle nada suyo: las instrucciones que él escriba, su historial y sus otros trainings
   quedan fuera de ese trato.
 
+## Antes de entregar una rutina
+
+Nace del primer día de NIKO, el 18-sep-2026, entregado a las 22:40 con prisa por la hora:
+sin instrucciones para los ejercicios nuevos, con el hip thrust en kilos totales sin saber
+qué barra usa, y con el rumano asumiendo la barra de 20 por defecto —el mismo error que el
+15-sep le hizo bajar la carga al otro atleta—. El usuario tuvo que preguntar cómo se hacían
+dos ejercicios y hacer cuentas entre series. Su resumen: *"no le pusiste cariño"*.
+
+**Una rutina no se entrega hasta que se cumple todo esto:**
+
+1. **Cada ejercicio con barra dice qué barra.** Se pregunta; no se asume. El `barWeight`
+   por defecto (20) no es un dato de nadie.
+2. **Cada peso se puede armar.** Se revisa contra la tabla de saltos de `equipo.md`:
+   con barra, múltiplos de 2.5 sobre el peso de la barra; con mancuerna, solo las que
+   existen.
+3. **Cada ejercicio que el atleta no conoce lleva instrucciones** dentro del app, paso a
+   paso, antes de que lo vea en el player. Si tuvo que preguntar cómo se hace, faltaban.
+4. **Se lee como la va a leer quien entrena**, no como la escribió quien diseña: entre
+   series, cansado, con el reloj corriendo.
+5. **El reloj no recorta nada de esta lista.** Si no entra bien antes de dormir, se para
+   y se deja escrito dónde se quedó. Mejor mañana entera que hoy a medias.
+
 ## Dónde vive cada cosa
 
 | Qué | Dónde |

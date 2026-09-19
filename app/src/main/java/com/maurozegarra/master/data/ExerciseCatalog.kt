@@ -38,6 +38,12 @@ object ExerciseCatalog {
         Triple("ex_pistol_squat", "Sentadilla pistola", "Pistol Squat"),
         Triple("ex_hip_thrust", "Empuje de cadera", "Hip Thrust"),
         Triple("ex_back_extension", "Extensión lumbar", "Back Extension"),
+        // Bisagra de cadera y gluteo medio (TD-127): lo que le faltaba a NIKO para dejar de
+        // sentir las piernas en el cuadriceps.
+        Triple("ex_romanian_deadlift", "Peso muerto rumano", "Romanian Deadlift"),
+        Triple("ex_hip_abduction", "Abducción de cadera", "Hip Abduction"),
+        Triple("ex_step_up", "Subida al cajón", "Step-Up"),
+        Triple("ex_neck_iso", "Cuello isométrico", "Neck Isometric"),
         Triple("ex_nordic_curl", "Curl nórdico", "Nordic Curl"),
         Triple("ex_seated_calf", "Pantorrilla sentado", "Seated Calf"),
         Triple("ex_donkey_calf", "Pantorrilla burro", "Donkey Calf"),

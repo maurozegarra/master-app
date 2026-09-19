@@ -5,6 +5,67 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-19 — septima sesion, y la noche que confirmo el mecanismo
+
+**LUMBAR**, 08:38 a 10:02, completa. Dolor 1 -> 0.
+
+**Primer dato del despertar: 4, y aflojo en 10 minutos.** Pero ese 4 no es una lectura
+limpia, y la razon es el mejor dato de la semana.
+
+### La noche
+
+Hizo **los dos cambios a la vez**: roto el colchon y durmio con la almohada **debajo** de las
+rodillas. Se acosto a las 23:30.
+
+- **A las 4:30**, despues de cinco horas, se levanto al banio con **cero dolor**. Sorprendido:
+  *"a esas horas ya se nota mi dolor habitual"*.
+- **Entre las 4:30 y las 7:00** NIKO vino a dormir con el. Y el tiene un habito: *"cuando ella
+  duerme conmigo procuro no moverme por no incomodarla, y esa inmovilidad me termina causando
+  dolor"*.
+- **A las 7:00**, el dolor de siempre.
+
+**Eso confirma el mecanismo mejor que cualquier teoria: no es la cama ni la hora, es la
+INMOVILIDAD.** Cinco horas moviendose libre con buen apoyo: nada. Dos horas y media quieto: el
+4 de siempre.
+
+Como los dos cambios fueron juntos, no se sabe cual peso mas; los dos se quedan, asi que para
+el resultado da igual. Lo que si hay que separar de ahora en adelante son las noches solo y
+acompaniado: **cuando duerman juntos, "acompaniado" en la nota de la sesion.** Es un A/B
+natural, y sin la marca el numero de la maniana no se puede leer.
+
+Lo de NIKO no es un problema de ella, es que el se congela. Moverse igual es la primera
+opcion.
+
+### El bloque de cadera
+
+**Las nueve series marcadas como ligeras**, puente de 36 incluido. La tarjeta del descanso
+funciono -marco todo- y la senial es unanime. Se sube, pero no esta semana sin pensarlo: el
+experimento del dolor de la maniana esta corriendo, y cargar mas el dia anterior podria
+mover el numero de la maniana. Se decide con la serie de la semana a la vista.
+
+### El pesaje del sabado
+
+| | 12-sep | 19-sep |
+|---|---|---|
+| Peso | 83.5 | 84.4 |
+| Cintura (cinta) | - | **93.5 cm** |
+| Cintura / estatura | - | **0.52** |
+
+**93.5 cm, justo por debajo de 94**, que es el borde del rango bueno. El indice que se sigue
+es cintura entre estatura: **meta por debajo de 0.5, o sea menos de 90.5 cm.**
+
+**La balanza en una semana:** visceral de 10 a 13 y cintura-cadera de 0.9 a **1.4**, que es
+fisicamente imposible. Lo que cambio fue el agua corporal, -3.1 puntos: con menos agua la
+bioimpedancia lee mas grasa y menos musculo. La cinta no depende de cuanta agua tomo.
+
+### Lo que el app no registro
+
+**La velocidad de la caminata.** El training la tenia -6 y 4 km/h- y la sesion llego sin
+ella: los pasos viajan al servicio del player como JSON y el serializador no la llevaba.
+Corregido en TD-129, con un test que obliga a que todo campo nuevo viaje.
+
+---
+
 ## 2026-09-18 — el dolor normalizado: lo que es, y el plan para quitarlo
 
 Lo abrio el en la nota de la sesion: *"tenemos que hablar de dolores normalizados"*. Es el

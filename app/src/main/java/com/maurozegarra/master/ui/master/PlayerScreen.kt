@@ -59,6 +59,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.ui.graphics.Path
+import androidx.compose.foundation.Canvas
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
@@ -97,6 +103,8 @@ import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.model.DisplayMode
 import com.maurozegarra.master.model.PlayerStep
 import com.maurozegarra.master.model.SPEED_STEP
+import com.maurozegarra.master.model.Plates
+import com.maurozegarra.master.model.WeightType
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
@@ -743,25 +751,23 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // pegada justo encima del reloj sin desplazar nada. Arriba del todo quedaba lejos de
         // donde se mira, y abajo movía el reloj ~126dp al cambiar de ejercicio.
         //
-        // La tarjeta sale MIENTRAS SE TRABAJA y tambien EN EL DESCANSO siguiente (TD-122).
-        // Durante la serie hay que hacer la serie: "el feedback del peso se me olvida
-        // marcar". En el descanso se esta parado esperando, que es cuando de verdad se
-        // puede contestar. En el descanso la tarjeta habla de la serie que acaba de pasar,
-        // asi que se le da ese paso y no el actual.
-        val pasoDelPeso = when {
-            step.weighted -> step
-            step.kind == StepKind.REST ->
-                vm.playerSteps.take(vm.playerIndex).lastOrNull { it.kind == StepKind.WORK }?.takeIf { it.weighted }
-            else -> null
+        // Durante la SERIE, la tarjeta del peso con su feedback. Fuera de la serie
+        // -preparacion, descanso, enfriamiento- lo UNICO que se ensena es lo que hay que
+        // cargar para la proxima (TD-130). Se probo poner tambien el feedback en el descanso
+        // (TD-122) y confundia: arriba "45 kg" de la serie que paso, abajo "55 kg" de la que
+        // viene, y no se sabia cual cargar. El feedback se puede volver a marcar yendo atras,
+        // asi que en el descanso sobra.
+        val proximaCarga = if (step.kind == StepKind.WORK) {
+            null
+        } else {
+            vm.playerSteps.drop(vm.playerIndex + 1).firstOrNull { it.kind == StepKind.WORK }?.takeIf { it.weighted }
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            if (pasoDelPeso != null) {
-                Box(Modifier.align(Alignment.BottomCenter)) {
-                    WeightFeedback(vm, pasoDelPeso, accent, t)
-                }
-            } else if (step.kind == StepKind.WORK && step.speedKmh != null) {
-                Box(Modifier.align(Alignment.BottomCenter)) {
-                    SpeedCard(vm, step, t)
+            Box(Modifier.align(Alignment.BottomCenter)) {
+                when {
+                    step.kind == StepKind.WORK && step.weighted -> WeightFeedback(vm, step, accent, t)
+                    step.kind == StepKind.WORK && step.speedKmh != null -> SpeedCard(vm, step, t)
+                    proximaCarga != null -> LoadCard(proximaCarga, t)
                 }
             }
         }
@@ -1064,7 +1070,16 @@ private fun InstructionsSheet(target: InstructionsTarget, onDismiss: () -> Unit)
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = AppTheme.colors.surface,
     ) {
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 32.dp)) {
+        // Con scroll: el contenido no tiene tope, y sin el, lo que no entraba en la pantalla
+        // se cortaba sin aviso. No se noto mientras las instrucciones eran cortas; las de la
+        // abduccion en español fueron las primeras que no entraron, y el ultimo paso -justo el
+        // que dice como corregirlo si arde donde no toca- quedo partido por la mitad.
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding()
+                .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
+        ) {
             Text(target.title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
             Spacer(Modifier.height(16.dp))
             target.steps.forEachIndexed { i, s ->
@@ -1252,7 +1267,9 @@ private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "${fmtKg(step.weightTotal)} ${t.kg}" + if (step.weightLabel.isNotBlank()) "  ·  ${step.weightLabel}" else "",
+                // Solo el total. La pregunta es por el peso que se movio, y desglosarlo en
+                // "6 + 40" es trabajo de la tarjeta de carga del descanso (TD-130).
+                "${fmtKg(step.weightTotal)} ${t.kg}",
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
@@ -1274,6 +1291,211 @@ private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color,
             FeedbackChip("${t.tooLight} ↑", current == 2.5, accent) {
                 vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 2.5)
             }
+        }
+    }
+}
+
+/**
+ * Lo que hay que cargar para la próxima serie, dibujado (TD-130).
+ *
+ * Nace de una cuenta hecha entre series que salió mal: el player decía "55 kg" y había que
+ * restar la barra, dividir entre dos y armar el lado con los discos que hay. El app ya sabe
+ * la barra y los discos, así que dibuja la barra con los discos de UN lado -del tamaño de
+ * su peso, como una barra de verdad- y la barra a la izquierda. Se ve de un golpe de ojo, a
+ * dos metros, cansado.
+ *
+ * Con mancuernas no hay cuenta pero sí cantidad: "1 de 7.5" no es "2 de 7.5".
+ *
+ * Todo en blanco sobre el color de la etapa: el fondo del player ES el acento, así que un
+ * disco del color del acento desaparecería -ya pasó con el peso del NEXT-.
+ */
+@Composable
+private fun LoadCard(next: PlayerStep, t: Strings) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.10f))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            "${t.setWord.uppercase()} ${next.setIndex + 1}/${next.totalSets}  \u00b7  ${fmtKg(next.weightTotal)} ${t.kg.uppercase()}",
+            color = Color.White.copy(alpha = 0.75f),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Spacer(Modifier.height(10.dp))
+        when (next.weightType) {
+            WeightType.BARBELL -> {
+                val discos = Plates.perSide(next.weightTotal - next.barWeight)
+                if (discos == null) {
+                    Text(
+                        "${fmtKg(next.weightTotal)} ${t.kg} \u00b7 ${t.cantBuild}",
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                } else {
+                    BarDrawing(next.barWeight, discos)
+                    if (discos.isEmpty()) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(t.barOnly, color = Color.White.copy(alpha = 0.75f), fontSize = 12.sp)
+                    }
+                }
+            }
+            WeightType.DUMBBELL -> {
+                val cada = if (next.dumbbellCount > 0) next.weightTotal / next.dumbbellCount else next.weightTotal
+                Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    repeat(next.dumbbellCount.coerceIn(1, 2)) { DumbbellDrawing(cada) }
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "${next.dumbbellCount} \u00d7 ${fmtKg(cada)} ${t.kg}",
+                    color = Color.White.copy(alpha = 0.75f),
+                    fontSize = 12.sp,
+                )
+            }
+            else -> Text(
+                "${fmtKg(next.weightTotal)} ${t.kg}",
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
+/** Alto de cada disco respecto al de 20: se lee el tamaño antes que el número. */
+private fun alturaDisco(kg: Double): Float = when {
+    kg >= 20.0 -> 1.0f
+    kg >= 10.0 -> 0.78f
+    kg >= 5.0 -> 0.62f
+    kg >= 2.5 -> 0.48f
+    else -> 0.38f
+}
+
+/**
+ * La barra COMPLETA, a todo el ancho de la tarjeta, con los discos en los dos extremos.
+ *
+ * Como una barra de verdad: los discos grandes hacia dentro y los chicos hacia fuera, el
+ * peso de la barra en el centro, y NADA despues del ultimo disco -"termina el disco,
+ * termina la barra"-. El largo de la barra es lo que la distingue de una mancuerna: la
+ * primera version la dibujo con 52dp de centro y parecia una.
+ *
+ * El numero va en los discos de los DOS lados: se carga un lado y luego el otro, y cada lado
+ * tiene que poder leerse solo.
+ */
+@Composable
+private fun BarDrawing(barKg: Double, discos: List<Double>) {
+    val alto = 88.dp
+    val separacion = 2.dp
+    BoxWithConstraints(Modifier.fillMaxWidth().height(alto)) {
+        // Los discos se quedan con hasta 22dp cada uno; la barra, con todo lo demas. Si hay
+        // muchos discos se afinan antes que dejar la barra en menos de 80dp.
+        val porLado = discos.size.coerceAtLeast(1)
+        val ancho = ((maxWidth - 80.dp) / (2 * porLado) - separacion).coerceIn(10.dp, 22.dp)
+        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+            // Izquierda: de fuera hacia dentro, del mas chico al mas grande.
+            discos.reversed().forEach { kg -> Disco(kg, ancho, alto, separacion) }
+            Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                Box(Modifier.fillMaxWidth().height(8.dp).background(Color.White.copy(alpha = 0.55f)))
+                // Etiqueta OSCURA con numero blanco. Era blanca translucida sobre una barra
+                // tambien clara, y el peso de la barra se leia apagado. Oscura se separa de la
+                // barra y de los discos -que son blancos- en cualquier color de etapa.
+                Box(
+                    Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color.Black.copy(alpha = 0.55f))
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(fmtKg(barKg), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            // Derecha: de dentro hacia fuera, del mas grande al mas chico.
+            discos.forEach { kg -> Disco(kg, ancho, alto, separacion) }
+        }
+    }
+}
+
+@Composable
+private fun Disco(kg: Double, ancho: androidx.compose.ui.unit.Dp, alto: androidx.compose.ui.unit.Dp, separacion: androidx.compose.ui.unit.Dp) {
+    Box(
+        Modifier
+            .padding(horizontal = separacion / 2)
+            .width(ancho)
+            .height(alto * alturaDisco(kg))
+            .clip(RoundedCornerShape(4.dp))
+            .background(Color.White),
+        contentAlignment = Alignment.Center,
+    ) {
+        // Vertical: en un disco delgado el numero horizontal no entra ("1.25").
+        Text(
+            fmtKg(kg),
+            color = Color.Black.copy(alpha = 0.85f),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.rotate(-90f).wrapContentSize(unbounded = true),
+        )
+    }
+}
+
+/**
+ * Una mancuerna de cabeza hexagonal, como las de la casa, con su peso en el cuadrado del
+ * centro de UNA cabeza -la derecha-: el mismo numero en las dos se leeria como el doble.
+ *
+ * La cabeza vista de lado: un rectangulo con las esquinas de fuera cortadas, y dentro las
+ * caras del hexagono -el cuadrado central y las dos bandas de arriba y abajo-.
+ */
+@Composable
+private fun DumbbellDrawing(kg: Double) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        CabezaHexagonal(fueraALaIzquierda = true, peso = null)
+        Box(Modifier.width(34.dp).height(12.dp).clip(RoundedCornerShape(3.dp)).background(Color.White.copy(alpha = 0.85f)))
+        CabezaHexagonal(fueraALaIzquierda = false, peso = kg)
+    }
+}
+
+@Composable
+private fun CabezaHexagonal(fueraALaIzquierda: Boolean, peso: Double?) {
+    val linea = Color.Black.copy(alpha = 0.35f)
+    Box(Modifier.width(36.dp).height(52.dp), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val corte = w * 0.22f
+            // El lado de fuera lleva el corte grande; el de dentro, uno chico.
+            val cFuera = corte
+            val cDentro = corte * 0.35f
+            val (cIzq, cDer) = if (fueraALaIzquierda) cFuera to cDentro else cDentro to cFuera
+            val silueta = Path().apply {
+                moveTo(cIzq, 0f)
+                lineTo(w - cDer, 0f)
+                lineTo(w, cDer * 1.6f)
+                lineTo(w, h - cDer * 1.6f)
+                lineTo(w - cDer, h)
+                lineTo(cIzq, h)
+                lineTo(0f, h - cIzq * 1.6f)
+                lineTo(0f, cIzq * 1.6f)
+                close()
+            }
+            drawPath(silueta, Color.White)
+            // Las caras: dos cortes horizontales y el cuadrado del centro.
+            val arriba = h * 0.30f
+            val abajo = h * 0.70f
+            val margen = w * 0.14f
+            val trazo = 1.6.dp.toPx()
+            drawLine(linea, Offset(0f, arriba), Offset(w, arriba), trazo)
+            drawLine(linea, Offset(0f, abajo), Offset(w, abajo), trazo)
+            drawLine(linea, Offset(margen, arriba), Offset(margen, abajo), trazo)
+            drawLine(linea, Offset(w - margen, arriba), Offset(w - margen, abajo), trazo)
+        }
+        if (peso != null) {
+            Text(fmtKg(peso), color = Color.Black.copy(alpha = 0.85f), fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
         }
     }
 }

@@ -4,12 +4,88 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **82 / 125** hechos, 43 pendientes.
+Progreso: **83 / 133** hechos, 50 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-133** El app en español, para NIKO y para cualquiera que no lea ingles
+  - PEDIDO el 19-sep-2026: 'niko no maneja el ingles, lo ideal seria que el app tenga soporte para español, apuntalo como un TD'. Para salir del paso ese dia se pusieron en español las instrucciones del catalogo (TD-131) y el texto libre de su rutina (TD-127 revision 3).
+
+LO QUE FALTA: el app es English-only por decision de producto (I18n.get() devuelve EN y lang() es 'en'), pero la base existe: Strings es una clase con todas las cadenas y el catalogo ya tiene los nombres en los dos idiomas. Hace falta un Strings ES completo, un ajuste de idioma por telefono (no por training: el idioma es de quien lo usa), y decidir que pasa con los textos libres que escribe el coach -notas, nombres de bloques-, que no se traducen solos.
+
+OJO: el idioma es del TELEFONO. Si el coach escribe en ingles para si y en español para NIKO, las notas de sus rutinas tienen que ir en el idioma de quien las recibe.
+- [ ] **TD-132** Una revision de una rutina ya asignada no le llega al atleta hasta reasignarla
+  - ENCONTRADO el 19-sep-2026 al rehacer el dia de NIKO (TD-127, revision 2): la revision se siembra en el telefono del coach, pero lo que ella recibe es lo que se PUBLICO al asignar. El payload solo sube en setAssignees, asi que una revision nueva se queda en el telefono del coach hasta que alguien vuelva a abrir 'Asignar a...' y confirme.
+
+HOY: el paso manual es reasignar -abrir 'Asignar a...' sobre el training y confirmar con ella marcada-. El uid se conserva entre revisiones, asi que se actualiza el mismo training en su telefono y no aparece uno nuevo.
+
+LO QUE HARIA FALTA: que cuando una revision cambia un training que ya tiene asignados, se republique solo. Necesita red y sesion de coach en el arranque, asi que tiene que poder fallar y reintentar sin bloquear nada. Es primo de TD-066 (publicar desde la PC).
+- [ ] **TD-131** Las instrucciones del catalogo viajan con el app, a todos los telefonos
+  - ENCONTRADO el 19-sep-2026 al ir a escribir las instrucciones del dia de NIKO: viven en cada telefono y ASIGNAR NO LAS MANDA. Escritas en el telefono del coach, a ella no le habrian llegado nunca. Nacio de su pregunta: 'como se ejecuta el hip abduction, y con el neck isometric estoy aun mas perdido'.
+
+LA SALIDA: 'como se hace un hip thrust' no es de nadie, es del catalogo. MasterDefaults.catalogInstructions() las lleva dentro del app y se siembran en TODOS los telefonos -sin puerta de perfil, y tambien en una instalacion limpia-, solo donde el ejercicio no tiene instrucciones: lo que alguien escribio a mano no se pisa. Van por revision, como las rutinas.
+
+LAS PRIMERAS: hip thrust, peso muerto rumano, abduccion de cadera, bulgara (con la ejecucion de gluteo), hiperextension, cuello isometrico (cada serie es una direccion, en orden), subida al cajon y puente. Para que le lleguen a NIKO hace falta un release: su telefono tiene que actualizar.
+
+EN ESPAÑOL, el mismo 19-sep: 'urge las instrucciones en español, niko no maneja el ingles'. La revision 2 del catalogo las cambia a español. Las inglesas de la revision 1 quedan como catalogInstructionsV1 solo para reconocer las que nadie toco y cambiarlas; lo editado a mano no coincide y se respeta. Un test comprueba que todo ejercicio de la rutina de NIKO tiene instrucciones y que no son las inglesas.
+
+Y UN BUG QUE DESTAPARON, visto en captura el mismo dia: la hoja de instrucciones del player no tenia scroll, y lo que no entraba en la pantalla se cortaba sin aviso. Nunca se habia notado porque las instrucciones eran cortas; las de la abduccion en español fueron las primeras que no entraron, y el paso que quedo partido era justo el que dice como corregirlo si arde donde no toca. Ahora hace scroll y deja libre la barra de navegacion. Se revisaron las otras dos hojas del app -colores y sesiones del dia-: usan listas que ya hacen scroll.
+- [ ] **TD-130** El descanso dibuja lo que hay que cargar: discos por lado y mancuernas
+  - PEDIDO el 19-sep-2026, con un relato que es el caso de uso entero: 'NEXT: HIP THRUST · 55 KG me fuerza a hacer matematicas en un mal momento: 70 kg - 6 de la barra... 65 / 2 son 32.5 a cada lado, esos son 20 + 10 + 2.5? ... ahora yo soy el rapido haciendo calculos, imagina lo que le va a tomar'. Y trajo el mockup: una barra dibujada con los discos de un lado, del tamaño de su peso, y la barra a la izquierda.
+
+LO QUE HACE: fuera de la serie -preparacion, descanso, enfriamiento- el hueco del player ensena SOLO lo que hay que cargar para la proxima serie. Con barra, la media barra dibujada: el tope con el peso de la barra y los discos de un lado, de mayor a menor, con alturas segun el peso. Con mancuernas, 'una o dos' dibujadas y '1 x 7.5' o '2 x 7.5' -pedido explicito: 'si es una, 1 de 7.5, si son 2 debe decir 2 de 7.5'-. Todo en blanco, porque el fondo del player es el acento. Sale tambien en la PREPARACION, que es donde se carga la primera serie.
+
+LAS PIEZAS: Plates.perSide, pura y con tests sobre el inventario real (cuatro de cada disco, dos por lado; el voraz es exacto con estas denominaciones y cualquier multiplo de 2.5 hasta 155 se arma); Exercise.dumbbellCount (1 o 2; antes DUMBBELL era siempre dos y una sola mancuerna iba como TOTAL, igual que las maquinas); PlayerStep lleva weightType, barWeight y dumbbellCount; y el editor ofrece 'una/dos' con mancuernas.
+
+REVISION 8 DE LA RUTINA LUMBAR: carry y goblet pasan a DUMBBELL con UNA mancuerna. El numero por serie es el mismo, asi que el historial no se parte.
+
+Y UN TEST QUE HACE CUMPLIR EL CHECKLIST: cada peso de las rutinas del coach se arma con el equipo de la casa (HomeGym, desde docs/equipo.md), ninguna barra se queda en el 20 por defecto, y nada va en kilos TOTALES salvo una maquina declarada -que era justo el hueco por donde se colo el error original-.
+
+AJUSTES DE DISEÑO, el mismo 19-sep tras probarlo: (1) la tarjeta de la SERIE dice solo el total -'46 kg'-, sin '6 + 40': la pregunta es por el peso que se movio, y el desglose es trabajo de la tarjeta de carga. (2) La barra se dibuja COMPLETA, con los discos en los dos lados -grandes hacia dentro- y el peso de la barra en el centro; los discos mas delgados (hasta 22dp, y se afinan si hay muchos) y el numero en UN solo lado, vertical, porque en un disco delgado '1.25' no entra horizontal. Fuera el 'per side', que con la barra completa ya no tiene sentido. (3) La mancuerna con cabeza HEXAGONAL, como las de la casa -el trajo el dibujo-, dibujada en Canvas, con el peso en el cuadrado central de UNA cabeza: el mismo numero en las dos se leeria como el doble.
+
+SEGUNDA VUELTA DE LA BARRA, con captura: (1) con 52dp de centro 'parece una mancuerna'; ahora la barra ocupa todo el ancho de la tarjeta y los discos van en los extremos. (2) El numero en los DOS lados -revierte la decision de un solo lado-: se carga un lado y luego el otro, y cada lado tiene que leerse solo. En la mancuerna sigue en una sola cabeza, que es como el lo pidio. (3) Nada despues del ultimo disco: 'termina el disco, termina la barra'. Se quitaron los topes que sobresalian.
+
+VALIDADO por el usuario el 19-sep: la barra -'me gusta'- y la mancuerna hexagonal -'muy bien, validado'-. Ultimo ajuste: el peso de la barra iba en una etiqueta blanca translucida sobre la barra, tambien clara, y 'se ve muy apagado'; paso a etiqueta oscura con numero blanco.
+- [ ] **TD-127** Rutina de NIKO orientada a Muay Thai: primer dia sembrado
+  - PRIMER DIA de la semana nueva de NIKO (ver docs/niko.md), sembrado en el telefono del COACH para que lo asigne. Quedan cinco dias por escribir: Muay Thai por rounds, tren superior con traccion, gluteo unilateral, Muay Thai con potencia, y el mixto del sabado.
+
+EL DIA A ataca su queja concreta -siente las piernas en el cuadriceps y no en el gluteo- y es bisagra de cadera casi entero. Las tres notas que lo hacen funcionar van DENTRO del app, porque sin ellas es el mismo ejercicio con otro musculo: el puente abre la sesion para que el gluteo se encienda primero, el hip thrust lleva pausa de 2 s arriba, y la bulgara va con el torso inclinado y paso largo.
+
+Cargas: hip thrust 45/55/65/70 -de lo que ya movia, 40/50/60/70 por 10, descontando lo que cuesta la pausa-; rumano 30/35/40/40, conservador porque la bisagra es nueva para ella; bulgara con sus mismas mancuernas pero con otra ejecucion; abduccion con la tobillera de 1 kg que ya tienen.
+
+Cuatro ejercicios nuevos en el catalogo: peso muerto rumano, abduccion de cadera, subida al cajon y cuello isometrico. El de cajon todavia no se usa: es para el dia de gluteo unilateral.
+
+Va por revision propia (NIKO_REVISION), igual que la lumbar: cambiar la rutina es editar la funcion y subir el numero.
+
+REVISION 2, el 19-sep, porque la 1 se entrego a medias -a las 22:40, apurada por la hora-: sin instrucciones para los cuatro ejercicios nuevos, con el hip thrust en kilos TOTALES sin preguntar que barra usa ella, y el rumano asumiendo la barra de 20 por defecto, el mismo error que el 15-sep le costo al otro atleta. El usuario la probo, hizo la cuenta entre series y le salio 71 donde tocaba 70: 70 sobre una barra de 6 son 64 de disco, 32 por lado, y con estos discos no existe. Su resumen: 'no le pusiste cariño'.
+
+Ahora: su barra es la EZ de 6 kg; hip thrust 46/56/66/71 (20, 25, 30 y 32.5 por lado) y rumano 26/31/36/36 (10, 12.5 y 15 por lado), todo armable. Las instrucciones van en el catalogo para que le lleguen (TD-131), y un test comprueba que cada peso de las rutinas del coach se puede armar con el equipo de la casa.
+
+REVISION 3, el 19-sep: lo que es texto libre pasa a español -notas, nombres de bloques y el nombre del training, 'NIKO - Día de glúteo'-, porque ella no lee ingles. Los nombres de los EJERCICIOS siguen en ingles: el player los traduce del catalogo segun el idioma del app, que hoy es fijo en ingles (TD-133).
+- [ ] **TD-126** El historial de un atleta asignado sube al coach
+  - EL HUECO, planteado el 18-sep-2026 al empezar a disenar la rutina de NIKO: 'lo ideal seria que le lleguen las rutinas en automatico y que puedas leerlo sin necesidad de su telefono'. La primera mitad ya existe -TD-063, TD-067 y TD-068: las asignaciones bajan por Supabase con aviso y deslizar para refrescar-. La segunda no: Supabase lleva perfiles, trainings y asignaciones, todo HACIA ABAJO, y las sesiones nunca salen del telefono.
+
+POR QUE BLOQUEA: al otro atleta se le entrena leyendo su historial -que completo, que salto, con que peso, como se sintio cada serie-. A NIKO habria que entrenarla a ciegas, que es justo lo que se dejo de hacer esta semana. Sin esto, su rutina se ajusta por lo que ella cuente, y contar no es medir.
+
+QUE HARIA FALTA: una tabla de sesiones en Supabase, subida al cerrar una sesion (con reintento, porque el telefono puede estar sin red al terminar), y que el coach pueda leer las de sus atletas. Decidir si sube todo el historial o solo lo de trainings asignados: lo suyo propio puede no ser asunto del coach.
+
+OJO: la service_role key no entra al repo por ninguna razon; esto se resuelve con RLS sobre la anon key, como el resto.
+
+PLAN DE IMPLEMENTACION, en cuatro etapas que se pueden soltar por separado.
+
+ETAPA 1 - La tabla. sessions(id uuid, profile_id text, payload jsonb, completed_at timestamptz, device text, created_at). El payload es el MISMO JSON que ya escribe SessionJson, asi que no hay formato nuevo que mantener: lo que se guarda en el telefono es lo que viaja. RLS: un perfil escribe y lee lo suyo; el coach autenticado lee el de los perfiles que le pertenecen, con la misma politica que ya usan trainings y assignments. Nada de service_role en el repo.
+
+ETAPA 2 - La subida. Al cerrar una sesion, ademas de guardarla en el store, encolarla. Un flag 'uploaded' por sesion y un reintento en cada vuelta a primer plano, porque el telefono puede estar sin red justo al terminar de entrenar -y en un gimnasio en casa eso pasa-. La sesion NUNCA depende de la red para guardarse: primero el disco, la nube despues. Idempotente por el id de sesion, que ya es unico.
+
+ETAPA 3 - La lectura del coach. Una pantalla que liste a sus atletas y abra el historial de cada uno, reutilizando HistoryScreen tal cual: los registros son el mismo ExerciseRecord. Solo lectura -corregir el registro de otro es TD-101 nivel 3-.
+
+ETAPA 4 - Que el asistente lo lea sin el telefono de nadie. Con la 3 hecha, el snapshot del telefono del coach ya trae las sesiones de sus atletas y se lee como hoy. Si hiciera falta leerlo directo de Supabase, va con la anon key y RLS, nunca con service_role.
+
+A DECIDIR ANTES DE EMPEZAR: si sube TODO el historial o solo las sesiones de trainings asignados. Lo segundo es lo defendible -lo que ella entrena por su cuenta no tiene por que ser asunto del coach- y es una condicion barata de escribir. Tambien hay que decidirlo con ella, no solo con quien disena.
+
+LO QUE HABILITA: entrenar a NIKO con datos desde la segunda semana en vez de por lo que cuente. Hoy su rutina se ajusta a ciegas.
 - [ ] **TD-125** Medir el dolor al despertar, que es el que lleva anios
   - DE LA CONVERSACION del 18-sep-2026 sobre el 'dolor normalizado' (ver docs/coach-log.md). Todos los dias amanece con dolor en la zona lumbar, nivel 3, que se va en 10-15 minutos de moverse y lleva anios. Nunca se habia medido.
 
@@ -36,6 +112,8 @@ NO SE PONE OBLIGATORIO, por la misma razon que la pregunta del dolor no bloquea 
 2. LOS HUECOS SE CIERRAN AL TERMINAR. La pantalla de resumen lista las series con peso que quedaron sin marcar y deja contestarlas de un toque. Hace falta ademas porque la ULTIMA serie de un ejercicio no lleva descanso detras: sin esto no hay ningun momento para contestarla, y es justo la que decide si el ejercicio sube.
 
 Marcar desde el resumen escribe en la sesion ya guardada y NO la pasa a EDITED: lo anota el propio usuario, minutos despues y sobre lo que acaba de hacer.
+
+CORREGIDO EL 19-SEP, tras usarlo una sesion: la tarjeta del feedback en el DESCANSO confundia. En el hip thrust ponia arriba '45 kg · How did the weight feel?' -la serie que paso- y abajo 'NEXT: 55 KG' -la que viene-, y no se sabia de quien era el feedback ni cuanto cargar. Sus palabras: 'el feedback de quien es? a cuanto tengo que cargar la barra?'. Y ademas no hacia falta: 'si me olvido de marcar, puedo regresar y marcarlo sin problema'. Se quito del descanso: el feedback vive solo en la serie, y el descanso ensena solo lo que hay que cargar (TD-130). La lista del resumen al terminar se queda mientras el no diga lo contrario.
 - [ ] **TD-123** Revision 6 de la rutina: sube el bloque de cadera entero
   - CAMBIO DE PAUTA del 18-sep-2026 (ver docs/coach-log.md). Puente 6/16/31 -> 6/21/36, carry 7.5/10/12.5 -> 10/12.5/15, sentadilla 10/12.5/15 -> 12.5/15/17.5.
 
@@ -131,12 +209,22 @@ OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que
 
 ### Fix
 
-- [ ] **TD-121** Fix: borrar una sesion, y las correcciones al arrancar, no escriben respaldo
-  - ENCONTRADO DE PASO el 17-sep-2026, verificando TD-120: el ultimo respaldo del telefono seguia siendo de las 21:30 aunque despues el usuario borro la sesion de prueba de las 21:29 y el app corrio la correccion del 17-sep. deleteSession y clearHistory guardan en el store y no llaman a snapshot(); las correcciones del init tampoco, a proposito (snapshotReady evita escribir durante el arranque).
+- [ ] **TD-129** Fix: la velocidad de la caminata no llegaba al registro
+  - ENCONTRADO el 19-sep-2026 leyendo su sesion: el training tenia la caminata a 6 y 4 km/h y la sesion llego sin velocidad. En todo el respaldo, 'speedKmh' solo aparecia en los trainings.
 
-POR QUE IMPORTA: el respaldo automatico es la red de seguridad. Si hoy se restaurara, volveria la sesion borrada y se perderia la correccion. Y el coach lee el historial desde ese respaldo: tras una correccion no hay forma de verificarla hasta que el usuario hace algo que si dispare uno.
+LA CAUSA: los pasos viajan del app al servicio del player como JSON -por el Intent al arrancar y en las preferencias para sobrevivir a que el sistema mate el proceso-, y ese serializador vivia dentro de WorkoutPlayerService escrito CAMPO A CAMPO. Cuando la caminata gano velocidad (TD-124) no se agrego a la lista, el servicio recibio la caminata sin ella y registro nada. Faltaban ademas workoutBaseName, variantName, rotating y secPerRep, de antes.
 
-Reportado sin tocar, pendiente de su OK.
+EL ARREGLO: PlayerStepJson, puro y en el modelo, con un test que arma un paso con TODOS los campos distintos de su valor por defecto -y verifica por reflexion que ninguno se quedo en el defecto- y exige que vuelva identico. El proximo campo que se agregue a PlayerStep y no se agregue al serializador rompe el test en vez de perderse en silencio. Lo probo de inmediato: al agregar weightType, barWeight y dumbbellCount (TD-130) el test obligo a llevarlos.
+
+LA LECCION, que es la de toda la semana: una lista escrita a mano se queda atras en silencio cuando lo de al lado crece.
+- [ ] **TD-128** Fix: un training recien sembrado no se podia asignar hasta reiniciar el app
+  - REPORTADO el 18-sep-2026, al intentar repartir el primer dia de NIKO: 'la rutina NIKO - Glute Day no me da opcion para asignar'.
+
+LA CAUSA: 'Asignar a...' solo aparece si el training tiene uid -sin uid no hay con que emparejarlo en el otro telefono-, y el uid se rellenaba AL ESCRIBIR EN DISCO, dentro de saveTrainings, sin devolverlo. Lo guardado y lo que la pantalla tenia en la mano dejaban de coincidir: el training sembrado vivia sin uid en memoria hasta el siguiente arranque del app, y hasta entonces no se podia repartir.
+
+EL ARREGLO: saveTrainings devuelve la lista ya con los uid puestos y persist() se queda con lo devuelto. El sitio unico de escritura sigue siendo el mismo; lo que cambia es que ahora lo que se guardo y lo que se ve son lo mismo.
+
+LA LECCION, que es la de siempre en este proyecto: una funcion que corrige los datos al guardarlos tiene que devolver lo corregido. Si no, hay dos versiones de la verdad y la de la pantalla es la vieja.
 - [ ] **TD-120** Escribir en la sesion del 17-sep el feedback que el app boto
   - La sesion del 17-sep-2026 se grabo con la version que botaba lo marcado en la tarjeta del peso (TD-117). El usuario lo conto por chat serie por serie esa noche y pidio escribirlo: puente ligero/ligero/sin marcar, carry y sentadilla ligero en las tres.
 
@@ -260,6 +348,7 @@ LAS TRES SON EL MISMO ERROR: un numero puesto a mano para reservarle sitio a otr
 
 ### Fix
 
+- [x] **TD-121** Fix: borrar una sesion, y las correcciones al arrancar, no escriben respaldo
 - [x] **TD-108** La rutina lumbar solo se siembra en el telefono de su dueno
 - [x] **TD-106** Fix: la tarjeta del peso se quedo sin sus botones al crecer la nota
 - [x] **TD-102** Reordenar las dos sesiones lumbares que quedaron en alfabetico

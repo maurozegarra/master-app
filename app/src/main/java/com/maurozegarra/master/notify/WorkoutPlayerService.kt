@@ -755,74 +755,11 @@ class WorkoutPlayerService : Service() {
             }
         }
 
-        fun encodeSteps(list: List<PlayerStep>): String {
-            val arr = JSONArray()
-            list.forEach { s ->
-                arr.put(
-                    JSONObject()
-                        .put("kind", s.kind.name)
-                        .put("title", s.title)
-                        .put("note", s.note)
-                        .put("ownerName", s.ownerName)
-                        .put("ownerExerciseId", s.ownerExerciseId)
-                        .put("exerciseIndex", s.exerciseIndex)
-                        .put("showVideo", s.showVideo)
-                        .put("workoutName", s.workoutName)
-                        .put("workoutIndex", s.workoutIndex)
-                        .put("totalWorkouts", s.totalWorkouts)
-                        .put("setIndex", s.setIndex)
-                        .put("totalSets", s.totalSets)
-                        .put("durationSec", s.durationSec)
-                        .put("reps", s.reps)
-                        .put("timeBased", s.timeBased)
-                        .put("display", s.display.name)
-                        .put("confirm", s.confirm.name)
-                        .put("finalCount", s.finalCount)
-                        .apply { if (s.beepSoundUri != null) put("beepSoundUri", s.beepSoundUri) }
-                        .put("alarm", s.alarm)
-                        .put("colorArgb", s.colorArgb)
-                        .put("weighted", s.weighted)
-                        .put("weightTotal", s.weightTotal)
-                        .put("weightLabel", s.weightLabel),
-                )
-            }
-            return arr.toString()
-        }
+        // Viven en PlayerStepJson, que es puro y tiene su test (TD-129). Se quedan aqui como
+        // puerta para no tocar a todos los que ya los llaman.
+        fun encodeSteps(list: List<PlayerStep>): String = com.maurozegarra.master.model.PlayerStepJson.encode(list)
 
-        fun decodeSteps(json: String): List<PlayerStep> = try {
-            val arr = JSONArray(json)
-            (0 until arr.length()).map { i ->
-                val o = arr.getJSONObject(i)
-                PlayerStep(
-                    kind = StepKind.valueOf(o.getString("kind")),
-                    title = o.optString("title", ""),
-                    note = o.optString("note", ""),
-                    ownerName = o.optString("ownerName", ""),
-                    ownerExerciseId = o.optString("ownerExerciseId", ""),
-                    exerciseIndex = o.optInt("exerciseIndex", 0),
-                    showVideo = o.optBoolean("showVideo", true),
-                    workoutName = o.optString("workoutName", ""),
-                    workoutIndex = o.optInt("workoutIndex", 0),
-                    totalWorkouts = o.optInt("totalWorkouts", 1),
-                    setIndex = o.optInt("setIndex", 0),
-                    totalSets = o.optInt("totalSets", 1),
-                    durationSec = o.optInt("durationSec", 0),
-                    reps = o.optInt("reps", 0),
-                    timeBased = o.optBoolean("timeBased", true),
-                    display = runCatching { DisplayMode.valueOf(o.optString("display")) }.getOrDefault(DisplayMode.COUNTDOWN),
-                    confirm = runCatching { ConfirmMode.valueOf(o.optString("confirm")) }.getOrDefault(ConfirmMode.AUTO),
-                    finalCount = o.optInt("finalCount", 0),
-                    beepSoundUri = o.optString("beepSoundUri", "").takeIf { it.isNotBlank() && it != "null" },
-                    alarm = o.optBoolean("alarm", true),
-                    colorArgb = o.optLong("colorArgb", 0xFF2E9E5BL),
-                    weighted = o.optBoolean("weighted", false),
-                    weightTotal = o.optDouble("weightTotal", 0.0),
-                    weightLabel = o.optString("weightLabel", ""),
-                )
-            }
-        } catch (_: Exception) {
-            emptyList()
-        }
+        fun decodeSteps(json: String): List<PlayerStep> = com.maurozegarra.master.model.PlayerStepJson.decode(json)
 
         fun stop(context: Context) {
             context.startService(

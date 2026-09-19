@@ -84,6 +84,15 @@ data class Exercise(
     val cooldownSec: Int = 0,
     val weightType: WeightType = WeightType.NONE,
     val barWeight: Double = 20.0,
+    /**
+     * Cuántas mancuernas lleva un ejercicio [WeightType.DUMBBELL]: 1 o 2 (TD-130).
+     *
+     * El peso de la serie es el de CADA mancuerna, y el total es la cuenta. Antes DUMBBELL
+     * era siempre "por mano" -dos- y lo de una sola mancuerna (suitcase carry, goblet) iba
+     * como TOTAL, que también es como van las máquinas: el player no podía decir "1 de
+     * 7.5" o "2 de 7.5", y eso es lo que hay que saber para agarrarlas del suelo.
+     */
+    val dumbbellCount: Int = 2,
     val setList: List<WorkSet> = emptyList(),
     val prepareCfg: StageConfig = StageConfig(color = StageConfig.COLOR_PREPARE, finalCount = 3),
     val workCfg: StageConfig = StageConfig(color = StageConfig.COLOR_WORK),
@@ -303,7 +312,7 @@ fun Exercise.normalizedSets(): Exercise =
 /** Peso total (kg) de una serie según el tipo de carga del ejercicio. */
 fun Exercise.weightTotal(s: WorkSet): Double = when (weightType) {
     WeightType.BARBELL -> barWeight + s.weight
-    WeightType.DUMBBELL -> 2.0 * s.weight
+    WeightType.DUMBBELL -> dumbbellCount * s.weight
     WeightType.TOTAL -> s.weight
     WeightType.NONE -> 0.0
 }

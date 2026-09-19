@@ -75,9 +75,21 @@ kilos de grasa, no a trece de peso.
   error habitual de 3 a 5 puntos y se mueve con la hidratacion.
 - **Sirven para tendencia**, siempre en las mismas condiciones: al despertar, tras el bano,
   en ayunas. Se mira la curva.
-- **La medicion de verdad que si puede hacer: circunferencia de cintura a la altura del
-  ombligo**, de pie, relajado, al despertar. Menos de 94 cm bien, 94-102 elevada, mas de 102
-  alta. **Pendiente: que la mida y la diga.**
+- **La medicion de verdad: circunferencia de cintura a la altura del ombligo**, de pie,
+  relajado, al despertar. Menos de 94 cm bien, 94-102 elevada, mas de 102 alta.
+- **El indice que se sigue es cintura / estatura: meta por debajo de 0.5**, que para 181 cm
+  es **menos de 90.5 cm**.
+
+### La serie (sabados al despertar)
+
+| Fecha | Peso | Cintura | Cintura / estatura | Nota |
+|---|---|---|---|---|
+| 12-sep | 83.5 | - | - | punto de partida de la balanza |
+| 19-sep | 84.4 | **93.5** | **0.52** | justo por debajo de 94 |
+
+La balanza del 19-sep ya ensenio por que no se le cree la grasa visceral: de 10 a 13 en una
+semana y cintura-cadera de 0.9 a 1.4, imposible. Bajo el agua corporal 3.1 puntos. Se lee la
+cinta.
 
 ### La sinergia
 

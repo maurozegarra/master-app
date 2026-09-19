@@ -136,6 +136,7 @@ object TrainingJson {
             .put("cooldownSec", e.cooldownSec)
             .put("weightType", e.weightType.name)
             .put("barWeight", e.barWeight)
+            .put("dumbbellCount", e.dumbbellCount)
             .put("setList", sets)
             .put("prepareCfg", stageToJson(e.prepareCfg))
             .put("workCfg", stageToJson(e.workCfg))
@@ -177,6 +178,8 @@ object TrainingJson {
             cooldownSec = o.optInt("cooldownSec", 0),
             weightType = runCatching { WeightType.valueOf(o.optString("weightType")) }.getOrDefault(WeightType.NONE),
             barWeight = o.optDouble("barWeight", 20.0),
+            // Sin el campo, 2: es lo que DUMBBELL significaba antes de TD-130.
+            dumbbellCount = o.optInt("dumbbellCount", 2),
             setList = setList,
             prepareCfg = stageFromJson(o.optJSONObject("prepareCfg"), StageConfig.COLOR_PREPARE, 3),
             workCfg = stageFromJson(o.optJSONObject("workCfg"), StageConfig.COLOR_WORK, 0),

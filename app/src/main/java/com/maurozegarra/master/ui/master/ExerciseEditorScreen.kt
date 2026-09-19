@@ -474,6 +474,16 @@ private fun WeightSection(ex: Exercise, accent: Color, t: Strings, onChange: (Ex
             VSpace(12)
             WeightStepper(t.barWeight, ex.barWeight, accent) { onChange(ex.copy(barWeight = it)) }
         }
+        // Con mancuernas, cuantas: el player dice "1 de 7.5" o "2 de 7.5", que es lo que
+        // hay que saber para agarrarlas del suelo (TD-130).
+        if (ex.weightType == WeightType.DUMBBELL) {
+            VSpace(12)
+            SegmentToggle(
+                options = listOf("1" to t.oneDumbbell, "2" to t.twoDumbbells),
+                selected = ex.dumbbellCount.toString(),
+                accent = accent,
+            ) { sel -> onChange(ex.copy(dumbbellCount = sel.toInt())) }
+        }
 
         if (ex.weightType != WeightType.NONE) {
             VSpace(12)

@@ -61,6 +61,15 @@ data class PlayerStep(
     val secPerRep: Int = 3,
     /** Velocidad prescrita en km/h, si el ejercicio la lleva (TD-124). */
     val speedKmh: Double? = null,
+    /**
+     * Con qué se carga, para que el player pueda decir QUÉ poner y no solo cuánto (TD-130):
+     * los discos por lado de una barra, o cuántas mancuernas y de cuánto.
+     */
+    val weightType: WeightType = WeightType.NONE,
+    /** Peso de la barra, si [weightType] es BARBELL. */
+    val barWeight: Double = 0.0,
+    /** Cuántas mancuernas, si [weightType] es DUMBBELL. */
+    val dumbbellCount: Int = 2,
 ) {
     /** La etapa requiere confirmación manual (TAP) para avanzar. */
     val manual: Boolean

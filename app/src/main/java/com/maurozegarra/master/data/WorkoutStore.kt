@@ -53,9 +53,17 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     /**
      * Nada se guarda sin [Training.uid]. Es el único punto de escritura, así que aquí se
      * cubren de una vez los defaults sembrados y los trainings de un respaldo antiguo.
+     *
+     * **Devuelve la lista ya con los uid puestos**, y quien la tenga en memoria debe
+     * quedarse con lo devuelto. Antes no la devolvía, y lo guardado y lo que la pantalla
+     * tenía en la mano dejaban de coincidir: un training recién sembrado se veía sin uid
+     * hasta el siguiente arranque, y "Asignar a…" no aparecía porque sin uid no hay con qué
+     * emparejarlo en el otro teléfono. Paso justo con el primer dia de NIKO (TD-128).
      */
-    fun saveTrainings(items: List<Training>) {
-        prefs.edit().putString(KEY_TRAININGS, TrainingJson.encode(items.withUids { newUid() })).apply()
+    fun saveTrainings(items: List<Training>): List<Training> {
+        val filled = items.withUids { newUid() }
+        prefs.edit().putString(KEY_TRAININGS, TrainingJson.encode(filled)).apply()
+        return filled
     }
 
     /** true si nunca se ha guardado la lista de trainings (instalación limpia). */
@@ -108,6 +116,12 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
      */
     fun lumbarRevision(): Int = prefs.getInt(KEY_LUMBAR_REVISION, 0)
     fun setLumbarRevision(rev: Int) { prefs.edit().putInt(KEY_LUMBAR_REVISION, rev).apply() }
+
+    fun catalogInstructionsRevision(): Int = prefs.getInt(KEY_CATALOG_INSTRUCTIONS, 0)
+    fun setCatalogInstructionsRevision(rev: Int) { prefs.edit().putInt(KEY_CATALOG_INSTRUCTIONS, rev).apply() }
+
+    fun nikoRevision(): Int = prefs.getInt(KEY_NIKO_REVISION, 0)
+    fun setNikoRevision(rev: Int) { prefs.edit().putInt(KEY_NIKO_REVISION, rev).apply() }
 
     /** Marca de migracion: si ya se corrigieron los pesos del 15-sep (TD-105). */
     fun isSep15Fixed(): Boolean = prefs.getBoolean(KEY_SEP15_FIXED, false)
@@ -222,6 +236,8 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_FIRST_SESSION = "lumbar_first_session_seeded_v2"
         const val KEY_WALK_NOTE_V2 = "walk_instructions_v2"
         const val KEY_LUMBAR_REVISION = "lumbar_revision"
+        const val KEY_NIKO_REVISION = "niko_revision"
+        const val KEY_CATALOG_INSTRUCTIONS = "catalog_instructions_revision"
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"
         const val KEY_SEP15_FIXED = "sep15_weights_fixed"
