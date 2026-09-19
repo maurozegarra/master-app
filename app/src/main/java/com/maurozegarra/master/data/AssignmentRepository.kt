@@ -81,11 +81,35 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
             .onFailure { Log.w(TAG, "no se pudo leer quien tiene $trainingUid", it) }
             .getOrNull()
 
+    /** Los uid de todo lo que alguien tiene asignado. Null si no se pudo leer (TD-132). */
+    fun assignedUids(): Set<String>? =
+        runCatching { AssignmentRowsJson.trainingUids(get("assignments?select=training_uid")) }
+            .onFailure { Log.w(TAG, "no se pudo leer que esta repartido", it) }
+            .getOrNull()
+
     /** Cuántos trainings tiene asignados alguien. Null si no se pudo leer. */
     fun assignmentCount(profileId: String): Int? =
         runCatching { AssignmentRowsJson.count(get(assignmentQuery(profileId, select = "training_uid"))) }
             .onFailure { Log.w(TAG, "no se pudo contar lo asignado a $profileId", it) }
             .getOrNull()
+
+    /**
+     * Vuelve a publicar el contenido de un training ya repartido (TD-132). Null si se
+     * publico, o el motivo.
+     *
+     * Solo toca la fila del training: las asignaciones no cambian, porque quien lo tiene lo
+     * sigue teniendo. El que recibe lo reemplaza por el uid en la siguiente sincronizacion.
+     */
+    fun republish(training: Training): String? {
+        val payload = JSONObject()
+            .put("uid", training.uid)
+            .put("name", training.name)
+            .put("payload", TrainingJson.toJson(training.forPublishing()))
+            .put("updated_at", java.time.Instant.now().toString())
+            .toString()
+        val res = write("POST", "trainings", payload, merge = true) ?: return NO_CONNECTION
+        return if (res.ok) null else reasonOf(res)
+    }
 
     // ---------- Sesiones (TD-126) ----------
 

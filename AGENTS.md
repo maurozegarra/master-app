@@ -168,8 +168,10 @@ siembran en el teléfono del perfil `mauro` (`LUMBAR_PROFILE`, TD-108), que es e
 lumbar (`NIKO_REVISION`)- y le llega a él o ella **asignándola**: en la lista de trainings,
 deslizar a la izquierda → **Assign to**. Dos cosas a saber:
 
-- **Una revisión nueva no le llega sola** (TD-132): lo que recibe es lo que se publicó al
-  asignar. Hay que volver a abrir *Assign to* y confirmar.
+- **Una revisión nueva le llega sola** (TD-132): cualquier cambio de un training repartido
+  —una revisión del código o una edición en el app— se vuelve a publicar al guardar y al
+  volver a primer plano, y el app avisa con *Updated for:* y los nombres. No hay que
+  reasignar. Sin red no se pierde: se reintenta en la siguiente sincronización.
 - **Lo que alguien tiene asignado se ve y se quita** en *Settings → Coach → People*,
   tocando su nombre (TD-134), incluido lo que ya no está en el teléfono del coach.
 
@@ -187,6 +189,7 @@ Las que más se usan (el app está en inglés, TD-133):
 |---|---|
 | Ver y quitar lo que alguien tiene asignado | Settings → Coach → **People** → tocar el nombre |
 | Repartir un training | Lista de trainings → deslizar a la izquierda → **Assign to** |
+| Quitar un training de la lista sin borrarlo | Lista de trainings → deslizar la tarjeta a la **derecha** (archiva). Vuelven desde la fila **Archived · N** del final, con el mismo gesto |
 | Respaldo manual | Settings → Data → **Export backup** / **Import backup** |
 | Instrucciones de un ejercicio, en el player | tocar la pantalla para que salga la franja de arriba → ícono de **lista** (≡) |
 

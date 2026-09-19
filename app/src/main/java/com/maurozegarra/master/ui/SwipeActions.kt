@@ -54,11 +54,19 @@ data class SwipeAction(
     val onClick: () -> Unit,
 )
 
-private enum class SwipeState { Closed, Open }
+private enum class SwipeState { Closed, Open, Triggered }
 
 private val ButtonSize = 44.dp
 private val ButtonGap = 10.dp
 private val PanelEndPadding = 12.dp
+
+/**
+ * Cuánto hay que arrastrar hacia la derecha para que la acción se dispare al soltar.
+ *
+ * 96dp y no menos: a la derecha no hay botón que tocar -el gesto ES la acción-, así que
+ * tiene que costar lo suficiente como para no dispararse con un roce al hacer scroll.
+ */
+private val RightTrigger = 96.dp
 
 /**
  * Grosor del borde del círculo de acción.
@@ -134,9 +142,18 @@ fun SwipeActionsRow(
      * envuelve el contenido y Compose lo rehace entero, con el estado que lleve dentro.
      */
     enabled: Boolean = true,
+    /**
+     * Acción del gesto hacia la DERECHA, si la fila tiene una (TD-138).
+     *
+     * No es un botón más: al arrastrar asoma su icono y la acción se ejecuta **al soltar**
+     * pasado [RightTrigger]; la fila vuelve sola a su sitio. Se hizo así porque el panel
+     * izquierdo ya lleva cuatro botones y un quinto ocuparía casi el ancho de la tarjeta,
+     * y porque el long-press, que sería la otra vía, ya es el arrastre para reordenar.
+     */
+    rightAction: SwipeAction? = null,
     content: @Composable () -> Unit,
 ) {
-    if (actions.isEmpty()) {
+    if (actions.isEmpty() && rightAction == null) {
         Box(modifier) { content() }
         return
     }
@@ -146,13 +163,14 @@ fun SwipeActionsRow(
     val token = remember { Any() }
     val panelWidth = ButtonSize * actions.size + ButtonGap * (actions.size - 1) + PanelEndPadding * 2
 
-    val state = remember(actions.size) {
+    val state = remember(actions.size, rightAction != null) {
         val panelPx = with(density) { panelWidth.toPx() }
         AnchoredDraggableState(
             initialValue = SwipeState.Closed,
             anchors = DraggableAnchors {
                 SwipeState.Closed at 0f
-                SwipeState.Open at -panelPx
+                if (actions.isNotEmpty()) SwipeState.Open at -panelPx
+                if (rightAction != null) SwipeState.Triggered at with(density) { RightTrigger.toPx() }
             },
             positionalThreshold = { distance -> distance * 0.4f },
             velocityThreshold = { with(density) { 120.dp.toPx() } },
@@ -200,6 +218,32 @@ fun SwipeActionsRow(
             }
         }
 
+        // El icono del gesto a la derecha, que asoma bajo la tarjeta mientras se arrastra.
+        // No es tocable a propósito: el gesto es la acción, y un botón ahí invitaría a
+        // soltar antes de tiempo y a tocarlo, que es justo lo que no dispara nada.
+        if (rightAction != null && offset > 1f) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(start = PanelEndPadding),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(ButtonSize)
+                        .clip(CircleShape)
+                        .border(SwipeBorder, AppTheme.colors.textPrimary, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        rightAction.icon,
+                        contentDescription = rightAction.label,
+                        tint = AppTheme.colors.textPrimary,
+                    )
+                }
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -227,6 +271,13 @@ fun SwipeActionsRow(
     // Al abrirse, avisa al coordinador para que la fila anterior se cierre.
     LaunchedEffect(state.currentValue) {
         if (state.currentValue == SwipeState.Open) controller.open(token)
+        if (state.currentValue == SwipeState.Triggered && rightAction != null) {
+            // Vuelve a su sitio ANTES de ejecutar: la fila suele irse de la lista al
+            // archivarse, y si se fuera desplazada, la siguiente que ocupe su lugar
+            // heredaría el desplazamiento.
+            state.animateTo(SwipeState.Closed)
+            rightAction.onClick()
+        }
     }
 
     // Y se cierra cuando el coordinador da paso a otra fila o pide cerrar todo.

@@ -34,6 +34,8 @@ import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.reorderedFrom
 import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionSync
+import com.maurozegarra.master.model.Archive
+import com.maurozegarra.master.model.PublishSync
 import com.maurozegarra.master.model.SPEED_MAX
 import com.maurozegarra.master.model.SPEED_MIN
 import com.maurozegarra.master.model.StepEngine
@@ -168,6 +170,39 @@ class MasterViewModel(
      * trampa que el comentario del init ya advierte para `syncing`.
      */
     private val sessionSyncLock = kotlinx.coroutines.sync.Mutex()
+
+    /** Lo mismo para republicar: ver la nota de arriba sobre el orden de inicializacion. */
+    private val republishLock = kotlinx.coroutines.sync.Mutex()
+
+    /**
+     * Aviso de que un training repartido se volvio a publicar, para que la pantalla lo diga
+     * (TD-132). Null cuando no hay nada que avisar.
+     */
+    var republishNotice by mutableStateOf<String?>(null)
+
+    /**
+     * Los uid archivados (TD-138), en memoria para que la lista reaccione al archivar.
+     * Declarado antes del `init` por la misma razon que los candados de arriba.
+     */
+    var archivedUids by mutableStateOf(store.archivedUids())
+        private set
+
+    /** Lo que se ve en la lista: todo menos lo archivado. */
+    val visibleTrainings: List<Training> get() = Archive.visible(trainings, archivedUids)
+
+    /** Lo archivado, que la lista ensena plegado al final. */
+    val archivedTrainings: List<Training> get() = Archive.archived(trainings, archivedUids)
+
+    /**
+     * Archiva o desarchiva. No borra, no desasigna y no para las republicaciones (TD-132):
+     * solo deja de ocupar sitio en la lista.
+     */
+    fun setArchived(trainingId: Long, archived: Boolean) {
+        val uid = trainings.firstOrNull { it.id == trainingId }?.uid ?: return
+        if (uid.isBlank()) return
+        archivedUids = if (archived) archivedUids + uid else archivedUids - uid
+        store.saveArchivedUids(archivedUids)
+    }
 
     private fun newId(): Long = nextId++
 
@@ -584,6 +619,43 @@ class MasterViewModel(
         }
     }
 
+    /**
+     * Republica los trainings repartidos que cambiaron (TD-132).
+     *
+     * Cualquier cambio, no solo las revisiones del coach: tambien lo que el edite en el app.
+     * Lo eligio asi el usuario, y por eso avisa cada vez -una edicion por error tiene que
+     * verse-. Sin red o sin sesion de entrenador no se pierde: la huella no se marca y se
+     * reintenta en la proxima sincronizacion.
+     */
+    private fun republishChanged() {
+        if (!isCoach) return
+        viewModelScope.launch(Dispatchers.IO) {
+            if (!republishLock.tryLock()) return@launch
+            try {
+                // Sin red no se sabe que esta repartido: se trabaja solo con las huellas que
+                // ya hay, y lo demas espera a la proxima vuelta.
+                val repartidos = assignments.assignedUids() ?: emptySet()
+                val cambiados = PublishSync.toRepublish(trainings.toList(), store.publishLedger(), repartidos)
+                if (cambiados.isEmpty()) return@launch
+                val avisos = mutableListOf<Pair<String, List<String>>>()
+                cambiados.forEach { (training, huella) ->
+                    if (assignments.republish(training) != null) return@forEach
+                    store.markPublished(training.uid, huella)
+                    val quienes = assignments.profilesWith(training.uid).orEmpty()
+                    if (quienes.isNotEmpty()) avisos += training.name to quienes
+                }
+                if (avisos.isEmpty()) return@launch
+                val nombres = assignments.directory()?.associate { it.id to it.name }.orEmpty()
+                val texto = avisos.joinToString("\n") { (nombre, ids) ->
+                    "$nombre \u2192 " + ids.joinToString(", ") { nombres[it] ?: it }
+                }
+                withContext(Dispatchers.Main) { republishNotice = texto }
+            } finally {
+                republishLock.unlock()
+            }
+        }
+    }
+
     private fun persist() {
         // Se recoge lo que devuelve el store: viene con los uid rellenados, y sin eso la
         // lista de la pantalla se queda con los huecos hasta el siguiente arranque.
@@ -593,6 +665,9 @@ class MasterViewModel(
             trainings.addAll(guardados)
         }
         snapshot()
+        // Guardar es el unico sitio por donde pasa cualquier cambio de un training, venga de
+        // una revision del coach o del editor: es donde toca mirar si hay que republicar.
+        republishChanged()
     }
 
     /**
@@ -867,7 +942,12 @@ class MasterViewModel(
      */
     fun setAssignees(trainingId: Long, profileIds: Set<String>, onDone: (String?) -> Unit) {
         val training = trainings.firstOrNull { it.id == trainingId } ?: return onDone("Training not found")
-        write(onDone) { assignments.setAssignees(training, profileIds) }
+        write({ error ->
+            // Asignar publica el contenido: es el punto de partida de la huella con la que
+            // despues se decide si hay que republicar (TD-132).
+            if (error == null) store.markPublished(training.uid, PublishSync.fingerprintOf(training))
+            onDone(error)
+        }) { assignments.setAssignees(training, profileIds) }
     }
 
     /**
@@ -949,6 +1029,7 @@ class MasterViewModel(
             // Cada vuelta a primer plano sincroniza asignaciones; es tambien el momento de
             // reintentar lo que no subio y de bajar lo nuevo de los atletas.
             syncSessions()
+            republishChanged()
             onDone(SyncResult.Ok(assigned = incoming.size, changed = changed))
         }
     }
@@ -1306,6 +1387,15 @@ class MasterViewModel(
         if (from == to || from !in trainings.indices || to !in trainings.indices) return
         trainings.add(to, trainings.removeAt(from))
         persist()
+    }
+
+    /**
+     * Reordenar arrastrando sobre la lista, donde lo archivado no aparece: las posiciones que
+     * llegan son las de lo visible y hay que traducirlas (TD-138).
+     */
+    fun moveVisibleTraining(from: Int, to: Int) {
+        val reales = Archive.visibleIndices(trainings, archivedUids)
+        moveTraining(reales.getOrNull(from) ?: return, reales.getOrNull(to) ?: return)
     }
 
     fun duplicateTraining(id: Long) {

@@ -1,7 +1,7 @@
 {
+  "versionCode": 287,
+  "changelog": "feat: TD-132 y TD-138, los cambios de una rutina repartida llegan solos y la lista esconde lo que no toca",
   "minVersionCode": 1,
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.276/master-1.0.276.apk",
-  "versionName": "1.0.276",
-  "changelog": "release: las asignaciones huerfanas se ven y se quitan desde People",
-  "versionCode": 276
+  "versionName": "1.0.287",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.287/master-1.0.287.apk"
 }

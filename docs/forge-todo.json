@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-138",
+      "title": "Archivar trainings: la lista ensena lo que toca, no todo lo que existe",
+      "category": "Feature",
+      "status": "done",
+      "manual": "PEDIDO el 19-sep-2026: 'me gustaria tener en la lista solo mi training que me toca manana y lo que le toca manana a Niko'. Tres ruidos distintos en la misma lista: LUMBAR (bad day), que solo se usa en un dia malo; los trainings de prueba, que no se quieren ver ni borrar; y los dias viejos de NIKO. Un filtro automatico necesitaria una regla para cada uno y se equivocaria justo el dia malo: por eso es un interruptor manual, como el archivo de WhatsApp.\n\nEL GESTO: deslizar la tarjeta a la DERECHA. Se descarto la barra contextual al mantener pulsado -su idea inicial- porque el long-press ya es el drag para reordenar, y se descarto un quinto boton en el panel izquierdo porque con cinco el panel mide casi lo que la tarjeta ('nada sexy'). A la derecha no habia nada, es una sola accion y es el mismo gesto con el que WhatsApp archiva. En la seccion de archivados, el mismo gesto desarchiva.\n\nLO QUE ARCHIVAR NO ES: no borra, no desasigna, no deja de sembrarse y no para las republicaciones (TD-132). El historial sigue ensenando sus sesiones y se puede reproducir desde ahi mismo. Reversible y con la seccion a la vista, asi que no lleva confirmacion ni deshacer.\n\nLA MARCA VA POR UID, no por id, y vive aparte de los trainings: una revision de la rutina lumbar o de NIKO reemplaza el objeto entero conservando el uid, y si la marca viajara dentro del training, lo archivado reapareceria en la siguiente revision. Es del dispositivo: no viaja con la asignacion -el telefono de NIKO archiva lo suyo- y por eso tampoco entra en el payload que se publica.\n\nVALIDADO en dispositivo el 19-sep-2026 (v1.0.287): 'probado, funciona'."
+    },
+    {
       "id": "TD-137",
       "title": "Circuitos: alternar ejercicios por rounds en vez de terminar uno para empezar otro",
       "category": "Feature",
@@ -40,8 +47,8 @@
       "id": "TD-132",
       "title": "Una revision de una rutina ya asignada no le llega al atleta hasta reasignarla",
       "category": "Feature",
-      "status": "pending",
-      "manual": "ENCONTRADO el 19-sep-2026 al rehacer el dia de NIKO (TD-127, revision 2): la revision se siembra en el telefono del coach, pero lo que ella recibe es lo que se PUBLICO al asignar. El payload solo sube en setAssignees, asi que una revision nueva se queda en el telefono del coach hasta que alguien vuelva a abrir 'Asignar a...' y confirme.\n\nHOY: el paso manual es reasignar -abrir 'Asignar a...' sobre el training y confirmar con ella marcada-. El uid se conserva entre revisiones, asi que se actualiza el mismo training en su telefono y no aparece uno nuevo.\n\nLO QUE HARIA FALTA: que cuando una revision cambia un training que ya tiene asignados, se republique solo. Necesita red y sesion de coach en el arranque, asi que tiene que poder fallar y reintentar sin bloquear nada. Es primo de TD-066 (publicar desde la PC)."
+      "status": "done",
+      "manual": "ENCONTRADO el 19-sep-2026 al rehacer el dia de NIKO (TD-127, revision 2): la revision se siembra en el telefono del coach, pero lo que ella recibe es lo que se PUBLICO al asignar. El payload solo sube en setAssignees, asi que una revision nueva se queda en el telefono del coach hasta que alguien vuelva a abrir 'Asignar a...' y confirme.\n\nHOY: el paso manual es reasignar -abrir 'Asignar a...' sobre el training y confirmar con ella marcada-. El uid se conserva entre revisiones, asi que se actualiza el mismo training en su telefono y no aparece uno nuevo.\n\nLO QUE HARIA FALTA: que cuando una revision cambia un training que ya tiene asignados, se republique solo. Necesita red y sesion de coach en el arranque, asi que tiene que poder fallar y reintentar sin bloquear nada. Es primo de TD-066 (publicar desde la PC).\n\nHECHO el 19-sep-2026 (v1.0.286), con la decision del usuario: 'dale con CUALQUIER cambio'. No solo las revisiones del codigo, tambien lo que el edite en el app. PublishSync guarda, por training publicado, la huella del payload (Training.forPublishing()); cuando la huella cambia se vuelve a publicar solo, y la pantalla avisa con un toast 'Updated for: <training> -> <nombres>' -porque si cualquier cambio viaja, una edicion por error tiene que verse-.\n\nDONDE ENGANCHA: persist() -por ahi pasa todo cambio de un training, venga de una revision o del editor- y la sincronizacion al volver a primer plano. Republicar toca SOLO la fila del training: las asignaciones no cambian, quien lo tiene lo sigue teniendo, y el uid estable hace que en el telefono del atleta se reemplace en vez de duplicarse.\n\nLO QUE NO ENTRA: lo que nunca se publico y nadie tiene -un training propio del coach no viaja-, y lo que este telefono RECIBIO (assigned), que seria devolverle al dueño una copia de lo suyo. Caso aparte, cubierto: lo que se asigno ANTES de que existiera el ledger -NIKO 1 y NIKO 2- no tiene huella; se toma la lista de uids repartidos del servidor para que entren igual. Sin red no se pierde nada: la huella no se marca y se reintenta en la proxima vuelta.\n\nVALIDADO en dispositivo el 19-sep-2026 (v1.0.286)."
     },
     {
       "id": "TD-131",
@@ -947,21 +954,28 @@
       "title": "Tests de dominio (Workout, PlayerStep)",
       "category": "Forge",
       "status": "auto",
-      "test": ["com.maurozegarra.master.model.WorkoutTest", "com.maurozegarra.master.model.PlayerStepTest"]
+      "test": [
+        "com.maurozegarra.master.model.WorkoutTest",
+        "com.maurozegarra.master.model.PlayerStepTest"
+      ]
     },
     {
       "id": "TD-002",
       "title": "Tests de rotacion idempotente",
       "category": "Forge",
       "status": "auto",
-      "test": ["com.maurozegarra.master.model.RotationTest"]
+      "test": [
+        "com.maurozegarra.master.model.RotationTest"
+      ]
     },
     {
       "id": "TD-001",
       "title": "Tests del motor de pasos (StepEngine)",
       "category": "Forge",
       "status": "auto",
-      "test": ["com.maurozegarra.master.model.StepEngineTest"]
+      "test": [
+        "com.maurozegarra.master.model.StepEngineTest"
+      ]
     }
   ]
 }

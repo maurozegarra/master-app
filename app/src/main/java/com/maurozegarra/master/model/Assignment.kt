@@ -85,6 +85,17 @@ object AssignmentRowsJson {
     }
 
     /** Cuántas filas trae la respuesta. */
+    /** Los training_uid de las filas, sin repetir. Null si la respuesta no se pudo leer. */
+    fun trainingUids(json: String): Set<String>? {
+        val arr = try { JSONArray(json) } catch (_: Exception) { return null }
+        val out = LinkedHashSet<String>()
+        for (i in 0 until arr.length()) {
+            val row = arr.optJSONObject(i) ?: return null
+            out += row.optString("training_uid").takeIf { it.isNotBlank() } ?: return null
+        }
+        return out
+    }
+
     fun count(json: String): Int? =
         try { JSONArray(json).length() } catch (_: Exception) { null }
 }

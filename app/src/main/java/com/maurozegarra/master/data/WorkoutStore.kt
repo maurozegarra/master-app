@@ -214,6 +214,33 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         prefs.edit().putString(KEY_UPLOAD_LEDGER, o.toString()).apply()
     }
 
+    /** Por training publicado, la huella de lo ultimo que se mando. Ver [PublishSync]. */
+    fun publishLedger(): Map<String, Int> = runCatching {
+        val o = org.json.JSONObject(prefs.getString(KEY_PUBLISH_LEDGER, "{}") ?: "{}")
+        o.keys().asSequence().associateWith { o.getInt(it) }
+    }.getOrDefault(emptyMap())
+
+    fun markPublished(uid: String, fingerprint: Int) {
+        val o = runCatching { org.json.JSONObject(prefs.getString(KEY_PUBLISH_LEDGER, "{}") ?: "{}") }
+            .getOrDefault(org.json.JSONObject())
+        o.put(uid, fingerprint)
+        prefs.edit().putString(KEY_PUBLISH_LEDGER, o.toString()).apply()
+    }
+
+    /**
+     * Los uid de los trainings archivados (TD-138). Aparte de los trainings a proposito: la
+     * marca tiene que sobrevivir a una revision, que reemplaza el training entero. Ver
+     * [com.maurozegarra.master.model.Archive].
+     */
+    fun archivedUids(): Set<String> = runCatching {
+        val a = org.json.JSONArray(prefs.getString(KEY_ARCHIVED_UIDS, "[]") ?: "[]")
+        (0 until a.length()).map { a.getString(it) }.toSet()
+    }.getOrDefault(emptySet())
+
+    fun saveArchivedUids(uids: Set<String>) {
+        prefs.edit().putString(KEY_ARCHIVED_UIDS, org.json.JSONArray(uids.toList()).toString()).apply()
+    }
+
     /** Las sesiones de los atletas, tal como las bajo el coach. Se reemplazan enteras. */
     fun loadAthleteSessions(): List<AthleteSession> =
         SessionSync.decodeAthleteSessions(prefs.getString(KEY_ATHLETE_SESSIONS, "[]") ?: "[]")
@@ -265,7 +292,9 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_LUMBAR_REVISION = "lumbar_revision"
         const val KEY_NIKO_REVISION = "niko_revision"
         const val KEY_UPLOAD_LEDGER = "session_upload_ledger"
+        const val KEY_PUBLISH_LEDGER = "publish_ledger"
         const val KEY_ATHLETE_SESSIONS = "athlete_sessions_json"
+        const val KEY_ARCHIVED_UIDS = "archived_training_uids"
         const val KEY_CATALOG_INSTRUCTIONS = "catalog_instructions_revision"
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"

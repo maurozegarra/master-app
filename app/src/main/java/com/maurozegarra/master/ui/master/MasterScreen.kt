@@ -33,10 +33,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Unarchive
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,6 +55,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,6 +133,15 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
     val timeFmt = remember { java.time.format.DateTimeFormatter.ofPattern("h:mm a") }
     val swipeController = rememberSwipeRowsController()
 
+    // Cuando un training repartido se vuelve a publicar solo (TD-132) se avisa: el usuario
+    // eligio que CUALQUIER cambio viaje, asi que una edicion por error tiene que verse.
+    LaunchedEffect(vm.republishNotice) {
+        vm.republishNotice?.let {
+            Toast.makeText(ctx, t.republished + "\n" + it, Toast.LENGTH_LONG).show()
+            vm.republishNotice = null
+        }
+    }
+
     /** Training cuyo reparto se está editando, si hay alguno. */
     var assigning by remember { mutableStateOf<Training?>(null) }
 
@@ -173,9 +187,14 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             }
         } else {
             val listState = rememberLazyListState()
+            // Lo que se arrastra son posiciones de lo VISIBLE; el ViewModel las traduce al
+            // orden real, donde lo archivado sigue estando (TD-138).
             val dragDropState = rememberDragDropState(listState) { from, to ->
-                vm.moveTraining(from - 1, to - 1)
+                vm.moveVisibleTraining(from - 1, to - 1)
             }
+            val visibles = vm.visibleTrainings
+            val archivados = vm.archivedTrainings
+            var archivedExpanded by rememberSaveable { mutableStateOf(false) }
             // Al hacer scroll se cierra la fila abierta: dejarla abierta fuera de vista
             // significa volver a encontrarla asi mas tarde, sin recordar por que.
             LaunchedEffect(listState.isScrollInProgress) {
@@ -191,7 +210,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                     WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- }, onDayClick = { selectedDate = it })
                 }
                 itemsIndexed(
-                    vm.trainings,
+                    visibles,
                     key = { _, it -> it.id },
                     contentType = { _, _ -> ReorderableContentType },
                 ) { index, tr ->
@@ -220,7 +239,58 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             } else {
                                 null
                             },
+                            // Sin uid no hay con que recordar que esta archivado entre
+                            // revisiones, asi que esos no se archivan.
+                            onArchive = if (tr.uid.isNotBlank()) {
+                                { vm.setArchived(tr.id, true) }
+                            } else {
+                                null
+                            },
                         )
+                    }
+                }
+
+                // Los archivados, plegados al final. Sin pantalla nueva: en un dia malo, la
+                // variante que toca esta a dos toques.
+                if (archivados.isNotEmpty()) {
+                    item(key = "archived_header") {
+                        ArchivedRow(
+                            count = archivados.size,
+                            expanded = archivedExpanded,
+                            t = t,
+                            onToggle = { archivedExpanded = !archivedExpanded },
+                        )
+                    }
+                    if (archivedExpanded) {
+                        // Clave distinta de la de la lista visible: al archivar, la tarjeta
+                        // se desecha y vuelve a nacer aqui, sin arrastrar el desplazamiento
+                        // del gesto que la trajo.
+                        items(archivados, key = { "archived_${it.id}" }) { tr ->
+                            TrainingCard(
+                                training = tr,
+                                accent = accent,
+                                t = t,
+                                isActive = vm.activePlayerTrainingId == tr.id,
+                                swipeController = swipeController,
+                                onPlay = { vm.openPlayer(tr.id); onStart() },
+                                onOpen = { vm.openPlayer(tr.id) },
+                                onEdit = { vm.startEditTraining(tr.id) },
+                                onDuplicate = { vm.duplicateTraining(tr.id) },
+                                onDelete = {
+                                    vm.deleteTrainingEverywhere(tr.id) { error ->
+                                        if (error != null) Toast.makeText(ctx, error, Toast.LENGTH_LONG).show()
+                                    }
+                                },
+                                mayBeAssigned = vm.isCoach,
+                                onAssign = if (vm.isCoach && tr.uid.isNotBlank()) {
+                                    { assigning = tr }
+                                } else {
+                                    null
+                                },
+                                onArchive = { vm.setArchived(tr.id, false) },
+                                isArchived = true,
+                            )
+                        }
                     }
                 }
             }
@@ -449,6 +519,45 @@ private fun WeekCalendar(
     }
 }
 
+/**
+ * La fila que resume lo archivado y lo despliega en el sitio (TD-138).
+ *
+ * Sin tarjeta ni borde: es un separador, no un training, y tiene que leerse como el final
+ * de la lista y no como una fila mas.
+ */
+@Composable
+private fun ArchivedRow(count: Int, expanded: Boolean, t: Strings, onToggle: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Dims.row))
+            .clickable(onClick = onToggle)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            Icons.Outlined.Archive,
+            contentDescription = null,
+            tint = AppTheme.colors.textDim,
+            modifier = Modifier.size(18.dp),
+        )
+        Text(
+            "${t.archived} · $count",
+            color = AppTheme.colors.textDim,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f),
+        )
+        Icon(
+            if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+            contentDescription = null,
+            tint = AppTheme.colors.textDim,
+            modifier = Modifier.size(18.dp),
+        )
+    }
+}
+
 @Composable
 private fun TrainingCard(
     training: Training,
@@ -465,6 +574,10 @@ private fun TrainingCard(
     onAssign: (() -> Unit)?,
     /** Con sesión de entrenador, borrar también le quita el training a quien lo tenga. */
     mayBeAssigned: Boolean = false,
+    /** Deslizar a la derecha (TD-138). Null cuando este training no se puede archivar. */
+    onArchive: (() -> Unit)? = null,
+    /** Ya archivado: el mismo gesto lo devuelve a la lista. */
+    isArchived: Boolean = false,
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
     val exercises = training.workouts.sumOf { w ->
@@ -496,7 +609,18 @@ private fun TrainingCard(
         }
     }
 
-    SwipeActionsRow(actions = actions, controller = swipeController) {
+    // Archivar no cabia como quinto boton -el panel mediria casi lo que la tarjeta- ni
+    // como long-press, que ya es el arrastre para reordenar. A la derecha no habia nada, y
+    // es el mismo gesto con el que WhatsApp archiva un chat.
+    val rightAction = onArchive?.let {
+        SwipeAction(
+            icon = if (isArchived) Icons.Outlined.Unarchive else Icons.Outlined.Archive,
+            label = if (isArchived) t.unarchive else t.archive,
+            onClick = it,
+        )
+    }
+
+    SwipeActionsRow(actions = actions, controller = swipeController, rightAction = rightAction) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

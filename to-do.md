@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **84 / 137** hechos, 53 pendientes.
+Progreso: **86 / 138** hechos, 52 pendientes.
 
 ## Pendientes
 
@@ -28,12 +28,6 @@ MISMO DIA: la plancha lateral de NIKO 2 salia en INGLES en el telefono del coach
 LO QUE FALTA: el app es English-only por decision de producto (I18n.get() devuelve EN y lang() es 'en'), pero la base existe: Strings es una clase con todas las cadenas y el catalogo ya tiene los nombres en los dos idiomas. Hace falta un Strings ES completo, un ajuste de idioma por telefono (no por training: el idioma es de quien lo usa), y decidir que pasa con los textos libres que escribe el coach -notas, nombres de bloques-, que no se traducen solos.
 
 OJO: el idioma es del TELEFONO. Si el coach escribe en ingles para si y en español para NIKO, las notas de sus rutinas tienen que ir en el idioma de quien las recibe.
-- [ ] **TD-132** Una revision de una rutina ya asignada no le llega al atleta hasta reasignarla
-  - ENCONTRADO el 19-sep-2026 al rehacer el dia de NIKO (TD-127, revision 2): la revision se siembra en el telefono del coach, pero lo que ella recibe es lo que se PUBLICO al asignar. El payload solo sube en setAssignees, asi que una revision nueva se queda en el telefono del coach hasta que alguien vuelva a abrir 'Asignar a...' y confirme.
-
-HOY: el paso manual es reasignar -abrir 'Asignar a...' sobre el training y confirmar con ella marcada-. El uid se conserva entre revisiones, asi que se actualiza el mismo training en su telefono y no aparece uno nuevo.
-
-LO QUE HARIA FALTA: que cuando una revision cambia un training que ya tiene asignados, se republique solo. Necesita red y sesion de coach en el arranque, asi que tiene que poder fallar y reintentar sin bloquear nada. Es primo de TD-066 (publicar desde la PC).
 - [ ] **TD-131** Las instrucciones del catalogo viajan con el app, a todos los telefonos
   - ENCONTRADO el 19-sep-2026 al ir a escribir las instrucciones del dia de NIKO: viven en cada telefono y ASIGNAR NO LAS MANDA. Escritas en el telefono del coach, a ella no le habrian llegado nunca. Nacio de su pregunta: 'como se ejecuta el hip abduction, y con el neck isometric estoy aun mas perdido'.
 
@@ -345,6 +339,8 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 
 ### Feature
 
+- [x] **TD-138** Archivar trainings: la lista ensena lo que toca, no todo lo que existe
+- [x] **TD-132** Una revision de una rutina ya asignada no le llega al atleta hasta reasignarla
 - [x] **TD-110** El historial ensena el dolor y la nota de cada sesion
 - [x] **TD-105** Revision 2 de la rutina, y corregir los pesos mal registrados del 15-sep
 - [x] **TD-104** Inventariar el equipo disponible para poder disenar con lo que hay
