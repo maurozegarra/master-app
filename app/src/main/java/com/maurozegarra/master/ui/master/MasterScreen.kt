@@ -206,7 +206,12 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             onOpen = { vm.openPlayer(tr.id) },
                             onEdit = { vm.startEditTraining(tr.id) },
                             onDuplicate = { vm.duplicateTraining(tr.id) },
-                            onDelete = { vm.deleteTraining(tr.id) },
+                            onDelete = {
+                                vm.deleteTrainingEverywhere(tr.id) { error ->
+                                    if (error != null) Toast.makeText(ctx, error, Toast.LENGTH_LONG).show()
+                                }
+                            },
+                            mayBeAssigned = vm.isCoach,
                             // Un training sin uid no se puede repartir: el uid es la clave
                             // con la que el que recibe lo empareja, y sin ella cada
                             // sincronización lo tomaría por uno nuevo.
@@ -458,6 +463,8 @@ private fun TrainingCard(
     onDelete: () -> Unit,
     /** Null cuando este dispositivo no puede repartir: sin sesión no hay acción que ofrecer. */
     onAssign: (() -> Unit)?,
+    /** Con sesión de entrenador, borrar también le quita el training a quien lo tenga. */
+    mayBeAssigned: Boolean = false,
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
     val exercises = training.workouts.sumOf { w ->
@@ -564,7 +571,14 @@ private fun TrainingCard(
             titleContentColor = AppTheme.colors.textPrimary,
             textContentColor = AppTheme.colors.textDim,
             title = { Text(t.delete) },
-            text = { Text(t.deleteTrainingConfirm(training.name.ifBlank { t.noName })) },
+            // Con sesion de entrenador se avisa que tambien se le quita a quien lo tenga
+            // (TD-134): antes borrar era solo local y dejaba asignaciones huerfanas.
+            text = {
+                Text(
+                    t.deleteTrainingConfirm(training.name.ifBlank { t.noName }) +
+                        if (mayBeAssigned) "\n\n${t.deleteAlsoUnassigns}" else "",
+                )
+            },
             confirmButton = {
                 TextButton(onClick = { onDelete(); confirmDelete = false }) {
                     Text(t.delete, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)

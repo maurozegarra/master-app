@@ -113,7 +113,7 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 ## Cómo poner contenido en el teléfono
 
 **Regla: los trainings, los ejercicios y los vídeos entran DESDE EL CÓDIGO. Nunca se le
-pide al usuario que importe un respaldo.** Importar (`Ajustes → Import data`) reemplaza
+pide al usuario que importe un respaldo.** Importar (`Settings → Data → Import backup`) reemplaza
 *todos* sus datos, así que obliga a reconstruir su estado completo en un archivo, depende
 de que el respaldo esté al día y lo deja haciendo a mano algo que el repo ya automatiza.
 Si un asistente termina diciendo "cópialo tú al teléfono", se equivocó de camino: hay uno
@@ -151,12 +151,44 @@ Las **instrucciones** de los ejercicios se siembran igual, con `lumbarInstructio
 `seedLumbarInstructions()` en el ViewModel, y van **con merge y sin pisar** lo que el
 usuario ya tenga escrito: un `exerciseId` del catálogo puede traer instrucciones suyas.
 
+**Las del catálogo van a TODOS los teléfonos** (`catalogInstructions()`, TD-131), sin
+puerta de perfil y también en una instalación limpia, porque **asignar un training no
+manda las instrucciones**: viven en cada teléfono. Están en español -NIKO no lee inglés- y
+van por revisión (`CATALOG_INSTRUCTIONS_REVISION`). Un ejercicio nuevo que alguien vaya a
+hacer sin el coach delante necesita las suyas ahí, antes de entregarle la rutina.
+
 Los **ejercicios nuevos** van al `ExerciseCatalog` (id `ex_*`, nombre ES y EN), no como
 ejercicios propios: así tienen id estable para el vídeo y salen en el selector.
 
 El training sembrado llega a **cualquier** instalación del app, incluidas las de otras
-personas. Si el contenido es solo para un teléfono, el camino no es sembrar sino asignar
-(TD-063 / TD-066).
+personas, salvo que su siembra mire el perfil: las rutinas lumbares y las de NIKO solo se
+siembran en el teléfono del perfil `mauro` (`LUMBAR_PROFILE`, TD-108), que es el del coach.
+
+**La rutina de otro atleta** se siembra en el teléfono del coach -por revisión, como la
+lumbar (`NIKO_REVISION`)- y le llega a él o ella **asignándola**: en la lista de trainings,
+deslizar a la izquierda → **Assign to**. Dos cosas a saber:
+
+- **Una revisión nueva no le llega sola** (TD-132): lo que recibe es lo que se publicó al
+  asignar. Hay que volver a abrir *Assign to* y confirmar.
+- **Lo que alguien tiene asignado se ve y se quita** en *Settings → Coach → People*,
+  tocando su nombre (TD-134), incluido lo que ya no está en el teléfono del coach.
+
+### Rutas del app: con las palabras de la pantalla
+
+Al decirle al usuario dónde tocar, **se usan las etiquetas que ve**, y esas viven en
+`i18n/Strings.kt`, no en los nombres del código. El 19-sep se le dio la ruta *"Ajustes →
+Manage profiles"*, sacada de `manageProfiles`, y en el app no existe: la pantalla dice
+*People*. Desde TD-135 los nombres de esa pantalla en el código siguen a la pantalla, pero
+la regla es la misma para todo: antes de dar una ruta, mirar el texto en `Strings.kt`.
+
+Las que más se usan (el app está en inglés, TD-133):
+
+| Para | Ruta |
+|---|---|
+| Ver y quitar lo que alguien tiene asignado | Settings → Coach → **People** → tocar el nombre |
+| Repartir un training | Lista de trainings → deslizar a la izquierda → **Assign to** |
+| Respaldo manual | Settings → Data → **Export backup** / **Import backup** |
+| Instrucciones de un ejercicio, en el player | tocar la pantalla para que salga la franja de arriba → ícono de **lista** (≡) |
 
 ### Publicar un vídeo
 

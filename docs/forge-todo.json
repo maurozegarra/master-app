@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-135",
+      "title": "El codigo y la documentacion dicen lo que dice la pantalla",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "manual": "PEDIDO el 19-sep-2026, despues de una ruta que no existia: se le dijo 'Ajustes → Manage profiles → toca Niko', y en su pantalla eso es 'Settings → Coach → People'. El nombre salio del codigo -manageProfiles, ProfilesScreen- y no de lo que el ve. Sus palabras: 'actualiza el codigo para que refleje lo que hay en pantalla, y altamente probable que la documentacion tambien este desactualizada'. Lo estaba.\n\nEN EL CODIGO: las claves de Strings pasan a people/peopleDesc; ProfilesScreen.kt pasa a PeopleScreen.kt; showProfiles y onManageProfiles, a showPeople y onPeople. La descripcion en pantalla dice ahora lo que hace: 'Who can receive trainings, and what each one has assigned'. El modelo Profile y los metodos del repositorio se quedan: hablan del servidor, donde la tabla se llama profiles, y el comentario de PeopleScreen deja escrita la equivalencia.\n\nEN LA DOCUMENTACION: AGENTS.md decia 'Ajustes → Import data' (es Settings → Data → Import backup); decia que un training sembrado llega a cualquier instalacion, cuando desde TD-108 las rutinas del coach miran el perfil; no explicaba como le llega una rutina a otro atleta ni que una revision exige reasignar; y no mencionaba las instrucciones del catalogo. coach.md no tenia la rutina de NIKO, el equipo, los objetivos ni sus documentos. Todo corregido, y AGENTS.md gana una tabla de rutas con las palabras de la pantalla y la regla: antes de dar una ruta, mirar Strings.kt.\n\nAl escribir esa tabla casi se repite el error con el boton de instrucciones del player; se verifico en el codigo antes de dejarlo: es un icono de lista en la franja de arriba, que sale al tocar la pantalla."
+    },
+    {
+      "id": "TD-134",
+      "title": "Fix: borrar un training dejaba su asignacion viva, y no habia donde quitarla",
+      "category": "Fix",
+      "status": "done",
+      "manual": "REPORTADO el 19-sep-2026: 'veo que [NIKO] tiene asignado VIDEO y yo no lo tengo como para quitarle la asignacion'. Confirmado leyendo Supabase (lectura publica): niko tenia asignados VIDEO (publicado el 6-sep) y su dia de gluteo; y mauro tiene 'COLUMNA (asignado)', pendiente de confirmar si el lo conserva.\n\nLA CAUSA: deleteTraining solo borraba en el telefono. La asignacion seguia en el servidor, el atleta lo seguia recibiendo, y el coach ya no tenia el training, asi que no habia 'Asignar a...' donde quitarlo.\n\nDOS PARTES:\n1. Recuperar las huerfanas. En Settings → Coach → People, tocar un nombre abre lo que tiene asignado, leido del SERVIDOR, con 'Remove' en cada uno; lo que ya no esta en este telefono se marca 'not on this phone'. AssignmentRepository.unassign quita UNA asignacion.\n2. Que no vuelva a pasar. Con sesion de entrenador, borrar un training primero se lo quita a quien lo tenga y despues lo borra; el dialogo lo avisa. Si no se puede saber quien lo tiene -sin red- NO se borra: borrar a ciegas es justo como nacen las huerfanas. En un telefono de atleta no se consulta, porque no reparte nada.\n\nVALIDADO en el telefono el 19-sep: le quito VIDEO a NIKO desde People. Antes tuvo que pedir la ruta con una captura: se le habia dicho 'Manage profiles', que no existe en pantalla (TD-135)."
+    },
+    {
       "id": "TD-133",
       "title": "El app en español, para NIKO y para cualquiera que no lea ingles",
       "category": "Feature",

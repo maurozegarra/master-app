@@ -73,7 +73,7 @@ fun SettingsScreen(
     vm: SettingsViewModel,
     masterVm: MasterViewModel,
     t: Strings,
-    onManageProfiles: () -> Unit,
+    onPeople: () -> Unit,
 ) {
     val cfg = vm.config
     val accent = AppTheme.colors.accent
@@ -93,7 +93,7 @@ fun SettingsScreen(
                 masterVm = masterVm,
                 accent = accent,
                 t = t,
-                onManageProfiles = onManageProfiles,
+                onPeople = onPeople,
             )
         }
 
@@ -348,7 +348,7 @@ private fun CoachSection(
     masterVm: MasterViewModel,
     accent: Color,
     t: Strings,
-    onManageProfiles: () -> Unit,
+    onPeople: () -> Unit,
 ) {
     val ctx = LocalContext.current
     var signingIn by remember { mutableStateOf(false) }
@@ -361,10 +361,10 @@ private fun CoachSection(
         )
         Spacer(Modifier.height(12.dp))
         ActionRow(
-            label = t.manageProfiles,
-            desc = t.manageProfilesDesc,
+            label = t.people,
+            desc = t.peopleDesc,
             accent = accent,
-            onClick = onManageProfiles,
+            onClick = onPeople,
         )
         Spacer(Modifier.height(16.dp))
         ActionRow(

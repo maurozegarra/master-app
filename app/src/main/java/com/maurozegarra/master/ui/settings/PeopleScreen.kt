@@ -24,6 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import com.maurozegarra.master.ui.theme.STATUS_SKIPPED
+import com.maurozegarra.master.model.Training
+import androidx.compose.ui.draw.rotate
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,14 +45,19 @@ import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.Dims
 
 /**
- * Quién puede recibir trainings: crear, renombrar y quitar.
+ * **People** (Settings → Coach → People): quién puede recibir trainings -crear, renombrar,
+ * quitar- y, tocando un nombre, qué tiene asignado cada uno (TD-134).
+ *
+ * En pantalla se llaman *People*; en el servidor, `profiles`, y el modelo es [Profile]. El
+ * nombre del archivo y de la función siguen a la pantalla (TD-135): el 19-sep el coach le
+ * dio al usuario la ruta "Manage profiles", sacada del código, y en el app no existe.
  *
  * Solo se llega aquí con sesión de entrenador. Aun así, la autorización real vive en el
  * servidor: si la sesión caducó, la escritura se rechaza y se ve el motivo. Esconder los
  * botones es comodidad, no seguridad.
  */
 @Composable
-fun ProfilesScreen(vm: MasterViewModel, t: Strings) {
+fun PeopleScreen(vm: MasterViewModel, t: Strings) {
     val ctx = LocalContext.current
     val accent = AppTheme.colors.accent
 
@@ -61,6 +72,22 @@ fun ProfilesScreen(vm: MasterViewModel, t: Strings) {
     var deleting by remember { mutableStateOf<Profile?>(null) }
     var deletingCount by remember { mutableStateOf<Int?>(null) }
     var busy by remember { mutableStateOf(false) }
+
+    // Lo que tiene asignado la persona abierta, leido del SERVIDOR y no del telefono
+    // (TD-134): lo que importa ver es justo lo que este telefono ya no tiene.
+    var abierto by remember { mutableStateOf<String?>(null) }
+    var asignados by remember { mutableStateOf<List<Training>?>(null) }
+    var cargandoAsignados by remember { mutableStateOf(false) }
+    var quitando by remember { mutableStateOf<Pair<Profile, Training>?>(null) }
+
+    fun cargarAsignados(profileId: String) {
+        cargandoAsignados = true
+        asignados = null
+        vm.loadAssignedTo(profileId) {
+            asignados = it
+            cargandoAsignados = false
+        }
+    }
 
     LaunchedEffect(reloads) {
         loading = true
@@ -102,6 +129,15 @@ fun ProfilesScreen(vm: MasterViewModel, t: Strings) {
                         profile = p,
                         accent = accent,
                         t = t,
+                        expanded = abierto == p.id,
+                        onToggle = {
+                            if (abierto == p.id) {
+                                abierto = null
+                            } else {
+                                abierto = p.id
+                                cargarAsignados(p.id)
+                            }
+                        },
                         onRename = { renaming = p },
                         onDelete = {
                             deleting = p
@@ -109,6 +145,15 @@ fun ProfilesScreen(vm: MasterViewModel, t: Strings) {
                             vm.countAssignments(p.id) { deletingCount = it }
                         },
                     )
+                    if (abierto == p.id) {
+                        AssignedList(
+                            asignados = asignados,
+                            cargando = cargandoAsignados,
+                            locales = vm.trainings.map { it.uid }.toSet(),
+                            t = t,
+                            onRemove = { tr -> quitando = p to tr },
+                        )
+                    }
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -138,6 +183,35 @@ fun ProfilesScreen(vm: MasterViewModel, t: Strings) {
                 vm.createProfile(name) { error ->
                     adding = false
                     finish(error)
+                }
+            },
+        )
+    }
+
+    quitando?.let { (p, tr) ->
+        AlertDialog(
+            onDismissRequest = { if (!busy) quitando = null },
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.textPrimary,
+            title = { Text(t.unassign) },
+            text = { Text(t.unassignConfirm(tr.name, p.name), color = AppTheme.colors.textDim) },
+            confirmButton = {
+                TextButton(
+                    enabled = !busy,
+                    onClick = {
+                        busy = true
+                        vm.unassign(p.id, tr.uid) { error ->
+                            quitando = null
+                            busy = false
+                            Toast.makeText(ctx, error ?: t.profilesUpdated, Toast.LENGTH_SHORT).show()
+                            if (error == null) cargarAsignados(p.id)
+                        }
+                    },
+                ) { Text(t.unassign, color = ACTION_DELETE, fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                TextButton(enabled = !busy, onClick = { quitando = null }) {
+                    Text(t.cancel, color = AppTheme.colors.textDim)
                 }
             },
         )
@@ -202,6 +276,8 @@ private fun ProfileRow(
     profile: Profile,
     accent: Color,
     t: Strings,
+    expanded: Boolean,
+    onToggle: () -> Unit,
     onRename: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -210,13 +286,24 @@ private fun ProfileRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            profile.name,
-            color = AppTheme.colors.textPrimary,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.weight(1f),
-        )
+        // El nombre abre lo que tiene asignado (TD-134).
+        Row(
+            Modifier.weight(1f).clickable(onClick = onToggle),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = AppTheme.colors.textDim,
+                modifier = Modifier.rotate(if (expanded) 90f else 0f),
+            )
+            Text(
+                profile.name,
+                color = AppTheme.colors.textPrimary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
         Text(
             t.renameProfile,
             color = accent,
@@ -229,6 +316,49 @@ private fun ProfileRow(
             fontSize = 14.sp,
             modifier = Modifier.clickable(onClick = onDelete),
         )
+    }
+}
+
+/**
+ * Lo que tiene asignado una persona, con la opcion de quitarlo (TD-134).
+ *
+ * Marca lo que ya NO esta en este telefono: es justo la asignacion huerfana, la que no
+ * tiene ningun otro sitio donde quitarse.
+ */
+@Composable
+private fun AssignedList(
+    asignados: List<Training>?,
+    cargando: Boolean,
+    locales: Set<String>,
+    t: Strings,
+    onRemove: (Training) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().padding(start = 28.dp, bottom = 8.dp)) {
+        when {
+            cargando -> Text("\u2026", color = AppTheme.colors.textDim, fontSize = 14.sp)
+            asignados == null -> Text(t.profileLoadFailed, color = AppTheme.colors.textDim, fontSize = 14.sp)
+            asignados.isEmpty() -> Text(t.noneAssigned, color = AppTheme.colors.textDim, fontSize = 14.sp)
+            else -> asignados.forEach { tr ->
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(tr.name, color = AppTheme.colors.textPrimary, fontSize = 15.sp)
+                        if (tr.uid !in locales) {
+                            Text(t.notOnThisPhone, color = STATUS_SKIPPED, fontSize = 12.sp)
+                        }
+                    }
+                    Text(
+                        t.unassign,
+                        color = ACTION_DELETE,
+                        fontSize = 14.sp,
+                        modifier = Modifier.clickable { onRemove(tr) },
+                    )
+                }
+            }
+        }
     }
 }
 

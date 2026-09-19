@@ -88,6 +88,20 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
     // ---------- Escritura (solo entrenador) ----------
 
     /**
+     * Quita UN training a UN perfil. Null si se quito, o el motivo (TD-134).
+     *
+     * Existe por las asignaciones huerfanas: un training que el coach borro de su telefono
+     * seguia asignado en el servidor, y como ya no lo tenia, no habia "Asignar a..." donde
+     * quitarlo. El 19-sep NIKO seguia recibiendo "VIDEO", borrado del telefono del coach
+     * trece dias antes.
+     */
+    fun unassign(profileId: String, trainingUid: String): String? {
+        val path = "assignments?profile_id=eq.${enc(profileId)}&training_uid=eq.${enc(trainingUid)}"
+        val res = write("DELETE", path) ?: return NO_CONNECTION
+        return if (res.ok) null else reasonOf(res)
+    }
+
+    /**
      * Crea un perfil. Devuelve **null si se creó**, o el motivo si no.
      *
      * El id sale del nombre y no de un contador: es legible en la base de datos y hace que

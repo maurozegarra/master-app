@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **83 / 133** hechos, 50 pendientes.
+Progreso: **84 / 135** hechos, 51 pendientes.
 
 ## Pendientes
 
@@ -293,6 +293,14 @@ LAS TRES SON EL MISMO ERROR: un numero puesto a mano para reservarle sitio a otr
 
 ### Mantenimiento
 
+- [ ] **TD-135** El codigo y la documentacion dicen lo que dice la pantalla
+  - PEDIDO el 19-sep-2026, despues de una ruta que no existia: se le dijo 'Ajustes → Manage profiles → toca Niko', y en su pantalla eso es 'Settings → Coach → People'. El nombre salio del codigo -manageProfiles, ProfilesScreen- y no de lo que el ve. Sus palabras: 'actualiza el codigo para que refleje lo que hay en pantalla, y altamente probable que la documentacion tambien este desactualizada'. Lo estaba.
+
+EN EL CODIGO: las claves de Strings pasan a people/peopleDesc; ProfilesScreen.kt pasa a PeopleScreen.kt; showProfiles y onManageProfiles, a showPeople y onPeople. La descripcion en pantalla dice ahora lo que hace: 'Who can receive trainings, and what each one has assigned'. El modelo Profile y los metodos del repositorio se quedan: hablan del servidor, donde la tabla se llama profiles, y el comentario de PeopleScreen deja escrita la equivalencia.
+
+EN LA DOCUMENTACION: AGENTS.md decia 'Ajustes → Import data' (es Settings → Data → Import backup); decia que un training sembrado llega a cualquier instalacion, cuando desde TD-108 las rutinas del coach miran el perfil; no explicaba como le llega una rutina a otro atleta ni que una revision exige reasignar; y no mencionaba las instrucciones del catalogo. coach.md no tenia la rutina de NIKO, el equipo, los objetivos ni sus documentos. Todo corregido, y AGENTS.md gana una tabla de rutas con las palabras de la pantalla y la regla: antes de dar una ruta, mirar Strings.kt.
+
+Al escribir esa tabla casi se repite el error con el boton de instrucciones del player; se verifico en el codigo antes de dejarlo: es un icono de lista en la franja de arriba, que sale al tocar la pantalla.
 - [ ] **TD-093** Permisos por prefijo, para que los scripts dejen de pedir permiso
   - EL PROBLEMA, visto el 13-sep-2026: las tres reglas de .claude/settings.local.json son de coincidencia EXACTA, y una de ellas incluye el -Message completo de un build de hace meses ('release: TD-048 Live Update notification + TD-049 color naranja en Now Bar'). Como el mensaje cambia en cada build, esa regla no vuelve a coincidir nunca y todo termina evaluado caso por caso. Ese dia build-debug.ps1 se rechazo una vez -etiquetado como 'Git Destructive' pese a que el script no toca git- y paso sin problema al reintentarlo, y un adb push al almacenamiento compartido se rechazo y no se pudo completar. LO QUE HAY QUE HACER: reglas por PREFIJO para los scripts del repo (build-debug.ps1, build-release.ps1, verify-compile.ps1, run-tests.ps1, forge-status.ps1) con cualquier argumento, y para los adb de solo lectura que se usan a diario (devices, shell ls, pull, exec-out screencap). Y limpiar las dos entradas exactas que ya no le sirven a nadie. LO QUE NO: nada que borre datos del dispositivo. adb uninstall no entra en ninguna lista, por lo mismo de TD-052 y TD-054. POR QUE IMPORTA ahora mas que antes: el ciclo de coach (docs/coach.md) termina siempre en 'siembro y hago build', asi que cada rutina nueva pasa por ahi. VALIDADO EL 15-sep-2026, a peticion del usuario: 'llevas varios dias sin tropezar con eso... tal vez solo lo estas repitiendo porque lo tienes anotado y no porque realmente sea obstaculo'. Tenia razon. LOS NUMEROS: en tres dias se corrieron 16 build-debug (v1.0.234 a la 250), 2 releases con gh y git push, y una decena de comandos adb -pull, screencap, install, shell ls-. **Rechazos: dos, los dos del primer dia**: build-debug una vez, etiquetado 'Git Destructive' pese a que el script no toca git, y que paso al reintentarlo; y un adb push a almacenamiento compartido, que ya no se volvio a necesitar porque la siembra por codigo lo dejo sin uso. CONCLUSION: dejo de ser un obstaculo real. No se descarta -si vuelve a estorbar, aqui esta el analisis hecho- pero no vale el tiempo hoy. Queda como pendiente de baja prioridad y sin reproponerse hasta que haya un tropiezo nuevo que lo justifique.
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
@@ -348,6 +356,7 @@ LAS TRES SON EL MISMO ERROR: un numero puesto a mano para reservarle sitio a otr
 
 ### Fix
 
+- [x] **TD-134** Fix: borrar un training dejaba su asignacion viva, y no habia donde quitarla
 - [x] **TD-121** Fix: borrar una sesion, y las correcciones al arrancar, no escriben respaldo
 - [x] **TD-108** La rutina lumbar solo se siembra en el telefono de su dueno
 - [x] **TD-106** Fix: la tarjeta del peso se quedo sin sus botones al crecer la nota

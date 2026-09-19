@@ -12,6 +12,7 @@ import com.maurozegarra.master.audio.AlarmPlayer
 import com.maurozegarra.master.data.AssignmentRepository
 import com.maurozegarra.master.data.AuthStore
 import com.maurozegarra.master.data.AutoBackup
+import com.maurozegarra.master.i18n.I18n
 import com.maurozegarra.master.data.ImportSummary
 import com.maurozegarra.master.data.MasterDefaults
 import com.maurozegarra.master.data.ExerciseCatalog
@@ -779,6 +780,56 @@ class MasterViewModel(
 
     fun deleteProfile(id: String, onDone: (String?) -> Unit) = write(onDone) {
         assignments.deleteProfile(id)
+    }
+
+    /** Lo que tiene asignado alguien, leido del servidor. Null si no se pudo leer (TD-134). */
+    fun loadAssignedTo(profileId: String, onDone: (List<Training>?) -> Unit) {
+        viewModelScope.launch {
+            onDone(withContext(Dispatchers.IO) { assignments.assignedTrainings(profileId) })
+        }
+    }
+
+    /** Quita un training a una persona, lo tenga o no este telefono (TD-134). */
+    fun unassign(profileId: String, trainingUid: String, onDone: (String?) -> Unit) = write(onDone) {
+        assignments.unassign(profileId, trainingUid)
+    }
+
+    /**
+     * Borra un training, y si el coach lo tenia repartido, se lo quita antes a todos (TD-134).
+     *
+     * Borrar solo en el telefono dejaba la asignacion viva en el servidor: el atleta lo
+     * seguia recibiendo y el coach ya no tenia donde quitarselo. Asi se quedo "VIDEO" en el
+     * telefono de NIKO desde el 6-sep.
+     *
+     * Si no se puede saber quien lo tiene -sin red-, NO se borra: borrarlo a ciegas es
+     * justo como nacen las huerfanas. Sin sesion de entrenador no se consulta: un telefono
+     * de atleta no reparte nada.
+     */
+    fun deleteTrainingEverywhere(id: Long, onDone: (String?) -> Unit) {
+        val tr = trainings.firstOrNull { it.id == id } ?: return onDone(null)
+        if (!isCoach || tr.uid.isBlank() || tr.assigned) {
+            deleteTraining(id)
+            return onDone(null)
+        }
+        viewModelScope.launch {
+            val quienes = withContext(Dispatchers.IO) { assignments.profilesWith(tr.uid) }
+            when {
+                quienes == null -> onDone(I18n.get().cantCheckAssignees)
+                quienes.isEmpty() -> {
+                    deleteTraining(id)
+                    onDone(null)
+                }
+                else -> {
+                    val error = withContext(Dispatchers.IO) { assignments.setAssignees(tr, emptySet()) }
+                    isCoach = auth.isCoach
+                    if (error == null) {
+                        deleteTraining(id)
+                        runSync {}
+                    }
+                    onDone(error)
+                }
+            }
+        }
     }
 
     /** Cuántos trainings tiene asignados alguien, para avisarlo antes de borrarlo. */

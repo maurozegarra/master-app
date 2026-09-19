@@ -93,9 +93,17 @@ dos ejercicios y hacer cuentas entre series. Su resumen: *"no le pusiste cariño
 
 | Qué | Dónde |
 |---|---|
-| La rutina | `data/MasterDefaults.kt` → `lumbarTraining()` |
-| Las indicaciones de cada ejercicio | `data/MasterDefaults.kt` → `lumbarInstructions()` |
+| Su rutina lumbar | `data/MasterDefaults.kt` → `lumbarTraining()`, `lumbarBadDayTraining()` · `LUMBAR_REVISION` |
+| La rutina de NIKO | `data/MasterDefaults.kt` → `nikoGluteHeavy()` · `NIKO_REVISION` |
+| Cómo le llega a NIKO | asignada desde el teléfono del coach; tras una revisión, **reasignar** (TD-132) |
+| Las indicaciones de cada ejercicio | `catalogInstructions()` (todos los teléfonos, en español) y `lumbarInstructions()` (las suyas) |
 | Los movimientos | `data/ExerciseCatalog.kt` (ids `ex_*`) |
+| El equipo y qué pesos se pueden pedir | `docs/equipo.md` · en el código, `HomeGym` y `Plates` |
 | Los vídeos | `videos.json` + release `videos` (ver `AGENTS.md`) |
 | Lo que entrenó | `SessionLog` → snapshots en `Documents/MASTER/` |
 | Cómo se sintió | `docs/coach-log.md` |
+| Lo que busca a largo plazo, y su pesaje | `docs/objetivos.md` |
+| Todo lo de NIKO | `docs/niko.md` |
+
+Su historial se lee del respaldo de su teléfono. El de NIKO **todavía no se puede leer**:
+se queda en su teléfono hasta TD-126.
