@@ -1,7 +1,7 @@
 {
-  "changelog": "release: el descanso dibuja lo que hay que cargar, y NIKO recibe su rutina en espanol",
-  "versionName": "1.0.274",
-  "versionCode": 274,
   "minVersionCode": 1,
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.274/master-1.0.274.apk"
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.276/master-1.0.276.apk",
+  "versionName": "1.0.276",
+  "changelog": "release: las asignaciones huerfanas se ven y se quitan desde People",
+  "versionCode": 276
 }
