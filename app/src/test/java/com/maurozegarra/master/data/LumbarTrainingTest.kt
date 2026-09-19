@@ -97,33 +97,37 @@ class LumbarTrainingTest {
         // le parecio mucho y bajo la carga. Un numero mal puesto le cambio el entrenamiento.
         assertEquals(6.0, e.barWeight, 0.0)
         // Los numeros de la serie son DISCOS: el total es la barra mas eso.
-        // 26 el 16-sep "se sintio normal" y pidio +5 "con prudencia": revision 4 sube la
-        // serie de arriba a 31 y deja intactas la de barra sola y la intermedia.
-        assertEquals(listOf(6.0, 16.0, 31.0), e.setList.map { e.weightTotal(it) })
+        // 21 -> 26 -> 31 -> 36, cada subida pedida por el cuerpo: el 18-sep marco los 31
+        // como ligeros en el player. La intermedia sube a 21 para acortar el salto.
+        assertEquals(listOf(6.0, 21.0, 36.0), e.setList.map { e.weightTotal(it) })
         assertTrue(e.setList.all { it.reps == 12 })
     }
 
     @Test
     fun `el carry se queda y la sentadilla sube`() {
-        assertEquals(listOf(7.5, 10.0, 12.5), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
-        // "Se sintio ligero" el 15-sep.
-        assertEquals(listOf(10.0, 12.5, 15.0), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
+        // Los dos suben un escalon en la revision 6: "ligero" en las tres series el 17-sep.
+        assertEquals(listOf(10.0, 12.5, 15.0), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertEquals(listOf(12.5, 15.0, 17.5), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
         listOf("ex_box_squat", "ex_suitcase_carry").forEach {
             assertEquals(WeightType.TOTAL, cadera(training).getValue(it).weightType)
         }
     }
 
     @Test
-    fun `las caminatas llevan la velocidad en la nota, no un adjetivo`() {
+    fun `las caminatas llevan la velocidad como dato, no como texto`() {
         // "Paso vivo" costo tres sesiones: a 3 km/h no hacia nada, a 5 le solto las caderas.
-        // Lo que se protege aqui es que haya un NUMERO, no cual: la dosis cambia con los
-        // datos -el 16-sep los 5 km/h le sobraron a los dos minutos y subio a 6- y un test
-        // clavado a una velocidad concreta convierte cada ajuste en un test roto.
-        val conVelocidad = Regex("""\d+(\.\d+)? km/h""")
-        assertTrue(conVelocidad.containsMatchIn(training.workouts.first().exercises.single().note))
-        assertTrue(conVelocidad.containsMatchIn(badDay.workouts[1].exercises.single().note))
-        // La caminata corta del dia malo son 6 minutos, la unica que ya corrio a 6 km/h.
-        assertTrue(badDay.workouts[1].exercises.single().note.contains("6 km/h"))
+        // El numero vivio un tiempo dentro de la nota, que era mejor que un adjetivo pero
+        // seguia siendo texto: nadie puede comparar notas entre sesiones. Desde TD-124 es un
+        // campo, el player lo deja ajustar y queda en el registro.
+        val entrada = training.workouts.first().exercises.single()
+        val corta = badDay.workouts[1].exercises.single()
+        assertEquals(6.0, entrada.speedKmh!!, 0.0)
+        assertEquals(6.0, corta.speedKmh!!, 0.0)
+        // Y la de cierre va mas suave que la de entrada, que es lo que significa "easy".
+        val cierre = training.workouts.last().exercises.single()
+        assertTrue(cierre.speedKmh!! < entrada.speedKmh!!)
+        // El numero ya no se repite en la nota: un dato en dos sitios acaba contradiciendose.
+        listOf(entrada, corta, cierre).forEach { assertFalse(it.note.contains("km/h")) }
     }
 
     @Test

@@ -22,6 +22,7 @@ object SessionJson {
                         .put("durationSec", sr.durationSec)
                     if (sr.skipped) setObj.put("skipped", true)
                     sr.feedbackDeltaKg?.let { setObj.put("feedbackDeltaKg", it) }
+                    sr.speedKmh?.let { setObj.put("speedKmh", it) }
                     setsArr.put(setObj)
                 }
                 val erObj = JSONObject()
@@ -52,6 +53,8 @@ object SessionJson {
                     s.painBefore?.let { put("painBefore", it) }
                     s.painAfter?.let { put("painAfter", it) }
                     s.radiating?.let { put("radiating", it) }
+                    s.painOnWaking?.let { put("painOnWaking", it) }
+                    s.painFadeMin?.let { put("painFadeMin", it) }
                     if (s.note.isNotBlank()) put("note", s.note)
                 }
                 .put("durationSec", s.durationSec)
@@ -80,6 +83,7 @@ object SessionJson {
                                 // Ausente es "no se marco", y eso no es un "justo".
                                 feedbackDeltaKg = if (so.has("feedbackDeltaKg"))
                                     so.optDouble("feedbackDeltaKg", 0.0) else null,
+                                speedKmh = if (so.has("speedKmh")) so.optDouble("speedKmh", 0.0) else null,
                             ))
                         }
                     }
@@ -118,6 +122,8 @@ object SessionJson {
                 painBefore = if (o.isNull("painBefore")) null else o.optInt("painBefore"),
                 painAfter = if (o.isNull("painAfter")) null else o.optInt("painAfter"),
                 radiating = if (o.isNull("radiating")) null else o.optBoolean("radiating"),
+                painOnWaking = if (o.isNull("painOnWaking")) null else o.optInt("painOnWaking"),
+                painFadeMin = if (o.isNull("painFadeMin")) null else o.optInt("painFadeMin"),
                 note = o.optString("note", ""),
                 exercises = exercises,
                 durationSec = o.optInt("durationSec", 0),

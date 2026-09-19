@@ -5,21 +5,145 @@ Lo más reciente arriba.
 
 ---
 
-## 2026-09-19 — plan: sube el bloque de cadera (decidido el 17)
+## 2026-09-18 — el dolor normalizado: lo que es, y el plan para quitarlo
 
-**El cambio del sabado es el de las cargas**, y va el sabado y no el viernes por la regla de
-un cambio a la vez: el viernes ya cambia el orden y los minutos de caminata. Si el sabado
-amanece peor, tiene que poderse saber cual de las dos cosas fue.
+Lo abrio el en la nota de la sesion: *"tenemos que hablar de dolores normalizados"*. Es el
+tema mas importante que ha salido, porque **mueve el piso de toda la escala**: el 1 que
+registra antes de entrenar lo pone veinte minutos despues de levantarse, cuando el dolor de
+la maniana ya se fue casi entero. La serie del historial empezaba a contar despues de lo que
+habia que medir.
 
-Lo que pide el dato del 17-sep, que es contundente: **todo el bloque se le queda corto.**
+**Son dos dolores distintos y se estaban llamando igual:**
 
-- **Puente:** 6 / 16 / 31 -> **6 / 16 / 36**. Los 31 "se sintieron bien, como para subirle 5
-  mas", y las dos primeras las marco ligeras.
-- **Suitcase carry:** las tres "ligero" (7.5 / 10 / 12.5). Sube un escalon.
-- **Sentadilla a caja:** las tres "ligero" (10 / 12.5 / 15). Sube un escalon.
+| | El del 13-sep | El normalizado |
+|---|---|---|
+| Que es | rigidez; agacharse imposible, "como un robot" | dolor al despertar |
+| Donde | en la columna | **a los costados de la columna**, "como muscular" |
+| Cuanto dura | dias | 10-15 min de estar de pie |
+| Cada cuanto | un episodio | **todos los dias, desde hace anios** |
+| Nivel | alto | 3, nunca pasa de 4 |
 
-Los numeros exactos del carry y la sentadilla se deciden el viernes por la noche con lo que
-marque en la tarjeta del peso, que desde la v1.0.258 si se guarda (TD-117).
+### El dato que lo ordena todo
+
+**"Mientras mas tiempo estoy en la cama, con mas dolor amanezco."** No hay nada de
+madrugada; a las 7 horas el dolor lo levanta aunque quiera seguir durmiendo, y los fines de
+semana no puede dormir de mas.
+
+Eso es dosis-respuesta por TIEMPO EN UNA POSTURA, no un dano que empeore de noche. Y el
+tejido lo dijo el: los costados de la columna baja son los erectores. Musculo, no disco.
+
+**El mecanismo que encaja:** se duerme de costado con almohada entre las rodillas, que es
+buena postura, y **amanece boca arriba**, donde esa almohada ya no hace nada. Boca arriba, y
+sobre un colchon de 5 anios que cede, la pelvis rota hacia adelante y la zona lumbar se
+arquea: los erectores se quedan acortados y trabajando, quietos, durante horas. Al pararse
+se estiran y se mueven, y por eso se va, y por eso se va de a pocos.
+
+**Y hay un A/B que el mismo hizo sin darse cuenta:** *"cuando viajo y duermo en otro colchon,
+amanezco mejor"*. Ademas tenia programado rotar el colchon cada 3 meses y lleva **al menos un
+anio sin rotarlo**.
+
+### El plan
+
+**1. Medirlo.** Dos numeros cada dia, en el app al terminar (TD-125): el dolor **al minuto
+0**, sentado en la cama, y **cuantos minutos** tardo en aflojar. Un dolor de anios no se
+mueve en tres dias; sin la serie no hay forma de saber si se movio.
+
+**2. Un solo cambio, y el primero es el colchon: ROTARLO.** Va primero y no la almohada
+porque es lo que seniala su propio dato -duerme mejor fuera de casa- y porque no es un
+experimento nuevo: es devolver un mantenimiento que el ya tenia y dejo de hacer. Vuelve
+tambien la alarma cada 3 meses.
+
+**3. A los ~7 dias, si no se movio: almohada DEBAJO de las rodillas** -no entre-, para que
+cuando ruede boca arriba la pelvis no se vaya hacia adelante. Gratis y ataca justo las horas
+donde el dolor se acumula.
+
+**4. Si tampoco: el colchon en si.** Un topper firme o cambiarlo. Para entonces habria una
+serie de dos semanas que justifique gastar.
+
+**Criterio de exito, y no es que el 3 baje a 2:** que un domingo pueda dormir 8 horas si
+quiere. Hoy el dolor lo expulsa de la cama a las 7.
+
+### Lo que queda anotado para despues
+
+- **9 horas sentado**, y dejo de usar el escritorio que sube y baja; antes se paraba 5
+  minutos cada hora. El dolor de estar sentado lo siente en las nalgas, no en la espalda,
+  pero nueve horas de cadera flexionada acortan el psoas y tiran de la misma pelvis. Es el
+  siguiente cambio de la lista, no el de ahora.
+- **Entrena dentro de la primera hora de levantarse** -5:00 y 5:18-, que es justo lo que las
+  instrucciones de su rutina dicen que hay que evitar. El orden lo protege: la carga de
+  verdad llega al minuto 45, con la caminata y la movilidad ya hechas. Deja de protegerlo el
+  dia que tenga prisa y se salte la caminata.
+- **Umbral a vigilar:** si los 10-15 minutos se estiran a mas de 45, o si empieza a
+  despertarlo de madrugada y no a las 7, es otro patron y se mira distinto. Hoy no lo es.
+
+---
+
+## 2026-09-19 — plan: sube el bloque de cadera (revision 6)
+
+| Ejercicio | 18-sep | 19-sep |
+|---|---|---|
+| Puente | 6 / 16 / 31 | **6 / 21 / 36** |
+| Suitcase carry | 7.5 / 10 / 12.5 | **10 / 12.5 / 15** |
+| Sentadilla a caja | 10 / 12.5 / 15 | **12.5 / 15 / 17.5** |
+
+Sube el bloque ENTERO, que es tres cambios a la vez y se hace a sabiendas: la señal es la
+misma en los tres y lleva dos sesiones repitiendose. Si el domingo algo no cuadra, el
+sospechoso es el bloque como unidad.
+
+En el puente sube tambien la intermedia, de 16 a 21: de 16 a 36 el salto quedaba largo para
+una serie de entrada. La de barra sola no se toca.
+
+McGill sigue en 6/4/2. Seis dias con el mismo volumen y el dolor en cero; el volumen de
+McGill se movera cuando haya una razon, no por inercia.
+
+---
+
+## 2026-09-18 — sexta sesion: LUMBAR normal, y el primer cero
+
+**LUMBAR** (el normal, con las dos caminatas), 07:22 a 08:29, **1h 06m 58s**, completa.
+
+**Dolor: 1 -> 0.** Sin irradiacion. **Es el primer cero del historial.**
+
+| Dia | Al empezar | Al terminar |
+|---|---|---|
+| 14-sep | 4 | 2 |
+| 15-sep | 4 | 2 |
+| 16-sep | 3 | 1 |
+| 17-sep | 2 | 1 |
+| **18-sep** | **1** | **0** |
+
+El de arranque baja por tercer dia seguido: 4, 4, 3, 2, 1. Seis dias despues de amanecer
+"hecho un tronco".
+
+**El orden normal aguanto.** 12 minutos de caminata de entrada a 6 km/h, McGill igual, el
+bloque de cadera y 5 minutos de cierre. El *bad day* nacio de una premisa que resulto falsa
+-que la caminata de entrada no servia; lo que no servia era caminar a 3 km/h- y hoy queda
+comprobado que el orden normal no le cuesta nada. **TD-097** (caminata de cierre en el bad
+day) se decide con este dato: si, tiene sentido, entra en la proxima revision que toque esa
+variante.
+
+**Primera sesion con el feedback del peso guardado de verdad** (TD-117):
+
+| Ejercicio | S1 | S2 | S3 |
+|---|---|---|---|
+| Puente 6 / 16 / 31 | ligero | — | **ligero** |
+| Carry 7.5 / 10 / 12.5 | — | — | ligero |
+| Sentadilla 10 / 12.5 / 15 | ligero | ligero | — |
+
+Marco los **31 kg como ligeros**. La vispera habia dicho "se sintio bien, como para subirle
+5"; con el dedo dijo ligero. De ahi la revision 6.
+
+**Lo que el escribio en la nota de la sesion**, y son dos cosas distintas:
+
+1. *"El feedback del peso se me olvida marcar, no se si ponerlo obligatorio."* No se pone
+   obligatorio, por la misma razon que la pregunta del dolor no bloquea: lo que estorba para
+   seguir entrenando se contesta de cualquier forma con tal de pasar. Lo que se hizo es
+   ponerlo donde si hay tiempo para contestar —el descanso— y cerrar los huecos al terminar
+   (TD-122).
+2. *"Tenemos que hablar de dolores normalizados."* **Pendiente, y es importante.** La
+   sospecha: que este 0 no significa "no me duele nada" sino "no me duele nada fuera de lo
+   que para mi ya es normal". Si el piso de la escala esta movido, todas las cifras de esta
+   tabla hay que leerlas con eso puesto.
 
 ---
 

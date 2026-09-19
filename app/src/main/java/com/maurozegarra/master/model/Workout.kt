@@ -70,6 +70,15 @@ data class Exercise(
     val workValue: Int = 30,
     /** Segundos estimados por repetición (solo REPS): pondera la barra de progreso. */
     val secPerRep: Int = 3,
+    /**
+     * Velocidad prescrita, en km/h y en pasos de [SPEED_STEP]. Null = este ejercicio no se
+     * dosifica por velocidad, que es el caso de casi todos (TD-124).
+     *
+     * Existe porque la velocidad de la caminata ha sido la variable que más ha movido el
+     * dolor de la espalda -3, 4, 5 y 6 km/h en cuatro sesiones- y no quedaba registrada en
+     * ninguna parte: iba escrita en la nota, que es texto que nadie puede comparar.
+     */
+    val speedKmh: Double? = null,
     val restSec: Int = 30,
     val restSkipOnLastSet: Boolean = true,
     val cooldownSec: Int = 0,
@@ -334,6 +343,11 @@ enum class SessionSource {
     EDITED,
 }
 
+/** Pasos de la velocidad, en km/h (TD-124). */
+const val SPEED_STEP = 0.5
+const val SPEED_MIN = 0.5
+const val SPEED_MAX = 25.0
+
 /** Una serie completada: reps, peso (kg) y duración (s) según corresponda. */
 data class SetRecord(
     val reps: Int = 0,
@@ -349,6 +363,8 @@ data class SetRecord(
      * guardar uno solo por ejercicio se quedaba con el último toque y perdía el resto.
      */
     val feedbackDeltaKg: Double? = null,
+    /** A qué velocidad se hizo, en km/h, si el ejercicio la lleva (TD-124). */
+    val speedKmh: Double? = null,
 )
 
 enum class ExerciseStatus {
@@ -412,11 +428,27 @@ data class SessionLog(
     val painAfter: Int? = null,
     val radiating: Boolean? = null,
     val note: String = "",
+    /**
+     * Cómo amaneció, ANTES de moverse: el número al sentarse en la cama y los minutos que
+     * tardó en aflojar (TD-125).
+     *
+     * Va aparte de [painBefore] porque no es el mismo momento y la diferencia es el dato:
+     * entrena unos veinte minutos después de levantarse, o sea que [painBefore] ya está
+     * medido cuando el dolor de la mañana se fue casi entero. Sin esto, la serie de dolor
+     * del historial empieza a contar después de lo que hay que medir.
+     *
+     * El dolor de la mañana lleva años y es el que se quiere mover; un dolor así no cambia
+     * en tres días, así que lo único que puede decir si cambió es la serie.
+     */
+    val painOnWaking: Int? = null,
+    /** Minutos desde que se levantó hasta que el dolor de la mañana aflojó (TD-125). */
+    val painFadeMin: Int? = null,
 )
 
 /** true si la sesión tiene algo anotado de cómo se sintió. */
 fun SessionLog.hasFeedback(): Boolean =
-    painBefore != null || painAfter != null || radiating != null || note.isNotBlank()
+    painBefore != null || painAfter != null || radiating != null || note.isNotBlank() ||
+        painOnWaking != null || painFadeMin != null
 
 /**
  * Los `exerciseId` que aparecen en algun training, variantes incluidas.

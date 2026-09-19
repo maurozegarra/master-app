@@ -149,6 +149,7 @@ class WorkoutPlayerService : Service() {
                     PlayerCommand.SKIP_EXERCISE -> skipExercise()
                     PlayerCommand.STOP -> stopPlayer()
                     is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.deltaKg)
+                    is PlayerCommand.SPEED -> recorder.setSpeed(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.kmh)
                 }
             }
         }
@@ -637,6 +638,7 @@ class WorkoutPlayerService : Service() {
                             timeBased = er.timeBased,
                             weighted = sr.weightKg > 0,
                             weightTotal = sr.weightKg,
+                            speedKmh = sr.speedKmh,
                         )
                         if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step)
                         sr.feedbackDeltaKg?.let { recorder.setFeedback(er.exerciseId, er.workoutIndex, setIdx, it) }
@@ -681,6 +683,7 @@ class WorkoutPlayerService : Service() {
                         timeBased = er.timeBased,
                         weighted = sr.weightKg > 0,
                         weightTotal = sr.weightKg,
+                        speedKmh = sr.speedKmh,
                     )
                     if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step)
                     sr.feedbackDeltaKg?.let { recorder.setFeedback(er.exerciseId, er.workoutIndex, setIdx, it) }

@@ -67,6 +67,9 @@ import com.maurozegarra.master.model.StageConfig
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.model.WeightType
 import com.maurozegarra.master.model.WorkMode
+import com.maurozegarra.master.model.SPEED_MAX
+import com.maurozegarra.master.model.SPEED_MIN
+import com.maurozegarra.master.model.SPEED_STEP
 import com.maurozegarra.master.model.WorkSet
 import com.maurozegarra.master.model.materializedSets
 import com.maurozegarra.master.model.normalizedSets
@@ -534,6 +537,34 @@ private fun WeightStepper(label: String, value: Double, accent: Color, onChange:
     }
 }
 
+/**
+ * La velocidad de un ejercicio por tiempo, de medio en medio km/h (TD-124).
+ *
+ * Por debajo del mínimo se apaga y se guarda como null, no como cero: casi ningún ejercicio
+ * se dosifica por velocidad, y una tarjeta diciendo "0 km/h" en el player sería peor que no
+ * enseñar ninguna.
+ */
+@Composable
+private fun SpeedStepper(t: Strings, value: Double?, accent: Color, onChange: (Double?) -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(t.speedLabel, color = AppTheme.colors.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        AppStepButton("\u2212", accent) {
+            onChange(((value ?: 0.0) - SPEED_STEP).takeIf { it >= SPEED_MIN })
+        }
+        Box(Modifier.width(72.dp), contentAlignment = Alignment.Center) {
+            Text(
+                if (value == null) t.off else "${fmtNum(value)} ${t.kmh}",
+                color = if (value == null) AppTheme.colors.textDim else AppTheme.colors.textPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+            )
+        }
+        AppStepButton("+", accent) {
+            onChange(((value ?: 0.0) + SPEED_STEP).coerceIn(SPEED_MIN, SPEED_MAX))
+        }
+    }
+}
+
 /** Subseccion colapsable "Opciones avanzadas" dentro de cada etapa. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -576,6 +607,11 @@ private fun StageAdvanced(
                 // Solo Work por repeticiones: segundos estimados por rep (pondera la barra de progreso).
                 if (kind == StepKind.WORK && ex.workMode == WorkMode.REPS) {
                     Stepper(t.secPerRepLabel, ex.secPerRep, accent, min = 1, max = 30) { onChange(ex.copy(secPerRep = it)) }
+                    VSpace(12)
+                }
+                // Solo por tiempo: a qué velocidad va.
+                if (kind == StepKind.WORK && ex.workMode == WorkMode.TIME) {
+                    SpeedStepper(t, ex.speedKmh, accent) { onChange(ex.copy(speedKmh = it)) }
                     VSpace(12)
                 }
                 VSpace(12)

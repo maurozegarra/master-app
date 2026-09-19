@@ -4,12 +4,44 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **81 / 121** hechos, 40 pendientes.
+Progreso: **82 / 125** hechos, 43 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-125** Medir el dolor al despertar, que es el que lleva anios
+  - DE LA CONVERSACION del 18-sep-2026 sobre el 'dolor normalizado' (ver docs/coach-log.md). Todos los dias amanece con dolor en la zona lumbar, nivel 3, que se va en 10-15 minutos de moverse y lleva anios. Nunca se habia medido.
+
+POR QUE IMPORTA MAS QUE LO QUE YA SE MEDIA: entrena unos veinte minutos despues de levantarse, asi que el painBefore que registra ya esta tomado cuando el dolor de la maniana se fue casi entero. La serie del historial -4, 4, 3, 2, 1- empezaba a contar despues de lo que hay que medir, y el 0 del 18-sep no era un 0: era 'nada fuera de lo que para mi ya es normal'.
+
+DOS CAMPOS en SessionLog: painOnWaking (la misma escala DVPRS, al minuto 0, sentado en la cama) y painFadeMin (minutos hasta que aflojo). Se preguntan AL TERMINAR, junto a 'como te fue', y van primero en esa tarjeta porque son el dolor que se quiere mover. No se preguntan antes de empezar: la pantalla de arranque tiene que dejar darle Start, que a esa hora es lo unico que se quiere hacer -lo eligio el usuario-.
+
+Los minutos son opciones sueltas (0, 5, 10, 15, 20, 30, 45, 60+) y no un contador: nadie mide esto con cronometro, se dice 'unos quince'. El 45 y el 60 existen a proposito, porque una rigidez de mas de 45 minutos seria otro patron.
+- [ ] **TD-124** La caminata registra a que velocidad fue
+  - LA VELOCIDAD ERA LA VARIABLE MAS IMPORTANTE Y LA UNICA SIN REGISTRAR. En cuatro sesiones fue 3, 4, 5 y 6 km/h y la respuesta del dolor mejoro con cada subida; dos veces se concluyo 'la caminata es neutra' con el dato bien y la interpretacion mal, porque nadie preguntaba la velocidad. Vivia dentro de la nota -'6 km/h, arms loose'-, o sea texto que nadie puede comparar entre sesiones, y habia que preguntarla por chat.
+
+SE HIZO ESTO Y NO TD-095 (modo distancia). Se evaluaron los dos: el modo distancia toca 46 sitios del enum WorkMode mas motor, player, editor e historial, y lo que arregla es que el carry deje de decir '2 REPS' -cosmetico, porque la distancia es fija, 36 m, y ya esta escrita en docs/equipo.md-. La velocidad es mas chica, usa el patron de la tarjeta del peso que el usuario ya sabe usar, y da el dato que se venia pidiendo a mano. TD-095 sigue abierto para cuando una rutina lleve metros que cambien.
+
+COMO QUEDO: Exercise.speedKmh (null = el ejercicio no se dosifica asi), SetRecord.speedKmh, y en el player una tarjeta con - y + en pasos de 0.5 en el mismo sitio que la del peso. Lo que enseñe al terminar la serie es lo que se registra, se haya tocado o no: si camino a lo prescrito, eso es lo que hizo. El editor lo ofrece en los ejercicios por tiempo, y por debajo del minimo se apaga como null en vez de quedar en cero. El historial lo dice al lado del tiempo: '12:00 - 6 km/h'.
+
+REVISION 7 DE LA RUTINA: las tres caminatas pasan la velocidad de la nota al campo. Entrada y corta a 6 km/h, que es lo que ya camina. La de cierre queda en 4 km/h, y ese numero LO PUSO EL ASISTENTE: la nota decia 'easy' y nunca se pregunto a que velocidad la hace. Si no es 4, se corrige con el - y el + y queda registrado.
+- [ ] **TD-122** El feedback del peso se pregunta en el descanso, y los huecos se cierran al terminar
+  - EN SU NOTA de la sesion del 18-sep-2026: 'El feedback del peso se me olvida marcar, no se si ponerlo obligatorio'.
+
+NO SE PONE OBLIGATORIO, por la misma razon que la pregunta del dolor no bloquea el arranque: una pregunta que estorba para seguir entrenando se contesta de cualquier forma con tal de pasar, y ese dato vale menos que ninguno. El problema no es que falte obligacion, es que se preguntaba en el peor momento.
+
+1. LA TARJETA TAMBIEN EN EL DESCANSO. Antes solo salia durante la serie, que es cuando hay que hacer la serie. En el descanso se esta parado esperando. En el descanso la tarjeta habla de la serie que acaba de pasar.
+
+2. LOS HUECOS SE CIERRAN AL TERMINAR. La pantalla de resumen lista las series con peso que quedaron sin marcar y deja contestarlas de un toque. Hace falta ademas porque la ULTIMA serie de un ejercicio no lleva descanso detras: sin esto no hay ningun momento para contestarla, y es justo la que decide si el ejercicio sube.
+
+Marcar desde el resumen escribe en la sesion ya guardada y NO la pasa a EDITED: lo anota el propio usuario, minutos despues y sobre lo que acaba de hacer.
+- [ ] **TD-123** Revision 6 de la rutina: sube el bloque de cadera entero
+  - CAMBIO DE PAUTA del 18-sep-2026 (ver docs/coach-log.md). Puente 6/16/31 -> 6/21/36, carry 7.5/10/12.5 -> 10/12.5/15, sentadilla 10/12.5/15 -> 12.5/15/17.5.
+
+La senal viene de dos sesiones: el 17-sep conto 'ligero' en las tres series de carry y sentadilla y en las dos primeras del puente, y el 18-sep marco en el player los 31 kg del puente como LIGEROS. En el puente sube tambien la intermedia porque de 16 a 36 el salto quedaba largo para una serie de entrada.
+
+Suben los tres ejercicios a la vez, que es tres cambios en un dia y se hace a sabiendas: la senal es la misma en los tres y ya se repitio. Si el domingo algo no cuadra, el sospechoso es el bloque como unidad.
 - [ ] **TD-118** El historial en corto: la serie en una linea y el feedback en icono
   - PEDIDO el 17-sep-2026, al ver el feedback por serie de TD-117 en el historial: 'en vez de Too light me gustaria que fueramos mas de iconos, porque siento que estamos cargando mucho con texto'. Se le propusieron dos niveles y eligio los dos.
 
@@ -54,8 +86,6 @@ POR QUE IMPORTA MAS DE LO QUE PARECE: la unica razon de ser de este historial es
 QUE HARIA FALTA: que SetRecord recuerde ademas el numero prescrito, y que el historial marque la serie cuando lo hecho y lo pautado no coinciden (una flecha, un color). Con eso 'cumplio la pauta' y 'no la toco' dejan de verse igual, y el coach ve de un vistazo donde el cuerpo dijo que no.
 
 OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que si los movio y que 26 se sintio normal. Ese registro es correcto; lo que falta es poder saberlo sin preguntar.
-- [ ] **TD-104** Inventariar el equipo disponible para poder disenar con lo que hay
-  - PEDIDO DEL USUARIO el 15-sep-2026: 'en su momento deberiamos inventariar lo que tengo para que puedas disenar diferentes rutinas'. POR QUE HACE FALTA, con el caso que lo destapo: ese dia el historial decia que habia hecho el puente de gluteos con 20/30/40 kg y lo que movio fueron 6/16/21. El app trae barWeight = 20 por defecto y su barra para ese ejercicio pesa 6. El numero inflado ademas le hizo bajar la carga -'me parecio mucho'-, asi que un dato mal puesto no solo ensucio el registro: cambio el entrenamiento. LO QUE SE SABE HOY, dicho por el y deducido de sus trainings: barras de 6, 7, 18 y 20 kg; mancuernas de 5, 7.5, 10 y 12.5; discos que llegan al menos a 30 por lado y permiten armar 15 (peso muerto con 0/10/20/30, hip thrust hasta 70 de total). Falta saber: granularidad real de los discos, si hay banco, caja o silla de altura conocida, banda, kettlebell, y con que barra hace cada ejercicio. QUE HAY QUE DECIDIR: donde vive el inventario. Tres opciones. (a) Un documento en docs/, que es barato y suficiente para que el asistente disene; no lo ve el app. (b) En Ajustes, como datos del usuario, para que el editor pueda ofrecer solo pesos que existen y que barWeight deje de ser un 20 por defecto que nadie mira. (c) Las dos: el documento primero y la pantalla cuando haya mas de un atleta. RECOMENDACION: empezar por (a) -docs/equipo.md, junto a coach.md-, porque el valor inmediato es que quien disena la rutina sepa con que cuenta, y eso no necesita UI. (b) sube de prioridad el dia que haya rutinas para otra persona, porque el equipo de NIKO no es el suyo. RELACIONADO: el barWeight por ejercicio ya existe en el modelo, asi que la parte urgente -que el puente diga 6 y no 20- se arregla con una revision de la rutina, sin esperar a este TD.
 - [ ] **TD-101** Control sobre el historial: corregir, anotar y saber de donde salio cada registro
   - PLANTEADO POR EL USUARIO el 14-sep-2026, al leer que dos sesiones se quedaban con el orden equivocado: 'deberias tener control total sobre los registros, eso de que se quedan como estan me suena a que no tenemos control sobre algo que nosotros mismos estamos creando'. Tiene razon. DONDE ESTAMOS HOY. El historial es de **una sola escritura**: lo escribe el player al terminar y despues solo se puede borrar la sesion entera. No hay forma de corregir un dato, ni de anotar nada, ni de reparar algo que se guardo mal. Lo unico que existe es lo que se ha estado haciendo a mano: leer el respaldo del telefono por adb y escribir migraciones de codigo (TD-087, TD-090, TD-091, TD-098). Funciona, pero cada correccion cuesta un build y depende de que el usuario abra el app. EL PROBLEMA MAS SERIO, y lo introdujo el asistente: tras TD-090 el historial tiene una sesion que el player nunca midio -la del 13-sep, reconstruida desde la rutina- y es **indistinguible** de las medidas. Dentro de seis semanas nadie va a saber si esos 12 aguantes se cronometraron o se dedujeron. Si encima se empiezan a corregir registros, el historial deja de ser un registro y pasa a ser una opinion. LO QUE HAY QUE RESOLVER, en tres niveles y por ese orden: (1) ORIGEN. SessionLog gana de donde sale cada registro -medido por el player, reconstruido, o editado a mano-, y el historial lo ensena. Es lo primero porque sin eso lo demas hace dano. Barato: un campo, su serializacion y una marca en la UI. (2) CORREGIR Y ANOTAR desde el app: cambiar reps o peso de una serie mal registrada, quitar un ejercicio que no se hizo, y la nota de como se sintio (TD-089, que es la otra mitad de esto). Le da el control a EL, que es quien estuvo ahi. (3) ESCRITURA REMOTA. Que el historial viaje por el mismo canal que las asignaciones (TD-063/TD-066) para poder leerlo y repararlo sin un build de por medio. Es el unico nivel que da 'control total' de verdad, y es el caro: toca Supabase, identidad y conflictos entre dispositivo y servidor. RECOMENDACION: hacer (1) ya -es pequeno y es el que protege la integridad de todo lo demas-, (2) junto con TD-089, y (3) solo cuando el ciclo de coach lo pida de verdad. EL PRINCIPIO que conviene fijar antes de escribir codigo: el historial tiene que ser **corregible pero auditable**. Que se pueda arreglar un dato malo, y que nunca se pueda confundir lo que se midio con lo que se dedujo.
 - [ ] **TD-097** Caminata de cierre en la variante de dia malo
@@ -199,6 +229,7 @@ LAS TRES SON EL MISMO ERROR: un numero puesto a mano para reservarle sitio a otr
 
 - [x] **TD-110** El historial ensena el dolor y la nota de cada sesion
 - [x] **TD-105** Revision 2 de la rutina, y corregir los pesos mal registrados del 15-sep
+- [x] **TD-104** Inventariar el equipo disponible para poder disenar con lo que hay
 - [x] **TD-098** Cargar el bloque de cadera y gluteo, que se le queda corto
 - [x] **TD-090** Anotar en el historial la sesion del 13-sep que se hizo sin el app
 - [x] **TD-088** Variante de dia malo: la movilidad antes de la caminata

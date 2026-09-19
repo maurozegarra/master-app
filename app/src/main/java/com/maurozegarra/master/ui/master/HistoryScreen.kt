@@ -351,6 +351,10 @@ private fun SessionFeedback(session: SessionLog, t: Strings) {
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         listOfNotNull(
+            session.painOnWaking?.let {
+                "${t.painOnWaking}: $it · ${t.painScale.getOrElse(it) { "" }}" +
+                    (session.painFadeMin?.let { m -> "  ·  ${if (m >= 60) "60+" else "$m"} min" } ?: "")
+            },
             session.painBefore?.let { "${t.painBefore}: $it · ${t.painScale.getOrElse(it) { "" }}" },
             session.painAfter?.let { "${t.painAfter}: $it · ${t.painScale.getOrElse(it) { "" }}" },
             session.radiating?.let { if (it) t.painRadiating else t.painCentered },

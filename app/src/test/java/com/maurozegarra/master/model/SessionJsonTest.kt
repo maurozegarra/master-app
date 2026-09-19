@@ -114,6 +114,15 @@ class SessionJsonTest {
     }
 
     @Test
+    fun `la velocidad de la serie viaja en el JSON`() {
+        val er = sampleExercise().copy(sets = listOf(SetRecord(durationSec = 720, speedKmh = 6.5), SetRecord(durationSec = 300)))
+        val sets = SessionJson.decode(SessionJson.encode(listOf(sampleSession(exercises = listOf(er)))))[0]
+            .exercises[0].sets
+        assertEquals(6.5, sets[0].speedKmh!!, 0.001)
+        assertNull(sets[1].speedKmh)
+    }
+
+    @Test
     fun `round-trip with null feedbackDeltaKg`() {
         val original = listOf(sampleSession(exercises = listOf(sampleExercise(feedbackDeltaKg = null))))
         val decoded = SessionJson.decode(SessionJson.encode(original))

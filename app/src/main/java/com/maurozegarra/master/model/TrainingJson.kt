@@ -130,6 +130,7 @@ object TrainingJson {
             .put("workMode", e.workMode.name)
             .put("workValue", e.workValue)
             .put("secPerRep", e.secPerRep)
+            .apply { e.speedKmh?.let { put("speedKmh", it) } }
             .put("restSec", e.restSec)
             .put("restSkipOnLastSet", e.restSkipOnLastSet)
             .put("cooldownSec", e.cooldownSec)
@@ -170,6 +171,7 @@ object TrainingJson {
             workMode = runCatching { WorkMode.valueOf(o.optString("workMode")) }.getOrDefault(WorkMode.TIME),
             workValue = o.optInt("workValue", 30),
             secPerRep = o.optInt("secPerRep", 3),
+            speedKmh = if (o.has("speedKmh")) o.optDouble("speedKmh", 0.0) else null,
             restSec = o.optInt("restSec", 30),
             restSkipOnLastSet = o.optBoolean("restSkipOnLastSet", true),
             cooldownSec = o.optInt("cooldownSec", 0),

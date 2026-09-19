@@ -32,6 +32,8 @@ import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.reorderedFrom
 import com.maurozegarra.master.model.SessionSource
+import com.maurozegarra.master.model.SPEED_MAX
+import com.maurozegarra.master.model.SPEED_MIN
 import com.maurozegarra.master.model.StepEngine
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.model.Training
@@ -867,6 +869,8 @@ class MasterViewModel(
         painAfter: Int? = null,
         radiating: Boolean? = null,
         note: String? = null,
+        painOnWaking: Int? = null,
+        painFadeMin: Int? = null,
     ) {
         val i = lastSessionIndex() ?: return
         val s = sessions[i]
@@ -875,6 +879,8 @@ class MasterViewModel(
             painAfter = painAfter ?: s.painAfter,
             radiating = radiating ?: s.radiating,
             note = note ?: s.note,
+            painOnWaking = painOnWaking ?: s.painOnWaking,
+            painFadeMin = painFadeMin ?: s.painFadeMin,
         )
         if (nueva == s) return
         sessions[i] = nueva
@@ -1406,6 +1412,50 @@ class MasterViewModel(
     }
 
     /**
+     * Las series con peso de esta corrida que se quedaron SIN marcar (TD-122).
+     *
+     * Se leen de los pasos, no del registro: son las mismas series, y así la pantalla de
+     * resumen puede ofrecer completarlas aunque la sesión ya esté guardada.
+     */
+    fun unmarkedWeightSets(): List<PlayerStep> =
+        playerSteps.filter {
+            it.kind == StepKind.WORK && it.weighted &&
+                weightFeedback[feedbackKey(it.ownerExerciseId, it.workoutIndex, it.setIndex)] == null
+        }
+
+    /**
+     * Marca una serie cuando la sesión YA se guardó: al terminar, desde el resumen.
+     *
+     * El recorder del servicio ya no existe a esas alturas, así que esto escribe directo en
+     * el registro guardado: la última sesión, que es la que se acaba de cerrar.
+     *
+     * La sesión NO pasa a [SessionSource.EDITED]. Lo anota el propio usuario, minutos
+     * después y sobre lo que acaba de hacer: sigue siendo lo medido, no la corrección de
+     * otro sobre un registro ajeno.
+     */
+    fun markFinishedFeedback(step: PlayerStep, deltaKg: Double) {
+        weightFeedback[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex)] =
+            SetFeedback(step.ownerName, "${step.ownerExerciseId}:${step.workoutIndex}", step.setIndex, step.weightTotal, deltaKg)
+        val sesion = sessions.firstOrNull() ?: return
+        val ejercicios = sesion.exercises.map { er ->
+            if (er.exerciseId != step.ownerExerciseId || er.workoutIndex != step.workoutIndex ||
+                step.setIndex !in er.sets.indices
+            ) {
+                er
+            } else {
+                val sets = er.sets.mapIndexed { i, set ->
+                    if (i == step.setIndex) set.copy(feedbackDeltaKg = deltaKg) else set
+                }
+                er.copy(sets = sets, feedbackDeltaKg = sets.lastOrNull { it.feedbackDeltaKg != null }?.feedbackDeltaKg)
+            }
+        }
+        if (ejercicios == sesion.exercises) return
+        sessions[0] = sesion.copy(exercises = ejercicios)
+        store.saveSessions(sessions.toList())
+        snapshot()
+    }
+
+    /**
      * Sugerencias de ajuste para la próxima vez (solo las que cambian).
      *
      * Una por ejercicio, la de su ÚLTIMA serie marcada: en una pirámide es la serie de
@@ -1464,6 +1514,26 @@ class MasterViewModel(
     fun prevStep() = PlayerBus.command.tryEmit(PlayerCommand.PREV)
     fun sendFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, deltaKg: Double) =
         PlayerBus.command.tryEmit(PlayerCommand.FEEDBACK(exerciseId, workoutIndex, setIndex, deltaKg))
+
+    /**
+     * La velocidad a la que va de verdad cada serie (TD-124).
+     *
+     * Arranca en la prescrita y el usuario la sube o la baja en el player. Se guarda aquí
+     * para que la tarjeta enseñe lo elegido aunque el paso se recomponga, y se manda al
+     * servicio, que es quien escribe el registro.
+     */
+    val setSpeed = mutableStateMapOf<String, Double>()
+
+    fun speedOf(step: PlayerStep): Double? =
+        setSpeed[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex)] ?: step.speedKmh
+
+    fun recordSpeed(step: PlayerStep, kmh: Double) {
+        val v = kmh.coerceIn(SPEED_MIN, SPEED_MAX)
+        setSpeed[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex)] = v
+        PlayerBus.command.tryEmit(
+            PlayerCommand.SPEED(step.ownerExerciseId, step.workoutIndex, step.setIndex, v),
+        )
+    }
 
     fun closePlayer() {
         pendingSessionRefresh = true

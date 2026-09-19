@@ -96,6 +96,7 @@ import com.maurozegarra.master.ui.ExerciseVideo
 import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.model.DisplayMode
 import com.maurozegarra.master.model.PlayerStep
+import com.maurozegarra.master.model.SPEED_STEP
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
@@ -741,10 +742,26 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // peso: dentro de la zona elástica su alto no se lo quita a nadie, así que aparece
         // pegada justo encima del reloj sin desplazar nada. Arriba del todo quedaba lejos de
         // donde se mira, y abajo movía el reloj ~126dp al cambiar de ejercicio.
+        //
+        // La tarjeta sale MIENTRAS SE TRABAJA y tambien EN EL DESCANSO siguiente (TD-122).
+        // Durante la serie hay que hacer la serie: "el feedback del peso se me olvida
+        // marcar". En el descanso se esta parado esperando, que es cuando de verdad se
+        // puede contestar. En el descanso la tarjeta habla de la serie que acaba de pasar,
+        // asi que se le da ese paso y no el actual.
+        val pasoDelPeso = when {
+            step.weighted -> step
+            step.kind == StepKind.REST ->
+                vm.playerSteps.take(vm.playerIndex).lastOrNull { it.kind == StepKind.WORK }?.takeIf { it.weighted }
+            else -> null
+        }
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            if (step.weighted) {
+            if (pasoDelPeso != null) {
                 Box(Modifier.align(Alignment.BottomCenter)) {
-                    WeightFeedback(vm, step, accent, t)
+                    WeightFeedback(vm, pasoDelPeso, accent, t)
+                }
+            } else if (step.kind == StepKind.WORK && step.speedKmh != null) {
+                Box(Modifier.align(Alignment.BottomCenter)) {
+                    SpeedCard(vm, step, t)
                 }
             }
         }
@@ -1261,6 +1278,54 @@ private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color,
     }
 }
 
+/**
+ * La velocidad de la caminata, ajustable mientras se camina (TD-124).
+ *
+ * Ocupa el mismo sitio que la tarjeta del peso y se lee igual: el número que dosifica este
+ * ejercicio, con lo que hace falta para cambiarlo. Antes la velocidad iba escrita en la
+ * nota -"6 km/h, arms loose"-, o sea texto que nadie puede comparar entre sesiones, y era
+ * justo la variable que más había movido el dolor: 3, 4, 5 y 6 km/h en cuatro días.
+ *
+ * Lo que enseñe al terminar la serie es lo que queda en el registro, se haya tocado o no:
+ * si caminó a lo prescrito, eso es lo que hizo.
+ */
+@Composable
+private fun SpeedCard(vm: MasterViewModel, step: PlayerStep, t: Strings) {
+    val actual = vm.speedOf(step) ?: return
+    Row(
+        Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.10f))
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SpeedStep("\u2212") { vm.recordSpeed(step, actual - SPEED_STEP) }
+        Text(
+            "${fmtNum(actual)} ${t.kmh}",
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(110.dp),
+        )
+        SpeedStep("+") { vm.recordSpeed(step, actual + SPEED_STEP) }
+    }
+}
+
+@Composable
+private fun SpeedStep(label: String, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.15f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+    }
+}
+
 @Composable
 private fun FeedbackChip(label: String, active: Boolean, accent: Color, onClick: () -> Unit) {
     Box(
@@ -1426,6 +1491,15 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
         Text(t.howItWent, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         Spacer(Modifier.height(12.dp))
 
+        // Lo de la mañana va PRIMERO porque es lo que se quiere mover: el dolor de años, no
+        // el de la sesión. Y se pregunta aquí, al terminar, y no antes de empezar: la
+        // pantalla de arranque tiene que dejar darle Start, y a esa hora es lo único que se
+        // quiere hacer.
+        PainScale(t.painOnWaking, saved?.painOnWaking, accent, t) { vm.saveHowItWent(painOnWaking = it) }
+        Spacer(Modifier.height(12.dp))
+        FadeMinutes(saved?.painFadeMin, accent, t) { vm.saveHowItWent(painFadeMin = it) }
+        Spacer(Modifier.height(12.dp))
+
         PainScale(t.painBefore, saved?.painBefore, accent, t) { vm.saveHowItWent(painBefore = it) }
         Spacer(Modifier.height(12.dp))
         PainScale(t.painAfter, saved?.painAfter, accent, t) { vm.saveHowItWent(painAfter = it) }
@@ -1470,6 +1544,43 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
  * servir para comparar. Es la idea que Freeletics aplica con palabras -cada opcion se
  * explica sola- traida a una escala numerica, que para el dolor es lo estandar.
  */
+/**
+ * Cuántos minutos tardó en aflojar el dolor de la mañana (TD-125).
+ *
+ * Opciones sueltas y no un contador: nadie mide esto con cronómetro, se dice "unos quince".
+ * Los valores están elegidos para que el paso normal -entre 10 y 15 minutos- se conteste de
+ * un toque, y para que la cifra que cambiaría el cuadro -45 o más- exista y se pueda marcar.
+ */
+@Composable
+private fun FadeMinutes(value: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
+    Text(t.painFadeMin, color = AppTheme.colors.textDim, fontSize = 13.sp)
+    Spacer(Modifier.height(6.dp))
+    listOf(listOf(0, 5, 10, 15), listOf(20, 30, 45, 60)).forEach { fila ->
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            fila.forEach { min ->
+                val activo = value == min
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (activo) accent else AppTheme.colors.track)
+                        .clickable { onPick(min) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        if (min == 60) "60+" else "$min",
+                        color = if (activo) AppTheme.colors.onAccent else AppTheme.colors.textDim,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+    }
+}
+
 @Composable
 private fun PainScale(label: String, value: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
     val measurer = rememberTextMeasurer()
@@ -1556,6 +1667,39 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
             }
             if (vm.asksHowItWent()) {
                 item { HowItWent(vm, accent, t) }
+            }
+            // Las series con peso que se quedaron sin marcar, para cerrarlas de un toque
+            // mientras se toma el agua (TD-122). La ultima serie de un ejercicio no tiene
+            // descanso detras, asi que sin esto no hay ningun momento para contestarla.
+            val pendientes = vm.unmarkedWeightSets()
+            if (pendientes.isNotEmpty()) {
+                item {
+                    Text(t.pendingFeedback, color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(4.dp))
+                }
+                items(pendientes, key = { "${it.ownerExerciseId}:${it.workoutIndex}:${it.setIndex}" }) { paso ->
+                    val marcado = vm.weightFeedback[vm.feedbackKey(paso.ownerExerciseId, paso.workoutIndex, paso.setIndex)]?.deltaKg
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(AppTheme.colors.surface)
+                            .padding(14.dp),
+                    ) {
+                        Text(
+                            ExerciseCatalog.display(paso.ownerExerciseId, paso.ownerName, t.locale.language) +
+                                "  ·  ${paso.setIndex + 1}/${paso.totalSets}  ·  ${fmtKg(paso.weightTotal)} ${t.kg}",
+                            color = AppTheme.colors.textPrimary,
+                            fontSize = 15.sp,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FeedbackChip("${t.tooHeavy} ↓", marcado == -2.5, accent) { vm.markFinishedFeedback(paso, -2.5) }
+                            FeedbackChip(t.justRight, marcado == 0.0, accent) { vm.markFinishedFeedback(paso, 0.0) }
+                            FeedbackChip("${t.tooLight} ↑", marcado == 2.5, accent) { vm.markFinishedFeedback(paso, 2.5) }
+                        }
+                    }
+                }
             }
             if (suggestions.isNotEmpty()) {
                 item {

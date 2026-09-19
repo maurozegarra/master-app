@@ -21,6 +21,7 @@ class SessionRecorderTest {
         timeBased: Boolean = true,
         weighted: Boolean = false,
         weightTotal: Double = 0.0,
+        speedKmh: Double? = null,
     ) = PlayerStep(
         kind = StepKind.WORK,
         title = ownerName,
@@ -36,6 +37,7 @@ class SessionRecorderTest {
         timeBased = timeBased,
         weighted = weighted,
         weightTotal = weightTotal,
+        speedKmh = speedKmh,
     )
 
     // ---------- Como se sintio la sesion (TD-089) ----------
@@ -438,6 +440,31 @@ class SessionRecorderTest {
         assertEquals(2.5, porClave.getValue("bridge" to 3).sets[0].feedbackDeltaKg!!, 0.001)
         assertNull(porClave.getValue("bridge" to 5).sets[0].feedbackDeltaKg)
         assertNull(porClave.getValue("carry" to 3).sets[0].feedbackDeltaKg)
+    }
+
+    // ---------- Velocidad (TD-124) ----------
+
+    @Test
+    fun `sin tocar nada, queda registrada la velocidad prescrita`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(exerciseId = "walk", speedKmh = 6.0))
+        assertEquals(6.0, r.build()[0].sets[0].speedKmh!!, 0.0)
+    }
+
+    @Test
+    fun `la velocidad que puso gana sobre la prescrita, aunque la cambie mientras camina`() {
+        val r = SessionRecorder()
+        r.setSpeed("walk", 0, 0, 6.5)
+        r.onWorkStepCompleted(workStep(exerciseId = "walk", speedKmh = 6.0))
+        r.setSpeed("walk", 0, 0, 7.0)
+        assertEquals(7.0, r.build()[0].sets[0].speedKmh!!, 0.0)
+    }
+
+    @Test
+    fun `un ejercicio sin velocidad no inventa ninguna`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep(exerciseId = "curl_up"))
+        assertNull(r.build()[0].sets[0].speedKmh)
     }
 
     @Test

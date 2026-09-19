@@ -23,6 +23,14 @@ class SessionRecorder {
      * le pega al armar el registro, sea cual sea el orden.
      */
     private val feedback = mutableMapOf<ExerciseKey, MutableMap<Int, Double>>()
+
+    /**
+     * La velocidad que el usuario puso de verdad, cuando difiere de la prescrita (TD-124).
+     *
+     * Mismo sitio aparte y por la misma razón que [feedback]: se toca mientras la serie
+     * corre, y el registro de esa serie todavía no existe o se va a rehacer.
+     */
+    private val speed = mutableMapOf<ExerciseKey, MutableMap<Int, Double>>()
     private var totalExercisesByWorkout = mutableMapOf<Int, Int>()
 
     private data class ExerciseKey(
@@ -38,9 +46,9 @@ class SessionRecorder {
     fun onWorkStepCompleted(step: PlayerStep) {
         if (step.kind != StepKind.WORK) return
         val setRecord = if (step.timeBased) {
-            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = step.durationSec)
+            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = step.durationSec, speedKmh = step.speedKmh)
         } else {
-            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = 0)
+            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = 0, speedKmh = step.speedKmh)
         }
         putSet(step, setRecord)
     }
@@ -48,9 +56,9 @@ class SessionRecorder {
     fun onWorkStepSkipped(step: PlayerStep) {
         if (step.kind != StepKind.WORK) return
         val setRecord = if (step.timeBased) {
-            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = step.durationSec, skipped = true)
+            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = step.durationSec, skipped = true, speedKmh = step.speedKmh)
         } else {
-            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = 0, skipped = true)
+            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = 0, skipped = true, speedKmh = step.speedKmh)
         }
         putSet(step, setRecord)
     }
@@ -81,9 +89,23 @@ class SessionRecorder {
         feedback.getOrPut(ExerciseKey(exerciseId, workoutIndex)) { mutableMapOf() }[setIndex] = deltaKg
     }
 
+    /** La velocidad que se puso en la serie [setIndex]; gana sobre la prescrita. */
+    fun setSpeed(exerciseId: String, workoutIndex: Int, setIndex: Int, kmh: Double) {
+        speed.getOrPut(ExerciseKey(exerciseId, workoutIndex)) { mutableMapOf() }[setIndex] = kmh
+    }
+
     private fun orderedWithFeedback(key: ExerciseKey, setMap: Map<Int, SetRecord>, totalSets: Int): List<SetRecord> {
         val marked = feedback[key].orEmpty()
-        return ordered(setMap.mapValues { (i, sr) -> marked[i]?.let { sr.copy(feedbackDeltaKg = it) } ?: sr }, totalSets)
+        val puesta = speed[key].orEmpty()
+        return ordered(
+            setMap.mapValues { (i, sr) ->
+                var r = sr
+                marked[i]?.let { r = r.copy(feedbackDeltaKg = it) }
+                puesta[i]?.let { r = r.copy(speedKmh = it) }
+                r
+            },
+            totalSets,
+        )
     }
 
     private fun deriveStatus(orderedSets: List<SetRecord>, totalSets: Int): ExerciseStatus {
@@ -137,5 +159,6 @@ class SessionRecorder {
         records.clear()
         sets.clear()
         feedback.clear()
+        speed.clear()
     }
 }

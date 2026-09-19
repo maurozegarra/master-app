@@ -59,10 +59,13 @@ internal val STAGE_COLORS: List<Long> = listOf(
 
 internal fun fmtSec(s: Int): String = if (s < 60) "${s}s" else "${s / 60}:${pad2(s % 60)}"
 
-internal fun fmtKg(d: Double): String {
+/** Un decimal solo cuando hace falta: 6.0 -> "6", 6.5 -> "6.5". Vale para kilos y km/h. */
+internal fun fmtNum(d: Double): String {
     val r = (d * 10).toLong()
     return if (r % 10 == 0L) (r / 10).toString() else (r / 10.0).toString()
 }
+
+internal fun fmtKg(d: Double): String = fmtNum(d)
 
 /**
  * Lo que dice una serie, en corto: "12 × 6 kg", "12 reps", "0:10" o "0:30 · 6 kg" (TD-118).
@@ -73,8 +76,9 @@ internal fun fmtKg(d: Double): String {
  */
 internal fun setSummary(sr: SetRecord, timeBased: Boolean, t: Strings): String {
     val kg = if (sr.weightKg > 0) "${fmtKg(sr.weightKg)} ${t.kg}" else null
+    val kmh = sr.speedKmh?.let { "${fmtNum(it)} ${t.kmh}" }
     return when {
-        timeBased -> listOfNotNull(fmtSec(sr.durationSec), kg).joinToString("  \u00b7  ")
+        timeBased -> listOfNotNull(fmtSec(sr.durationSec), kmh, kg).joinToString("  \u00b7  ")
         kg != null -> "${sr.reps} \u00d7 $kg"
         else -> "${sr.reps} ${t.repLabel}"
     }

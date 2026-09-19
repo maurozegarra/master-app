@@ -59,6 +59,8 @@ data class PlayerStep(
     val rotating: Boolean = false,
     /** Segundos estimados por repetición (solo WORK por reps): pondera la barra de progreso. */
     val secPerRep: Int = 3,
+    /** Velocidad prescrita en km/h, si el ejercicio la lleva (TD-124). */
+    val speedKmh: Double? = null,
 ) {
     /** La etapa requiere confirmación manual (TAP) para avanzar. */
     val manual: Boolean

@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 5
+    const val LUMBAR_REVISION = 7
 
     /**
      * De quien es la rutina lumbar.
@@ -394,11 +394,11 @@ object MasterDefaults {
             name = "LUMBAR",
             tracksPain = true,
             workouts = listOf(
-                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "6 km/h, arms loose"),
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
                 b.mobility(),
                 b.mcgill(),
                 b.hipGlute(),
-                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "Easy. No toe-touch stretching after"),
+                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
             ),
             createdAt = now,
             updatedAt = now,
@@ -434,7 +434,7 @@ object MasterDefaults {
                 // La velocidad va en la nota y no solo en las instrucciones porque es lo que
                 // se lee en el player. "Paso vivo" costo tres sesiones: a 3 km/h no hacia
                 // nada, a 5 le solto las caderas. Un adjetivo no dosifica.
-                b.walk(if (lang == "es") "Caminata corta" else "Short Walk", sec = 360, note = "6 km/h, after the mobility"),
+                b.walk(if (lang == "es") "Caminata corta" else "Short Walk", sec = 360, note = "After the mobility, not before", kmh = 6.0),
                 b.mcgill(),
                 b.hipGlute(),
             ),
@@ -667,10 +667,14 @@ object MasterDefaults {
             },
         )
 
-        fun walk(name: String, sec: Int, note: String): Workout = Workout(
+        // La velocidad va como DATO del ejercicio y ya no dentro de la nota (TD-124): en la
+        // nota es texto que nadie puede comparar entre sesiones, y es la variable que mas ha
+        // movido el dolor -3, 4, 5 y 6 km/h en cuatro dias-. Ahora el player la ensena con
+        // - y +, y lo que quede al terminar es lo que se registra.
+        fun walk(name: String, sec: Int, note: String, kmh: Double?): Workout = Workout(
             id = id(),
             name = name,
-            exercises = listOf(ex("ex_walk", note = note, work = sec)),
+            exercises = listOf(ex("ex_walk", note = note, work = sec).copy(speedKmh = kmh)),
         )
 
         fun mobility(): Workout = Workout(
@@ -714,15 +718,17 @@ object MasterDefaults {
                 // cuando iban a ser 26, le parecio mucho y bajo la carga. Un numero mal
                 // puesto le cambio el entrenamiento.
                 //
-                // Discos 0/10/25 sobre esa barra: 6, 16 y 31 kg. La serie de barra sola es
+                // Discos 0/15/30 sobre esa barra: 6, 21 y 36 kg. La serie de barra sola es
                 // suya y se respeta -entrar al patron sin carga, en una rutina de columna,
-                // es buena idea-; lo unico que sube es la de arriba. Iba 21 -> 26 el 15-sep,
-                // y el 16-sep los 26 "se sintieron normal" y pidio +5 con estas palabras:
-                // "quiero ir con prudencia". 31 son 12.5 kg de disco por lado.
-                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 10.0, 25.0), WeightType.BARBELL, barWeight = 6.0),
-                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(7.5, 10.0, 12.5)),
-                // "Se sintio ligero" con 7.5/10/12.5, asi que sube entera.
-                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(10.0, 12.5, 15.0)),
+                // es buena idea-. La de arriba fue 21 -> 26 -> 31 -> 36, y cada subida la
+                // pidio el cuerpo: el 18-sep marco los 31 como LIGEROS en el player. La
+                // intermedia sube de 16 a 21 para que el salto hasta la de arriba no quede
+                // tan largo.
+                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 15.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
+                // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
+                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(10.0, 12.5, 15.0)),
+                // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
+                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(12.5, 15.0, 17.5)),
             ),
         )
     }

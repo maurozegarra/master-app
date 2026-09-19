@@ -19,7 +19,7 @@ object StepEngine {
                 val sets = e.sets.coerceAtLeast(1)
                 for (s in 0 until sets) {
                     if (e.workMode == WorkMode.TIME) {
-                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
+                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, speedKmh = e.speedKmh))
                     } else {
                         val ws = e.setAt(s)
                         add(
@@ -112,6 +112,7 @@ object StepEngine {
         rotating: Boolean = false,
         secPerRep: Int = 3,
         exerciseIndex: Int = 0,
+        speedKmh: Double? = null,
     ): PlayerStep {
         val cfg = when (kind) {
             StepKind.PREP -> e.prepareCfg
@@ -148,6 +149,7 @@ object StepEngine {
             variantName = variant,
             rotating = rotating,
             secPerRep = secPerRep,
+            speedKmh = speedKmh,
         )
     }
 
