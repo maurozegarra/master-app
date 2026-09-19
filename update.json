@@ -1,7 +1,7 @@
 {
-  "changelog": "",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.257/master-1.0.257.apk",
+  "changelog": "release: el descanso dibuja lo que hay que cargar, y NIKO recibe su rutina en espanol",
+  "versionName": "1.0.274",
+  "versionCode": 274,
   "minVersionCode": 1,
-  "versionCode": 257,
-  "versionName": "1.0.257"
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.274/master-1.0.274.apk"
 }
