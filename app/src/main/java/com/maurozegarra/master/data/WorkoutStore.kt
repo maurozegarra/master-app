@@ -228,6 +228,23 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     }
 
     /**
+     * Por exerciseId, la huella de lo ultimo que este telefono intercambio con el servidor
+     * (TD-139): lo que publico si es el del coach, lo que aplico si es el de un atleta. Es lo
+     * que permite distinguir despues lo que escribio una persona de lo que llego solo.
+     */
+    fun mediaLedger(): Map<String, Int> = runCatching {
+        val o = org.json.JSONObject(prefs.getString(KEY_MEDIA_LEDGER, "{}") ?: "{}")
+        o.keys().asSequence().associateWith { o.getInt(it) }
+    }.getOrDefault(emptyMap())
+
+    fun markMediaSynced(exerciseId: String, fingerprint: Int) {
+        val o = runCatching { org.json.JSONObject(prefs.getString(KEY_MEDIA_LEDGER, "{}") ?: "{}") }
+            .getOrDefault(org.json.JSONObject())
+        o.put(exerciseId, fingerprint)
+        prefs.edit().putString(KEY_MEDIA_LEDGER, o.toString()).apply()
+    }
+
+    /**
      * Los uid de los trainings archivados (TD-138). Aparte de los trainings a proposito: la
      * marca tiene que sobrevivir a una revision, que reemplaza el training entero. Ver
      * [com.maurozegarra.master.model.Archive].
@@ -295,6 +312,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_PUBLISH_LEDGER = "publish_ledger"
         const val KEY_ATHLETE_SESSIONS = "athlete_sessions_json"
         const val KEY_ARCHIVED_UIDS = "archived_training_uids"
+        const val KEY_MEDIA_LEDGER = "exercise_media_ledger"
         const val KEY_CATALOG_INSTRUCTIONS = "catalog_instructions_revision"
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"

@@ -7,6 +7,8 @@ import com.maurozegarra.master.model.AssignedTrainingsJson
 import com.maurozegarra.master.model.Profile
 import com.maurozegarra.master.model.ProfileDirectoryJson
 import com.maurozegarra.master.model.Training
+import com.maurozegarra.master.model.MediaSync
+import com.maurozegarra.master.model.ExerciseMedia
 import com.maurozegarra.master.model.SessionSync
 import com.maurozegarra.master.model.AthleteSession
 import com.maurozegarra.master.model.TrainingJson
@@ -108,6 +110,27 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
             .put("updated_at", java.time.Instant.now().toString())
             .toString()
         val res = write("POST", "trainings", payload, merge = true) ?: return NO_CONNECTION
+        return if (res.ok) null else reasonOf(res)
+    }
+
+    // ---------- Instrucciones por ejercicio (TD-139) ----------
+
+    /**
+     * Las instrucciones publicadas, de todos los ejercicios. **Null es "no se pudo leer"**,
+     * que no es lo mismo que una tabla vacia.
+     *
+     * Va sin sesion: se lee con la clave publicable, porque el telefono de un atleta no tiene
+     * cuenta y estas instrucciones no son secretas. Escribirlas si exige sesion.
+     */
+    fun exerciseMedia(): Map<String, ExerciseMedia>? =
+        runCatching { MediaSync.parseRows(get("exercise_media?select=exercise_id,instructions")) }
+            .onFailure { Log.w(TAG, "no se pudieron leer las instrucciones publicadas", it) }
+            .getOrNull()
+
+    /** Publica las instrucciones de un ejercicio. Null si se publico, o el motivo. */
+    fun publishMedia(exerciseId: String, media: ExerciseMedia): String? {
+        val res = write("POST", "exercise_media", MediaSync.rowOf(exerciseId, media), merge = true)
+            ?: return NO_CONNECTION
         return if (res.ok) null else reasonOf(res)
     }
 

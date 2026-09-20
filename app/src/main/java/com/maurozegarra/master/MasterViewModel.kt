@@ -36,6 +36,9 @@ import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionSync
 import com.maurozegarra.master.model.Archive
 import com.maurozegarra.master.model.PublishSync
+import com.maurozegarra.master.model.MediaSync
+import com.maurozegarra.master.model.MissingContent
+import com.maurozegarra.master.model.DeliveryCheck
 import com.maurozegarra.master.model.SPEED_MAX
 import com.maurozegarra.master.model.SPEED_MIN
 import com.maurozegarra.master.model.StepEngine
@@ -174,11 +177,31 @@ class MasterViewModel(
     /** Lo mismo para republicar: ver la nota de arriba sobre el orden de inicializacion. */
     private val republishLock = kotlinx.coroutines.sync.Mutex()
 
+    /** Y para las instrucciones (TD-139). Misma razon, mismo sitio. */
+    private val mediaSyncLock = kotlinx.coroutines.sync.Mutex()
+
     /**
      * Aviso de que un training repartido se volvio a publicar, para que la pantalla lo diga
      * (TD-132). Null cuando no hay nada que avisar.
      */
     var republishNotice by mutableStateOf<String?>(null)
+
+    /**
+     * Si este dispositivo puede escribir. Lo decide el servidor; esto solo pinta la UI.
+     *
+     * Es estado observable y no una lectura directa del almacenamiento: la accion
+     * "Assign to" de la lista de trainings depende de esto, y con una lectura simple solo
+     * apareceria cuando algo mas obligase a repintar esa pantalla.
+     *
+     * Declarado AQUI, antes del `init`, por lo mismo que los candados de arriba (TD-142).
+     * Vivia junto al resto de lo del entrenador, y desde que [republishChanged] lo mira
+     * (TD-132) eso lo convirtio en una bomba: el `init` llama a persist() al sembrar, y ahi
+     * el delegado todavia era null. Lo que corre desde el `init` mira [AuthStore] y no este
+     * estado, pero la declaracion se queda arriba igual: el siguiente que lo lea desde el
+     * arranque no tiene por que saber esta historia.
+     */
+    var isCoach by mutableStateOf(auth.isCoach)
+        private set
 
     /**
      * Los uid archivados (TD-138), en memoria para que la lista reaccione al archivar.
@@ -628,7 +651,10 @@ class MasterViewModel(
      * reintenta en la proxima sincronizacion.
      */
     private fun republishChanged() {
-        if (!isCoach) return
+        // auth.isCoach y no isCoach: esto se llama desde persist(), que corre dentro del
+        // `init` al sembrar. Preguntarle al almacen no depende del orden de inicializacion
+        // (TD-142).
+        if (!auth.isCoach) return
         viewModelScope.launch(Dispatchers.IO) {
             if (!republishLock.tryLock()) return@launch
             try {
@@ -653,6 +679,52 @@ class MasterViewModel(
             } finally {
                 republishLock.unlock()
             }
+        }
+    }
+
+    /**
+     * Las instrucciones de los ejercicios, en la misma pasada que lo demas (TD-139).
+     *
+     * **La direccion la marca quien es coach**: el suyo es el telefono que las escribe, asi
+     * que publica; el de un atleta recibe, asi que aplica. Nadie fusiona en las dos
+     * direcciones. Sin red no se pierde nada: la huella no se marca y se reintenta.
+     */
+    private fun syncMedia() {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (!mediaSyncLock.tryLock()) return@launch
+            try {
+                if (auth.isCoach) publishMediaChanges() else applyPublishedMedia()
+            } finally {
+                mediaSyncLock.unlock()
+            }
+        }
+    }
+
+    private fun publishMediaChanges() {
+        for ((id, media) in MediaSync.toPublish(mediaStore.load(), store.mediaLedger())) {
+            // Al primer fallo se corta: sin red o sin sesion, seguir es gastar intentos.
+            if (assignments.publishMedia(id, media) != null) return
+            store.markMediaSynced(id, MediaSync.fingerprintOf(media))
+        }
+    }
+
+    private suspend fun applyPublishedMedia() {
+        val remote = assignments.exerciseMedia() ?: return
+        val local = mediaStore.load()
+        val aplicar = MediaSync.toApply(
+            remote = remote,
+            local = local,
+            ledger = store.mediaLedger(),
+            seeded = MasterDefaults.replaceableInstructions(),
+        )
+        if (aplicar.isEmpty()) return
+        val merged = local + aplicar
+        mediaStore.save(merged)
+        aplicar.forEach { (id, m) -> store.markMediaSynced(id, MediaSync.fingerprintOf(m)) }
+        withContext(Dispatchers.Main) {
+            exerciseMedia.clear()
+            exerciseMedia.putAll(merged)
+            snapshot()
         }
     }
 
@@ -768,6 +840,15 @@ class MasterViewModel(
     }
 
 
+    /**
+     * Que le llegaria incompleto a quien reciba este training (TD-143). Lista vacia = nada
+     * que avisar.
+     */
+    fun deliveryGaps(trainingId: Long): List<MissingContent> {
+        val training = trainings.firstOrNull { it.id == trainingId } ?: return emptyList()
+        return DeliveryCheck.gaps(training, exerciseMedia.toMap(), videos.publishedIds())
+    }
+
     fun setInstructions(exerciseId: String, steps: List<String>) {
         updateMedia(exerciseId) { it.copy(instructions = steps.filter { s -> s.isNotBlank() }) }
     }
@@ -777,6 +858,9 @@ class MasterViewModel(
         if (updated.isEmpty) exerciseMedia.remove(exerciseId) else exerciseMedia[exerciseId] = updated
         mediaStore.save(exerciseMedia.toMap())
         snapshot()
+        // Corregir una instruccion es publicarla: es el punto entero de TD-139, que no haga
+        // falta una version del app para que le llegue a quien entrena con ella.
+        syncMedia()
     }
 
     // ---------- Perfil y trainings asignados (TD-063) ----------
@@ -830,16 +914,6 @@ class MasterViewModel(
     }
 
     // ---------- Entrenador: crear personas y asignar (TD-067, etapa B) ----------
-
-    /**
-     * Si este dispositivo puede escribir. Lo decide el servidor; esto solo pinta la UI.
-     *
-     * Es estado observable y no una lectura directa del almacenamiento: la acción
-     * "Asignar a…" de la lista de trainings depende de esto, y con una lectura simple solo
-     * aparecería cuando algo más obligase a repintar esa pantalla.
-     */
-    var isCoach by mutableStateOf(auth.isCoach)
-        private set
 
     val coachEmail: String get() = auth.email
 
@@ -1030,6 +1104,7 @@ class MasterViewModel(
             // reintentar lo que no subio y de bajar lo nuevo de los atletas.
             syncSessions()
             republishChanged()
+            syncMedia()
             onDone(SyncResult.Ok(assigned = incoming.size, changed = changed))
         }
     }

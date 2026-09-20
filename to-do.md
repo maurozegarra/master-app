@@ -4,12 +4,64 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **86 / 138** hechos, 52 pendientes.
+Progreso: **87 / 143** hechos, 56 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-143** Antes de repartir, el app dice que le va a llegar incompleto
+  - PEDIDO el 19-sep-2026, a raiz de encontrarlo pasando de verdad: al verificar TD-139 se cruzaron los ejercicios de 'NIKO 2 · Muay Thai' -el que ella entrena el lunes- contra las instrucciones publicadas, y SEIS estaban sin una sola linea: los cinco del calentamiento (cuerda, rotacion de cadera, 90 a 90, rotacion de hombros, sombra) y el salto de llanta. Se asigno asi, y se descubrio por casualidad la vispera.
+
+POR QUE PASA: repartir parecia un solo acto y no lo es. El training viaja, pero las instrucciones y el video son de cada exerciseId y pueden no existir. Cuando faltan, el fallo es SILENCIOSO: quien recibe abre el ejercicio y ve un nombre, y quien reparte no se entera nunca.
+
+QUE SE HACE: DeliveryCheck.gaps(training, instrucciones, videos publicados) lista los ejercicios que llegarian sin instrucciones o sin video, y el dialogo de 'Assign to' lo ensena ANTES de confirmar, con los que no tienen instrucciones primero y en blanco -sin instrucciones no se puede hacer el ejercicio; sin video se puede leer como se hace-.
+
+AVISA, NO BLOQUEA: repartir algo sin video es normal; repartirlo sin saberlo es lo que no.
+
+EL VIDEO PROPIO NO CUENTA: vive en el directorio privado del telefono que lo asigno y no viaja con la rutina, asi que solo vale el publicado. Mirar el estado del video a secas diria que esta cubierto cuando el otro telefono no puede descargarlo.
+
+Y MIRA LAS VARIANTES: un workout rotativo esconde sus ejercicios dentro de ellas, que en el dia de Muay Thai son casi todo el training. Hay un test que lo fija.
+- [ ] **TD-139** Las instrucciones dejan de viajar en el APK: una tabla por exerciseId
+  - ETAPA 1 de 3 del rediseno de la entrega de contenido (ver TD-140 y TD-141).
+
+EL DIAGNOSTICO, del 19-sep-2026, revisando el codigo y no los comentarios. La unidad real de contenido es el exerciseId -un ejercicio tiene nombre, instrucciones y video- pero esas tres piezas viajan por tres caminos: el nombre dentro del training (Supabase), las instrucciones dentro del APK (catalogInstructions + CATALOG_INSTRUCTIONS_REVISION) y el video por un commit al repo (videos.json + release 'videos'). Solo el training se entrega solo. Consecuencia: un ejercicio nuevo le llega a un atleta SIN instrucciones hasta que actualice el app, y un video asignado desde el telefono (own/<id>.mp4, directorio privado) no le llega nunca. Y falla en silencio: ella ve un nombre y nada mas.
+
+LO QUE NO ERA LA RAZON: el peso. Los 7 videos publicados pesan entre 1.7 y 4.8 MB, 21 MB en total. A 3 MB por video, el plan gratis (del orden de 1 GB de almacenamiento y 5 GB de trafico al mes) da para unos 300, y cada telefono descarga cada uno UNA vez porque se cachea por rev. La razon real era la inercia: el pipeline se construyo alrededor del repo. El usuario lo intuyo antes que nadie ('me parecia raro que el agente me da tantas excusas para el tema del video').
+
+QUE SE HACE: una tabla exercise_media en Supabase -exercise_id, instructions, video_rev, video_bytes- que el app sincroniza en la misma pasada que ya hace al abrir (MainActivity.onStart -> syncAssignments, con freno de 60 s). Lectura anon: la clave publicable viaja en el APK, asi que lo que lea anon es publico de hecho; las instrucciones no son secretas. Escritura solo con sesion de entrenador.
+
+catalogInstructions() en el codigo se queda como SEMILLA -instalacion limpia y sin red- pero deja de ser el canal de entrega. Se mantiene el merge que no pisa lo que el usuario escribio.
+
+LO QUE DESBLOQUEA: corregir una instruccion en el telefono del coach y que le llegue al atleta al abrir el app, sin release y sin APK nuevo. Es la etapa que mas duele hoy.
+
+CUESTA UNA ACTUALIZACION: el telefono del atleta necesita una version del app que sepa leer la tabla. Es la misma que ya necesita para TD-126.
+
+DECISIONES DEL USUARIO (19-sep-2026):
+  1. Bucket PUBLICO: 'no hay nada que ocultar o derechos de autor, son para uso personal, es una app de ejercicios, no es app bancaria'. Hoy los de GitHub ya son publicos, asi que no cambia nada en la practica.
+  2. videos.json SE RETIRA tras migrar. Dos caminos para lo mismo es la enfermedad que se esta curando.
+EL RIESGO ACEPTADO: un proyecto gratis de Supabase se pausa por inactividad (~7 dias), y con los videos alli una pausa deja al atleta sin videos ademas de sin rutina. En la practica no pasa -el app lo toca cada vez que se abre- y la rutina ya depende de el.
+- [ ] **TD-140** Publicar un video desde el telefono: bucket en Supabase y boton en la ficha del ejercicio
+  - ETAPA 2 de 3 (ver TD-139 y TD-141).
+
+HOY el video propio (own/<exerciseId>.mp4) vive en el directorio privado del app: no entra en el payload, no entra en el respaldo y no se sube a ningun sitio. Publicar uno exige PC, el CLI de gh y un commit a videos.json, o sea el asistente. Grabar un ejercicio con el telefono y que le llegue al atleta no se puede.
+
+QUE SE HACE: un bucket publico de Storage y un boton 'Publish video' en la ficha del ejercicio que sube el own/ y escribe la fila de exercise_media (rev +1 y bytes). Subir solo con sesion de entrenador. VideoRepository resuelve el manifiesto desde la tabla en vez de videos.json; la cache ya nombra por rev, asi que la version nueva convive con la vieja sin tocar VideoCache.
+
+PENDIENTE DE DISENO: que hacer con el own/ una vez publicado -seguir ganando sobre el publicado como hoy, o desaparecer para que el coach vea lo mismo que el atleta-. Lo segundo evita el clasico 'a mi se me ve bien'.
+
+DECISIONES DEL USUARIO (19-sep-2026):
+  1. Bucket PUBLICO: 'no hay nada que ocultar o derechos de autor, son para uso personal, es una app de ejercicios, no es app bancaria'. Hoy los de GitHub ya son publicos, asi que no cambia nada en la practica.
+  2. videos.json SE RETIRA tras migrar. Dos caminos para lo mismo es la enfermedad que se esta curando.
+EL RIESGO ACEPTADO: un proyecto gratis de Supabase se pausa por inactividad (~7 dias), y con los videos alli una pausa deja al atleta sin videos ademas de sin rutina. En la practica no pasa -el app lo toca cada vez que se abre- y la rutina ya depende de el.
+- [ ] **TD-141** Migrar los 7 videos publicados y retirar videos.json
+  - ETAPA 3 de 3 (ver TD-139 y TD-140).
+
+QUE SE HACE: subir al bucket los 7 mp4 del release 'videos' -21 MB en total-, escribir sus filas en exercise_media conservando rev y bytes, y quitar del codigo el camino viejo: MANIFEST_URL a raw.githubusercontent, el archivo videos.json de la raiz y su seccion en AGENTS.md. El release 'videos' de GitHub se queda como respaldo frio; build-release.ps1 ya tiene prohibido borrarlo (TD-065).
+
+POR QUE RETIRAR Y NO CONVIVIR: decision del usuario. Dos fuentes para lo mismo obligan a una regla de precedencia, y esa regla es justo lo que hace que hoy nadie sepa por que un video aparece en un telefono y no en otro.
+
+ORDEN: va despues de TD-140, porque hasta que el bucket no sirva videos, retirar el manifiesto deja a los dos telefonos sin ninguno.
 - [ ] **TD-137** Circuitos: alternar ejercicios por rounds en vez de terminar uno para empezar otro
   - LIMITACION DEL MODELO, encontrada al diseñar el dia 6 de NIKO (19-sep-2026). Lo ideal para defensa personal es un circuito: saco 60 s → sprawl 30 s → saco 60 s..., repetido por rounds. El player hace un ejercicio con TODAS sus series y recien pasa al siguiente, asi que un circuito no se puede expresar: hoy va como series seguidas de cada ejercicio.
 
@@ -374,6 +426,7 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 
 ### Fix
 
+- [x] **TD-142** Fix: republicar desde el arranque leia isCoach antes de que existiera
 - [x] **TD-134** Fix: borrar un training dejaba su asignacion viva, y no habia donde quitarla
 - [x] **TD-121** Fix: borrar una sesion, y las correcciones al arrancar, no escriben respaldo
 - [x] **TD-108** La rutina lumbar solo se siembra en el telefono de su dueno

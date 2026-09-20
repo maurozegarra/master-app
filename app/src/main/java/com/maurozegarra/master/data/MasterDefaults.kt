@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 9
+    const val LUMBAR_REVISION = 10
 
     /**
      * De quien es la rutina lumbar.
@@ -784,7 +784,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 5
+    const val CATALOG_INSTRUCTIONS_REVISION = 6
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -905,6 +905,61 @@ object MasterDefaults {
                 "Si sientes que trabaja la espalda baja, no estás usando el glúteo.",
             ),
         ),
+        "ex_rope_jumping" to ExerciseMedia(
+            listOf(
+                "Mide la cuerda: pisa el centro con un pie y los mangos deben llegarte a las axilas.",
+                "Codos pegados al cuerpo. La cuerda gira con las MUÑECAS, no con los brazos.",
+                "Saltos bajos, de dos dedos del piso, cayendo en la punta de los pies con la rodilla suelta.",
+                "Mirada al frente, no a los pies.",
+                "Si te trabas, sigue: lo que cuenta son los dos minutos en movimiento, no una serie perfecta.",
+            ),
+        ),
+        "ex_hip_rotation" to ExerciseMedia(
+            listOf(
+                "De pie, con una mano en la pared si te hace falta equilibrio.",
+                "Sube una rodilla hasta la altura de la cadera.",
+                "Llévala en círculo hacia afuera, lo más amplio que puedas, y bájala. Ese es un círculo.",
+                "El tronco no acompaña: se mueve la pierna, no la espalda.",
+                "Diez con una pierna y diez con la otra. Es movilidad, no fuerza: lento y sin rebotes.",
+            ),
+        ),
+        "ex_90_90" to ExerciseMedia(
+            listOf(
+                "En el piso: una pierna delante doblada a 90° y la otra al costado, también a 90°.",
+                "Las dos rodillas y los dos tobillos tocando el piso, y la espalda recta.",
+                "Gira las dos piernas al otro lado, dejando caer las rodillas, sin ayudarte con las manos.",
+                "Un lado y el otro es una repetición.",
+                "Si las rodillas no llegan al piso, no fuerces: llega hasta donde llegues y respira.",
+            ),
+        ),
+        "ex_shoulder_rotation" to ExerciseMedia(
+            listOf(
+                "De pie, con los brazos sueltos a los costados.",
+                "Sube un brazo por delante, estíralo arriba junto a la oreja y bájalo por atrás: un círculo grande y lento.",
+                "El hombro se queda abajo, no sube hacia la oreja.",
+                "Diez círculos con un brazo y diez con el otro.",
+                "Si algo pincha, haz el círculo más pequeño hasta donde no moleste.",
+            ),
+        ),
+        "ex_shadow_boxing" to ExerciseMedia(
+            listOf(
+                "Guardia: manos a la altura de los pómulos, codos pegados a las costillas y el mentón metido.",
+                "Pies al ancho de los hombros, uno delante y otro detrás, con el talón de atrás levantado.",
+                "No te quedes quieto: pasos cortos, sin cruzar nunca los pies.",
+                "El golpe sale del pie y la cadera y termina en la mano. Si solo mueves el brazo, no es un golpe.",
+                "La mano que no golpea NO se cae: vuelve a la cara.",
+                "Manos y pies: mete también teeps y rodillas, y vuelve siempre a la guardia.",
+            ),
+        ),
+        "ex_tire_jumping" to ExerciseMedia(
+            listOf(
+                "De frente a la llanta, a un paso de distancia.",
+                "Salta con los dos pies a la vez y cae ENCIMA de la llanta, en la punta de los pies y con las rodillas dobladas.",
+                "Baja saltando hacia atrás, igual de suave, y encadena el siguiente.",
+                "Ligera y rápida: el piso quema. No aterrices con el talón ni con la pierna rígida.",
+                "Si lo sientes en las rodillas, quédate en el piso saltando dentro y fuera del hueco, con los pies rápidos.",
+            ),
+        ),
     )
 
     /**
@@ -926,6 +981,22 @@ object MasterDefaults {
      * El usuario lo acepto para el suyo tambien: *"imagino que ese cambio tambien me afecta
      * a mi, pero no hay problema"*. El puente de la lumbar NO entra: no se pidio.
      */
+    /**
+     * Las versiones de instrucciones que este codigo sembro alguna vez y que, por tanto, se
+     * pueden reemplazar por lo que llegue del servidor (TD-139).
+     *
+     * Es la misma idea que sostiene [supersededInstructions] -lo sembrado es reemplazable, lo
+     * escrito a mano no- extendida a la actual: en la PRIMERA sincronizacion el telefono ya
+     * trae las del APK, y sin contarlas como reemplazables no entraria nunca nada.
+     */
+    fun replaceableInstructions(): Map<String, List<ExerciseMedia>> {
+        val out = supersededInstructions().toMutableMap()
+        (catalogInstructions() + lumbarInstructions()).forEach { (id, m) ->
+            out[id] = (out[id].orEmpty() + m).distinct()
+        }
+        return out
+    }
+
     fun supersededInstructions(): Map<String, List<ExerciseMedia>> {
         val lumbar = lumbarInstructions()
         val out = catalogInstructionsV1Map.mapValues { (_, m) -> listOf(m) }.toMutableMap()

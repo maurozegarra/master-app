@@ -68,6 +68,7 @@ fun AssignDialog(vm: MasterViewModel, training: Training, t: Strings, onClose: (
 
     val list = profiles
     val marks = checked
+    val gaps = remember(training.id) { vm.deliveryGaps(training.id) }
 
     AlertDialog(
         onDismissRequest = { if (!busy) onClose() },
@@ -103,6 +104,37 @@ fun AssignDialog(vm: MasterViewModel, training: Training, t: Strings, onClose: (
                         }
                         Spacer(Modifier.height(8.dp))
                         Text(t.assignWarning, color = AppTheme.colors.textFaded, fontSize = 12.sp)
+                        // Lo que le va a llegar incompleto, antes de confirmar y no despues
+                        // (TD-143). Avisa, no bloquea: repartir algo sin video es normal;
+                        // repartirlo sin saberlo es lo que no lo es.
+                        if (gaps.isNotEmpty()) {
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                t.deliveryGaps,
+                                color = AppTheme.colors.textPrimary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            // Los que no tienen instrucciones, uno a uno: cada uno es algo
+                            // que escribir. Los que solo no tienen video van en una linea:
+                            // listarlos seria un muro -hoy casi ninguno lo tiene- y no hay
+                            // nada que hacer con esa lista.
+                            gaps.filter { it.noInstructions }.forEach { hueco ->
+                                Text(
+                                    "${hueco.name} — ${t.gapNoSteps}",
+                                    color = AppTheme.colors.textPrimary,
+                                    fontSize = 12.sp,
+                                )
+                            }
+                            val sinVideo = gaps.count { it.noVideo }
+                            if (sinVideo > 0) {
+                                Text(
+                                    "$sinVideo ${t.gapNoVideo}",
+                                    color = AppTheme.colors.textFaded,
+                                    fontSize = 12.sp,
+                                )
+                            }
+                        }
                     }
                 }
             }

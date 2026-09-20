@@ -79,6 +79,12 @@ class VideoRepository(
      */
     fun stateOf(exerciseId: String): VideoState = states[exerciseId] ?: VideoState.None
 
+    /**
+     * Los ejercicios con video PUBLICADO, los unicos que pueden llegarle a otra persona
+     * (TD-143). El video propio no cuenta: vive en el directorio privado de este telefono.
+     */
+    fun publishedIds(): Set<String> = manifest?.videos?.keys.orEmpty()
+
     /** El archivo listo para reproducir, o null. */
     fun fileFor(exerciseId: String): File? = (stateOf(exerciseId) as? VideoState.Ready)?.file
 

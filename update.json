@@ -1,7 +1,7 @@
 {
-  "versionCode": 287,
-  "changelog": "feat: TD-132 y TD-138, los cambios de una rutina repartida llegan solos y la lista esconde lo que no toca",
+  "versionCode": 291,
   "minVersionCode": 1,
-  "versionName": "1.0.287",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.287/master-1.0.287.apk"
+  "versionName": "1.0.291",
+  "changelog": "feat: TD-139, TD-142 y TD-143, las instrucciones viajan por Supabase y repartir avisa de lo que falta",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.291/master-1.0.291.apk"
 }
