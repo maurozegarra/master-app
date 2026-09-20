@@ -29,7 +29,9 @@ class LumbarTrainingTest {
             listOf("Warm Walk", "Mobility", "McGill Big 3", "Hip & Glute", "Cool Walk"),
             training.workouts.map { it.name },
         )
-        assertEquals(listOf(1, 2, 4, 3, 1), training.workouts.map { it.exercises.size })
+        // 3 en McGill y no 4 desde TD-147: la plancha lateral era dos ejercicios clonados y
+        // ahora es uno con sus dos lados declarados.
+        assertEquals(listOf(1, 2, 3, 3, 1), training.workouts.map { it.exercises.size })
     }
 
     @Test
@@ -46,9 +48,17 @@ class LumbarTrainingTest {
             assertEquals(12, e.sets)
             assertEquals(10, e.workValue)
             assertEquals(3, e.restSec)
-            // El respiro largo cierra el bloque de 6 y el de 4, y nada mas lo lleva.
-            assertEquals(listOf(5, 9), e.setList.indices.filter { e.setList[it].restSec != null })
-            assertTrue(e.setList.filter { it.restSec != null }.all { it.restSec == 30 })
+            // El respiro largo cierra el bloque de 6 y el de 4. La plancha lleva ademas uno
+            // en la ULTIMA serie: son los 20 s para cambiar de lado, que antes los daba la
+            // PREP del segundo ejercicio y al fundirlos habrian desaparecido (TD-147).
+            val conDescanso = e.setList.indices.filter { e.setList[it].restSec != null }
+            if (e.sides.isEmpty()) {
+                assertEquals(listOf(5, 9), conDescanso)
+                assertTrue(e.setList.filter { it.restSec != null }.all { it.restSec == 30 })
+            } else {
+                assertEquals(listOf(5, 9, 11), conDescanso)
+                assertEquals(20, e.setList[11].restSec)
+            }
         }
     }
 
@@ -61,19 +71,26 @@ class LumbarTrainingTest {
             t.sumOf { it.durationSec }
         }
 
-        // 20 s para acomodarse + 3:27 de piramide.
-        assertTrue(porMovimiento.all { it == 227 })
+        // 20 s para acomodarse + 3:27 de piramide. La plancha son los dos lados: 20 de
+        // acomodarse, una piramide, 20 para cambiar de lado y la otra piramide. El total del
+        // bloque no se mueve -antes eran dos PREP de 20 y ahora una PREP y un cambio-, que
+        // es lo que hace que fundirla no le cambie la sesion a nadie (TD-147).
+        assertEquals(listOf(227, 454, 227), porMovimiento)
     }
 
     @Test
     fun `la plancha lateral se hace a los dos lados y cada uno cuenta aparte`() {
-        val mcgill = training.workouts[2]
-        val ids = mcgill.exercises.map { it.exerciseId }
+        // Hasta TD-147 eran dos entradas del catalogo clonadas. Lo que se protegia con eso
+        // -que izquierda y derecha se cuenten aparte, porque una asimetria es justo lo que
+        // hay que ver- lo da ahora el lado declarado en el ejercicio, sin clonar nada.
+        val plancha = training.workouts[2].exercises.single { it.exerciseId == "ex_side_plank" }
 
-        assertTrue("ex_side_plank_l" in ids && "ex_side_plank_r" in ids)
-        // Ids distintos es lo que mantiene separadas sus series en el historial, que
-        // agrupa por ejercicio dentro del workout.
-        assertEquals(ids.size, ids.toSet().size)
+        assertEquals(listOf("Left", "Right"), plancha.sides)
+        val registros = StepEngine.buildSteps(training)
+            .filter { it.kind == StepKind.WORK && it.ownerExerciseId == "ex_side_plank" }
+            .map { it.side }
+            .distinct()
+        assertEquals(listOf("Left", "Right"), registros)
     }
 
     @Test
@@ -164,7 +181,7 @@ class LumbarTrainingTest {
             listOf("Warm Walk", "Mobility", "McGill Big 3", "Carry", "Cool Walk"),
             short.workouts.map { it.name },
         )
-        assertEquals(listOf(6, 6, 6, 6), short.workouts.first { it.name == "McGill Big 3" }.exercises.map { it.sets })
+        assertEquals(listOf(6, 6, 6), short.workouts.first { it.name == "McGill Big 3" }.exercises.map { it.sets })
         // De los tres con carga se queda el que mas da por minuto y que ademas es caminar
         // cargado. El puente y la sentadilla los hace igual cuatro dias por semana.
         assertEquals(
@@ -286,8 +303,8 @@ class LumbarTrainingTest {
         fun aguantes(t: com.maurozegarra.master.model.Training) =
             t.workouts.first { it.name == "McGill Big 3" }.exercises.map { it.sets }
 
-        assertEquals(listOf(12, 12, 12, 12), aguantes(training))
-        assertEquals(listOf(6, 6, 6, 6), aguantes(badDay))
+        assertEquals(listOf(12, 12, 12), aguantes(training))
+        assertEquals(listOf(6, 6, 6), aguantes(badDay))
         // Y los 10 s de cada aguante no se tocan: lo que baja es cuantos, no cuanto dura.
         assertTrue(badDay.workouts.first { it.name == "McGill Big 3" }.exercises.all { it.workValue == 10 })
     }

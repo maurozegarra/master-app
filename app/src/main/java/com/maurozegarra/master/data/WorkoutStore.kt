@@ -129,6 +129,10 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
     fun isSep15Fixed(): Boolean = prefs.getBoolean(KEY_SEP15_FIXED, false)
     fun setSep15Fixed() { prefs.edit().putBoolean(KEY_SEP15_FIXED, true).apply() }
 
+    /** Marca de migracion: si el historial de la plancha lateral ya se fundio (TD-147). */
+    fun isSidePlankMerged(): Boolean = prefs.getBoolean(KEY_SIDE_PLANK_MERGED, false)
+    fun setSidePlankMerged() { prefs.edit().putBoolean(KEY_SIDE_PLANK_MERGED, true).apply() }
+
     /** Marca de migracion: si ya se escribio el feedback del 17-sep (TD-120). */
     fun isSep17FeedbackFilled(): Boolean = prefs.getBoolean(KEY_SEP17_FEEDBACK, false)
     fun setSep17FeedbackFilled() { prefs.edit().putBoolean(KEY_SEP17_FEEDBACK, true).apply() }
@@ -313,6 +317,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_ATHLETE_SESSIONS = "athlete_sessions_json"
         const val KEY_ARCHIVED_UIDS = "archived_training_uids"
         const val KEY_MEDIA_LEDGER = "exercise_media_ledger"
+        const val KEY_SIDE_PLANK_MERGED = "side_plank_merged"
         const val KEY_CATALOG_INSTRUCTIONS = "catalog_instructions_revision"
         const val KEY_FIRST_SESSION_MARKED = "first_session_marked"
         const val KEY_SESSIONS_REORDERED = "lumbar_sessions_reordered"

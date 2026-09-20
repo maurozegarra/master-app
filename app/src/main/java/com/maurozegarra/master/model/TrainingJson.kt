@@ -143,6 +143,7 @@ object TrainingJson {
             .put("restCfg", stageToJson(e.restCfg))
             .put("cooldownCfg", stageToJson(e.cooldownCfg))
             .put("showVideo", e.showVideo)
+            .put("sides", JSONArray(e.sides))
     }
 
     private fun exerciseFromJson(o: JSONObject): Exercise {
@@ -189,6 +190,7 @@ object TrainingJson {
             // respaldos viejos ni los payloads ya publicados traen el campo, y leerlos
             // como false apagaría de golpe todos los vídeos.
             showVideo = o.optBoolean("showVideo", true),
+            sides = o.optJSONArray("sides")?.let { a -> (0 until a.length()).map { a.getString(it) } }.orEmpty(),
         )
     }
 

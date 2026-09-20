@@ -33,9 +33,14 @@ class SessionRecorder {
     private val speed = mutableMapOf<ExerciseKey, MutableMap<Int, Double>>()
     private var totalExercisesByWorkout = mutableMapOf<Int, Int>()
 
+    /**
+     * Un lado es un registro (TD-147): la plancha izquierda y la derecha se cuentan aparte,
+     * que es lo unico que hace visible una asimetria. Vacio en lo bilateral.
+     */
     private data class ExerciseKey(
         val exerciseId: String,
         val workoutIndex: Int,
+        val side: String = "",
     )
 
     fun setTotalExercisesByWorkout(map: Map<Int, Int>) {
@@ -64,7 +69,7 @@ class SessionRecorder {
     }
 
     private fun putSet(step: PlayerStep, setRecord: SetRecord) {
-        val key = ExerciseKey(step.ownerExerciseId, step.workoutIndex)
+        val key = ExerciseKey(step.ownerExerciseId, step.workoutIndex, step.side)
         val setMap = sets.getOrPut(key) { mutableMapOf() }
         setMap[step.setIndex] = setRecord
         val orderedSets = orderedWithFeedback(key, setMap, step.totalSets)
@@ -75,6 +80,7 @@ class SessionRecorder {
             workoutName = step.workoutName,
             workoutIndex = step.workoutIndex,
             exerciseIndex = step.exerciseIndex,
+            side = step.side,
             setsCompleted = completedCount,
             totalSets = step.totalSets,
             sets = orderedSets,
@@ -85,13 +91,13 @@ class SessionRecorder {
     }
 
     /** Lo marcado en la serie [setIndex]; si se vuelve a tocar, gana el último toque. */
-    fun setFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, deltaKg: Double) {
-        feedback.getOrPut(ExerciseKey(exerciseId, workoutIndex)) { mutableMapOf() }[setIndex] = deltaKg
+    fun setFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, deltaKg: Double, side: String = "") {
+        feedback.getOrPut(ExerciseKey(exerciseId, workoutIndex, side)) { mutableMapOf() }[setIndex] = deltaKg
     }
 
     /** La velocidad que se puso en la serie [setIndex]; gana sobre la prescrita. */
-    fun setSpeed(exerciseId: String, workoutIndex: Int, setIndex: Int, kmh: Double) {
-        speed.getOrPut(ExerciseKey(exerciseId, workoutIndex)) { mutableMapOf() }[setIndex] = kmh
+    fun setSpeed(exerciseId: String, workoutIndex: Int, setIndex: Int, kmh: Double, side: String = "") {
+        speed.getOrPut(ExerciseKey(exerciseId, workoutIndex, side)) { mutableMapOf() }[setIndex] = kmh
     }
 
     private fun orderedWithFeedback(key: ExerciseKey, setMap: Map<Int, SetRecord>, totalSets: Int): List<SetRecord> {
@@ -128,7 +134,9 @@ class SessionRecorder {
      */
     fun build(): List<ExerciseRecord> =
         records.values.map { er ->
-            val key = ExerciseKey(er.exerciseId, er.workoutIndex)
+            // CON el lado: sin el, un ejercicio por lados buscaba una clave que no existe
+            // y se quedaba sin el feedback ni la velocidad de ninguno de los dos (TD-147).
+            val key = ExerciseKey(er.exerciseId, er.workoutIndex, er.side)
             val orderedSets = sets[key]?.let { orderedWithFeedback(key, it, er.totalSets) } ?: er.sets
             er.copy(
                 setsCompleted = orderedSets.count { !it.skipped },

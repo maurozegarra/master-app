@@ -28,6 +28,7 @@ object SessionJson {
                 val erObj = JSONObject()
                     .put("exerciseId", er.exerciseId)
                     .put("name", er.name)
+                    .put("side", er.side)
                     .put("workoutName", er.workoutName)
                     .put("workoutIndex", er.workoutIndex)
                     .put("exerciseIndex", er.exerciseIndex)
@@ -90,6 +91,7 @@ object SessionJson {
                     exercises.add(ExerciseRecord(
                         exerciseId = eo.optString("exerciseId", ""),
                         name = eo.optString("name", ""),
+                        side = eo.optString("side", ""),
                         workoutName = eo.optString("workoutName", ""),
                         workoutIndex = eo.optInt("workoutIndex", 0),
                         // Las sesiones guardadas antes de TD-099 no lo traen. Se quedan en

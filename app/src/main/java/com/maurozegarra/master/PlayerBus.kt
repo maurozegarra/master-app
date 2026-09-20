@@ -14,8 +14,8 @@ sealed class PlayerCommand {
     data object SKIP_STEP : PlayerCommand()
     data object SKIP_EXERCISE : PlayerCommand()
     data object STOP : PlayerCommand()
-    data class FEEDBACK(val exerciseId: String, val workoutIndex: Int, val setIndex: Int, val deltaKg: Double) : PlayerCommand()
-    data class SPEED(val exerciseId: String, val workoutIndex: Int, val setIndex: Int, val kmh: Double) : PlayerCommand()
+    data class FEEDBACK(val exerciseId: String, val workoutIndex: Int, val setIndex: Int, val deltaKg: Double, val side: String = "") : PlayerCommand()
+    data class SPEED(val exerciseId: String, val workoutIndex: Int, val setIndex: Int, val kmh: Double, val side: String = "") : PlayerCommand()
 }
 
 /**

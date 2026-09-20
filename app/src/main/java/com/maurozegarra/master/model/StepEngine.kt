@@ -17,9 +17,13 @@ object StepEngine {
                     add(stageStep(StepKind.PREP, e, wName, wi, tw, durationSec = e.prepareSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
                 }
                 val sets = e.sets.coerceAtLeast(1)
+                // Un ejercicio sin lados se comporta como siempre: una vuelta con etiqueta
+                // vacia. Con lados, TODAS las series de uno y despues las del otro (TD-147).
+                val sides = e.sides.ifEmpty { listOf("") }
+                for ((si, side) in sides.withIndex()) {
                 for (s in 0 until sets) {
                     if (e.workMode == WorkMode.TIME) {
-                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, speedKmh = e.speedKmh))
+                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, speedKmh = e.speedKmh, side = side))
                     } else {
                         val ws = e.setAt(s)
                         add(
@@ -30,19 +34,22 @@ object StepEngine {
                                 weightTotal = if (e.isWeighted) e.weightTotal(ws) else 0.0,
                                 weightLabel = if (e.isWeighted) weightLabel(e, ws) else "",
                                 workoutBase = w.name, variant = wVariant, rotating = w.rotating,
-                                secPerRep = e.secPerRep, exerciseIndex = ei,
+                                secPerRep = e.secPerRep, exerciseIndex = ei, side = side,
                             ),
                         )
                     }
-                    val lastSet = s == sets - 1
+                    // El ultimo de verdad es el ultimo del ULTIMO lado: entre un lado y el
+                    // siguiente hay que cambiar de postura, asi que ese descanso se queda.
+                    val lastSet = s == sets - 1 && si == sides.lastIndex
                     // El descanso que decide es el EFECTIVO de esta serie, no el del
                     // ejercicio: si no, una serie con descanso propio no generaria etapa
                     // en un ejercicio con restSec 0, que es justo como se escribe una
                     // piramide (series pegadas y un respiro largo solo en dos de ellas).
                     val rest = e.restSecAt(s)
                     if (rest > 0 && !(e.restSkipOnLastSet && lastSet)) {
-                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
+                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, side = side))
                     }
+                }
                 }
                 if (e.cooldownSec > 0) {
                     add(stageStep(StepKind.COOLDOWN, e, wName, wi, tw, durationSec = e.cooldownSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
@@ -132,6 +139,7 @@ object StepEngine {
         secPerRep: Int = 3,
         exerciseIndex: Int = 0,
         speedKmh: Double? = null,
+        side: String = "",
     ): PlayerStep {
         val cfg = when (kind) {
             StepKind.PREP -> e.prepareCfg
@@ -147,6 +155,7 @@ object StepEngine {
             ownerExerciseId = e.exerciseId,
             exerciseIndex = exerciseIndex,
             showVideo = e.showVideo,
+            side = side,
             workoutName = workoutName,
             workoutIndex = workoutIndex,
             totalWorkouts = totalWorkouts,

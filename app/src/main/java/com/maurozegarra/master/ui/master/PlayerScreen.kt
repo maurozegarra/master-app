@@ -780,7 +780,15 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // linea propia encima. Ocupaba el alto de una nota entera para decir "1 / 3", y la
         // nota es lo que hay que leer mientras se entrena. Colgar no descentra el numero:
         // igual que la unidad a la derecha, se mide y se desplaza.
-        ClockOrReps(vm, step, repByRep, padClock, t, lead = if (showSeries) "${step.setIndex + 1}/${step.totalSets}" else null)
+        // El lado va colgado del numero, junto al contador de series (TD-147): "L · 3/12".
+        // Tiene que verse SIEMPRE que exista, incluso con una sola serie -el isometrico de
+        // cuello son cuatro direcciones de una serie cada una-, que es justo cuando el
+        // contador no sale y antes no quedaba nada que dijera cual toca.
+        val lead = listOfNotNull(
+            step.side.takeIf { it.isNotBlank() },
+            "${step.setIndex + 1}/${step.totalSets}".takeIf { showSeries },
+        ).joinToString(" · ").ifBlank { null }
+        ClockOrReps(vm, step, repByRep, padClock, t, lead = lead)
         Spacer(Modifier.height(16.dp))
 
         // Siempre visibles, en toda etapa y en cualquier modo: son el mando de la corrida.
@@ -1288,7 +1296,7 @@ private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean, l
 
 @Composable
 private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color, t: Strings) {
-    val current = vm.weightFeedback[vm.feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex)]?.deltaKg
+    val current = vm.weightFeedback[vm.feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.side)]?.deltaKg
     // Translucida y no negra: todo lo demas de esta pantalla -los controles, la franja de
     // rutina- deja ver el color de la etapa, y un bloque solido rompia esa gramatica.
     //
@@ -1320,13 +1328,13 @@ private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color,
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FeedbackChip("${t.tooHeavy} ↓", current == -2.5, accent) {
-                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, -2.5)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, -2.5, step.side)
             }
             FeedbackChip(t.justRight, current == 0.0, accent) {
-                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 0.0)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 0.0, step.side)
             }
             FeedbackChip("${t.tooLight} ↑", current == 2.5, accent) {
-                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 2.5)
+                vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 2.5, step.side)
             }
         }
     }
@@ -1937,7 +1945,7 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
                     Spacer(Modifier.height(4.dp))
                 }
                 items(pendientes, key = { "${it.ownerExerciseId}:${it.workoutIndex}:${it.setIndex}" }) { paso ->
-                    val marcado = vm.weightFeedback[vm.feedbackKey(paso.ownerExerciseId, paso.workoutIndex, paso.setIndex)]?.deltaKg
+                    val marcado = vm.weightFeedback[vm.feedbackKey(paso.ownerExerciseId, paso.workoutIndex, paso.setIndex, paso.side)]?.deltaKg
                     Column(
                         Modifier
                             .fillMaxWidth()

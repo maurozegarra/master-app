@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **91 / 146** hechos, 55 pendientes.
+Progreso: **92 / 147** hechos, 55 pendientes.
 
 ## Pendientes
 
@@ -371,6 +371,7 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 
 ### Feature
 
+- [x] **TD-147** El ejercicio unilateral: el lado entra en el modelo
 - [x] **TD-145** El video es un campo mas del ejercicio: una sola tarjeta y sin carteles
 - [x] **TD-139** Las instrucciones dejan de viajar en el APK: una tabla por exerciseId
 - [x] **TD-140** Publicar un video desde el telefono: bucket en Supabase y boton en la ficha del ejercicio

@@ -111,6 +111,25 @@ data class Exercise(
      * tiene delante, y quien recibe un training asignado no podría deshacerla.
      */
     val showVideo: Boolean = true,
+    /**
+     * Los lados o direcciones en los que se hace **cada serie** (TD-147). Vacío = el
+     * ejercicio se hace una vez por serie, como siempre.
+     *
+     * Existe porque el modelo no sabía lo que es un lado, y eso se estaba fingiendo de dos
+     * maneras, las dos malas: clonando la entrada del catálogo -la plancha lateral es
+     * `ex_side_plank_l` y `ex_side_plank_r`- o metiendo las direcciones en la nota, como el
+     * isométrico de cuello, que decía "adelante, atrás, derecha, izquierda" y dejaba al que
+     * entrena adivinando cuál toca en la serie 3 de 4.
+     *
+     * Clonar funciona -izquierda y derecha SON dos capacidades, y verlas aparte es el
+     * punto- pero no escala: aplicado al resto de lo unilateral que ya hay (abducción,
+     * step-up, búlgara, carry) pedía seis entradas más del catálogo, con sus instrucciones
+     * duplicadas. Con esto se declara una vez y el motor hace el resto.
+     *
+     * **El orden es por lado, no alternando**: todas las series de un lado y luego las del
+     * otro, que es como se ejecuta una pirámide de McGill y como ya se venía haciendo.
+     */
+    val sides: List<String> = emptyList(),
 ) {
     fun withStageColor(kind: StepKind, color: Long): Exercise = when (kind) {
         StepKind.PREP -> copy(prepareCfg = prepareCfg.copy(color = color))
@@ -397,6 +416,14 @@ data class ExerciseRecord(
      * real ya no está en ninguna parte.
      */
     val exerciseIndex: Int = 0,
+    /**
+     * El lado o la dirección de este registro (TD-147). Vacío en lo bilateral y en todo lo
+     * anterior a TD-147.
+     *
+     * Va aquí y no en cada serie porque **un lado es un registro**: es lo que hace que una
+     * asimetría se vea en el historial en vez de promediarse con el otro lado.
+     */
+    val side: String = "",
     val setsCompleted: Int,
     val totalSets: Int,
     val sets: List<SetRecord>,

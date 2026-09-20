@@ -92,9 +92,8 @@ class RoutinesFitEquipmentTest {
         // de la lumbar tambien se superpone con el catalogo, pero ese no se pidio.
         val viejas = MasterDefaults.supersededInstructions()
         val lumbar = MasterDefaults.lumbarInstructions()
-        listOf("ex_side_plank_l", "ex_side_plank_r").forEach {
-            assertTrue("$it: la de la lumbar no se reemplaza", lumbar.getValue(it) in viejas.getValue(it))
-        }
+        // Un solo id desde TD-147; el reemplazo se sigue reconociendo igual.
+        assertTrue("la de la lumbar no se reemplaza", lumbar.getValue("ex_side_plank") in viejas.getValue("ex_side_plank"))
         assertTrue(lumbar.getValue("ex_glute_bridge") !in viejas["ex_glute_bridge"].orEmpty())
     }
 
@@ -109,7 +108,9 @@ class RoutinesFitEquipmentTest {
         }
         val viejas = MasterDefaults.supersededInstructions()
         assertTrue(viejas.getValue("ex_russian_twist").any { it.instructions.first().startsWith("Sentada") })
-        assertTrue(viejas.getValue("ex_side_plank_l").any { it.instructions.first().startsWith("De lado, apoyada") })
+        // La version en femenino de la plancha vivia bajo ex_side_plank_l, un id que ya no
+        // existe (TD-147). Su fila queda publicada y sin usar: nadie la va a volver a
+        // sembrar, asi que no hay nada que reconocer para reemplazar.
     }
 
     @Test

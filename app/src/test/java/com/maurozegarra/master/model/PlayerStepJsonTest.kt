@@ -25,6 +25,7 @@ class PlayerStepJsonTest {
         ownerExerciseId = "ex_walk",
         exerciseIndex = 2,
         showVideo = false,
+        side = "Izquierda",
         workoutName = "Warm Walk",
         workoutIndex = 3,
         totalWorkouts = 5,

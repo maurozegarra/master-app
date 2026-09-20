@@ -32,6 +32,7 @@ object PlayerStepJson {
                     .put("ownerExerciseId", s.ownerExerciseId)
                     .put("exerciseIndex", s.exerciseIndex)
                     .put("showVideo", s.showVideo)
+        .put("side", s.side)
                     .put("workoutName", s.workoutName)
                     .put("workoutIndex", s.workoutIndex)
                     .put("totalWorkouts", s.totalWorkouts)
@@ -74,6 +75,7 @@ object PlayerStepJson {
                 ownerExerciseId = o.optString("ownerExerciseId", ""),
                 exerciseIndex = o.optInt("exerciseIndex", 0),
                 showVideo = o.optBoolean("showVideo", true),
+        side = o.optString("side", ""),
                 workoutName = o.optString("workoutName", ""),
                 workoutIndex = o.optInt("workoutIndex", 0),
                 totalWorkouts = o.optInt("totalWorkouts", 1),

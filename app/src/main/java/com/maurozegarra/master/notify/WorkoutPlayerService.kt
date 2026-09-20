@@ -131,7 +131,9 @@ class WorkoutPlayerService : Service() {
         recorder.setTotalExercisesByWorkout(
             newSteps.filter { it.kind == StepKind.WORK }
                 .groupBy { it.workoutIndex }
-                .mapValues { it.value.map { ex -> ex.ownerExerciseId }.distinct().size }
+                // Por (ejercicio, lado): con lados, uno cuenta como varios, que es lo que
+                // luego dice "3 de 8" en el historial (TD-147).
+                .mapValues { it.value.map { ex -> ex.ownerExerciseId to ex.side }.distinct().size }
         )
         persist()
         publishAndNotify()
@@ -148,8 +150,8 @@ class WorkoutPlayerService : Service() {
                     PlayerCommand.SKIP_STEP -> skipStep()
                     PlayerCommand.SKIP_EXERCISE -> skipExercise()
                     PlayerCommand.STOP -> stopPlayer()
-                    is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.deltaKg)
-                    is PlayerCommand.SPEED -> recorder.setSpeed(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.kmh)
+                    is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.deltaKg, cmd.side)
+                    is PlayerCommand.SPEED -> recorder.setSpeed(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.kmh, cmd.side)
                 }
             }
         }

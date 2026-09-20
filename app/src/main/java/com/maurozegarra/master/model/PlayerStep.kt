@@ -32,6 +32,8 @@ data class PlayerStep(
      * training —que ni siquiera tiene por qué estar cargado al reconectar con una corrida.
      */
     val showVideo: Boolean = true,
+    /** Lado o dirección de este paso, si el ejercicio los tiene (TD-147). */
+    val side: String = "",
     val workoutName: String = "",
     val workoutIndex: Int = 0,
     val totalWorkouts: Int = 1,

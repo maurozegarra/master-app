@@ -73,8 +73,9 @@ object ExerciseCatalog {
         // Izquierda y derecha son dos entradas y no una con nota "cada lado" porque el
         // historial agrupa por ejercicio dentro del workout: con un solo id, las series
         // de un lado pisarian las del otro y se perderia la mitad del registro.
-        Triple("ex_side_plank_l", "Plancha lateral izquierda", "Side Plank L"),
-        Triple("ex_side_plank_r", "Plancha lateral derecha", "Side Plank R"),
+        // Un solo movimiento, con los lados declarados en el ejercicio (TD-147). Eran dos
+        // entradas clonadas porque el modelo no sabia lo que era un lado; ahora si.
+        Triple("ex_side_plank", "Plancha lateral", "Side Plank"),
         Triple("ex_bird_dog", "Bird dog", "Bird Dog"),
         Triple("ex_glute_bridge", "Puente de gluteos", "Glute Bridge"),
         Triple("ex_suitcase_carry", "Suitcase carry", "Suitcase Carry"),

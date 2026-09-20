@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 11
+    const val LUMBAR_REVISION = 12
 
     /**
      * De quien es la rutina lumbar.
@@ -512,24 +512,31 @@ object MasterDefaults {
         val t = lumbarTraining(lang)
         val exercises = mutableListOf<ExerciseRecord>()
         t.workouts.forEachIndexed { wi, w ->
+            // Un registro por LADO, igual que lo que escribe el recorder (TD-147): la
+            // plancha lateral de aquel dia se hizo a los dos lados, y asi se sigue contando
+            // como dos aunque ahora sea un solo ejercicio.
+            val porBloque = w.exercises.sumOf { it.sides.size.coerceAtLeast(1) }
             w.exercises.forEach { e ->
                 val porTiempo = e.workMode == WorkMode.TIME
-                exercises.add(
-                    ExerciseRecord(
-                        exerciseId = e.exerciseId,
-                        name = e.name,
-                        workoutName = w.name,
-                        workoutIndex = wi,
-                        setsCompleted = e.sets,
-                        totalSets = e.sets,
-                        sets = (0 until e.sets).map { i ->
-                            if (porTiempo) SetRecord(durationSec = e.workSecAt(i))
-                            else SetRecord(reps = e.setAt(i).reps)
-                        },
-                        timeBased = porTiempo,
-                        totalExercisesInWorkout = w.exercises.size,
-                    ),
-                )
+                e.sides.ifEmpty { listOf("") }.forEach { lado ->
+                    exercises.add(
+                        ExerciseRecord(
+                            exerciseId = e.exerciseId,
+                            name = e.name,
+                            workoutName = w.name,
+                            workoutIndex = wi,
+                            side = lado,
+                            setsCompleted = e.sets,
+                            totalSets = e.sets,
+                            sets = (0 until e.sets).map { i ->
+                                if (porTiempo) SetRecord(durationSec = e.workSecAt(i))
+                                else SetRecord(reps = e.setAt(i).reps)
+                            },
+                            timeBased = porTiempo,
+                            totalExercisesInWorkout = porBloque,
+                        ),
+                    )
+                }
             }
         }
         return SessionLog(
@@ -615,7 +622,7 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 4
+    const val NIKO_REVISION = 7
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -716,7 +723,11 @@ object MasterDefaults {
                     id = b.id(),
                     name = "Cuello",
                     exercises = listOf(
-                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta. Adelante, atrás, derecha, izquierda", 20, sets = 4, rest = 15, mode = WorkMode.TIME),
+                        // Cuatro direcciones declaradas, no escondidas en la nota (TD-147): el player dice
+                        // cual toca en cada serie y el historial las cuenta aparte, que es lo que hace
+                        // visible un cuello que se desarrolla torcido.
+                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta", 20, sets = 1, rest = 15, mode = WorkMode.TIME)
+                            .copy(sides = listOf("Adelante", "Atrás", "Derecha", "Izquierda")),
                     ),
                 ),
             ),
@@ -766,15 +777,19 @@ object MasterDefaults {
                             "ex_russian_twist", "10 por lado. Gira el pecho, no solo los brazos", 20, rest = 45,
                             weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(5.0, 5.0, 5.0),
                         ),
-                        b.ex("ex_side_plank_l", "Codo bajo el hombro, cuerpo recto", 30, sets = 3, rest = 20, mode = WorkMode.TIME),
-                        b.ex("ex_side_plank_r", "Codo bajo el hombro, cuerpo recto", 30, sets = 3, rest = 20, mode = WorkMode.TIME),
+                        b.ex("ex_side_plank", "Codo bajo el hombro, cuerpo recto", 30, sets = 3, rest = 20, mode = WorkMode.TIME)
+                            .copy(sides = listOf("Izquierda", "Derecha")),
                     ),
                 ),
                 Workout(
                     id = b.id(),
                     name = "Cuello",
                     exercises = listOf(
-                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta. Adelante, atrás, derecha, izquierda", 20, sets = 4, rest = 15, mode = WorkMode.TIME),
+                        // Cuatro direcciones declaradas, no escondidas en la nota (TD-147): el player dice
+                        // cual toca en cada serie y el historial las cuenta aparte, que es lo que hace
+                        // visible un cuello que se desarrolla torcido.
+                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta", 20, sets = 1, rest = 15, mode = WorkMode.TIME)
+                            .copy(sides = listOf("Adelante", "Atrás", "Derecha", "Izquierda")),
                     ),
                 ),
             ),
@@ -837,7 +852,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 6
+    const val CATALOG_INSTRUCTIONS_REVISION = 7
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -937,16 +952,9 @@ object MasterDefaults {
                 "Para hacerlo más difícil, levanta los pies del piso.",
             ),
         ),
-        "ex_side_plank_l" to ExerciseMedia(
+        "ex_side_plank" to ExerciseMedia(
             listOf(
-                "De lado, sobre el antebrazo izquierdo, con el codo justo debajo del hombro.",
-                "Sube la cadera hasta que el cuerpo quede en línea recta de la cabeza a los pies.",
-                "Aguanta sin dejar caer la cadera. Si no puedes con las piernas estiradas, apoya las rodillas dobladas.",
-            ),
-        ),
-        "ex_side_plank_r" to ExerciseMedia(
-            listOf(
-                "De lado, sobre el antebrazo derecho, con el codo justo debajo del hombro.",
+                "De lado, sobre el antebrazo del lado que toca, con el codo justo debajo del hombro.",
                 "Sube la cadera hasta que el cuerpo quede en línea recta de la cabeza a los pies.",
                 "Aguanta sin dejar caer la cadera. Si no puedes con las piernas estiradas, apoya las rodillas dobladas.",
             ),
@@ -1053,9 +1061,7 @@ object MasterDefaults {
     fun supersededInstructions(): Map<String, List<ExerciseMedia>> {
         val lumbar = lumbarInstructions()
         val out = catalogInstructionsV1Map.mapValues { (_, m) -> listOf(m) }.toMutableMap()
-        listOf("ex_side_plank_l", "ex_side_plank_r").forEach { id ->
-            lumbar[id]?.let { out[id] = out[id].orEmpty() + it }
-        }
+        lumbar["ex_side_plank"]?.let { out["ex_side_plank"] = out["ex_side_plank"].orEmpty() + it }
         // Revisiones 3 y 4 del catalogo: escritas en femenino pensando en NIKO -"apoyada",
         // "sentada"-, cuando las del catalogo le llegan a todos. Se sembraron en el telefono
         // del coach el 19-sep y se reconocen para cambiarlas por las neutras.
@@ -1069,8 +1075,9 @@ object MasterDefaults {
             actual.getValue(id).let { it.copy(instructions = listOf(primero) + it.instructions.drop(1)) }
         return mapOf(
             "ex_russian_twist" to conPrimerPaso("ex_russian_twist", """Sentada en el piso, rodillas dobladas, talones apoyados. Inclina el torso atrás hasta sentir el abdomen trabajando."""),
-            "ex_side_plank_l" to conPrimerPaso("ex_side_plank_l", """De lado, apoyada en el antebrazo izquierdo, con el codo justo debajo del hombro."""),
-            "ex_side_plank_r" to conPrimerPaso("ex_side_plank_r", """De lado, apoyada en el antebrazo derecho, con el codo justo debajo del hombro."""),
+            // Las dos versiones en femenino de la plancha vivian bajo ex_side_plank_l y
+            // ex_side_plank_r, que ya no existen (TD-147). Sus filas quedan publicadas y sin
+            // usar; no hay nada que reemplazar porque nadie las va a volver a sembrar.
         )
     }
 
@@ -1272,6 +1279,15 @@ object MasterDefaults {
              * la mitad, para el dia con prisa y para el dia malo (revision 11).
              */
             blocks: List<Int> = listOf(6, 4, 2),
+            /** Lados, si el movimiento se hace a los dos (TD-147). */
+            sides: List<String> = emptyList(),
+            /**
+             * Los segundos para cambiar de lado. Van como descanso de la ULTIMA serie: en el
+             * ultimo lado se lo salta [Exercise.restSkipOnLastSet], asi que solo aparece
+             * entre un lado y el siguiente. Antes ese hueco lo daba la PREP del segundo
+             * ejercicio, que al fundirlos ya no existe.
+             */
+            sideRest: Int = 0,
         ): Exercise {
             val total = blocks.sum()
             // Donde termina cada bloque menos el ultimo: ahi van los 30 s de descanso.
@@ -1284,9 +1300,10 @@ object MasterDefaults {
                 prep = 20,
                 rest = 3,
                 setList = (0 until total).map { i ->
-                    WorkSet(reps = 10, restSec = if (i in cortes) 30 else null)
+                    val fin = i == total - 1 && sides.isNotEmpty() && sideRest > 0
+                    WorkSet(reps = 10, restSec = if (fin) sideRest else if (i in cortes) 30 else null)
                 },
-            )
+            ).copy(sides = sides)
         }
 
         // La velocidad va como DATO del ejercicio y ya no dentro de la nota (TD-124): en la
@@ -1313,8 +1330,7 @@ object MasterDefaults {
             name = "McGill Big 3",
             exercises = listOf(
                 pyramid("ex_curl_up", "Alternate the bent leg between blocks", blocks),
-                pyramid("ex_side_plank_l", "Elbow under the shoulder, knees at 90", blocks),
-                pyramid("ex_side_plank_r", "Elbow under the shoulder, knees at 90", blocks),
+                pyramid("ex_side_plank", "Elbow under the shoulder, knees at 90", blocks, sides = listOf("Left", "Right"), sideRest = 20),
                 pyramid("ex_bird_dog", "Alternate sides between holds", blocks),
             ),
         )
@@ -1420,8 +1436,7 @@ object MasterDefaults {
                 "Alternate the bent leg between blocks.",
             ),
         ),
-        "ex_side_plank_l" to sidePlankSteps(),
-        "ex_side_plank_r" to sidePlankSteps(),
+        "ex_side_plank" to sidePlankSteps(),
         "ex_bird_dog" to ExerciseMedia(
             listOf(
                 "Opposite arm and leg, up to shoulder and hip height, no higher.",

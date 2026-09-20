@@ -284,6 +284,7 @@ class MasterViewModel(
             reorderLumbarSessions()
             fixSep15Weights()
             fillSep17Feedback()
+            mergeSidePlankHistory()
         }
         // Fuera del if a proposito: tambien una instalacion limpia las necesita.
         seedCatalogInstructions()
@@ -341,6 +342,39 @@ class MasterViewModel(
      * Esto es una correccion a mano de un dato concreto, que es lo que habra que dejar de
      * hacer por codigo cuando exista el nivel 2 de TD-101.
      */
+    /**
+     * Funde el historial de la plancha lateral en un solo movimiento con lado (TD-147).
+     *
+     * Hasta aqui eran dos ejercicios clonados, `ex_side_plank_l` y `ex_side_plank_r`, porque
+     * el modelo no sabia lo que era un lado. Al declararlo de verdad, lo ya entrenado tenia
+     * que venirse: si no, el historial de la plancha se parte en un antes y un despues y
+     * comparar aguantes entre sesiones deja de poder hacerse, que es justo para lo que
+     * sirve tenerlos separados por lado.
+     *
+     * **No marca la sesion como EDITADA.** No se cambia lo que se hizo -ni un segundo, ni
+     * una serie-, solo bajo que nombre esta archivado. Lo medido sigue siendo lo medido.
+     */
+    private fun mergeSidePlankHistory() {
+        if (store.isSidePlankMerged()) return
+        val sesiones = store.loadSessions()
+        val nombre = ExerciseCatalog.name("ex_side_plank", lang())
+        val lados = mapOf("ex_side_plank_l" to "Left", "ex_side_plank_r" to "Right")
+        val nuevas = sesiones.map { s ->
+            s.copy(
+                exercises = s.exercises.map { er ->
+                    val lado = lados[er.exerciseId] ?: return@map er
+                    er.copy(exerciseId = "ex_side_plank", side = lado, name = nombre)
+                },
+            )
+        }
+        if (nuevas != sesiones) {
+            store.saveSessions(nuevas)
+            sessions.clear()
+            sessions.addAll(nuevas)
+        }
+        store.setSidePlankMerged()
+    }
+
     private fun fixSep15Weights() {
         if (store.isSep15Fixed()) return
         val sesiones = store.loadSessions()
@@ -1867,12 +1901,13 @@ class MasterViewModel(
      */
     val weightFeedback = mutableStateMapOf<String, SetFeedback>()
 
-    fun feedbackKey(exerciseId: String, workoutIndex: Int, setIndex: Int) = "$exerciseId:$workoutIndex:$setIndex"
+    fun feedbackKey(exerciseId: String, workoutIndex: Int, setIndex: Int, side: String = "") =
+        "$exerciseId:$workoutIndex:$setIndex:$side"
 
-    fun recordFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, name: String, weight: Double, deltaKg: Double) {
-        weightFeedback[feedbackKey(exerciseId, workoutIndex, setIndex)] =
-            SetFeedback(name, "$exerciseId:$workoutIndex", setIndex, weight, deltaKg)
-        sendFeedback(exerciseId, workoutIndex, setIndex, deltaKg)
+    fun recordFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, name: String, weight: Double, deltaKg: Double, side: String = "") {
+        weightFeedback[feedbackKey(exerciseId, workoutIndex, setIndex, side)] =
+            SetFeedback(name, "$exerciseId:$workoutIndex:$side", setIndex, weight, deltaKg)
+        sendFeedback(exerciseId, workoutIndex, setIndex, deltaKg, side)
     }
 
     /**
@@ -1884,7 +1919,7 @@ class MasterViewModel(
     fun unmarkedWeightSets(): List<PlayerStep> =
         playerSteps.filter {
             it.kind == StepKind.WORK && it.weighted &&
-                weightFeedback[feedbackKey(it.ownerExerciseId, it.workoutIndex, it.setIndex)] == null
+                weightFeedback[feedbackKey(it.ownerExerciseId, it.workoutIndex, it.setIndex, it.side)] == null
         }
 
     /**
@@ -1898,11 +1933,12 @@ class MasterViewModel(
      * otro sobre un registro ajeno.
      */
     fun markFinishedFeedback(step: PlayerStep, deltaKg: Double) {
-        weightFeedback[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex)] =
-            SetFeedback(step.ownerName, "${step.ownerExerciseId}:${step.workoutIndex}", step.setIndex, step.weightTotal, deltaKg)
+        weightFeedback[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.side)] =
+            SetFeedback(step.ownerName, "${step.ownerExerciseId}:${step.workoutIndex}:${step.side}", step.setIndex, step.weightTotal, deltaKg)
         val sesion = sessions.firstOrNull() ?: return
         val ejercicios = sesion.exercises.map { er ->
             if (er.exerciseId != step.ownerExerciseId || er.workoutIndex != step.workoutIndex ||
+                er.side != step.side ||
                 step.setIndex !in er.sets.indices
             ) {
                 er
@@ -1977,8 +2013,8 @@ class MasterViewModel(
     fun skipStep() = PlayerBus.command.tryEmit(PlayerCommand.SKIP_STEP)
     fun skipExercise() = PlayerBus.command.tryEmit(PlayerCommand.SKIP_EXERCISE)
     fun prevStep() = PlayerBus.command.tryEmit(PlayerCommand.PREV)
-    fun sendFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, deltaKg: Double) =
-        PlayerBus.command.tryEmit(PlayerCommand.FEEDBACK(exerciseId, workoutIndex, setIndex, deltaKg))
+    fun sendFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, deltaKg: Double, side: String = "") =
+        PlayerBus.command.tryEmit(PlayerCommand.FEEDBACK(exerciseId, workoutIndex, setIndex, deltaKg, side))
 
     /**
      * La velocidad a la que va de verdad cada serie (TD-124).
@@ -1990,13 +2026,13 @@ class MasterViewModel(
     val setSpeed = mutableStateMapOf<String, Double>()
 
     fun speedOf(step: PlayerStep): Double? =
-        setSpeed[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex)] ?: step.speedKmh
+        setSpeed[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.side)] ?: step.speedKmh
 
     fun recordSpeed(step: PlayerStep, kmh: Double) {
         val v = kmh.coerceIn(SPEED_MIN, SPEED_MAX)
-        setSpeed[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex)] = v
+        setSpeed[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.side)] = v
         PlayerBus.command.tryEmit(
-            PlayerCommand.SPEED(step.ownerExerciseId, step.workoutIndex, step.setIndex, v),
+            PlayerCommand.SPEED(step.ownerExerciseId, step.workoutIndex, step.setIndex, v, step.side),
         )
     }
 
