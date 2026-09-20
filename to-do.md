@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **90 / 145** hechos, 55 pendientes.
+Progreso: **91 / 146** hechos, 55 pendientes.
 
 ## Pendientes
 
@@ -409,6 +409,7 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 
 ### Fix
 
+- [x] **TD-146** Apagar el video desde el player, y que lo editado en caliente se vea ya
 - [x] **TD-142** Fix: republicar desde el arranque leia isCoach antes de que existiera
 - [x] **TD-134** Fix: borrar un training dejaba su asignacion viva, y no habia donde quitarla
 - [x] **TD-121** Fix: borrar una sesion, y las correcciones al arrancar, no escriben respaldo

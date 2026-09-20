@@ -78,6 +78,25 @@ object StepEngine {
     /** Si dos pasos ocupan la misma casilla del training, aunque cambien sus valores. */
     fun sameSlot(a: PlayerStep, b: PlayerStep): Boolean = compareSteps(a, b) == 0
 
+    /**
+     * El paso recien construido, pero con el reloj del que se esta corriendo (TD-146).
+     *
+     * Al editar un training en marcha, el paso en el que uno esta parado NO puede cambiar de
+     * duracion: si vas por la serie 15 de 30 s y subes el tiempo a 40, esa serie termina con
+     * 30 y el cambio entra en la siguiente. Asi el reloj no salta bajo los pies y lo que se
+     * registra para esa serie es lo que de verdad se hizo.
+     *
+     * Lo que si entra **ahora** es todo lo demas: el video, la nota, el color, el peso. Antes
+     * se conservaba el paso viejo ENTERO, y por eso apagar el video desde el editor no hacia
+     * nada hasta la serie siguiente -parecia que el interruptor estaba roto-.
+     *
+     * Si cambio el modo -de tiempo a repeticiones o al reves- no hay reloj que conservar: el
+     * paso nuevo manda entero.
+     */
+    fun keepClock(fresh: PlayerStep, running: PlayerStep): PlayerStep =
+        if (fresh.timeBased != running.timeBased) fresh
+        else fresh.copy(durationSec = running.durationSec, reps = running.reps)
+
     private fun compareSteps(a: PlayerStep, b: PlayerStep): Int = compareValuesBy(
         a, b,
         { it.workoutIndex },

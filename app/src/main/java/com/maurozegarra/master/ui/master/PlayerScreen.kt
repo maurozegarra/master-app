@@ -34,6 +34,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.VideocamOff
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Check
@@ -95,6 +97,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
+import com.maurozegarra.master.data.VideoState
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.ui.AnimatedGlowBorder
 import com.maurozegarra.master.ui.ExerciseThumb
@@ -659,6 +662,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                         vm.hidePlayerControls()
                     }
                     EditExerciseButton(vm, step, t)
+                    ToggleVideoButton(vm, step, t)
                 }
             }
         }
@@ -999,6 +1003,39 @@ private val NOTE_SIZE = 40.sp
  * editar del mismo tamaño al lado de saltar y confirmar se pulsaría por error con las manos
  * sudadas. No aparece en un training asignado, que no es editable.
  */
+/**
+ * Apagar o encender el vídeo del ejercicio en curso, sin salir del player (TD-146).
+ *
+ * Antes esto costaba cuatro toques —lápiz, bajar hasta VIDEO, interruptor, Save— y encima
+ * devolvía al usuario a la lista de trainings: *"yo solo buscaba dejar de ver el vídeo"*.
+ *
+ * **Se dibuja siempre, aunque el ejercicio no tenga vídeo**, apagado en gris. Que un icono
+ * aparezca y desaparezca entre ejercicios movería de sitio a los otros dos, y en este app
+ * ningún control cambia de posición al pasar de etapa o de ejercicio.
+ */
+@Composable
+private fun ToggleVideoButton(vm: MasterViewModel, step: PlayerStep, t: Strings) {
+    val id = vm.playerTrainingId ?: return
+    if (vm.trainings.firstOrNull { it.id == id }?.assigned != false) return
+    val hayVideo = vm.videoStateFor(step.ownerExerciseId) !is VideoState.None
+
+    Box(
+        modifier = Modifier
+            .padding(start = 12.dp)
+            .size(36.dp)
+            .clip(CircleShape)
+            .clickable(enabled = hayVideo) { vm.toggleRunningVideo(step) },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            if (step.showVideo) Icons.Filled.Videocam else Icons.Filled.VideocamOff,
+            contentDescription = t.showVideoHere,
+            tint = Color.White.copy(alpha = if (hayVideo) 0.7f else 0.25f),
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
 @Composable
 private fun EditExerciseButton(vm: MasterViewModel, step: PlayerStep, t: Strings) {
     val id = vm.playerTrainingId ?: return

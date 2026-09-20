@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-146",
+      "title": "Apagar el video desde el player, y que lo editado en caliente se vea ya",
+      "category": "Fix",
+      "status": "done",
+      "manual": "ENCONTRADO el 20-sep-2026 entrenando: en WORK, lapiz -> VIDEO -> apagar 'Show it in this training' no hacia nada, el video seguia. Y salir costaba TRES Saves -ejercicio, workout, training- mas un tap al mini-player. 'Yo solo buscaba dejar de ver el video, por que tengo que pasar por workout y training?'.\n\nTRES COSAS, tres causas distintas:\n\n1. EL CAMBIO NO LLEGABA AL PASO EN CURSO. applyToRunningPlayer conservaba el paso actual ENTERO para que el reloj no saltara a mitad de serie, y de paso congelaba el video, la nota, el color y el peso: lo editado entraba en la serie siguiente y el interruptor parecia roto. Ahora StepEngine.keepClock conserva SOLO el reloj -segundos y reps- y toma del paso nuevo todo lo demas. Si cambio el modo (tiempo <-> reps) manda el paso nuevo entero: no hay reloj que conservar. Con dos tests.\n\n2. LA VUELTA ERA EL CAMINO DE IDA. El lapiz monta training -> workout -> [variante] -> ejercicio y nadie recordaba de donde se venia. Ahora editRunningExercise lo marca y el Save del ejercicio guarda el training -lo que ademas rehace la cola- y devuelve al player, al ejercicio que se estaba haciendo. El 'atras' hace lo mismo sin guardar, en vez de dejar al usuario tirado en la pantalla de workout.\n\n3. EL OJO EN EL PLAYER. Apagar el video costaba cuatro toques aun con lo anterior arreglado, asi que va un icono de camara en la franja de arriba, a la derecha del lapiz: un toque y se apaga. Se dibuja SIEMPRE, en gris cuando el ejercicio no tiene video, porque si apareciera y desapareciera moveria de sitio al lapiz y a las instrucciones entre ejercicios.\n\nLA TRAMPA DEL ARREGLO 2, que aparecio al validar: volver con openPlayer relee la cola del DISCO (restorePlayerState), y ese archivo lo escribe el servicio, que procesa el aviso de la cola nueva DESPUES -su onStartCommand va al mismo hilo principal-. Asi que pisaba la cola recien rehecha con la de antes del cambio: el video funcionaba -va directo, sin editor- y el color no. Volver del editor ya no relee nada: la cola esta en memoria y al dia.\n\nVALIDADO en dispositivo el 20-sep-2026 (v1.0.300 y v1.0.301)."
+    },
+    {
       "id": "TD-144",
       "title": "Progresiones: un mismo ejercicio con varios niveles, cada uno con su video",
       "category": "Feature",

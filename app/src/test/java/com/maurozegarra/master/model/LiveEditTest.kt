@@ -160,4 +160,30 @@ class LiveEditTest {
         assertTrue(sets.take(15).all { it.durationSec == 30 })
         assertTrue(sets.drop(15).all { it.durationSec == 40 })
     }
+
+    // ---------- Que se conserva del paso en curso (TD-146) ----------
+
+    @Test
+    fun `el paso en curso conserva el reloj pero no el resto`() {
+        // Apagar el video desde el editor no hacia NADA hasta la serie siguiente, porque el
+        // paso en curso se conservaba entero. Parecia que el interruptor estaba roto.
+        val corriendo = PlayerStep(kind = StepKind.WORK, title = "Bird Dog", durationSec = 30, showVideo = true, note = "vieja")
+        val nuevo = corriendo.copy(durationSec = 40, showVideo = false, note = "nueva")
+
+        val out = StepEngine.keepClock(nuevo, corriendo)
+
+        assertEquals(30, out.durationSec)
+        assertEquals(false, out.showVideo)
+        assertEquals("nueva", out.note)
+    }
+
+    @Test
+    fun `si cambia el modo manda el paso nuevo entero`() {
+        // De tiempo a repeticiones no hay reloj que conservar: mezclarlos daria un paso que
+        // cuenta segundos con las reps de otro.
+        val corriendo = PlayerStep(kind = StepKind.WORK, title = "Curl-up", durationSec = 30, timeBased = true)
+        val nuevo = corriendo.copy(timeBased = false, reps = 12, durationSec = 0)
+
+        assertEquals(nuevo, StepEngine.keepClock(nuevo, corriendo))
+    }
 }

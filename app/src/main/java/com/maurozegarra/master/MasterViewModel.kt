@@ -1467,6 +1467,44 @@ class MasterViewModel(
     val canSaveTraining: Boolean
         get() = draft?.let { it.name.isNotBlank() && it.workouts.any { w -> w.hasContent() } } == true
 
+    /**
+     * Enciende o apaga el video del ejercicio en curso, sin salir del player (TD-146).
+     *
+     * Existe porque apagarlo costaba cuatro toques y un viaje al editor -"yo solo buscaba
+     * dejar de ver el video"-. Toca [Exercise.showVideo], que es de ESTA instancia en ESTE
+     * training: que un video se vea aqui no dice nada de los demas trainings que usen el
+     * mismo movimiento.
+     *
+     * Un training asignado no se toca: llega de otro y la siguiente sincronizacion lo
+     * devolveria a como estaba.
+     */
+    fun toggleRunningVideo(step: PlayerStep) {
+        val id = playerTrainingId ?: activePlayerTrainingId ?: return
+        val idx = trainings.indexOfFirst { it.id == id }
+        if (idx < 0) return
+        val training = trainings[idx]
+        if (training.assigned) return
+        val workout = training.workouts.getOrNull(step.workoutIndex) ?: return
+        val objetivo = workout.activeExercises().getOrNull(step.exerciseIndex) ?: return
+
+        fun voltea(list: List<Exercise>) =
+            list.map { if (it.id == objetivo.id) it.copy(showVideo = !it.showVideo) else it }
+
+        val nuevo = if (workout.rotating) {
+            val v = workout.activeVariant() ?: return
+            workout.copy(variants = workout.variants.map { if (it.id == v.id) it.copy(exercises = voltea(it.exercises)) else it })
+        } else {
+            workout.copy(exercises = voltea(workout.exercises))
+        }
+        val actualizado = training.copy(
+            workouts = training.workouts.toMutableList().also { it[step.workoutIndex] = nuevo },
+            updatedAt = System.currentTimeMillis(),
+        )
+        trainings[idx] = actualizado
+        persist()
+        applyToRunningPlayer(actualizado)
+    }
+
     fun saveTraining() {
         val d = draft ?: return
         if (!canSaveTraining) return
@@ -1485,10 +1523,11 @@ class MasterViewModel(
      * desde la lista con el player minimizado, que ya se podía hacer y simplemente no
      * tenía efecto.
      *
-     * **El paso en curso se conserva tal cual**: si estás en la serie 15 de 30s y subes el
-     * tiempo a 40, esa serie termina siendo de 30 y el cambio entra en la siguiente. Así el
-     * reloj no salta bajo los pies y lo que se registre para esa serie es lo que de verdad
-     * se hizo. Solo se conserva si la casilla sigue existiendo: si esa serie desapareció,
+     * **Del paso en curso se conserva el reloj**, no el paso entero (ver
+     * [StepEngine.keepClock]): si estás en la serie 15 de 30s y subes el tiempo a 40, esa
+     * serie termina siendo de 30 y el cambio entra en la siguiente, pero el vídeo, la nota o
+     * el color cambian ya. Solo se conserva si la casilla sigue existiendo: si esa serie
+     * desapareció,
      * [StepEngine.relocate] deja el índice en el primer paso posterior y ahí manda el paso
      * nuevo, no el viejo.
      */
@@ -1499,7 +1538,8 @@ class MasterViewModel(
         if (rebuilt.isEmpty()) return
         val at = StepEngine.relocate(current, rebuilt)
         val steps = if (StepEngine.sameSlot(rebuilt[at], current)) {
-            rebuilt.toMutableList().also { it[at] = current }
+            // Del paso en curso se conserva el reloj y nada mas: lo demas entra ya (TD-146).
+            rebuilt.toMutableList().also { it[at] = StepEngine.keepClock(rebuilt[at], current) }
         } else {
             rebuilt
         }
@@ -1742,6 +1782,7 @@ class MasterViewModel(
 
     fun closeExerciseEditor() {
         editingExerciseId = null
+        if (editFromPlayer) returnToRunningPlayer(save = false)
     }
 
     fun deleteExercise(id: Long) = updateEditorExercises { list -> list.filterNot { it.id == id } }
@@ -1760,6 +1801,34 @@ class MasterViewModel(
     fun saveExercise(updated: Exercise) {
         updateEditorExercises { list -> list.map { if (it.id == updated.id) updated else it } }
         editingExerciseId = null
+        if (editFromPlayer) returnToRunningPlayer(save = true)
+    }
+
+    /**
+     * Cierra de una vez el camino que abrio [editRunningExercise] y devuelve al player, al
+     * ejercicio que se estaba haciendo (TD-146).
+     *
+     * Con [save] se guarda el training -lo que ademas rehace la cola del player- y sin el se
+     * descarta el borrador: salir con "atras" no puede dejar a medias lo que no se confirmo,
+     * ni abandonar al usuario en la pantalla de workout, que es donde caia antes.
+     */
+    private fun returnToRunningPlayer(save: Boolean) {
+        editFromPlayer = false
+        val id = draft?.id ?: return
+        if (save && canSaveTraining) saveTraining() else closeTrainingEditor()
+        // Volver NO es abrir: [openPlayer] relee la cola del disco, y ese archivo lo escribe
+        // el SERVICIO, que procesa el aviso de la cola nueva DESPUES de que termine esto -su
+        // onStartCommand va al mismo hilo principal-. Asi que pisaba la cola recien rehecha
+        // con la de antes del cambio, y lo editado no se veia hasta el paso siguiente: se
+        // arreglaba el sintoma del color y se rompia por otro lado (TD-146).
+        //
+        // La cola ya esta en memoria y al dia. Lo unico que falta es volver a ensenarlo.
+        if (activePlayerTrainingId == id && playerStep != null) {
+            playerTrainingId = id
+            playerStarted = true
+        } else {
+            openPlayer(id)
+        }
     }
 
     /** Aplica un color a una etapa (kind) en todos los ejercicios del training. */
@@ -1953,11 +2022,20 @@ class MasterViewModel(
      *
      * Un training asignado no se edita —ni parado ni corriendo—, así que aquí no se ofrece.
      */
+    /**
+     * Si el editor abierto se entro desde el player (TD-146). Decide el camino de VUELTA:
+     * el de ida monta training -> workout -> [variante] -> ejercicio, y deshacerlo a mano
+     * costaba tres Saves y un tap al mini-player para volver al ejercicio que se estaba
+     * haciendo.
+     */
+    private var editFromPlayer = false
+
     fun editRunningExercise(step: PlayerStep) {
         val id = playerTrainingId ?: activePlayerTrainingId ?: return
         val training = trainings.firstOrNull { it.id == id } ?: return
         if (training.assigned) return
 
+        editFromPlayer = true
         minimizePlayer()
         startEditTraining(id)
         val workout = draft?.workouts?.getOrNull(step.workoutIndex) ?: return
