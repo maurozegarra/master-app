@@ -20,6 +20,7 @@ class RoutinesFitEquipmentTest {
 
     private val rutinas = listOf(
         MasterDefaults.lumbarTraining("en"),
+        MasterDefaults.lumbarShortTraining("en"),
         MasterDefaults.lumbarBadDayTraining("en"),
     ) + MasterDefaults.nikoTrainings("en")
 

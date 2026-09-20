@@ -551,7 +551,11 @@ class MasterViewModel(
      * caso se quedan y que decida quien los tenga.
      */
     private fun removeLumbarFromOtherPhone() {
-        val ajenos = setOf(MasterDefaults.LUMBAR_ID, MasterDefaults.LUMBAR_BAD_DAY_ID)
+        val ajenos = setOf(
+            MasterDefaults.LUMBAR_ID,
+            MasterDefaults.LUMBAR_SHORT_ID,
+            MasterDefaults.LUMBAR_BAD_DAY_ID,
+        )
         val usados = store.loadSessions().map { it.trainingId }.toSet()
         val sobran = trainings.filter { it.id in ajenos && it.id !in usados }
         if (sobran.isEmpty()) return

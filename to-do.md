@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **89 / 145** hechos, 56 pendientes.
+Progreso: **90 / 145** hechos, 55 pendientes.
 
 ## Pendientes
 
@@ -34,25 +34,6 @@ AVISA, NO BLOQUEA: repartir algo sin video es normal; repartirlo sin saberlo es 
 EL VIDEO PROPIO NO CUENTA: vive en el directorio privado del telefono que lo asigno y no viaja con la rutina, asi que solo vale el publicado. Mirar el estado del video a secas diria que esta cubierto cuando el otro telefono no puede descargarlo.
 
 Y MIRA LAS VARIANTES: un workout rotativo esconde sus ejercicios dentro de ellas, que en el dia de Muay Thai son casi todo el training. Hay un test que lo fija.
-- [ ] **TD-139** Las instrucciones dejan de viajar en el APK: una tabla por exerciseId
-  - ETAPA 1 de 3 del rediseno de la entrega de contenido (ver TD-140 y TD-141).
-
-EL DIAGNOSTICO, del 19-sep-2026, revisando el codigo y no los comentarios. La unidad real de contenido es el exerciseId -un ejercicio tiene nombre, instrucciones y video- pero esas tres piezas viajan por tres caminos: el nombre dentro del training (Supabase), las instrucciones dentro del APK (catalogInstructions + CATALOG_INSTRUCTIONS_REVISION) y el video por un commit al repo (videos.json + release 'videos'). Solo el training se entrega solo. Consecuencia: un ejercicio nuevo le llega a un atleta SIN instrucciones hasta que actualice el app, y un video asignado desde el telefono (own/<id>.mp4, directorio privado) no le llega nunca. Y falla en silencio: ella ve un nombre y nada mas.
-
-LO QUE NO ERA LA RAZON: el peso. Los 7 videos publicados pesan entre 1.7 y 4.8 MB, 21 MB en total. A 3 MB por video, el plan gratis (del orden de 1 GB de almacenamiento y 5 GB de trafico al mes) da para unos 300, y cada telefono descarga cada uno UNA vez porque se cachea por rev. La razon real era la inercia: el pipeline se construyo alrededor del repo. El usuario lo intuyo antes que nadie ('me parecia raro que el agente me da tantas excusas para el tema del video').
-
-QUE SE HACE: una tabla exercise_media en Supabase -exercise_id, instructions, video_rev, video_bytes- que el app sincroniza en la misma pasada que ya hace al abrir (MainActivity.onStart -> syncAssignments, con freno de 60 s). Lectura anon: la clave publicable viaja en el APK, asi que lo que lea anon es publico de hecho; las instrucciones no son secretas. Escritura solo con sesion de entrenador.
-
-catalogInstructions() en el codigo se queda como SEMILLA -instalacion limpia y sin red- pero deja de ser el canal de entrega. Se mantiene el merge que no pisa lo que el usuario escribio.
-
-LO QUE DESBLOQUEA: corregir una instruccion en el telefono del coach y que le llegue al atleta al abrir el app, sin release y sin APK nuevo. Es la etapa que mas duele hoy.
-
-CUESTA UNA ACTUALIZACION: el telefono del atleta necesita una version del app que sepa leer la tabla. Es la misma que ya necesita para TD-126.
-
-DECISIONES DEL USUARIO (19-sep-2026):
-  1. Bucket PUBLICO: 'no hay nada que ocultar o derechos de autor, son para uso personal, es una app de ejercicios, no es app bancaria'. Hoy los de GitHub ya son publicos, asi que no cambia nada en la practica.
-  2. videos.json SE RETIRA tras migrar. Dos caminos para lo mismo es la enfermedad que se esta curando.
-EL RIESGO ACEPTADO: un proyecto gratis de Supabase se pausa por inactividad (~7 dias), y con los videos alli una pausa deja al atleta sin videos ademas de sin rutina. En la practica no pasa -el app lo toca cada vez que se abre- y la rutina ya depende de el.
 - [ ] **TD-141** Migrar los 7 videos publicados y retirar videos.json
   - ETAPA 3 de 3 (ver TD-139 y TD-140).
 
@@ -391,6 +372,7 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 ### Feature
 
 - [x] **TD-145** El video es un campo mas del ejercicio: una sola tarjeta y sin carteles
+- [x] **TD-139** Las instrucciones dejan de viajar en el APK: una tabla por exerciseId
 - [x] **TD-140** Publicar un video desde el telefono: bucket en Supabase y boton en la ficha del ejercicio
 - [x] **TD-138** Archivar trainings: la lista ensena lo que toca, no todo lo que existe
 - [x] **TD-132** Una revision de una rutina ya asignada no le llega al atleta hasta reasignarla

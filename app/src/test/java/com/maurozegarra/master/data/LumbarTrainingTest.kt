@@ -20,6 +20,7 @@ import org.junit.Test
 class LumbarTrainingTest {
 
     private val training = MasterDefaults.lumbarTraining("en")
+    private val short = MasterDefaults.lumbarShortTraining("en")
     private val steps = StepEngine.buildSteps(training.copy(workouts = training.workouts))
 
     @Test
@@ -98,9 +99,14 @@ class LumbarTrainingTest {
         assertEquals(6.0, e.barWeight, 0.0)
         // Los numeros de la serie son DISCOS: el total es la barra mas eso.
         // 21 -> 26 -> 31 -> 36, cada subida pedida por el cuerpo: el 18-sep marco los 31
-        // como ligeros en el player. La intermedia sube a 21 para acortar el salto.
-        // Revision 9: 41 arriba, tras las nueve series marcadas ligeras del 19-sep.
-        assertEquals(listOf(6.0, 26.0, 41.0), e.setList.map { e.weightTotal(it) })
+        // como ligeros en el player. Revision 9: 41 arriba, tras las nueve series ligeras
+        // del 19-sep.
+        //
+        // REVISION 11, con lo que contesto el 20-sep: 41 PESADO (-2.5) y 26 bien. El tope
+        // baja a 38.5 -6 + 10 + 5 + 1.25 por lado- y la de abajo sube de la barra sola a 16:
+        // llevaba tres dias marcando la barra vacia como ligera, que es un dato que se
+        // repite sin decir nada nuevo.
+        assertEquals(listOf(16.0, 26.0, 38.5), e.setList.map { e.weightTotal(it) })
         assertTrue(e.setList.all { it.reps == 12 })
     }
 
@@ -138,11 +144,41 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `los dos lumbares comparten el bloque cargado`() {
+    fun `el corto comparte el carry con el completo, al mismo peso`() {
+        // Lo que se comparte es el peso, no el bloque entero: el corto lleva solo el carry
+        // (revision 11). Si el completo sube, el corto sube con el; llevar dos numeros para
+        // el mismo ejercicio seria dos historiales que no se pueden comparar.
+        val enCompleto = cadera(training).getValue("ex_suitcase_carry")
+        val enCorto = short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }
+
+        assertEquals(enCompleto.weightType, enCorto.weightType)
+        assertEquals(enCompleto.setList, enCorto.setList)
+        assertEquals(enCompleto.dumbbellCount, enCorto.dumbbellCount)
+    }
+
+    // ---------- El corto, para los dias con trabajo presencial (revision 11) ----------
+
+    @Test
+    fun `el corto camina, hace McGill a la mitad y solo carga el carry`() {
         assertEquals(
-            cadera(training).mapValues { (_, e) -> e.weightType to e.setList },
-            cadera(badDay).mapValues { (_, e) -> e.weightType to e.setList },
+            listOf("Warm Walk", "Mobility", "McGill Big 3", "Carry", "Cool Walk"),
+            short.workouts.map { it.name },
         )
+        assertEquals(listOf(6, 6, 6, 6), short.workouts.first { it.name == "McGill Big 3" }.exercises.map { it.sets })
+        // De los tres con carga se queda el que mas da por minuto y que ademas es caminar
+        // cargado. El puente y la sentadilla los hace igual cuatro dias por semana.
+        assertEquals(
+            listOf("ex_suitcase_carry"),
+            short.workouts.flatMap { it.exercises }.filter { it.weightType != WeightType.NONE }.map { it.exerciseId },
+        )
+    }
+
+    @Test
+    fun `el corto cabe en media hora`() {
+        // El motivo de que exista: los lunes, miercoles y jueves trabaja fuera. Si se pasa de
+        // 35 minutos deja de resolver el problema y vuelve a saltarse la sesion.
+        val medido = StepEngine.buildSteps(short).sumOf { it.durationSec }
+        assertTrue("dura ${medido / 60} min", medido in 1500..2100)
     }
 
     @Test
@@ -228,49 +264,61 @@ class LumbarTrainingTest {
     @Test
     fun `el dia malo abre con movilidad y camina despues`() {
         assertEquals(
-            listOf("Mobility", "Short Walk", "McGill Big 3", "Hip & Glute"),
+            listOf("Mobility", "Walk", "McGill Big 3", "Cool Walk"),
             badDay.workouts.map { it.name },
         )
     }
 
     @Test
-    fun `el dia malo camina 6 minutos en vez de 12`() {
-        assertEquals(360, badDay.workouts[1].exercises.single().workValue)
+    fun `el dia malo camina MAS que el normal, no menos`() {
+        // Hasta la revision 10 caminaba 6 minutos frente a los 12+5 del dia bueno, y llevaba
+        // la misma carga. Estaba al reves: en un dia de crisis lo que sobra es carga y lo que
+        // falta es movimiento.
+        val malo = badDay.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
+        assertEquals(listOf(600, 300), malo.map { it.workValue })
+        // 15 minutos de caminata frente a los 17 del dia bueno, pero sin nada de carga.
+        val bueno = training.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
+        assertEquals(listOf(720, 300), bueno.map { it.workValue })
     }
 
     @Test
-    fun `el dia malo no sube nada en McGill`() {
-        fun forma(t: com.maurozegarra.master.model.Training) =
-            t.workouts.first { it.name == "McGill Big 3" }.exercises.map {
-                Triple(it.exerciseId, it.sets to it.workValue, it.setList.map { s -> s.restSec })
-            }
+    fun `el dia malo baja McGill a la mitad`() {
+        fun aguantes(t: com.maurozegarra.master.model.Training) =
+            t.workouts.first { it.name == "McGill Big 3" }.exercises.map { it.sets }
 
-        assertEquals(forma(training), forma(badDay))
+        assertEquals(listOf(12, 12, 12, 12), aguantes(training))
+        assertEquals(listOf(6, 6, 6, 6), aguantes(badDay))
+        // Y los 10 s de cada aguante no se tocan: lo que baja es cuantos, no cuanto dura.
+        assertTrue(badDay.workouts.first { it.name == "McGill Big 3" }.exercises.all { it.workValue == 10 })
     }
 
     @Test
-    fun `el bloque de cadera va al final, donde se puede saltar`() {
-        assertEquals("Hip & Glute", badDay.workouts.last().name)
+    fun `el dia malo no lleva carga`() {
+        // Antes iba al final "donde se puede saltar con el skip". Saltarlo dependia de que el
+        // usuario decidiera bien el peor dia; ahora no esta y no hay nada que decidir.
+        assertTrue(badDay.workouts.flatMap { it.exercises }.none { it.weightType != WeightType.NONE })
     }
 
     @Test
-    fun `los dos trainings lumbares no comparten ningun id`() {
+    fun `los tres trainings lumbares no comparten ningun id`() {
         fun ids(t: com.maurozegarra.master.model.Training) =
             listOf(t.id) + t.workouts.flatMap { w -> listOf(w.id) + w.exercises.map { it.id } }
 
-        assertTrue(ids(training).none { it in ids(badDay) })
+        val todos = listOf(ids(training), ids(short), ids(badDay))
+        assertEquals(todos.flatten().size, todos.flatten().toSet().size)
     }
 
     // ---------- La rutina va por revision (TD-103) ----------
 
     @Test
-    fun `withLumbarRevision agrega los dos lumbares si no estan`() {
+    fun `withLumbarRevision agrega los tres lumbares si no estan`() {
         val otros = listOf(MasterDefaults.masterTraining("en"))
 
         val out = MasterDefaults.withLumbarRevision(otros, "en")
 
-        assertEquals(3, out.size)
+        assertEquals(4, out.size)
         assertTrue(out.any { it.id == MasterDefaults.LUMBAR_ID })
+        assertTrue(out.any { it.id == MasterDefaults.LUMBAR_SHORT_ID })
         assertTrue(out.any { it.id == MasterDefaults.LUMBAR_BAD_DAY_ID })
     }
 
@@ -281,7 +329,7 @@ class LumbarTrainingTest {
 
         val out = MasterDefaults.withLumbarRevision(listOf(viejo, master), "en")
 
-        assertEquals(3, out.size)
+        assertEquals(4, out.size)
         assertEquals(MasterDefaults.LUMBAR_ID, out[0].id)
         assertEquals(5, out[0].workouts.size)
         assertEquals(master, out[1])

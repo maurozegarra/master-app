@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 10
+    const val LUMBAR_REVISION = 11
 
     /**
      * De quien es la rutina lumbar.
@@ -374,6 +374,13 @@ object MasterDefaults {
      */
     const val LUMBAR_ID = 950016L
     const val LUMBAR_BAD_DAY_ID = 951016L
+
+    /**
+     * "LUMBAR (short)", para los dias con trabajo presencial (revision 11).
+     *
+     * Rango 952000.. para no chocar con los otros dos ni con los ids que genera el reloj.
+     */
+    const val LUMBAR_SHORT_ID = 952016L
 
     /**
      * Training "LUMBAR": la rutina de columna lumbar (McGill Big 3 + trabajo de cadera).
@@ -413,11 +420,17 @@ object MasterDefaults {
      * todo la bisagra de cadera. Ademas la hizo media hora despues de levantarse tras una
      * manana en cama, que es la peor ventana para cargar la columna.
      *
-     * Por eso cambia el ORDEN y la dosis de la caminata, no el contenido: la movilidad
-     * abre, la caminata se acorta a 6 minutos y pasa detras, McGill se queda igual -no se
-     * sube nada en un dia malo- y el bloque de cadera va al final, donde se puede saltar
-     * con el skip del player si ese dia no toca. Saltar ya queda registrado, asi que el
-     * dato para la proxima decision se guarda solo.
+     * Por eso la movilidad abre y la caminata va detras.
+     *
+     * **REVISION 11: estaba al reves.** Hasta aqui el dia malo llevaba la MISMA carga que el
+     * dia bueno -los mismos 12 aguantes de McGill y el mismo bloque de cadera con barra- y
+     * once minutos MENOS de caminata. Justo lo contrario de lo que pide un dia de crisis,
+     * donde lo que sobra es carga y lo que falta es movimiento. Lo escribio el asistente y lo
+     * encontro el 20-sep-2026 comparando las dos rutinas.
+     *
+     * Ahora: la caminata sube a 10 minutos y gana una de cierre, McGill baja a la mitad
+     * (3-2-1 en vez de 6-4-2) y el bloque con carga NO va. No se salta con el skip del
+     * player: no esta.
      *
      * Es un training aparte y no una edicion del otro: el normal ya esta validado para un
      * dia normal, y tener los dos permite comparar en la bitacora que paso con cada orden.
@@ -434,9 +447,49 @@ object MasterDefaults {
                 // La velocidad va en la nota y no solo en las instrucciones porque es lo que
                 // se lee en el player. "Paso vivo" costo tres sesiones: a 3 km/h no hacia
                 // nada, a 5 le solto las caderas. Un adjetivo no dosifica.
-                b.walk(if (lang == "es") "Caminata corta" else "Short Walk", sec = 360, note = "After the mobility, not before", kmh = 6.0),
-                b.mcgill(),
-                b.hipGlute(),
+                b.walk(if (lang == "es") "Caminata" else "Walk", sec = 600, note = "After the mobility, not before", kmh = 6.0),
+                b.mcgill(blocks = listOf(3, 2, 1)),
+                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
+     * Training "LUMBAR (short)": los dias con trabajo presencial (revision 11).
+     *
+     * Sale de una pregunta suya del 20-sep-2026: lunes, miercoles y jueves trabaja fuera y no
+     * tiene los 78 minutos que le toma la rutina entera. La pregunta de verdad era que
+     * priorizar sin estar recuperado del todo, y el orden es este:
+     *
+     *  1. **Caminar.** Es lo que movio la aguja. Su dolor de la manana es por quedarse
+     *     quieto, no por esfuerzo: a las 4:30, tras cinco horas en cama, marca 0, y vuelve
+     *     tras dos horas y media sin moverse. Lo primero que se protege.
+     *  2. **McGill**, a la mitad de aguantes. Resistencia a baja carga: le ensena a la
+     *     espalda a aguantar sin cargarla.
+     *  3. **Movilidad**, que son dos minutos y es el patron con el que se agacha todo el dia.
+     *  4. **La carga**, que es lo primero que se cae cuando no hay tiempo. Se queda solo el
+     *     carry (ver [LumbarBlocks.carryOnly]); el puente y la sentadilla los hace igual
+     *     cuatro veces por semana en casa.
+     *
+     * Unos 32 minutos. Y lo que mas importa esos dias no esta en el training: levantarse a
+     * caminar 2-3 minutos cada hora. Ocho horas de oficina pesan mas que los 45 minutos de
+     * rutina que se ahorra.
+     */
+    fun lumbarShortTraining(lang: String): Training {
+        val b = LumbarBlocks(lang, seqStart = 952000L)
+        val now = System.currentTimeMillis()
+        return Training(
+            id = LUMBAR_SHORT_ID,
+            name = "LUMBAR (short)",
+            tracksPain = true,
+            workouts = listOf(
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = 6.0),
+                b.mobility(),
+                b.mcgill(blocks = listOf(3, 2, 1)),
+                b.carryOnly(),
+                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
             ),
             createdAt = now,
             updatedAt = now,
@@ -1115,7 +1168,7 @@ object MasterDefaults {
     }
 
     fun withLumbarRevision(trainings: List<Training>, lang: String): List<Training> {
-        val nuevos = listOf(lumbarTraining(lang), lumbarBadDayTraining(lang))
+        val nuevos = listOf(lumbarTraining(lang), lumbarShortTraining(lang), lumbarBadDayTraining(lang))
         val out = trainings.toMutableList()
         nuevos.forEach { nuevo ->
             val i = out.indexOfFirst { it.id == nuevo.id }
@@ -1211,17 +1264,30 @@ object MasterDefaults {
         // Los 10 s no se tocan al progresar: se suben los aguantes por bloque (8/6/4,
         // 10/8/6). Pasado ese tiempo la calidad del bracing cae y el ejercicio cobra mas
         // de lo que da.
-        private fun pyramid(exerciseId: String, note: String): Exercise = ex(
-            exerciseId,
-            note = note,
-            sets = 12,
-            work = 10,
-            prep = 20,
-            rest = 3,
-            setList = (0 until 12).map { i ->
-                WorkSet(reps = 10, restSec = if (i == 5 || i == 9) 30 else null)
-            },
-        )
+        private fun pyramid(
+            exerciseId: String,
+            note: String,
+            /**
+             * Los bloques de la piramide descendente. 6-4-2 es la dosis completa; 3-2-1 es
+             * la mitad, para el dia con prisa y para el dia malo (revision 11).
+             */
+            blocks: List<Int> = listOf(6, 4, 2),
+        ): Exercise {
+            val total = blocks.sum()
+            // Donde termina cada bloque menos el ultimo: ahi van los 30 s de descanso.
+            val cortes = blocks.runningFold(0) { acc, n -> acc + n }.drop(1).dropLast(1).map { it - 1 }
+            return ex(
+                exerciseId,
+                note = note,
+                sets = total,
+                work = 10,
+                prep = 20,
+                rest = 3,
+                setList = (0 until total).map { i ->
+                    WorkSet(reps = 10, restSec = if (i in cortes) 30 else null)
+                },
+            )
+        }
 
         // La velocidad va como DATO del ejercicio y ya no dentro de la nota (TD-124): en la
         // nota es texto que nadie puede comparar entre sesiones, y es la variable que mas ha
@@ -1242,14 +1308,14 @@ object MasterDefaults {
             ),
         )
 
-        fun mcgill(): Workout = Workout(
+        fun mcgill(blocks: List<Int> = listOf(6, 4, 2)): Workout = Workout(
             id = id(),
             name = "McGill Big 3",
             exercises = listOf(
-                pyramid("ex_curl_up", "Alternate the bent leg between blocks"),
-                pyramid("ex_side_plank_l", "Elbow under the shoulder, knees at 90"),
-                pyramid("ex_side_plank_r", "Elbow under the shoulder, knees at 90"),
-                pyramid("ex_bird_dog", "Alternate sides between holds"),
+                pyramid("ex_curl_up", "Alternate the bent leg between blocks", blocks),
+                pyramid("ex_side_plank_l", "Elbow under the shoulder, knees at 90", blocks),
+                pyramid("ex_side_plank_r", "Elbow under the shoulder, knees at 90", blocks),
+                pyramid("ex_bird_dog", "Alternate sides between holds", blocks),
             ),
         )
 
@@ -1265,6 +1331,23 @@ object MasterDefaults {
          * goblet y no con barra porque el peso delante ayuda a mantener el pecho arriba y
          * carga menos la espalda.
          */
+        /**
+         * Solo el carry, para el dia con prisa (revision 11).
+         *
+         * De los tres con carga es el que mas da por minuto: son tres viajes, no pide montar
+         * nada, y ademas es caminar cargado -que es lo que mas le ha movido el dolor-. El
+         * puente y la sentadilla se quedan para los dias en casa.
+         */
+        fun carryOnly(): Workout = Workout(
+            id = id(),
+            name = if (lang == "es") "Carry" else "Carry",
+            exercises = listOf(carry()),
+        )
+
+        private fun carry(): Exercise =
+            loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(12.5, 15.0, 17.5), WeightType.DUMBBELL)
+                .copy(dumbbellCount = 1)
+
         fun hipGlute(): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
@@ -1282,7 +1365,7 @@ object MasterDefaults {
                 // 41 ya se acerca a su hip thrust de MASTER (40-70). Hasta aqui se estaba
                 // alcanzando su nivel real; cuando llegue, cargar la cadera los siete dias deja
                 // de tener sentido y el bloque pasa a tres por semana (ver coach-log 19-sep).
-                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(0.0, 20.0, 35.0), WeightType.BARBELL, barWeight = 6.0),
+                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(10.0, 20.0, 32.5), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
                 // y el player no podia decir "1 de 10". El numero por serie es el mismo, asi

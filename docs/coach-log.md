@@ -5,6 +5,72 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-20 — octava sesion: los pesos aterrizan, y la semana se parte en dos
+
+**LUMBAR**, 78 minutos, completa. Dolor 1 -> **0**, tercera sesion seguida terminando en cero.
+Sin irradiacion.
+
+**El dolor al despertar baja a la mitad:** 4 el sabado (se iba en 10 min), **2 el domingo**
+(se iba en 15). Es el segundo dato de la serie desde que se mide (TD-125); el de ayer venia
+de la primera noche con el colchon rotado y la almohada bajo las rodillas.
+
+**Los pesos, por primera vez, aterrizaron.** El sabado marco **las nueve series ligeras**, asi
+que la revision 10 subio +5 en el puente y +2.5 en lo demas. Hoy contesto:
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| Glute Bridge | 6 · 26 · 41 | 6 ligero · **26 bien** · **41 pesado (-2.5)** |
+| Suitcase Carry | 12.5 · 15 · 17.5 | **las tres bien** |
+| Box Squat | 15 · 17.5 · 20 | **las tres bien** |
+
+Es la primera vez que el bloque no pide mas. Carry y sentadilla se quedan donde estan -una
+sesion consolidando, despues de dos subidas seguidas- y el puente baja el tope a **38.5** y
+sube la primera de la barra sola a **16**: llevaba tres dias marcando la barra vacia como
+ligera, que es un dato que se repite sin decir nada nuevo.
+
+**Todas las series con peso traen respuesta, ninguna en blanco.** Lo que pedia el 18-sep
+-*"el feedback del peso se me olvida marcar, no se si ponerlo obligatorio"*- lo resolvio el
+cierre de huecos al terminar (TD-122), sin obligar a nada.
+
+### La semana se parte en dos, y el dia malo estaba al reves
+
+Pregunto por una version reducida: **lunes, miercoles y jueves trabaja presencial** y no
+tiene 78 minutos. Al comparar las dos rutinas para armarla salio un error propio: **el dia
+malo llevaba la MISMA carga que el dia bueno y once minutos MENOS de caminata**. Justo al
+reves de lo que pide un dia de crisis.
+
+**Revision 11**, tres cambios:
+
+- **LUMBAR (short)**, unos 32 min: caminata 10 + movilidad + McGill a la mitad (3-2-1) +
+  **solo el carry** + caminata 5. El orden de prioridad, para su caso: caminar primero
+  -su dolor de la manana es por quedarse quieto-, McGill despues, movilidad, y la carga al
+  final, que es lo primero que se cae cuando no hay tiempo.
+- **LUMBAR (bad day) corregido**: 15 minutos de caminata, McGill a la mitad y **sin carga**.
+  Antes el bloque iba al final "para poder saltarlo con el skip", lo que dependia de que el
+  usuario decidiera bien justo el peor dia.
+- Los pesos nuevos del completo.
+
+**La semana queda:** lun/mie/jue el corto, mar/vie/sab/dom el completo, y el dia malo cuando
+la espalda mande.
+
+### Lo que el asistente no habia dicho
+
+Pregunto por la frecuencia: **ocho dias seguidos entrenando y ninguna mencion al descanso**.
+Tenia razon a medias y hay que registrarlo:
+
+- **Caminar y McGill a diario esta bien** y es lo que ha movido la aguja. En esta fase el
+  descanso no es no moverse.
+- **La carga progresiva de cadera siete dias por semana, no.** Estaba anotado como decision
+  futura *dentro de un comentario del codigo* -"cuando llegue a su nivel real, el bloque pasa
+  a tres por semana"- y nunca se le dijo. Que una decision del plan viva solo en un comentario
+  es el error, no la decision.
+
+Con la semana nueva el bloque cargado pasa de 7 a 4 dias sin que nadie lo decidiera, y quedan
+tres cargados seguidos (vie/sab/dom). **Propuesta: el domingo pasa al corto**, y asi la carga
+de cadera queda en mar/vie/sab.
+
+---
+
 ## 2026-09-19 — septima sesion, y la noche que confirmo el mecanismo
 
 **LUMBAR**, 08:38 a 10:02, completa. Dolor 1 -> 0.
