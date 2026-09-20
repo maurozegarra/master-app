@@ -1,7 +1,7 @@
 {
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.298/master-1.0.298.apk",
-  "versionName": "1.0.298",
-  "changelog": "feat: TD-140 y TD-145, el video se publica desde el telefono y es un campo mas del ejercicio",
-  "versionCode": 298,
-  "minVersionCode": 1
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.304/master-1.0.304.apk",
+  "changelog": "feat: TD-147 el ejercicio unilateral, con el lado en el modelo",
+  "versionName": "1.0.304",
+  "minVersionCode": 1,
+  "versionCode": 304
 }
