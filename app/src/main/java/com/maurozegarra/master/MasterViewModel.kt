@@ -808,6 +808,41 @@ class MasterViewModel(
         }
     }
 
+    /**
+     * Publica el video propio de un ejercicio (TD-140). [onDone] recibe null si se publico,
+     * o el motivo.
+     *
+     * Al publicarlo **deja de ser propio**: el archivo se mueve a la cache como la revision
+     * recien subida y se borra el propio. Asi el coach ve exactamente lo que va a ver quien
+     * lo reciba -en vez de seguir viendo su copia privada y creer que todo esta bien- y
+     * nadie descarga lo que ya tiene en el telefono.
+     */
+    fun publishVideo(exerciseId: String, onDone: (String?) -> Unit) {
+        viewModelScope.launch {
+            var rev = 0
+            val error = withContext(Dispatchers.IO) {
+                val propio = videoCache.ownFile(exerciseId)
+                if (!propio.exists()) return@withContext "No video to publish"
+                rev = (videos.publishedRev(exerciseId) ?: 0) + 1
+                val fallo = assignments.uploadVideo(exerciseId, rev, propio)
+                if (fallo != null) return@withContext fallo
+                // Si el movimiento del archivo falla, el video ya esta publicado: se deja
+                // el propio donde esta y se sigue. Quien lo reciba lo vera igual.
+                runCatching {
+                    val destino = videoCache.repoFile(exerciseId, rev)
+                    destino.parentFile?.mkdirs()
+                    propio.copyTo(destino, overwrite = true)
+                    propio.delete()
+                }
+                null
+            }
+            if (error == null) {
+                videos.notePublished(exerciseId, rev, videoCache.repoFile(exerciseId, rev).length())
+            }
+            onDone(error)
+        }
+    }
+
     /** Quita el vídeo propio. Si el ejercicio tiene uno publicado, vuelve a ser el que se ve. */
     fun removeVideo(exerciseId: String) {
         viewModelScope.launch {
@@ -848,6 +883,22 @@ class MasterViewModel(
         val training = trainings.firstOrNull { it.id == trainingId } ?: return emptyList()
         return DeliveryCheck.gaps(training, exerciseMedia.toMap(), videos.publishedIds())
     }
+
+    /**
+     * Los otros trainings que usan este movimiento, por nombre (TD-145).
+     *
+     * Es lo que sustituye al cartel que avisaba SIEMPRE de que el video y las instrucciones
+     * son del movimiento: si solo se usa aqui, no hay nada que decir.
+     */
+    fun otherTrainingsUsing(exerciseId: String, exceptTrainingId: Long?): List<String> =
+        trainings
+            .filter { it.id != exceptTrainingId }
+            .filter { t ->
+                t.workouts.any { w ->
+                    (w.exercises + w.variants.flatMap { it.exercises }).any { it.exerciseId == exerciseId }
+                }
+            }
+            .map { it.name }
 
     fun setInstructions(exerciseId: String, steps: List<String>) {
         updateMedia(exerciseId) { it.copy(instructions = steps.filter { s -> s.isNotBlank() }) }

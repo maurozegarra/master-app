@@ -4,12 +4,24 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **87 / 143** hechos, 56 pendientes.
+Progreso: **89 / 145** hechos, 56 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-144** Progresiones: un mismo ejercicio con varios niveles, cada uno con su video
+  - PLANTEADO por el usuario el 19-sep-2026, al revisar por que el video no se comporta como un campo mas del ejercicio: 'un ejercicio puede tener progresiones: side plank, con piernas a 90 o estiradas, es un mismo ejercicio que podria tener 2 videos. Imagina pistol squat, puede tener varias progresiones y es el mismo ejercicio, y asi hay varios'.
+
+ES DOMINIO, NO UI. Una progresion es una forma distinta de hacer el MISMO movimiento, mas facil o mas dificil, con su propio video y sus propias instrucciones. El atleta esta en un nivel y sube: para un principiante, progresar ES eso, no anadir peso. Hoy el app no lo sabe expresar y por eso la plancha lateral acabo partida en ex_side_plank_l y ex_side_plank_r -que es otro hack, el de los lados- y la version de rodillas vive dentro del texto de las instrucciones ('si no puedes con las piernas estiradas, apoya las rodillas dobladas').
+
+OJO CON LA PALABRA: 'variante' ya esta tomada en el modelo (WorkoutVariant = el dia A/B de un workout rotativo). Esto es otra cosa y necesita su propio nombre: progresion o nivel.
+
+EL CAMINO BARATO, y probablemente el bueno: cada progresion es una entrada del catalogo (ex_side_plank_knees, ex_side_plank_full) mas un campo de FAMILIA que las agrupa. Asi el video por exerciseId, las instrucciones por exerciseId, la comprobacion de lo que falta al repartir (TD-143) y la publicacion (TD-140) siguen funcionando sin tocar nada: una progresion es un ejercicio con id propio. Lo que aporta la familia es lo que hoy se pierde: que el historial las cuente juntas -pasar de rodillas a piernas estiradas es progreso, no un ejercicio nuevo que empieza de cero- y que el selector las ofrezca agrupadas en vez de como seis entradas sueltas.
+
+LA ALTERNATIVA CARA, descartada de momento: que el ejercicio lleve una referencia propia al video (videoId) y la cache deje de indexarse por movimiento. Resuelve el video pero no el concepto, y el concepto es lo que importa: el coach necesita saber en que nivel esta cada uno, no solo que grabacion se ve.
+
+SIN DECIDIR: si una progresion hereda las instrucciones de su familia o las tiene propias, y que hace el historial cuando alguien baja de nivel.
 - [ ] **TD-143** Antes de repartir, el app dice que le va a llegar incompleto
   - PEDIDO el 19-sep-2026, a raiz de encontrarlo pasando de verdad: al verificar TD-139 se cruzaron los ejercicios de 'NIKO 2 · Muay Thai' -el que ella entrena el lunes- contra las instrucciones publicadas, y SEIS estaban sin una sola linea: los cinco del calentamiento (cuerda, rotacion de cadera, 90 a 90, rotacion de hombros, sombra) y el salto de llanta. Se asigno asi, y se descubrio por casualidad la vispera.
 
@@ -36,19 +48,6 @@ catalogInstructions() en el codigo se queda como SEMILLA -instalacion limpia y s
 LO QUE DESBLOQUEA: corregir una instruccion en el telefono del coach y que le llegue al atleta al abrir el app, sin release y sin APK nuevo. Es la etapa que mas duele hoy.
 
 CUESTA UNA ACTUALIZACION: el telefono del atleta necesita una version del app que sepa leer la tabla. Es la misma que ya necesita para TD-126.
-
-DECISIONES DEL USUARIO (19-sep-2026):
-  1. Bucket PUBLICO: 'no hay nada que ocultar o derechos de autor, son para uso personal, es una app de ejercicios, no es app bancaria'. Hoy los de GitHub ya son publicos, asi que no cambia nada en la practica.
-  2. videos.json SE RETIRA tras migrar. Dos caminos para lo mismo es la enfermedad que se esta curando.
-EL RIESGO ACEPTADO: un proyecto gratis de Supabase se pausa por inactividad (~7 dias), y con los videos alli una pausa deja al atleta sin videos ademas de sin rutina. En la practica no pasa -el app lo toca cada vez que se abre- y la rutina ya depende de el.
-- [ ] **TD-140** Publicar un video desde el telefono: bucket en Supabase y boton en la ficha del ejercicio
-  - ETAPA 2 de 3 (ver TD-139 y TD-141).
-
-HOY el video propio (own/<exerciseId>.mp4) vive en el directorio privado del app: no entra en el payload, no entra en el respaldo y no se sube a ningun sitio. Publicar uno exige PC, el CLI de gh y un commit a videos.json, o sea el asistente. Grabar un ejercicio con el telefono y que le llegue al atleta no se puede.
-
-QUE SE HACE: un bucket publico de Storage y un boton 'Publish video' en la ficha del ejercicio que sube el own/ y escribe la fila de exercise_media (rev +1 y bytes). Subir solo con sesion de entrenador. VideoRepository resuelve el manifiesto desde la tabla en vez de videos.json; la cache ya nombra por rev, asi que la version nueva convive con la vieja sin tocar VideoCache.
-
-PENDIENTE DE DISENO: que hacer con el own/ una vez publicado -seguir ganando sobre el publicado como hoy, o desaparecer para que el coach vea lo mismo que el atleta-. Lo segundo evita el clasico 'a mi se me ve bien'.
 
 DECISIONES DEL USUARIO (19-sep-2026):
   1. Bucket PUBLICO: 'no hay nada que ocultar o derechos de autor, son para uso personal, es una app de ejercicios, no es app bancaria'. Hoy los de GitHub ya son publicos, asi que no cambia nada en la practica.
@@ -391,6 +390,8 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 
 ### Feature
 
+- [x] **TD-145** El video es un campo mas del ejercicio: una sola tarjeta y sin carteles
+- [x] **TD-140** Publicar un video desde el telefono: bucket en Supabase y boton en la ficha del ejercicio
 - [x] **TD-138** Archivar trainings: la lista ensena lo que toca, no todo lo que existe
 - [x] **TD-132** Una revision de una rutina ya asignada no le llega al atleta hasta reasignarla
 - [x] **TD-110** El historial ensena el dolor y la nota de cada sesion

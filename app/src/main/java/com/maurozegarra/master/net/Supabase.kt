@@ -20,6 +20,12 @@ object Supabase {
 
     const val REST = "$URL/rest/v1/"
 
+    /** Bucket publico de los videos de ejercicio (TD-140). */
+    const val VIDEO_BUCKET = "videos"
+
+    /** Un bucket publico se lee por aqui sin sesion y sin pasar por RLS. */
+    const val VIDEO_PUBLIC = "$URL/storage/v1/object/public/$VIDEO_BUCKET/"
+
     /** GoTrue: el único sitio donde se cambia una contraseña por una sesión. */
     const val AUTH = "$URL/auth/v1/"
 

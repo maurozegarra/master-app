@@ -1,7 +1,7 @@
 {
-  "versionCode": 291,
-  "minVersionCode": 1,
-  "versionName": "1.0.291",
-  "changelog": "feat: TD-139, TD-142 y TD-143, las instrucciones viajan por Supabase y repartir avisa de lo que falta",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.291/master-1.0.291.apk"
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.298/master-1.0.298.apk",
+  "versionName": "1.0.298",
+  "changelog": "feat: TD-140 y TD-145, el video se publica desde el telefono y es un campo mas del ejercicio",
+  "versionCode": 298,
+  "minVersionCode": 1
 }

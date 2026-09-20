@@ -20,6 +20,42 @@ data class HttpResponse(val code: Int, val body: String) {
  */
 object Http {
 
+    /**
+     * Sube un archivo tal cual, sin envolverlo en nada (TD-140).
+     *
+     * `setFixedLengthStreamingMode` es lo que hace que no se cargue el mp4 entero en
+     * memoria: son megas, y un telefono con el app en segundo plano no tiene por que
+     * aguantarlos. El timeout es largo a proposito: subir 3 MB por datos moviles no es lo
+     * mismo que pedir una fila.
+     */
+    fun upload(
+        method: String,
+        url: String,
+        headers: Map<String, String> = emptyMap(),
+        file: java.io.File,
+        contentType: String,
+        timeoutMs: Int = 120_000,
+    ): HttpResponse {
+        val conn = (URL(url).openConnection() as HttpURLConnection).apply {
+            requestMethod = method
+            connectTimeout = timeoutMs
+            readTimeout = timeoutMs
+            useCaches = false
+            doOutput = true
+            setFixedLengthStreamingMode(file.length())
+            setRequestProperty("Content-Type", contentType)
+            headers.forEach { (name, value) -> setRequestProperty(name, value) }
+        }
+        return try {
+            conn.outputStream.use { out -> file.inputStream().use { it.copyTo(out) } }
+            val code = conn.responseCode
+            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+            HttpResponse(code, stream?.bufferedReader()?.use { it.readText() }.orEmpty())
+        } finally {
+            conn.disconnect()
+        }
+    }
+
     fun request(
         method: String,
         url: String,

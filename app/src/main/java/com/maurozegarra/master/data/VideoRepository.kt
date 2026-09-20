@@ -8,6 +8,9 @@ import androidx.compose.runtime.mutableStateMapOf
 import com.maurozegarra.master.model.VideoManifest
 import com.maurozegarra.master.model.VideoManifestJson
 import com.maurozegarra.master.net.Downloader
+import com.maurozegarra.master.net.Supabase
+import com.maurozegarra.master.net.Http
+import com.maurozegarra.master.model.VideoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -62,12 +65,23 @@ class VideoRepository(
 
     private var manifest: VideoManifest? = null
 
+    /**
+     * Lo publicado desde un telefono (TD-140), por exerciseId. Vive aparte del manifiesto
+     * de GitHub y **gana sobre el**: si alguien publico una version nueva desde el app, esa
+     * es la buena. Cada entrada trae su url entera porque vive en otro alojamiento.
+     */
+    private var published: Map<String, VideoEntry> = emptyMap()
+
     init {
         // El manifiesto guardado permite arrancar sin red sabiendo que hay descargado y
         // de donde vino; luego se refresca por detras.
         manifest = prefs.getString(KEY_MANIFEST, null)?.let { VideoManifestJson.decode(it) }
+        published = decodePublished(prefs.getString(KEY_PUBLISHED, null).orEmpty())
         rebuildStates()
-        scope.launch { refreshManifest() }
+        scope.launch {
+            refreshManifest()
+            refreshPublished()
+        }
     }
 
     /**
@@ -123,10 +137,70 @@ class VideoRepository(
         rebuildStates()
     }
 
+    /**
+     * Vuelve a leer que videos hay publicados en la tabla (TD-140).
+     *
+     * Va sin sesion, con la clave publicable: el telefono de un atleta no tiene cuenta y el
+     * bucket es publico. Sin red se queda con lo guardado.
+     */
+    suspend fun refreshPublished() {
+        val body = withContext(Dispatchers.IO) {
+            runCatching {
+                Http.request(
+                    "GET",
+                    "${Supabase.REST}exercise_media?select=exercise_id,video_rev,video_bytes",
+                    Supabase.headers(),
+                )
+            }.onFailure { Log.w(TAG, "no se pudo leer los videos publicados", it) }.getOrNull()
+        } ?: return
+        if (!body.ok) return
+        val fresh = decodePublished(body.body)
+        if (fresh == published) return
+        published = fresh
+        prefs.edit().putString(KEY_PUBLISHED, body.body).apply()
+        rebuildStates()
+    }
+
+    /**
+     * Anota una publicacion recien hecha desde ESTE telefono, sin esperar a releer la tabla
+     * (TD-140): el coach acaba de subirlo y tiene que verlo ya.
+     */
+    fun notePublished(exerciseId: String, rev: Int, bytes: Long) {
+        published = published + (exerciseId to videoEntryOf(exerciseId, rev, bytes))
+        refreshState(exerciseId)
+    }
+
+    /** La revision publicada de un ejercicio, o null si no tiene ninguna. */
+    fun publishedRev(exerciseId: String): Int? = entryOf(exerciseId)?.rev
+
+    /** Lo publicado gana sobre el manifiesto viejo de GitHub. */
+    private fun entryOf(exerciseId: String): VideoEntry? =
+        published[exerciseId] ?: manifest?.entry(exerciseId)
+
+    private fun videoEntryOf(exerciseId: String, rev: Int, bytes: Long) = VideoEntry(
+        file = "$exerciseId.$rev.mp4",
+        rev = rev,
+        bytes = bytes,
+        url = "${Supabase.VIDEO_PUBLIC}$exerciseId.$rev.mp4",
+    )
+
+    private fun decodePublished(json: String): Map<String, VideoEntry> = runCatching {
+        val rows = org.json.JSONArray(json)
+        buildMap {
+            for (i in 0 until rows.length()) {
+                val row = rows.getJSONObject(i)
+                val id = row.optString("exercise_id", "")
+                val rev = row.optInt("video_rev", 0)
+                if (id.isBlank() || rev <= 0) continue
+                put(id, videoEntryOf(id, rev, row.optLong("video_bytes", 0L)))
+            }
+        }
+    }.getOrDefault(emptyMap())
+
     /** Recalcula el estado de todo lo que puede tener vídeo. Toca disco, así que se llama
      *  en los pocos momentos en que algo cambia, no al pintar. */
     fun rebuildStates() {
-        val ids = manifest?.videos?.keys.orEmpty() + cache.ownExerciseIds()
+        val ids = manifest?.videos?.keys.orEmpty() + published.keys + cache.ownExerciseIds()
         states.clear()
         ids.forEach { states[it] = resolveState(it) }
     }
@@ -137,7 +211,7 @@ class VideoRepository(
     }
 
     private fun resolveState(exerciseId: String): VideoState {
-        val rev = manifest?.entry(exerciseId)?.rev
+        val rev = entryOf(exerciseId)?.rev
         return videoStateOf(rev = rev, file = cache.resolve(exerciseId, rev))
     }
 
@@ -173,8 +247,8 @@ class VideoRepository(
     }
 
     private suspend fun download(exerciseId: String) {
-        val entry = manifest?.entry(exerciseId) ?: return
-        val url = manifest?.urlFor(exerciseId) ?: return
+        val entry = entryOf(exerciseId) ?: return
+        val url = entry.url ?: manifest?.urlFor(exerciseId) ?: return
         val target = cache.repoFile(exerciseId, entry.rev)
         states[exerciseId] = VideoState.Downloading(0f)
 
@@ -207,6 +281,7 @@ class VideoRepository(
     private companion object {
         const val TAG = "VideoRepository"
         const val KEY_MANIFEST = "video_manifest_json"
+        const val KEY_PUBLISHED = "video_published_rows"
 
         // Un solo sitio a proposito: TD-063 lo cambia por uno por usuario
         // (/users/<uid>/videos.json) tocando esta constante y nada mas.

@@ -127,6 +127,50 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
             .onFailure { Log.w(TAG, "no se pudieron leer las instrucciones publicadas", it) }
             .getOrNull()
 
+    /**
+     * Sube el mp4 de un ejercicio y anota su revision en exercise_media (TD-140). Null si
+     * se publico, o el motivo.
+     *
+     * El nombre en el bucket es el mismo que usa la cache -<exerciseId>.<rev>.mp4- asi que
+     * una revision nueva convive con la vieja y nadie se queda sin video a mitad de camino.
+     *
+     * La fila se escribe con merge: toca video_rev y video_bytes y **no pisa las
+     * instrucciones**, que son del mismo ejercicio pero no de esta operacion.
+     *
+     * SI ESTO DEVUELVE "new row violates row-level security policy", mirar las politicas de
+     * **storage.prefixes** antes de sospechar del token. Storage no escribe solo en
+     * storage.objects: tambien en prefixes, que tiene RLS propio, y con permiso en una y no
+     * en la otra la subida se cae con el MISMO mensaje que una peticion sin sesion. Costo
+     * tres builds el 19-sep-2026 (ver docs/supabase/td-140-videos-bucket.sql). La forma de
+     * distinguirlo: un token invalido da "signature verification failed" y uno mal formado
+     * "JWS Protected Header is invalid"; si el mensaje es el de RLS, el token llego bien.
+     */
+    fun uploadVideo(exerciseId: String, rev: Int, file: java.io.File): String? {
+        val token = auth.accessToken() ?: return NO_CONNECTION
+
+        val res = runCatching {
+            Http.upload(
+                method = "POST",
+                url = "${Supabase.URL}/storage/v1/object/${Supabase.VIDEO_BUCKET}/$exerciseId.$rev.mp4",
+                // x-upsert para que reintentar una subida cortada no choque con lo que quedo.
+                headers = Supabase.headers(token) + mapOf("x-upsert" to "true"),
+                file = file,
+                contentType = "video/mp4",
+            )
+        }.onFailure { Log.w(TAG, "no se pudo subir el video de $exerciseId", it) }.getOrNull()
+            ?: return NO_CONNECTION
+        if (!res.ok) return reasonOf(res)
+
+        val row = JSONObject()
+            .put("exercise_id", exerciseId)
+            .put("video_rev", rev)
+            .put("video_bytes", file.length())
+            .put("updated_at", java.time.Instant.now().toString())
+            .toString()
+        val anotada = write("POST", "exercise_media", row, merge = true) ?: return NO_CONNECTION
+        return if (anotada.ok) null else reasonOf(anotada)
+    }
+
     /** Publica las instrucciones de un ejercicio. Null si se publico, o el motivo. */
     fun publishMedia(exerciseId: String, media: ExerciseMedia): String? {
         val res = write("POST", "exercise_media", MediaSync.rowOf(exerciseId, media), merge = true)

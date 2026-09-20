@@ -2,8 +2,14 @@ package com.maurozegarra.master.model
 
 import org.json.JSONObject
 
-/** Un vídeo publicado: nombre del archivo, revisión y tamaño esperado. */
-data class VideoEntry(val file: String, val rev: Int, val bytes: Long)
+/**
+ * Un vídeo publicado: nombre del archivo, revisión y tamaño esperado.
+ *
+ * [url] la traen las entradas que NO salen del manifiesto de GitHub sino de la tabla
+ * `exercise_media` (TD-140), que viven en otro alojamiento. Null = se arma con el
+ * [VideoManifest.baseUrl], como siempre.
+ */
+data class VideoEntry(val file: String, val rev: Int, val bytes: Long, val url: String? = null)
 
 /**
  * Catálogo de vídeos disponibles para descargar, por `exerciseId`.
@@ -19,7 +25,7 @@ data class VideoManifest(val baseUrl: String, val videos: Map<String, VideoEntry
 
     /** Url completa del vídeo, o null si ese ejercicio no tiene ninguno publicado. */
     fun urlFor(exerciseId: String): String? =
-        videos[exerciseId]?.let { "${baseUrl.trimEnd('/')}/${it.file}" }
+        videos[exerciseId]?.let { it.url ?: "${baseUrl.trimEnd('/')}/${it.file}" }
 }
 
 /**

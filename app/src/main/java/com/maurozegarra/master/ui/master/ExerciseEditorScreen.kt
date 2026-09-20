@@ -82,6 +82,12 @@ import com.maurozegarra.master.ui.theme.AppTheme
 fun ExerciseEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val initial = vm.editingExercise() ?: return
     var ex by remember(initial.id) { mutableStateOf(initial) }
+    // Las instrucciones tambien son borrador y se guardan con Save, como las series (TD-145).
+    // Antes se escribian al instante: salir con "atras" perdia las series y conservaba la
+    // instruccion, y en la misma pantalla convivian dos formas de guardar.
+    var steps by remember(initial.id) {
+        mutableStateOf(vm.mediaFor(initial.exerciseId)?.instructions ?: emptyList())
+    }
     // Acordeon: una sola etapa abierta a la vez; null = todas colapsadas (por defecto).
     var openStage by remember(initial.id) { mutableStateOf<StepKind?>(null) }
 
@@ -92,7 +98,17 @@ fun ExerciseEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item { GeneralCard(ex, accent, t) { ex = it } }
-            item { ExerciseMediaCard(vm, ex.exerciseId, ex.name, accent, t) }
+            item {
+                ExerciseMediaCard(
+                    vm = vm,
+                    ex = ex,
+                    accent = accent,
+                    t = t,
+                    steps = steps,
+                    onStepsChange = { steps = it },
+                    onChange = { ex = it },
+                )
+            }
             listOf(StepKind.PREP, StepKind.WORK, StepKind.REST, StepKind.COOLDOWN).forEach { kind ->
                 item(key = kind) {
                     StageSection(
@@ -129,7 +145,10 @@ fun ExerciseEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
                 label = t.save,
                 accent = accent,
                 modifier = Modifier.weight(1f),
-                onClick = { vm.saveExercise(ex) },
+                onClick = {
+                    vm.setInstructions(ex.exerciseId, steps)
+                    vm.saveExercise(ex)
+                },
             )
         }
     }
@@ -141,17 +160,6 @@ private fun GeneralCard(ex: Exercise, accent: Color, t: Strings, onChange: (Exer
         ExerciseNoteField(ex, accent, t, onChange)
         VSpace(14)
         Stepper(t.setsLabel, ex.sets, accent, min = 1, max = 30) { onChange(ex.copy(sets = it)) }
-        VSpace(14)
-        // Va aquí, entre lo de esta instancia, y no en la tarjeta del vídeo: que el
-        // interruptor esté al lado de las series es lo que hace evidente su alcance. Qué
-        // vídeo demuestra el movimiento es del movimiento; si en ESTE training se ve, no.
-        SwitchRow(
-            label = t.showVideoHere,
-            desc = t.showVideoHereDesc,
-            checked = ex.showVideo,
-            accent = accent,
-            onCheckedChange = { onChange(ex.copy(showVideo = it)) },
-        )
     }
 }
 

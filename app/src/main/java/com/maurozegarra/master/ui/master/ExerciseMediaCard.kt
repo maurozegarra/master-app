@@ -1,5 +1,6 @@
 package com.maurozegarra.master.ui.master
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -40,6 +41,8 @@ import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.data.VideoState
+import com.maurozegarra.master.model.Exercise
+import com.maurozegarra.master.ui.SwitchRow
 import com.maurozegarra.master.ui.ExerciseVideo
 import com.maurozegarra.master.ui.openVideoExternally
 import com.maurozegarra.master.ui.theme.ACTION_DELETE
@@ -47,22 +50,42 @@ import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.Dims
 
 /**
- * Vídeo e instrucciones del ejercicio (TD-058 / TD-059).
+ * El vídeo del ejercicio y sus instrucciones, como un campo más (TD-145).
  *
- * Se guardan por `exerciseId` del catálogo, no por instancia: el editor edita un
- * ejercicio dentro de un workout, pero esto aplica a **todos** los trainings que usen ese
- * ejercicio. De ahí el aviso explícito: sin él, el usuario esperaría un cambio local.
+ * Antes esta tarjeta traía un cartel de dos líneas avisando de que lo de dentro era "del
+ * movimiento" y no de este ejercicio, y el interruptor de verlo vivía lejos, entre las
+ * series. Las dos cosas explicaban una decisión de implementación —el archivo pesa megas y
+ * se guarda una vez por `exerciseId`— y no algo que el usuario tenga que cargar: *"es un
+ * tremendo banner para justificar el mal diseño"*.
+ *
+ * Ahora el alcance se dice **solo cuando es verdad**: si el movimiento se usa en otro
+ * training, se nombra; si no, no se dice nada.
+ *
+ * El vídeo se copia **al elegirlo** y no espera al Save, a diferencia de las instrucciones.
+ * Es la única asimetría y es a propósito: elegir un archivo es un acto con respuesta
+ * inmediata —aparece la miniatura— y se deshace con Remove; escribir un texto es un
+ * borrador.
  */
 @Composable
-fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, name: String, accent: Color, t: Strings) {
+fun ExerciseMediaCard(
+    vm: MasterViewModel,
+    ex: Exercise,
+    accent: Color,
+    t: Strings,
+    steps: List<String>,
+    onStepsChange: (List<String>) -> Unit,
+    onChange: (Exercise) -> Unit,
+) {
     val ctx = LocalContext.current
-    val media = vm.mediaFor(exerciseId)
+    val exerciseId = ex.exerciseId
     val state = vm.videoStateFor(exerciseId)
     val videoFile = (state as? VideoState.Ready)?.file
     // Solo se puede quitar lo que puso el usuario: un vídeo publicado se volvería a
     // descargar, así que ofrecer "quitar" sería mentirle.
     val own = remember(exerciseId, state) { vm.hasOwnVideo(exerciseId) }
+    val alsoIn = remember(exerciseId, ex.id) { vm.otherTrainingsUsing(exerciseId, vm.draft?.id) }
     var error by remember { mutableStateOf(false) }
+    var publishing by remember { mutableStateOf(false) }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
@@ -80,20 +103,12 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, name: String, acc
             .background(AppTheme.colors.surface)
             .padding(16.dp),
     ) {
-        // El nombre del movimiento y el alcance, en grande y no en gris de 11px. Es la
-        // unica tarjeta de esta pantalla que no habla de esta instancia sino del
-        // movimiento, y sin decirlo se lee como una fila mas entre las series y las reps.
         Text(
-            "${t.videoAndInstructions}${if (name.isBlank()) "" else " · ${name.uppercase()}"}",
+            t.video,
             color = AppTheme.colors.textDim,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
-        )
-        Text(
-            t.appliesToAllTrainings,
-            color = AppTheme.colors.textFaded,
-            fontSize = 12.sp,
-            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+            modifier = Modifier.padding(bottom = 12.dp),
         )
 
         if (videoFile != null) {
@@ -126,8 +141,29 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, name: String, acc
                 accent = accent,
                 t = t,
                 canRemove = own,
+                // Solo hay algo que publicar si este telefono tiene un video propio, y solo
+                // puede hacerlo quien reparte rutinas (TD-140).
+                canPublish = own && vm.isCoach,
                 onReplace = { picker.launch(arrayOf("video/*")) },
                 onRemove = { vm.removeVideo(exerciseId) },
+                onPublish = {
+                    publishing = true
+                    vm.publishVideo(exerciseId) { err ->
+                        publishing = false
+                        Toast.makeText(ctx, err ?: t.videoPublished, Toast.LENGTH_LONG).show()
+                    }
+                },
+                publishing = publishing,
+            )
+            // Debajo del vídeo del que habla, y no entre las series: así no hace falta
+            // explicar a qué se refiere.
+            Spacer(Modifier.height(6.dp))
+            SwitchRow(
+                label = t.showVideoHere,
+                desc = null,
+                checked = ex.showVideo,
+                accent = accent,
+                onCheckedChange = { onChange(ex.copy(showVideo = it)) },
             )
         } else {
             // Hay vídeo publicado pero todavía no está en el teléfono. Se dice, en vez de
@@ -155,11 +191,22 @@ fun ExerciseMediaCard(vm: MasterViewModel, exerciseId: String, name: String, acc
         }
 
         InstructionsEditor(
-            steps = media?.instructions ?: emptyList(),
+            steps = steps,
             accent = accent,
             t = t,
-            onChange = { vm.setInstructions(exerciseId, it) },
+            onChange = onStepsChange,
         )
+
+        // El alcance, solo si lo hay: el vídeo y las instrucciones son del movimiento, y
+        // eso importa cuando de verdad hay otro training que los enseña.
+        if (alsoIn.isNotEmpty()) {
+            Text(
+                "${t.usedAlsoIn} ${alsoIn.joinToString(", ")}",
+                color = AppTheme.colors.textFaded,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 14.dp),
+            )
+        }
     }
 }
 
@@ -168,8 +215,11 @@ private fun VideoActions(
     accent: Color,
     t: Strings,
     canRemove: Boolean,
+    canPublish: Boolean,
+    publishing: Boolean,
     onReplace: () -> Unit,
     onRemove: () -> Unit,
+    onPublish: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
@@ -182,6 +232,15 @@ private fun VideoActions(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable(onClick = onReplace),
         )
+        if (canPublish) {
+            Text(
+                if (publishing) "${t.publishVideo}…" else t.publishVideo,
+                color = if (publishing) AppTheme.colors.textFaded else accent,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable(enabled = !publishing, onClick = onPublish),
+            )
+        }
         // Solo se puede quitar lo que puso el usuario: un vídeo publicado se volvería a
         // descargar, así que ofrecer "quitar" sería mentirle. Para no verlo aquí está el
         // interruptor del ejercicio, que es de esta instancia y no del movimiento.
