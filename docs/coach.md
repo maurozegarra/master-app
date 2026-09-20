@@ -67,6 +67,50 @@ no un número, esa es una variable suelta y hay que preguntarla o escribirla.
   pisarle nada suyo: las instrucciones que él escriba, su historial y sus otros trainings
   quedan fuera de ese trato.
 
+## La semana
+
+Vigente desde el **20-sep-2026** (revisión 11). Sale de dos cosas suyas: que los **lunes,
+miércoles y jueves trabaja presencial** y no tiene 78 minutos, y de una pregunta que
+destapó un olvido —ocho días entrenando sin que nadie mencionara el descanso—.
+
+| Día | Qué | Lleva carga de cadera |
+|---|---|---|
+| Lunes | **LUMBAR (short)** | no |
+| Martes | **LUMBAR** | **sí** |
+| Miércoles | **LUMBAR (short)** | no |
+| Jueves | **LUMBAR (short)** | no |
+| Viernes | **LUMBAR** | **sí** |
+| Sábado | **LUMBAR** | **sí** |
+| Domingo | **LUMBAR (short)** | no |
+| Cuando la espalda mande | **LUMBAR (bad day)**, en lugar del que tocaba | no |
+
+**Caminar y McGill van los siete días.** En esta fase el descanso no es dejar de moverse:
+su dolor de la mañana aparece por estar quieto, y McGill es resistencia a baja carga, no
+fuerza.
+
+**El puente y la sentadilla van tres días**, con descanso entre ellos. Llegó a hacerlos
+siete días seguidos subiendo carga en cada sesión, que es lo que esta tabla corrige. El
+domingo usa el corto justo para que viernes, sábado y domingo no sean tres días cargados
+seguidos. El carry se queda todos los días: son tres viajes y además es caminar cargado.
+
+**El corto y el completo comparten el peso del carry** a propósito. Dos números distintos
+para el mismo ejercicio serían dos historiales que no se pueden comparar.
+
+### Lo que hay que mirar el 18 de octubre
+
+Fecha acordada el 20-sep para decidir sobre **volver al Muay Thai**: un mes completo de
+datos, que es el mínimo para hablar de un deporte de impacto con una hernia detrás. Los
+tres números, que el app ya registra solo:
+
+1. **Dolor al despertar en 0-1 la mayoría de los días** (el 20-sep estaba en 2).
+2. **Cero irradiación**, que cumple desde el principio.
+3. **El bloque cargado subiendo sin que el dolor de después se mueva del 0.**
+
+Revisión intermedia el **4 de octubre**: si a esas alturas el dolor al despertar ya está en
+0-1 casi siempre, la conversación se adelanta y **la propone el coach**, sin que él
+pregunte. El retorno, cuando toque, empieza por desplazamiento y sombra —carga cero para el
+disco—, no pegando.
+
 ## Antes de entregar una rutina
 
 Nace del primer día de NIKO, el 18-sep-2026, entregado a las 22:40 con prisa por la hora:
@@ -93,13 +137,14 @@ dos ejercicios y hacer cuentas entre series. Su resumen: *"no le pusiste cariño
 
 | Qué | Dónde |
 |---|---|
-| Su rutina lumbar | `data/MasterDefaults.kt` → `lumbarTraining()`, `lumbarBadDayTraining()` · `LUMBAR_REVISION` |
-| La rutina de NIKO | `data/MasterDefaults.kt` → `nikoGluteHeavy()` · `NIKO_REVISION` |
-| Cómo le llega a NIKO | asignada desde el teléfono del coach; tras una revisión, **reasignar** (TD-132) |
-| Las indicaciones de cada ejercicio | `catalogInstructions()` (todos los teléfonos, en español) y `lumbarInstructions()` (las suyas) |
+| **Qué le toca cada día** | aquí mismo, en **La semana** |
+| Su rutina lumbar | `data/MasterDefaults.kt` → `lumbarTraining()`, `lumbarShortTraining()`, `lumbarBadDayTraining()` · `LUMBAR_REVISION` |
+| La rutina de NIKO | `data/MasterDefaults.kt` → `nikoTrainings()` · `NIKO_REVISION` · su semana base en `docs/niko.md` |
+| Cómo le llega a NIKO | asignada desde el teléfono del coach. Tras una revisión **no hay que reasignar**: se republica sola al guardar y al volver a primer plano (TD-132) |
+| Las indicaciones de cada ejercicio | se escriben en `catalogInstructions()` / `lumbarInstructions()` y **viajan por Supabase** (tabla `exercise_media`, TD-139): corregir una le llega al atleta al abrir el app, sin versión nueva |
 | Los movimientos | `data/ExerciseCatalog.kt` (ids `ex_*`) |
 | El equipo y qué pesos se pueden pedir | `docs/equipo.md` · en el código, `HomeGym` y `Plates` |
-| Los vídeos | `videos.json` + release `videos` (ver `AGENTS.md`) |
+| Los vídeos | se publican **desde el teléfono**: ficha del ejercicio → **Publish** (TD-140). Los siete antiguos siguen en `videos.json` + release `videos` hasta que se migren |
 | Lo que entrenó | `SessionLog` → snapshots en `Documents/MASTER/` |
 | Cómo se sintió | `docs/coach-log.md` |
 | Lo que busca a largo plazo, y su pesaje | `docs/objetivos.md` |
