@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-148",
+      "title": "Estimar la duracion de un training que todavia nadie ha corrido",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "LO QUE QUEDO FLOJO de TD-040. La tarjeta usa la mediana de las sesiones reales, pero un training sin historial cae al calculo del motor, que se queda corto -unos 43 minutos frente a los 73 reales de LUMBAR-. Afecta a LUMBAR (short), a las rutinas de NIKO y a cualquiera nueva: dicen un numero bajo hasta que se entrenan una vez.\n\nLA SALIDA, con sus propios datos: el historial ya mide el factor. Sus rutinas tardan del orden de 1.7 veces lo que suma la cola del player, porque entre ejercicios pasan cosas que el motor no ve. Calculando ese factor por telefono -con los trainings que SI tienen historial- y aplicandolo a los que no, un training nuevo estimaria bien desde el primer dia.\n\nSIN DECIDIR: si el factor es uno por telefono o por tipo de rutina (una de fuerza con cambios de disco no se parece a una de movilidad), y cuantas sesiones hacen falta antes de fiarse de el.\n\nAplazado por el usuario el 20-sep: 'usemos tu estimacion de momento, ya otro dia hacemos que el app lo calcule con mas certeza'."
+    },
+    {
       "id": "TD-147",
       "title": "El ejercicio unilateral: el lado entra en el modelo",
       "category": "Feature",
@@ -61,8 +68,8 @@
       "id": "TD-141",
       "title": "Migrar los 7 videos publicados y retirar videos.json",
       "category": "Feature",
-      "status": "pending",
-      "manual": "ETAPA 3 de 3 (ver TD-139 y TD-140).\n\nQUE SE HACE: subir al bucket los 7 mp4 del release 'videos' -21 MB en total-, escribir sus filas en exercise_media conservando rev y bytes, y quitar del codigo el camino viejo: MANIFEST_URL a raw.githubusercontent, el archivo videos.json de la raiz y su seccion en AGENTS.md. El release 'videos' de GitHub se queda como respaldo frio; build-release.ps1 ya tiene prohibido borrarlo (TD-065).\n\nPOR QUE RETIRAR Y NO CONVIVIR: decision del usuario. Dos fuentes para lo mismo obligan a una regla de precedencia, y esa regla es justo lo que hace que hoy nadie sepa por que un video aparece en un telefono y no en otro.\n\nORDEN: va despues de TD-140, porque hasta que el bucket no sirva videos, retirar el manifiesto deja a los dos telefonos sin ninguno."
+      "status": "done",
+      "manual": "ETAPA 3 de 3 (ver TD-139 y TD-140).\n\nQUE SE HACE: subir al bucket los 7 mp4 del release 'videos' -21 MB en total-, escribir sus filas en exercise_media conservando rev y bytes, y quitar del codigo el camino viejo: MANIFEST_URL a raw.githubusercontent, el archivo videos.json de la raiz y su seccion en AGENTS.md. El release 'videos' de GitHub se queda como respaldo frio; build-release.ps1 ya tiene prohibido borrarlo (TD-065).\n\nPOR QUE RETIRAR Y NO CONVIVIR: decision del usuario. Dos fuentes para lo mismo obligan a una regla de precedencia, y esa regla es justo lo que hace que hoy nadie sepa por que un video aparece en un telefono y no en otro.\n\nORDEN: va despues de TD-140, porque hasta que el bucket no sirva videos, retirar el manifiesto deja a los dos telefonos sin ninguno.\n\nHECHO el 20-sep-2026, y SIN MIGRAR NADA. Al preparar la migracion el usuario freno: 'esos videos eran de prueba, ¿que va a pasar con cat-cow? yo ya publique la version correcta'. Tenia razon y el SQL que se le iba a dar era destructivo: traia video_rev = 1 y el bucket ya tenia cat-cow en revision 2 (10.5 MB, la buena, publicada desde el telefono), asi que lo habria DEGRADADO al de prueba y apuntando a un archivo que ni existe en el bucket.\n\nLOS DATOS al cruzar: de los 7 de GitHub, cat_cow ya estaba superado por la revision 2 y los otros seis no los usa NINGUNA rutina. No habia nada que migrar. El release 'videos' de GitHub se queda como respaldo frio.\n\nQUE SE RETIRA: videos.json de la raiz, MANIFEST_URL, VideoManifest y VideoManifestJson. El parseo de lo publicado se muda a PublishedVideos, puro y con tests -sustituye a VideoManifestTest, que probaba codigo que ya no existe-. El bucket es la unica fuente.\n\nDOS COSAS QUE APARECIERON: (1) al fundir la plancha lateral (TD-147) se le quito el video, porque estaba publicado bajo ex_side_plank_l/_r y esos ids dejaron de existir; se republico bajo ex_side_plank y los huerfanos se borraron. (2) publishedIds() -lo que alimenta el aviso de que llega incompleto al repartir, TD-143- seguia leyendo el manifiesto de GitHub en vez del bucket, asi que el aviso mentia desde TD-140."
     },
     {
       "id": "TD-138",
@@ -759,10 +766,10 @@
     },
     {
       "id": "TD-040",
-      "title": "Duracion estimada en TrainingCard",
+      "title": "La tarjeta dice cuantos ejercicios y cuanto dura",
       "category": "Feature",
-      "status": "pending",
-      "manual": "Mostrar duracion estimada (~12 min) junto a '3 workouts · 8 exercises' en la TrainingCard. Calcular sumando duraciones de todos los steps (PREP + WORK + REST + COOLDOWN) del training."
+      "status": "done",
+      "manual": "PEDIDO el 20-sep-2026: en la lista, '5 Workout · 8 Exercise' pasa a '8 Exercises · ~30 min'. Su indicacion fue 'tu sabes cuanto va a durar cada training, usa ese valor porque tu estimacion es mas certera'.\n\nY AHI ESTUVO LA CLAVE, que el mismo corrigio a mitad: 'pero ¿y la estimacion que me dabas? no vi que usaras el app'. El calculo del motor -la cola del player: trabajo, descansos y preparaciones- se queda MUY corto: para LUMBAR da unos 43 minutos y sus cuatro sesiones reales fueron 55, 67, 79 y 83. Entre ejercicios pasan cosas que la cola no ve: cambiar discos, ir a por la mancuerna, contestar el feedback, la pregunta del dolor. Enseñar el calculo habria sido poner un numero que miente.\n\nQUE SE HACE: manda el historial. TrainingDuration.minutes() toma la MEDIANA de las ultimas 5 sesiones COMPLETAS de ese training -mediana y no promedio para que un dia raro de 96 minutos no arrastre; completas porque una a medias dice cuanto se aguanto, no cuanto dura-. El calculo del motor queda solo de respaldo para un training que nadie ha corrido.\n\nY LOS EJERCICIOS pasan a contarse de la corrida QUE VIENE: en un workout rotativo, los de la variante activa. Antes se sumaban los de todas, un numero que nadie va a hacer nunca. El numero de workouts se va: es como esta organizado el training, no lo que vas a hacer.\n\nVALIDADO en dispositivo el 20-sep-2026 (v1.0.306)."
     },
     {
       "id": "TD-039",

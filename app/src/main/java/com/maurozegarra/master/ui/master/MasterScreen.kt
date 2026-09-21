@@ -72,6 +72,8 @@ import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.Training
+import com.maurozegarra.master.model.TrainingDuration
+import com.maurozegarra.master.model.activeExercises
 import com.maurozegarra.master.model.hasContent
 import com.maurozegarra.master.ui.DraggableItem
 import com.maurozegarra.master.ui.SwipeAction
@@ -246,6 +248,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             } else {
                                 null
                             },
+                            minutos = TrainingDuration.minutes(tr, vm.sessions),
                         )
                     }
                 }
@@ -289,6 +292,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                                 },
                                 onArchive = { vm.setArchived(tr.id, false) },
                                 isArchived = true,
+                                minutos = TrainingDuration.minutes(tr, vm.sessions),
                             )
                         }
                     }
@@ -578,11 +582,14 @@ private fun TrainingCard(
     onArchive: (() -> Unit)? = null,
     /** Ya archivado: el mismo gesto lo devuelve a la lista. */
     isArchived: Boolean = false,
+    /** Cuanto dura, en minutos. Ver [TrainingDuration] (TD-040). */
+    minutos: Int = 0,
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
-    val exercises = training.workouts.sumOf { w ->
-        if (w.variants.isNotEmpty()) w.variants.sumOf { it.exercises.size } else w.exercises.size
-    }
+    // Los de la corrida que viene: en un workout rotativo, los de la variante ACTIVA. Antes
+    // se sumaban los de TODAS las variantes, un numero que nadie va a hacer nunca, y que
+    // ademas no cuadraria con la duracion, que sale de esa misma corrida (TD-040).
+    val exercises = training.workouts.sumOf { it.activeExercises().size }
     val canPlay = training.workouts.any { it.hasContent() }
 
     // Orden pedido: borrar, duplicar, editar. El destructivo queda en el extremo
@@ -660,7 +667,12 @@ private fun TrainingCard(
                 }
             }
             Text(
-                "${training.workouts.size} ${t.workout} · $exercises ${t.exercise}",
+                // Cuantos ejercicios y cuanto dura. El numero de workouts se fue: es como
+                // esta ORGANIZADO el training, no lo que vas a hacer con el.
+                listOfNotNull(
+                    "$exercises ${if (exercises == 1) t.exercise else t.exercises}",
+                    "~$minutos ${t.minShort}".takeIf { minutos > 0 },
+                ).joinToString(" · "),
                 color = AppTheme.colors.textDim,
                 fontSize = 13.sp,
             )

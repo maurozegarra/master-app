@@ -144,7 +144,7 @@ dos ejercicios y hacer cuentas entre series. Su resumen: *"no le pusiste cariño
 | Las indicaciones de cada ejercicio | se escriben en `catalogInstructions()` / `lumbarInstructions()` y **viajan por Supabase** (tabla `exercise_media`, TD-139): corregir una le llega al atleta al abrir el app, sin versión nueva |
 | Los movimientos | `data/ExerciseCatalog.kt` (ids `ex_*`) |
 | El equipo y qué pesos se pueden pedir | `docs/equipo.md` · en el código, `HomeGym` y `Plates` |
-| Los vídeos | se publican **desde el teléfono**: ficha del ejercicio → **Publish** (TD-140). Los siete antiguos siguen en `videos.json` + release `videos` hasta que se migren |
+| Los vídeos | se publican **desde el teléfono**: ficha del ejercicio → **Publish** (TD-140) |
 | Lo que entrenó | `SessionLog` → snapshots en `Documents/MASTER/` |
 | Cómo se sintió | `docs/coach-log.md` |
 | Lo que busca a largo plazo, y su pesaje | `docs/objetivos.md` |

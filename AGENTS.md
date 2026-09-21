@@ -195,25 +195,31 @@ Las que más se usan (el app está en inglés, TD-133):
 
 ### Publicar un vídeo
 
-Los vídeos **no** viajan dentro del APK ni dentro del respaldo. Hay dos caminos y solo uno
-es automatizable:
+**Desde el teléfono, con sesión de entrenador.** En la ficha del ejercicio (`VIDEO`):
+*Add video* para elegirlo y **Publish** para subirlo (TD-140). El app lo sube al bucket
+`videos` de Supabase como `<exerciseId>.<rev>.mp4`, anota `video_rev` y `video_bytes` en la
+fila del ejercicio en `exercise_media` —**sin tocar sus instrucciones**, que comparten
+fila— y mueve el archivo de `own/` a la caché con esa revisión, de modo que el coach pasa a
+ver exactamente lo que verá quien lo reciba.
 
-- **Publicado (`repo/`)** — el manifiesto `videos.json` de la raíz del repo. Es el que
-  puede hacer un asistente de punta a punta:
-  1. Renombrar el `.mp4` a `<exerciseId>.mp4` (el id del catálogo, tal cual: es el nombre
-     del archivo en la caché).
-  2. `gh release upload videos <exerciseId>.mp4` — el release fijo `videos`, el mismo que
-     `build-release.ps1` tiene prohibido borrar.
-  3. Agregar la entrada a `videos.json`: `file`, `rev` (subir `rev` reemplaza un vídeo ya
-     publicado; el nombre en caché cambia y la versión nueva convive con la vieja) y
-     `bytes` (permite detectar descargas cortadas).
-  4. Commit y push de `videos.json` a `main`. El app lo lee de
-     `raw.githubusercontent.com/.../main/videos.json` y descarga cada vídeo bajo demanda.
-     **No hace falta publicar una versión del app.**
-- **Propio (`own/`)** — el que el usuario asigna desde la ficha del ejercicio. Gana sobre
-  el publicado, pero vive en el directorio privado del app: no se puede escribir por `adb`
-  en un build de release, no viaja con la asignación y no se recupera solo. Es una
-  preferencia del dispositivo, no un camino para meter contenido.
+El otro teléfono lo descarga bajo demanda: el bucket es público, así que no necesita
+sesión, y **no hace falta publicar una versión del app**.
+
+- **Reemplazar un vídeo** es publicar otro: sube la revisión, el nombre en caché cambia y
+  la versión nueva convive con la vieja hasta que se poda.
+- **Si la subida falla con `new row violates row-level security policy`**, el token llegó
+  bien y el problema son las políticas: mirar `storage.prefixes`, que tiene RLS propio (ver
+  `docs/supabase/td-140-videos-bucket.sql`). Un token inválido daría otro mensaje.
+- **`videos.json` ya no existe** (TD-141). Era un manifiesto en la raíz del repo que se
+  editaba a mano y se leía de `raw.githubusercontent.com`; publicar exigía PC, `gh` y un
+  commit. Desde que se publica desde el teléfono, mantener dos sitios solo servía para no
+  saber en cuál mirar cuando un vídeo no aparecía. El release `videos` de GitHub se queda
+  como respaldo frío de lo que hubo ahí.
+
+**El vídeo propio (`own/`)**, el que se asigna sin publicar, gana sobre el publicado pero
+vive en el directorio privado del app: no se puede escribir por `adb` en un build de
+release, no viaja con la asignación y no se recupera solo. Es una preferencia del
+dispositivo, no un camino para meter contenido.
 
 ## Reglas de oro
 

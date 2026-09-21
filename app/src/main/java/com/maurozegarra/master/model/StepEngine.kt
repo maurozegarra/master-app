@@ -214,3 +214,18 @@ object StepEngine {
     fun workoutsToRotate(advancedWorkouts: Set<Int>, uptoExclusive: Int): List<Int> =
         (0 until uptoExclusive).filter { it !in advancedWorkouts }
 }
+
+/**
+ * Cuánto se estima que dura este training, en segundos (TD-040).
+ *
+ * Sale de la misma cola que va a correr el player, así que cuenta lo que de verdad va a
+ * pasar: las variantes ACTIVAS de un workout rotativo, los dos lados de un ejercicio
+ * unilateral, las preparaciones y los descansos. Lo que va por repeticiones se pondera con
+ * [PlayerStep.estimatedSec] —reps por segundos por repetición—, que es lo único estimado
+ * aquí; el resto son segundos de reloj.
+ *
+ * **Es un suelo, no un pronóstico.** No incluye lo que pasa entre ejercicios -cambiar
+ * discos, buscar la mancuerna, contestar el feedback-, y por eso en la tarjeta se enseña
+ * con una tilde delante.
+ */
+fun Training.estimatedSec(): Int = StepEngine.buildSteps(this).sumOf { it.estimatedSec }

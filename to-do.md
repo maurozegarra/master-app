@@ -4,12 +4,20 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **92 / 147** hechos, 55 pendientes.
+Progreso: **94 / 148** hechos, 54 pendientes.
 
 ## Pendientes
 
 ### Feature
 
+- [ ] **TD-148** Estimar la duracion de un training que todavia nadie ha corrido
+  - LO QUE QUEDO FLOJO de TD-040. La tarjeta usa la mediana de las sesiones reales, pero un training sin historial cae al calculo del motor, que se queda corto -unos 43 minutos frente a los 73 reales de LUMBAR-. Afecta a LUMBAR (short), a las rutinas de NIKO y a cualquiera nueva: dicen un numero bajo hasta que se entrenan una vez.
+
+LA SALIDA, con sus propios datos: el historial ya mide el factor. Sus rutinas tardan del orden de 1.7 veces lo que suma la cola del player, porque entre ejercicios pasan cosas que el motor no ve. Calculando ese factor por telefono -con los trainings que SI tienen historial- y aplicandolo a los que no, un training nuevo estimaria bien desde el primer dia.
+
+SIN DECIDIR: si el factor es uno por telefono o por tipo de rutina (una de fuerza con cambios de disco no se parece a una de movilidad), y cuantas sesiones hacen falta antes de fiarse de el.
+
+Aplazado por el usuario el 20-sep: 'usemos tu estimacion de momento, ya otro dia hacemos que el app lo calcule con mas certeza'.
 - [ ] **TD-144** Progresiones: un mismo ejercicio con varios niveles, cada uno con su video
   - PLANTEADO por el usuario el 19-sep-2026, al revisar por que el video no se comporta como un campo mas del ejercicio: 'un ejercicio puede tener progresiones: side plank, con piernas a 90 o estiradas, es un mismo ejercicio que podria tener 2 videos. Imagina pistol squat, puede tener varias progresiones y es el mismo ejercicio, y asi hay varios'.
 
@@ -34,14 +42,6 @@ AVISA, NO BLOQUEA: repartir algo sin video es normal; repartirlo sin saberlo es 
 EL VIDEO PROPIO NO CUENTA: vive en el directorio privado del telefono que lo asigno y no viaja con la rutina, asi que solo vale el publicado. Mirar el estado del video a secas diria que esta cubierto cuando el otro telefono no puede descargarlo.
 
 Y MIRA LAS VARIANTES: un workout rotativo esconde sus ejercicios dentro de ellas, que en el dia de Muay Thai son casi todo el training. Hay un test que lo fija.
-- [ ] **TD-141** Migrar los 7 videos publicados y retirar videos.json
-  - ETAPA 3 de 3 (ver TD-139 y TD-140).
-
-QUE SE HACE: subir al bucket los 7 mp4 del release 'videos' -21 MB en total-, escribir sus filas en exercise_media conservando rev y bytes, y quitar del codigo el camino viejo: MANIFEST_URL a raw.githubusercontent, el archivo videos.json de la raiz y su seccion en AGENTS.md. El release 'videos' de GitHub se queda como respaldo frio; build-release.ps1 ya tiene prohibido borrarlo (TD-065).
-
-POR QUE RETIRAR Y NO CONVIVIR: decision del usuario. Dos fuentes para lo mismo obligan a una regla de precedencia, y esa regla es justo lo que hace que hoy nadie sepa por que un video aparece en un telefono y no en otro.
-
-ORDEN: va despues de TD-140, porque hasta que el bucket no sirva videos, retirar el manifiesto deja a los dos telefonos sin ninguno.
 - [ ] **TD-137** Circuitos: alternar ejercicios por rounds en vez de terminar uno para empezar otro
   - LIMITACION DEL MODELO, encontrada al diseñar el dia 6 de NIKO (19-sep-2026). Lo ideal para defensa personal es un circuito: saco 60 s → sprawl 30 s → saco 60 s..., repetido por rounds. El player hace un ejercicio con TODAS sus series y recien pasa al siguiente, asi que un circuito no se puede expresar: hoy va como series seguidas de cada ejercicio.
 
@@ -251,8 +251,6 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
   - Al abrir History, mostrar un header compacto con: total de sesiones, tiempo total acumulado, ejercicio mas frecuente. Datos derivados de vm.sessions.
 - [ ] **TD-041** Ring de progreso en el player
   - Ademas de la barra lineal de progreso, un ring circular alrededor del clock que muestra cuantos del step actual ha transcurrido. Mas visual y moderno. Calcular fraccion con playerRemainingMs y la duracion total del step.
-- [ ] **TD-040** Duracion estimada en TrainingCard
-  - Mostrar duracion estimada (~12 min) junto a '3 workouts · 8 exercises' en la TrainingCard. Calcular sumando duraciones de todos los steps (PREP + WORK + REST + COOLDOWN) del training.
 - [ ] **TD-014** Keep-screen-on durante la corrida (opcional)
   - El player a pantalla completa podria beneficiarse de keep-screen-on
 - [ ] **TD-013** Accesibilidad (opcional)
@@ -384,6 +382,7 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 - [x] **TD-145** El video es un campo mas del ejercicio: una sola tarjeta y sin carteles
 - [x] **TD-139** Las instrucciones dejan de viajar en el APK: una tabla por exerciseId
 - [x] **TD-140** Publicar un video desde el telefono: bucket en Supabase y boton en la ficha del ejercicio
+- [x] **TD-141** Migrar los 7 videos publicados y retirar videos.json
 - [x] **TD-138** Archivar trainings: la lista ensena lo que toca, no todo lo que existe
 - [x] **TD-132** Una revision de una rutina ya asignada no le llega al atleta hasta reasignarla
 - [x] **TD-110** El historial ensena el dolor y la nota de cada sesion
@@ -410,6 +409,7 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 - [x] **TD-053** Snapshot automatico de datos a almacenamiento compartido
 - [x] **TD-051** Add from existing: reutilizar un workout de otro training
 - [x] **TD-048** Icono de la barra de estado solo en segundo plano (estilo YouTube)
+- [x] **TD-040** La tarjeta dice cuantos ejercicios y cuanto dura
 - [x] **TD-039** Swipe-to-reveal en TrainingCards, en reemplazo del menu de 3 puntos
 - [x] **TD-037** Tap en dia del calendario abre sheet con sesiones de ese dia
 - [x] **TD-035** Atenuar pantalla del player cuando el timer esta en pausa
