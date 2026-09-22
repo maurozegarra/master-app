@@ -1,7 +1,7 @@
 {
-  "changelog": "feat: TD-141 y TD-040, el bucket es la unica fuente de videos y la tarjeta dice cuanto dura",
   "minVersionCode": 1,
-  "versionCode": 306,
-  "versionName": "1.0.306",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.306/master-1.0.306.apk"
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.307/master-1.0.307.apk",
+  "changelog": "release: NIKO 3 y TD-149, las sesiones borradas se borran tambien en el servidor",
+  "versionCode": 307,
+  "versionName": "1.0.307"
 }
