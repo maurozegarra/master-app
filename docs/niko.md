@@ -166,7 +166,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 | Dia | Training | Estado |
 |---|---|---|
 | 1 | NIKO 1 · Glúteo pesado | asignado el 19-sep como "NIKO - Día de glúteo"; el nombre numerado le llega al reasignarlo |
-| 2 | NIKO 2 · Muay Thai | **sembrado el 19-sep para el lunes 21** |
+| 2 | NIKO 2 · Muay Thai | **hecho el lunes 21-sep**, completo (ver *Sus sesiones*) |
 | 3 | NIKO 3 · Tren superior | plan base |
 | 4 | NIKO 4 · Glúteo a una pierna | plan base |
 | 5 | NIKO 5 · Muay Thai y potencia | plan base |
@@ -268,3 +268,32 @@ Las dos reglas, decididas con el usuario:
 
 Para que funcione, **su telefono tiene que tener la version con TD-126** (v1.0.282 o
 posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
+
+## Sus sesiones
+
+Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
+
+### 2026-09-21 — NIKO 2 · Muay Thai, la primera que llega sola
+
+**De 08:00 a 09:01, 61 minutos, completa.** No se saltó nada:
+
+| Bloque | Qué hizo |
+|---|---|
+| Calentamiento | cuerda 2 min · rotación de cadera · 90/90 · hombros, 10 de cada uno |
+| Rounds | **3 de sombra y 5 de saco, de 3 minutos** |
+| Pies | llanta, 6 × 30 s |
+| Core | Russian twist 3 × 20 con 5 kg, **las tres "bien"** · plancha 3 × 30 s por lado |
+| Cuello | 20 s en cada una de las cuatro direcciones |
+
+- **Es la prueba de punta a punta de TD-126:** su teléfono la subió y el del coach la bajó
+  sin que nadie tocara nada. También es su primera sesión real con los lados en la plancha
+  y el cuello (TD-147), y llegaron completos.
+- **El único peso que el app le pregunta, lo marcó.** El twist se queda en 5 kg.
+- **No se sabe cómo le cayó:** su rutina no pregunta dolor ni cansancio. Queda preguntarle
+  por los cinco rounds de saco.
+- **Todavía no sabe usar el app.** El coach le enseña el martes 22, en casa.
+
+**Lo que no es suyo:** esa mañana, entre 06:40 y 06:55, el coach le hizo una demostración en
+su teléfono con NIKO 1 y NIKO 2. Las borró allá, pero ya habían subido y el servidor no se
+entera de un borrado (TD-149). Se quitaron a mano con SQL. Pasa lo mismo con tres sesiones a
+medias del 19-sep, entre 23:45 y 23:55, que siguen en el servidor y no están en su teléfono.

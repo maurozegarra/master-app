@@ -4,9 +4,26 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **94 / 148** hechos, 54 pendientes.
+Progreso: **94 / 149** hechos, 55 pendientes.
 
 ## Pendientes
+
+### Bug
+
+- [ ] **TD-149** Borrar una sesion en el telefono del atleta no la borra del servidor
+  - LO QUE PASO, el 21-sep-2026: el coach le hizo a NIKO una demostracion del app en su telefono, con NIKO 1 y NIKO 2, y despues borro esas dos sesiones. Ya habian subido (TD-126) y el servidor no se entero del borrado: el telefono del coach las siguio bajando y el asistente las leyo como entrenamientos de ella -5 y 9 minutos, 'completos'-. Se quitaron a mano con un delete en el SQL Editor. Quedan en el servidor, por lo mismo, tres sesiones a medias del 19-sep (23:45-23:55) que ya no estan en su telefono.
+
+POR QUE: es la regla 1 de TD-126, a proposito. El telefono del atleta solo puede SUBIR, por upload_session, sin leer ni borrar, porque va sin cuenta y con la clave publica. El borrado se quedo sin camino.
+
+CONSECUENCIA: su historial, el del coach y el respaldo que lee el asistente no dicen lo mismo, y el que lee el asistente es justo el que esta mal. Entrenarla con datos falsos es peor que sin datos.
+
+LO QUE HARIA FALTA: una funcion delete_session(p_profile_id, p_session_id) en Supabase, security definer como upload_session, que borre SOLO la sesion de ese perfil con ese id. El app la llama en deleteSession y clearHistory si hay perfil, y quita la marca del ledger de subidas. Sin red, el borrado queda pendiente y se reintenta en la siguiente sincronizacion, igual que la subida. El SQL lo corre el usuario.
+
+A DECIDIR: si borrar todo el historial en el telefono del atleta tambien lo borra en el servidor, o solo el borrado de una sesion.
+
+RIESGO QUE QUEDA: quien conozca el id de perfil y el id de una sesion podria borrarla con la clave publica. Es el mismo nivel que ya tiene upload_session, que puede pisarla.
+
+DESCARTADO el mismo dia: se sospecho que el telefono del coach solo bajaba sesiones al arrancar. No: runSync las baja en cada vuelta a primer plano. Fue un error de lectura del asistente, que imprimio las ultimas 6 de 7 sesiones de una lista ordenada de la mas nueva a la mas vieja.
 
 ### Feature
 
