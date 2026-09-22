@@ -31,6 +31,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Edit
@@ -788,12 +792,11 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // cuello son cuatro direcciones de una serie cada una-, que es justo cuando el
         // contador no sale y antes no quedaba nada que dijera cual toca.
         // El lado es una flecha y no la palabra (TD-153): "Derecha" junto a un reloj ancho
-        // se salia por el borde y NIKO leia "HA".
-        val lead = listOfNotNull(
-            SideMark.of(step.side, step.sideIndex, step.sideCount),
-            "${step.setIndex + 1}/${step.totalSets}".takeIf { showSeries },
-        ).joinToString(" · ").ifBlank { null }
-        ClockOrReps(vm, step, repByRep, padClock, t, lead = lead)
+        // se salia por el borde y NIKO leia "HA". Va aparte del contador y GRANDE: tiene que
+        // leerse a distancia, con el telefono en el piso y ella en la plancha.
+        val lead = "${step.setIndex + 1}/${step.totalSets}".takeIf { showSeries }
+        val side = SideMark.of(step.side, step.sideIndex, step.sideCount)
+        ClockOrReps(vm, step, repByRep, padClock, t, lead = lead, side = side)
         Spacer(Modifier.height(16.dp))
 
         // Siempre visibles, en toda etapa y en cualquier modo: son el mando de la corrida.
@@ -820,11 +823,12 @@ private fun ClockOrReps(
     padClock: Boolean,
     t: Strings,
     lead: String? = null,
+    side: String? = null,
 ) {
     if (step.kind == StepKind.WORK && !step.timeBased) {
-        RepsDisplay(step, repByRep, t, lead)
+        RepsDisplay(step, repByRep, t, lead, side)
     } else {
-        ClockDisplay(step, vm.playerRemainingMs, padClock, lead)
+        ClockDisplay(step, vm.playerRemainingMs, padClock, lead, side)
     }
 }
 
@@ -966,6 +970,19 @@ private val READOUT_MARK_SIZE = 26.sp
 
 /** Aire entre la marca y el número. */
 private val READOUT_GAP = 10.dp
+
+/** La flecha del lado (TD-153): del alto de una cifra del reloj, para leerla a distancia. */
+private val READOUT_SIDE_ICON = 60.dp
+private val READOUT_SIDE_DOTS = 30.sp
+
+/** La flecha que dibuja cada marca de [SideMark]; null si la marca son puntos. */
+private fun arrowIcon(mark: String) = when (mark) {
+    "←" -> Icons.AutoMirrored.Filled.ArrowBack
+    "→" -> Icons.AutoMirrored.Filled.ArrowForward
+    "↑" -> Icons.Filled.ArrowUpward
+    "↓" -> Icons.Filled.ArrowDownward
+    else -> null
+}
 
 /**
  * Techo del nombre **cuando hay vídeo**: 28sp.
@@ -1214,7 +1231,7 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
 }
 
 @Composable
-private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings, lead: String? = null) {
+private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings, lead: String? = null, side: String? = null) {
     // La unidad, no el simbolo. "15" a secas se confunde con un reloj en 15 —y mas con los
     // ceros a la izquierda apagados—, y la "x" pequena y gris no peleaba contra eso. Una
     // palabra no hay que interpretarla. El reloj no la necesita: se delata solo, porque baja.
@@ -1222,6 +1239,7 @@ private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings, lead: S
         value = if (repByRep) "${step.setIndex + 1} / ${step.totalSets}" else "${step.reps}",
         mark = if (repByRep) t.repLabel else t.repsUnit.uppercase(),
         lead = lead,
+        side = side,
     )
 }
 
@@ -1239,7 +1257,7 @@ private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings, lead: S
  * borde izquierdo, en vez de ponerlos en fila.
  */
 @Composable
-private fun BigReadout(value: String, mark: String? = null, lead: String? = null) {
+private fun BigReadout(value: String, mark: String? = null, lead: String? = null, side: String? = null) {
     val measurer = rememberTextMeasurer()
     val valueStyle = TextStyle(
         color = Color.White,
@@ -1262,21 +1280,38 @@ private fun BigReadout(value: String, mark: String? = null, lead: String? = null
     val markHalf = remember(mark) {
         if (mark == null) 0 else measurer.measure(mark, markStyle).size.width / 2
     }
-    val leadHalf = remember(lead) {
-        if (lead == null) 0 else measurer.measure(lead, leadStyle).size.width / 2
+    val density = LocalDensity.current
+    // El lado va ENCIMA del contador, en la misma columna a la izquierda del numero: la
+    // flecha grande arriba y "2/3" pequeno debajo (TD-153). La columna se cuelga por su
+    // ancho mas ancho, igual que antes se colgaba el texto.
+    val arrow = side?.let(::arrowIcon)
+    val sideStyle = markStyle.copy(fontSize = READOUT_SIDE_DOTS)
+    val sideWidth = remember(side) {
+        when {
+            side == null -> 0
+            arrow != null -> with(density) { READOUT_SIDE_ICON.roundToPx() }
+            else -> measurer.measure(side, sideStyle).size.width
+        }
     }
-    val gap = with(LocalDensity.current) { READOUT_GAP.roundToPx() }
+    val leadWidth = remember(lead) { if (lead == null) 0 else measurer.measure(lead, leadStyle).size.width }
+    val leadHalf = maxOf(sideWidth, leadWidth) / 2
+    val gap = with(density) { READOUT_GAP.roundToPx() }
 
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Text(value, style = valueStyle)
-        if (lead != null) {
-            Text(
-                lead,
-                style = leadStyle,
+        if (lead != null || side != null) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .align(Alignment.Center)
                     .offset { IntOffset(-(valueHalf + gap + leadHalf), 0) },
-            )
+            ) {
+                when {
+                    arrow != null -> Icon(arrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(READOUT_SIDE_ICON))
+                    side != null -> Text(side, style = sideStyle)
+                }
+                if (lead != null) Text(lead, style = leadStyle)
+            }
         }
         if (mark != null) {
             Text(
@@ -1293,11 +1328,11 @@ private fun BigReadout(value: String, mark: String? = null, lead: String? = null
 }
 
 @Composable
-private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean, lead: String? = null) {
+private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean, lead: String? = null, side: String? = null) {
     val shown = if (step.display == DisplayMode.COUNTUP) {
         (step.durationSec * 1000L - remainingMs).coerceAtLeast(0L)
     } else remainingMs
-    BigReadout(formatPlayerClock(shown, padded), lead = lead)
+    BigReadout(formatPlayerClock(shown, padded), lead = lead, side = side)
 }
 
 @Composable
