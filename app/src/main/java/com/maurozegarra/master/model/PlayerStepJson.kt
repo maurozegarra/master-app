@@ -33,6 +33,8 @@ object PlayerStepJson {
                     .put("exerciseIndex", s.exerciseIndex)
                     .put("showVideo", s.showVideo)
         .put("side", s.side)
+                    .put("sideIndex", s.sideIndex)
+                    .put("sideCount", s.sideCount)
                     .put("workoutName", s.workoutName)
                     .put("workoutIndex", s.workoutIndex)
                     .put("totalWorkouts", s.totalWorkouts)
@@ -76,6 +78,8 @@ object PlayerStepJson {
                 exerciseIndex = o.optInt("exerciseIndex", 0),
                 showVideo = o.optBoolean("showVideo", true),
         side = o.optString("side", ""),
+                sideIndex = o.optInt("sideIndex", 0),
+                sideCount = o.optInt("sideCount", 0),
                 workoutName = o.optString("workoutName", ""),
                 workoutIndex = o.optInt("workoutIndex", 0),
                 totalWorkouts = o.optInt("totalWorkouts", 1),

@@ -35,6 +35,7 @@ import com.maurozegarra.master.model.reorderedFrom
 import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionSync
 import com.maurozegarra.master.model.Archive
+import com.maurozegarra.master.model.VideoPrefs
 import com.maurozegarra.master.model.PublishSync
 import com.maurozegarra.master.model.MediaSync
 import com.maurozegarra.master.model.MissingContent
@@ -226,6 +227,20 @@ class MasterViewModel(
         archivedUids = if (archived) archivedUids + uid else archivedUids - uid
         store.saveArchivedUids(archivedUids)
     }
+
+    /**
+     * Los videos apagados en este telefono (TD-154), fuera de los trainings. Antes del
+     * `init` por la regla de siempre, y ademas por la migracion: tiene que leer los
+     * trainings como estaban ANTES de que el `init` siembre una revision y los reemplace,
+     * porque esa revision traeria todos los videos encendidos.
+     */
+    var hiddenVideos by mutableStateOf(
+        store.hiddenVideos() ?: VideoPrefs.migrate(store.loadTrainings()).also { store.saveHiddenVideos(it) },
+    )
+        private set
+
+    /** El training como se ve en ESTE telefono: con sus videos apagados aplicados. */
+    private fun asSeen(t: Training): Training = VideoPrefs.apply(t, hiddenVideos)
 
     private fun newId(): Long = nextId++
 
@@ -1506,7 +1521,9 @@ class MasterViewModel(
     }
 
     fun startEditTraining(id: Long) {
-        draft = trainings.firstOrNull { it.id == id }?.copy() ?: return
+        // El borrador lleva los videos como se ven aqui, para que el interruptor del editor
+        // arranque en lo que el usuario eligio y no en lo que dice la definicion (TD-154).
+        draft = trainings.firstOrNull { it.id == id }?.let(::asSeen) ?: return
         editingWorkoutId = null
         editingVariantId = null
         editingExerciseId = null
@@ -1530,44 +1547,29 @@ class MasterViewModel(
      * Enciende o apaga el video del ejercicio en curso, sin salir del player (TD-146).
      *
      * Existe porque apagarlo costaba cuatro toques y un viaje al editor -"yo solo buscaba
-     * dejar de ver el video"-. Toca [Exercise.showVideo], que es de ESTA instancia en ESTE
-     * training: que un video se vea aqui no dice nada de los demas trainings que usen el
-     * mismo movimiento.
-     *
-     * Un training asignado no se toca: llega de otro y la siguiente sincronizacion lo
-     * devolveria a como estaba.
+     * dejar de ver el video"-. Desde TD-154 no toca el training sino [hiddenVideos], que es
+     * de este telefono: por eso sirve tambien en un training asignado -NIKO no tenia el
+     * boton- y sobrevive a que el coach suba una revision.
      */
     fun toggleRunningVideo(step: PlayerStep) {
         val id = playerTrainingId ?: activePlayerTrainingId ?: return
-        val idx = trainings.indexOfFirst { it.id == id }
-        if (idx < 0) return
-        val training = trainings[idx]
-        if (training.assigned) return
-        val workout = training.workouts.getOrNull(step.workoutIndex) ?: return
-        val objetivo = workout.activeExercises().getOrNull(step.exerciseIndex) ?: return
+        val training = trainings.firstOrNull { it.id == id } ?: return
+        changeHiddenVideos(VideoPrefs.set(hiddenVideos, training, step.ownerExerciseId, show = !step.showVideo))
+        applyToRunningPlayer(training)
+    }
 
-        fun voltea(list: List<Exercise>) =
-            list.map { if (it.id == objetivo.id) it.copy(showVideo = !it.showVideo) else it }
-
-        val nuevo = if (workout.rotating) {
-            val v = workout.activeVariant() ?: return
-            workout.copy(variants = workout.variants.map { if (it.id == v.id) it.copy(exercises = voltea(it.exercises)) else it })
-        } else {
-            workout.copy(exercises = voltea(workout.exercises))
-        }
-        val actualizado = training.copy(
-            workouts = training.workouts.toMutableList().also { it[step.workoutIndex] = nuevo },
-            updatedAt = System.currentTimeMillis(),
-        )
-        trainings[idx] = actualizado
-        persist()
-        applyToRunningPlayer(actualizado)
+    private fun changeHiddenVideos(keys: Set<String>) {
+        if (keys == hiddenVideos) return
+        hiddenVideos = keys
+        store.saveHiddenVideos(keys)
     }
 
     fun saveTraining() {
         val d = draft ?: return
         if (!canSaveTraining) return
         val updated = d.copy(updatedAt = System.currentTimeMillis())
+        // Lo que el interruptor del editor dejo en el borrador pasa a este telefono.
+        changeHiddenVideos(VideoPrefs.fromTraining(hiddenVideos, updated))
         val i = trainings.indexOfFirst { it.id == updated.id }
         if (i >= 0) trainings[i] = updated else trainings.add(updated)
         persist()
@@ -1593,7 +1595,7 @@ class MasterViewModel(
     private fun applyToRunningPlayer(updated: Training) {
         if (activePlayerTrainingId != updated.id) return
         val current = playerStep ?: return
-        val rebuilt = StepEngine.buildSteps(updated)
+        val rebuilt = StepEngine.buildSteps(asSeen(updated))
         if (rebuilt.isEmpty()) return
         val at = StepEngine.relocate(current, rebuilt)
         val steps = if (StepEngine.sameSlot(rebuilt[at], current)) {
@@ -2007,7 +2009,7 @@ class MasterViewModel(
             return
         }
         val t = trainings.firstOrNull { it.id == trainingId } ?: return
-        val steps = StepEngine.buildSteps(t)
+        val steps = StepEngine.buildSteps(asSeen(t))
         if (steps.isEmpty()) return
         PlayerBus.state.value = null
         sessionReloaded = false

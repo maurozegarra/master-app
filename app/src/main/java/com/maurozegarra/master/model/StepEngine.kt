@@ -23,7 +23,7 @@ object StepEngine {
                 for ((si, side) in sides.withIndex()) {
                 for (s in 0 until sets) {
                     if (e.workMode == WorkMode.TIME) {
-                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, speedKmh = e.speedKmh, side = side))
+                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, speedKmh = e.speedKmh, side = side, sideIndex = si, sideCount = e.sides.size))
                     } else {
                         val ws = e.setAt(s)
                         add(
@@ -34,7 +34,7 @@ object StepEngine {
                                 weightTotal = if (e.isWeighted) e.weightTotal(ws) else 0.0,
                                 weightLabel = if (e.isWeighted) weightLabel(e, ws) else "",
                                 workoutBase = w.name, variant = wVariant, rotating = w.rotating,
-                                secPerRep = e.secPerRep, exerciseIndex = ei, side = side,
+                                secPerRep = e.secPerRep, exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size,
                             ),
                         )
                     }
@@ -47,7 +47,7 @@ object StepEngine {
                     // piramide (series pegadas y un respiro largo solo en dos de ellas).
                     val rest = e.restSecAt(s)
                     if (rest > 0 && !(e.restSkipOnLastSet && lastSet)) {
-                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, side = side))
+                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size))
                     }
                 }
                 }
@@ -140,6 +140,8 @@ object StepEngine {
         exerciseIndex: Int = 0,
         speedKmh: Double? = null,
         side: String = "",
+        sideIndex: Int = 0,
+        sideCount: Int = 0,
     ): PlayerStep {
         val cfg = when (kind) {
             StepKind.PREP -> e.prepareCfg
@@ -156,6 +158,8 @@ object StepEngine {
             exerciseIndex = exerciseIndex,
             showVideo = e.showVideo,
             side = side,
+            sideIndex = sideIndex,
+            sideCount = sideCount,
             workoutName = workoutName,
             workoutIndex = workoutIndex,
             totalWorkouts = totalWorkouts,

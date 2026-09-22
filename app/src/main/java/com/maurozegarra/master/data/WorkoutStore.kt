@@ -291,6 +291,15 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         prefs.edit().putString(KEY_ARCHIVED_UIDS, org.json.JSONArray(uids.toList()).toString()).apply()
     }
 
+    /** Los videos apagados en este telefono, o null si todavia no se migraron (TD-154). */
+    fun hiddenVideos(): Set<String>? =
+        if (!prefs.contains(KEY_HIDDEN_VIDEOS)) null
+        else prefs.getStringSet(KEY_HIDDEN_VIDEOS, emptySet()).orEmpty().toSet()
+
+    fun saveHiddenVideos(keys: Set<String>) {
+        prefs.edit().putStringSet(KEY_HIDDEN_VIDEOS, keys).apply()
+    }
+
     /** Las sesiones de los atletas, tal como las bajo el coach. Se reemplazan enteras. */
     fun loadAthleteSessions(): List<AthleteSession> =
         SessionSync.decodeAthleteSessions(prefs.getString(KEY_ATHLETE_SESSIONS, "[]") ?: "[]")
@@ -346,6 +355,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_PUBLISH_LEDGER = "publish_ledger"
         const val KEY_ATHLETE_SESSIONS = "athlete_sessions_json"
         const val KEY_ARCHIVED_UIDS = "archived_training_uids"
+        const val KEY_HIDDEN_VIDEOS = "hidden_videos"
         const val KEY_MEDIA_LEDGER = "exercise_media_ledger"
         const val KEY_SIDE_PLANK_MERGED = "side_plank_merged"
         const val KEY_CATALOG_INSTRUCTIONS = "catalog_instructions_revision"

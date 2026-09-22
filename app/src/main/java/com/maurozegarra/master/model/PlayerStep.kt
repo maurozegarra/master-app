@@ -34,6 +34,10 @@ data class PlayerStep(
     val showVideo: Boolean = true,
     /** Lado o dirección de este paso, si el ejercicio los tiene (TD-147). */
     val side: String = "",
+    /** Qué lado es y de cuántos (TD-153): lo que dibuja la marca cuando el lado no es una
+     *  dirección que se pueda poner como flecha. */
+    val sideIndex: Int = 0,
+    val sideCount: Int = 0,
     val workoutName: String = "",
     val workoutIndex: Int = 0,
     val totalWorkouts: Int = 1,

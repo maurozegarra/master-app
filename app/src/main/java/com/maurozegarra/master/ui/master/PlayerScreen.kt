@@ -108,6 +108,7 @@ import com.maurozegarra.master.model.PlayerStep
 import com.maurozegarra.master.model.SPEED_STEP
 import com.maurozegarra.master.model.Plates
 import com.maurozegarra.master.model.WeightType
+import com.maurozegarra.master.model.SideMark
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
@@ -682,10 +683,12 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     ) {
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
         val repByRep = step.kind == StepKind.WORK && !step.timeBased && step.reps == 1 && step.totalSets > 1
-        val bigTitle = when (step.kind) {
+        // La palabra del lado va aqui, entera: la flecha junto al numero dice cual, y el
+        // titulo -que tiene todo el ancho y se encoge para caber- lo dice con letras.
+        val bigTitle = (when (step.kind) {
             StepKind.WORK -> step.title.ifBlank { t.exercise }
             else -> ownerLabel.ifBlank { stageLabel }
-        }.uppercase()
+        } + (step.side.takeIf { it.isNotBlank() && step.kind != StepKind.PREP }?.let { " · $it" } ?: "")).uppercase()
         // PREPARE y COOLDOWN se fueron los dos: el color de la etapa ya es el indicador,
         // y cada palabra ocupaba 40sp justo encima del video.
         val showSeries = (step.kind == StepKind.WORK || step.kind == StepKind.REST) &&
@@ -784,8 +787,10 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // Tiene que verse SIEMPRE que exista, incluso con una sola serie -el isometrico de
         // cuello son cuatro direcciones de una serie cada una-, que es justo cuando el
         // contador no sale y antes no quedaba nada que dijera cual toca.
+        // El lado es una flecha y no la palabra (TD-153): "Derecha" junto a un reloj ancho
+        // se salia por el borde y NIKO leia "HA".
         val lead = listOfNotNull(
-            step.side.takeIf { it.isNotBlank() },
+            SideMark.of(step.side, step.sideIndex, step.sideCount),
             "${step.setIndex + 1}/${step.totalSets}".takeIf { showSeries },
         ).joinToString(" · ").ifBlank { null }
         ClockOrReps(vm, step, repByRep, padClock, t, lead = lead)
@@ -1023,8 +1028,9 @@ private val NOTE_SIZE = 40.sp
  */
 @Composable
 private fun ToggleVideoButton(vm: MasterViewModel, step: PlayerStep, t: Strings) {
-    val id = vm.playerTrainingId ?: return
-    if (vm.trainings.firstOrNull { it.id == id }?.assigned != false) return
+    // Tambien en un training asignado (TD-154): la preferencia es del telefono y no del
+    // training, asi que la sincronizacion no la deshace.
+    vm.playerTrainingId ?: return
     val hayVideo = vm.videoStateFor(step.ownerExerciseId) !is VideoState.None
 
     Box(
