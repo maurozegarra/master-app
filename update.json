@@ -1,7 +1,7 @@
 {
-  "changelog": "release: revision 13, NIKO 4, el lado como flecha y el video del telefono",
+  "versionName": "1.0.310",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.310/master-1.0.310.apk",
+  "versionCode": 310,
   "minVersionCode": 1,
-  "versionCode": 309,
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.309/master-1.0.309.apk",
-  "versionName": "1.0.309"
+  "changelog": "release: la flecha del lado, grande"
 }
