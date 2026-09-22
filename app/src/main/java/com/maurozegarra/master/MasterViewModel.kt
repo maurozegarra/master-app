@@ -1431,6 +1431,12 @@ class MasterViewModel(
             if (!sessionSyncLock.tryLock()) return@launch
             try {
                 assignments.profileId?.let { perfil ->
+                    // Los borrados van ANTES que las subidas (TD-149): una sesion borrada y
+                    // vuelta a traer con un respaldo tiene que acabar subida, no borrada.
+                    for (id in store.pendingSessionDeletes()) {
+                        assignments.deleteSession(perfil, id) ?: break
+                        store.sessionDeleted(id)
+                    }
                     val pendientes = SessionSync.pending(store.loadSessions(), store.loadTrainings(), store.uploadLedger())
                     for (p in pendientes) {
                         // true se guardo, false no era un training asignado: en los dos casos
@@ -1461,12 +1467,31 @@ class MasterViewModel(
         sessions.removeAll { it.id == id }
         store.saveSessions(sessions.toList())
         snapshot()
+        forgetUploaded(listOf(id))
     }
 
     fun clearHistory() {
+        val borradas = sessions.map { it.id }
         sessions.clear()
         store.saveSessions(emptyList())
         snapshot()
+        forgetUploaded(borradas)
+    }
+
+    /**
+     * Lo borrado aqui se borra tambien en el servidor, si llego a subir (TD-149).
+     *
+     * Vaciar el historial entero cuenta igual que borrar una por una: lo que el atleta ya
+     * no tiene en su telefono no puede seguir contandole al coach entrenamientos. Se anota
+     * primero y se manda despues, asi que sin red no se pierde: sale en la siguiente
+     * sincronizacion.
+     */
+    private fun forgetUploaded(ids: Collection<Long>) {
+        if (assignments.profileId == null) return
+        val borrar = SessionSync.toDelete(ids, store.uploadLedger())
+        if (borrar.isEmpty()) return
+        store.queueSessionDeletes(borrar)
+        syncSessions()
     }
 
     // ---------- Lista de Trainings ----------

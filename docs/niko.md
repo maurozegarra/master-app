@@ -262,7 +262,8 @@ por donde se leen, igual que las de el.
 Las dos reglas, decididas con el usuario:
 
 - **Solo el coach las lee.** Llevan el dolor de cada dia. El telefono de ella solo puede subir
-  las suyas, por una funcion que no deja leer ni borrar nada.
+  las suyas, por una funcion que no deja leer nada. Y desde TD-149, borrarlas: lo que ella
+  borra en su telefono se borra tambien en el servidor, sesion por sesion.
 - **Solo suben las de trainings asignados.** Lo que ella entrene por su cuenta se queda en su
   telefono. El servidor lo comprueba otra vez.
 

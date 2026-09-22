@@ -218,6 +218,35 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         prefs.edit().putString(KEY_UPLOAD_LEDGER, o.toString()).apply()
     }
 
+    /** Sesiones borradas aqui que falta borrar en el servidor (TD-149). */
+    fun pendingSessionDeletes(): Set<Long> =
+        prefs.getStringSet(KEY_PENDING_SESSION_DELETES, emptySet()).orEmpty()
+            .mapNotNull { it.toLongOrNull() }.toSet()
+
+    /**
+     * Anota [ids] para borrarlas en el servidor y las saca del ledger de subidas, las dos
+     * cosas en la misma escritura.
+     *
+     * Salen del ledger porque ya no estan subidas -o no lo estaran en cuanto haya red-: si
+     * la misma sesion volviera, por ejemplo al importar un respaldo, tiene que subir otra vez
+     * y no quedarse fuera por una huella vieja.
+     */
+    fun queueSessionDeletes(ids: Set<Long>) {
+        val ledger = runCatching { org.json.JSONObject(prefs.getString(KEY_UPLOAD_LEDGER, "{}") ?: "{}") }
+            .getOrDefault(org.json.JSONObject())
+        ids.forEach { ledger.remove(it.toString()) }
+        val pendientes = pendingSessionDeletes() + ids
+        prefs.edit()
+            .putString(KEY_UPLOAD_LEDGER, ledger.toString())
+            .putStringSet(KEY_PENDING_SESSION_DELETES, pendientes.map { it.toString() }.toSet())
+            .apply()
+    }
+
+    fun sessionDeleted(id: Long) {
+        val quedan = pendingSessionDeletes() - id
+        prefs.edit().putStringSet(KEY_PENDING_SESSION_DELETES, quedan.map { it.toString() }.toSet()).apply()
+    }
+
     /** Por training publicado, la huella de lo ultimo que se mando. Ver [PublishSync]. */
     fun publishLedger(): Map<String, Int> = runCatching {
         val o = org.json.JSONObject(prefs.getString(KEY_PUBLISH_LEDGER, "{}") ?: "{}")
@@ -313,6 +342,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         const val KEY_LUMBAR_REVISION = "lumbar_revision"
         const val KEY_NIKO_REVISION = "niko_revision"
         const val KEY_UPLOAD_LEDGER = "session_upload_ledger"
+        const val KEY_PENDING_SESSION_DELETES = "pending_session_deletes"
         const val KEY_PUBLISH_LEDGER = "publish_ledger"
         const val KEY_ATHLETE_SESSIONS = "athlete_sessions_json"
         const val KEY_ARCHIVED_UIDS = "archived_training_uids"

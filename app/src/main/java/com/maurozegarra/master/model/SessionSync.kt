@@ -47,6 +47,21 @@ object SessionSync {
         }
     }
 
+    /**
+     * De las sesiones que se acaban de borrar en este teléfono, las que hay que borrar
+     * también en el servidor (TD-149): las que están en el [ledger], porque solo esas
+     * llegaron a subir.
+     *
+     * Sin esto, el borrado se quedaba en el teléfono y la copia del servidor seguía viva: el
+     * 21-sep el coach le enseñó el app a NIKO en su teléfono, borró las dos sesiones de la
+     * demostración, y el asistente las leyó igual como entrenamientos de ella.
+     *
+     * Las que nunca subieron -de trainings no asignados, o de un teléfono sin perfil- no
+     * tienen nada que borrar allá, y preguntar por ellas sería ir a la red por nada.
+     */
+    fun toDelete(removed: Collection<Long>, ledger: Map<Long, Int>): Set<Long> =
+        removed.filterTo(mutableSetOf()) { it in ledger }
+
     data class Pending(val session: SessionLog, val trainingUid: String, val payload: String) {
         val fingerprint: Int get() = payload.hashCode()
     }

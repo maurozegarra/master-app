@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **94 / 149** hechos, 55 pendientes.
+Progreso: **94 / 151** hechos, 57 pendientes.
 
 ## Pendientes
 
@@ -25,8 +25,24 @@ RIESGO QUE QUEDA: quien conozca el id de perfil y el id de una sesion podria bor
 
 DESCARTADO el mismo dia: se sospecho que el telefono del coach solo bajaba sesiones al arrancar. No: runSync las baja en cada vuelta a primer plano. Fue un error de lectura del asistente, que imprimio las ultimas 6 de 7 sesiones de una lista ordenada de la mas nueva a la mas vieja.
 
+HECHO en codigo el 21-sep, pendiente del SQL y de probarlo en el telefono de NIKO (necesita release). Se decidio que vaciar todo el historial cuenta igual que borrar una por una: lo que el atleta ya no tiene no puede seguir contandole al coach. SessionSync.toDelete elige lo que llego a subir -lo que esta en el ledger-; WorkoutStore.queueSessionDeletes lo anota como pendiente y lo saca del ledger en la misma escritura, para que una sesion que vuelva con un respaldo suba otra vez; syncSessions manda los borrados ANTES de las subidas. AssignmentRepository.deleteSession llama a delete_session con la clave publica; si la funcion todavia no existe devuelve null y el borrado se queda pendiente hasta que exista. El SQL, en docs/supabase/td-149-delete-session.sql, borra ademas las tres sesiones a medias del 19-sep que ya no estan en el telefono de NIKO.
+
 ### Feature
 
+- [ ] **TD-151** El dolor se anota cuando pasa, no al terminar el training
+  - LO PIDIO el usuario el 21-sep-2026: el dolor al despertar, los minutos que tarda en aflojar y el dolor de antes se contestan en la pantalla final, despues de una hora de ejercicio, y se vuelve un ejercicio de memoria. "Mientras mas pronto registre el dolor, mejor": el de la manana apenas se despierta, y el alivio apenas pasa.
+
+LO QUE HAY HOY: painOnWaking y painFadeMin (TD-125) viven en SessionLog y se preguntan al final. painBefore se pregunta en la pantalla previa al player ("How is your back right now?"), pero el boton de play de la tarjeta se salta esa pantalla -onPlay = openPlayer + onStart-, asi que en la practica tambien se contesta al final, como "Pain before". painAfter se pregunta al final, que es su momento.
+
+PLAN PROPUESTO:
+(1) La manana sale de la sesion. Un registro por dia -fecha, dolor al despertar, hora a la que lo anoto, hora a la que aflojo- en su propio almacen, con respaldo. Se anota desde la lista de trainings, en una tarjeta bajo el calendario que solo aparece si algun training lleva tracksPain. Al despertar: el numero, un toque. Cuando afloja: un boton "It eased", y los minutos los calcula el app con las dos horas -no hay nada que recordar ni que contar-. Hecho, la tarjeta se reduce a una linea editable.
+(2) Los dias sin sesion tambien cuentan. Hoy un dia de descanso no deja dolor de la manana; con el registro por dia, si.
+(3) La sesion sigue llevando painOnWaking y painFadeMin, copiados del registro del dia al guardarse, para que el historial y lo que lee el coach no cambien de forma. En la pantalla final se ven ya contestados.
+(4) El dolor de antes, al arrancar de verdad: si el training lleva tracksPain y no se contesto en la pantalla previa, se pregunta en el player durante el primer ejercicio -la caminata-, en una franja que desaparece al contestar. Sin bloquear nada.
+
+EDGE CASES: se despierta, anota, y no entrena ese dia; entrena dos veces el mismo dia; anota el alivio pero no el despertar; lo anota pasada la medianoche; importar un respaldo sin registros diarios; NIKO no tiene tracksPain y no ve nada de esto.
+
+PROPUESTA DEL USUARIO, el mismo 21-sep, y hacia donde se inclina: una ALARMA propia del app en vez de la tarjeta en la lista. Suena al despertar y la pantalla de la alarma es la pregunta del dolor, asi que se contesta apenas abre los ojos, antes de moverse, que es justo lo que mide painOnWaking. Queda como propuesta, sin decidir. A pensar antes de empezar: permisos de alarma exacta (SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM desde Android 12-14) y de pantalla completa sobre la de bloqueo (USE_FULL_SCREEN_INTENT, restringido desde Android 14); si reemplaza a la alarma que ya usa o convive con ella; que hacer si la apaga sin contestar; y como se enlaza con el "It eased", que seguiria necesitando un sitio -la misma notificacion, que se queda puesta hasta que afloja, es un candidato-.
 - [ ] **TD-148** Estimar la duracion de un training que todavia nadie ha corrido
   - LO QUE QUEDO FLOJO de TD-040. La tarjeta usa la mediana de las sesiones reales, pero un training sin historial cae al calculo del motor, que se queda corto -unos 43 minutos frente a los 73 reales de LUMBAR-. Afecta a LUMBAR (short), a las rutinas de NIKO y a cualquiera nueva: dicen un numero bajo hasta que se entrenan una vez.
 
@@ -381,6 +397,15 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
   - TD-063 dejo el app recibiendo asignaciones, pero los archivos users.json y users/<id>.json se generaron A MANO desde un backup del dispositivo. Asi no es usable: cada cambio de asignacion exige que alguien edite JSON. Falta un publish-profiles.ps1 que lea los trainings de una fuente -el export del usuario, o docs/ si se decide tenerlos versionados-, cruce una tabla de asignaciones tipo docs/assignments.json ({ 'niko': ['<uid>', '<uid>'] }) y genere los archivos listos para publicar, con la misma mecanica que build-release.ps1. Ojo con dos cosas al escribirlo: el uid de cada training publicado tiene que ser ESTABLE entre publicaciones, porque es la clave con la que el dispositivo empareja y conserva el id local que enlaza el historial; y publicar una lista vacia para alguien le retira sus trainings asignados, asi que conviene que el script avise de cuantos quita antes de escribir. BAJA A OPCIONAL con TD-067: asignar pasa a hacerse desde el telefono contra Supabase, asi que este script deja de ser el camino y queda como herramienta alterna para cuando estes en la PC, y solo si despues de TD-067 sigue haciendo falta.
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
   - Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez.
+
+### UI
+
+- [ ] **TD-150** Los trainings archivados tambien se ordenan arrastrando
+  - LO PIDIO el usuario el 21-sep-2026: "los training archivados no permite ordenar arrastrando, deberia". Desde TD-138 solo se arrastran los visibles; los archivados se pintan con items() sin contentType reorderable, asi que el long-press no los toma.
+
+PLAN: (1) los archivados pasan a DraggableItem con su propio contentType, y Reorderable solo acepta como destino un item del MISMO contentType que el que se arrastra, para que un archivado no aterrice entre los visibles ni al reves -archivar sigue siendo el gesto de deslizar, no arrastrar-. (2) MasterViewModel.moveArchivedTraining(from, to), gemelo de moveVisibleTraining, con Archive.archivedIndices para traducir a posiciones reales. (3) Test en ArchiveTest de que mover dentro de los archivados no cambia el orden de los visibles.
+
+EDGE CASES: la fila Archived plegada no tiene nada que arrastrar; un solo archivado no tiene con quien cambiar; las pantallas que ya usan Reorderable (editor de training y de workout) tienen un solo contentType y no cambian.
 
 ## Hechos
 

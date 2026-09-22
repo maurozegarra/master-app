@@ -208,6 +208,33 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
     }
 
     /**
+     * Borra en el servidor una sesion que este telefono ya borro (TD-149). true si la borro,
+     * false si alla no estaba, null si fallo la red o la funcion no existe todavia.
+     *
+     * Por la misma razon que [uploadSession] va por una funcion y con la clave publica: el
+     * telefono del atleta no tiene cuenta, y la tabla no le deja borrar. delete_session solo
+     * sabe borrar UNA sesion de UN perfil (docs/supabase/td-149-delete-session.sql).
+     *
+     * Que la funcion falte da null y no false a proposito: el borrado se queda pendiente y
+     * sale solo en cuanto el SQL este corrido, en vez de darse por hecho sin haberlo hecho.
+     */
+    fun deleteSession(profileId: String, sessionId: Long): Boolean? {
+        val body = JSONObject()
+            .put("p_profile_id", profileId)
+            .put("p_session_id", sessionId)
+            .toString()
+        val res = runCatching {
+            Http.request("POST", "${Supabase.REST}rpc/delete_session", Supabase.headers(), body)
+        }.onFailure { Log.w(TAG, "no se pudo borrar la sesion $sessionId", it) }.getOrNull()
+            ?: return null
+        if (!res.ok) {
+            Log.w(TAG, "delete_session rechazo: HTTP ${res.code} ${res.body}")
+            return null
+        }
+        return res.body.trim() == "true"
+    }
+
+    /**
      * Las sesiones de todos los atletas, para el coach. Null si no hay sesion de
      * entrenador o fallo la red: sin sesion, la tabla ni siquiera deja leer.
      */
