@@ -4,22 +4,12 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **95 / 154** hechos, 59 pendientes.
+Progreso: **96 / 154** hechos, 58 pendientes.
 
 ## Pendientes
 
 ### Bug
 
-- [ ] **TD-154** Apagar el video es una preferencia del telefono, no del training
-  - LO REPORTO el usuario el 22-sep-2026, dos sintomas de la misma causa:
-(1) Apaga el video de un ejercicio y, cuando el coach sube una revision de la rutina, vuelve a salir.
-(2) En el telefono de NIKO no se puede apagar ni encender: el boton del player no aparece.
-
-CAUSA: la preferencia vive DENTRO del training (Exercise.showVideo). Las rutinas lumbares se reemplazan enteras al subir LUMBAR_REVISION, y el showVideo vuelve al true de la definicion. Y un training asignado no se puede tocar -la siguiente sincronizacion lo devolveria a como estaba-, asi que toggleRunningVideo y ToggleVideoButton lo excluyen a proposito, y NIKO se queda sin boton.
-
-PROPUESTA: sacarla del training, igual que el archivado (TD-138): un conjunto en este telefono, por uid del training + exerciseId, con los videos APAGADOS. Sobrevive a las revisiones porque el uid se conserva, no viaja al asignar -es de quien mira, no de quien disena- y deja el boton disponible tambien en los trainings asignados. El interruptor "Show it in this training" del editor escribe en el mismo sitio. Migracion: los showVideo=false que ya existan pasan al conjunto una vez.
-
-A SABER: con la clave por exerciseId, dos apariciones del mismo movimiento en un training -la caminata de entrada y la de salida- comparten la preferencia. Es el mismo video, asi que parece lo correcto.
 - [ ] **TD-149** Borrar una sesion en el telefono del atleta no la borra del servidor
   - LO QUE PASO, el 21-sep-2026: el coach le hizo a NIKO una demostracion del app en su telefono, con NIKO 1 y NIKO 2, y despues borro esas dos sesiones. Ya habian subido (TD-126) y el servidor no se entero del borrado: el telefono del coach las siguio bajando y el asistente las leyo como entrenamientos de ella -5 y 9 minutos, 'completos'-. Se quitaron a mano con un delete en el SQL Editor. Quedan en el servidor, por lo mismo, tres sesiones a medias del 19-sep (23:45-23:55) que ya no estan en su telefono.
 
@@ -435,6 +425,7 @@ EDGE CASES: la fila Archived plegada no tiene nada que arrastrar; un solo archiv
 
 ### Bug
 
+- [x] **TD-154** Apagar el video es una preferencia del telefono, no del training
 - [x] **TD-153** El lado del ejercicio se corta en el player: DERECHA sale HA
 - [x] **TD-075** Fix: el video del ejercicio pausa la musica (Spotify) al reproducirse
 - [x] **TD-015** Fix drag-reorder en lista de trainings
