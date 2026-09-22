@@ -23,7 +23,8 @@ class PlatesTest {
     fun `los pesos de la rutina lumbar se arman`() {
         // Puente sobre la barra de 6: 6, 21 y 36 kg.
         assertEquals(listOf(5.0, 2.5), Plates.perSide(15.0))
-        assertEquals(listOf(10.0, 5.0), Plates.perSide(30.0))
+        // 36 eran 10 + 5 por lado hasta el 22-sep; desde que hay un par de 15, es un disco.
+        assertEquals(listOf(15.0), Plates.perSide(30.0))
     }
 
     @Test
@@ -35,16 +36,26 @@ class PlatesTest {
 
     @Test
     fun `solo hay dos discos de cada uno por lado`() {
-        // 45 por lado pediria 20 + 20 + 5: dos de 20 si caben. 85 por lado no.
+        // 45 por lado pediria 20 + 20 + 5: dos de 20 si caben. 92.5 por lado es el tope.
         assertEquals(listOf(20.0, 20.0, 5.0), Plates.perSide(90.0))
-        assertNull(Plates.perSide(170.0))
+        assertNull(Plates.perSide(200.0))
+    }
+
+    @Test
+    fun `del disco de 15 hay uno por lado, no dos`() {
+        // Se compro un par el 22-sep-2026, no dos pares: 30 por lado no son 15 + 15.
+        assertEquals(listOf(20.0, 10.0), Plates.perSide(60.0))
+        // Y donde si entra, ahorra discos: 35 por lado son dos y no tres.
+        assertEquals(listOf(20.0, 15.0), Plates.perSide(70.0))
     }
 
     @Test
     fun `cualquier multiplo de 2_5 hasta el maximo se puede armar`() {
-        // Es lo que dice la tabla de saltos de docs/equipo.md.
+        // Es lo que dice la tabla de saltos de docs/equipo.md. Barre TODO el rango porque el
+        // voraz dejo de estar garantizado por las denominaciones al entrar el disco de 15:
+        // si en algun punto no reparte, tiene que saltar aqui y no en una sesion.
         var total = 0.0
-        while (total <= 155.0) {
+        while (total <= 185.0) {
             val lado = Plates.perSide(total)
             assertTrue("$total no se pudo armar", lado != null)
             assertEquals(total / 2.0, lado!!.sum(), 1e-6)

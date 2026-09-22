@@ -42,9 +42,14 @@ muerto rumano de NIKO.
 | 2.5 | 4 | 2 |
 | 5 | 4 | 2 |
 | 10 | 4 | 2 |
+| 15 | 2 | 1 |
 | 20 | 4 | 2 |
 
-**155 kg en discos.** Hasta **77.5 kg por lado**.
+**185 kg en discos.** Hasta **92.5 kg por lado**.
+
+Los de **15 son un par, comprados el 22-sep-2026**: uno por lado, no dos. Los pidio el
+usuario para armar mas rapido, no para llegar mas arriba: un 35 por lado pasa de tres discos
+(20 + 10 + 5) a dos (20 + 15).
 
 ### Mancuernas — fijas, cabeza hexagonal, pares
 
@@ -101,8 +106,8 @@ Sobre la barra de 6 kg, que es la de la rutina lumbar:
 | 7.5 (5 + 2.5) | **21** |
 | 10 | 26 |
 | 12.5 (10 + 2.5) | 31 |
-| 15 (10 + 5) | **36** |
-| 17.5 (10 + 5 + 2.5) | 41 |
+| 15 | **36** |
+| 17.5 (15 + 2.5) | 41 |
 | 20 | 46 |
 
 Entre esos hay escalones de 2.5 (8.5, 13.5, 18.5…) si alguna vez hace falta afinar.

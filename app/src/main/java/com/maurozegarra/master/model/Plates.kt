@@ -10,15 +10,23 @@ package com.maurozegarra.master.model
  * El app ya sabe la barra y ya sabe los discos: la cuenta la hace él.
  *
  * El inventario es el de `docs/equipo.md`, el mismo para los dos atletas: cuatro discos de
- * cada denominación, o sea **dos por lado**.
+ * cada denominación —**dos por lado**— salvo los de 15, que son un par: **uno por lado**.
  */
 object Plates {
 
     /** Los discos de la casa, de mayor a menor, en kg. */
-    val HOME = listOf(20.0, 10.0, 5.0, 2.5, 1.25)
+    val HOME = listOf(20.0, 15.0, 10.0, 5.0, 2.5, 1.25)
 
-    /** Cuántos de cada uno caben por lado: hay cuatro de cada denominación. */
+    /** Cuántos de cada uno caben por lado: cuatro de cada denominación, dos por lado. */
     const val PER_SIDE = 2
+
+    /**
+     * Las excepciones a [PER_SIDE]. De 15 hay un solo par (22-sep-2026), o sea uno por lado.
+     *
+     * Van aquí y no en el cálculo porque el inventario crece de a poco y lo que cambia es
+     * esta tabla, no el algoritmo.
+     */
+    val PER_SIDE_LIMIT = mapOf(15.0 to 1)
 
     /**
      * Los discos de UN lado para [platesTotal] kg de disco entre los dos lados, de mayor a
@@ -26,8 +34,10 @@ object Plates {
      * [available] -un número que no reparte en discos existentes-, que para el player es
      * un aviso y para quien diseña, un error de la rutina.
      *
-     * Voraz de mayor a menor: con estas denominaciones (cada una es múltiplo de la
-     * siguiente o la dobla) el voraz da siempre la combinación de menos discos.
+     * Voraz de mayor a menor. Con el disco de 15 en medio ya no es cierto que cada
+     * denominación sea múltiplo de la siguiente, que era lo que garantizaba el voraz sobre
+     * el papel; lo que lo garantiza ahora es el test, que barre TODO el rango de 1.25 en
+     * 1.25 y exige que no quede ningún hueco.
      */
     fun perSide(platesTotal: Double, available: List<Double> = HOME, perSide: Int = PER_SIDE): List<Double>? {
         if (platesTotal < 0.0) return null
@@ -35,7 +45,8 @@ object Plates {
         val out = mutableListOf<Double>()
         for (disco in available.sortedDescending()) {
             var usados = 0
-            while (usados < perSide && resto >= disco - EPS) {
+            val tope = minOf(perSide, PER_SIDE_LIMIT[disco] ?: perSide)
+            while (usados < tope && resto >= disco - EPS) {
                 out.add(disco)
                 resto -= disco
                 usados++
