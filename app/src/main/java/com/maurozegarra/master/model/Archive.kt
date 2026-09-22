@@ -34,4 +34,20 @@ object Archive {
      */
     fun visibleIndices(trainings: List<Training>, archived: Set<String>): List<Int> =
         trainings.indices.filterNot { isArchived(trainings[it], archived) }
+
+    /** Lo mismo para lo archivado, que desde TD-150 también se ordena arrastrando. */
+    fun archivedIndices(trainings: List<Training>, archived: Set<String>): List<Int> =
+        trainings.indices.filter { isArchived(trainings[it], archived) }
+
+    /**
+     * Mueve el training de la posición real [from] a [to], como lo hace la lista.
+     *
+     * Solo cambia de sitio uno, así que el orden relativo de todos los demás se conserva:
+     * mover dentro de lo archivado no toca el orden de lo visible, aunque en la lista
+     * completa estén intercalados.
+     */
+    fun move(trainings: List<Training>, from: Int, to: Int): List<Training> {
+        if (from == to || from !in trainings.indices || to !in trainings.indices) return trainings
+        return trainings.toMutableList().apply { add(to, removeAt(from)) }
+    }
 }

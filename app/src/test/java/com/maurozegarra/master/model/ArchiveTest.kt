@@ -50,4 +50,26 @@ class ArchiveTest {
         )
         assertEquals(listOf(0, 3), Archive.visibleIndices(lista, archivados))
     }
+
+    @Test
+    fun `ordenar lo archivado no mueve lo visible`() {
+        // TD-150: el 21-sep pidio poder ordenar tambien los archivados. En la lista real van
+        // intercalados con los visibles; mover uno archivado no puede empujar a ninguno de
+        // los que se ven.
+        val lista = listOf(
+            Training(id = 1L, uid = "uid-lumbar", name = "LUMBAR"),
+            Training(id = 2L, uid = "uid-bad-day", name = "LUMBAR (bad day)"),
+            Training(id = 3L, uid = "uid-short", name = "LUMBAR (short)"),
+            Training(id = 4L, uid = "uid-prueba", name = "On Your Marks"),
+        )
+        val archivados = setOf("uid-bad-day", "uid-prueba")
+        val reales = Archive.archivedIndices(lista, archivados)
+        assertEquals(listOf(1, 3), reales)
+
+        // El segundo archivado pasa a primero.
+        val movida = Archive.move(lista, reales[1], reales[0])
+
+        assertEquals(listOf("On Your Marks", "LUMBAR (bad day)"), Archive.archived(movida, archivados).map { it.name })
+        assertEquals(listOf("LUMBAR", "LUMBAR (short)"), Archive.visible(movida, archivados).map { it.name })
+    }
 }

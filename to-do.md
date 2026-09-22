@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **96 / 154** hechos, 58 pendientes.
+Progreso: **97 / 154** hechos, 57 pendientes.
 
 ## Pendientes
 
@@ -408,15 +408,6 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 - [ ] **TD-033** Arquitectura: Repository interfaces + MVI + Navigation + Testing
   - Fases 2-5 del plan en docs/plan-arquitectura.md. (2) Repository interfaces: TrainingRepository, SessionRepository, SettingsRepository como interfaces, WorkoutStore y SettingsStore las implementan, ViewModels reciben interfaces por constructor. (3) MVI: MasterState/MasterAction/MasterEvent, StateFlow + Channel, onAction() en vez de metodos sueltos, composables reciben state + onAction. (4) Compose Navigation type-safe con SavedStateHandle, migrar flags de navegacion del ViewModel a rutas. (5) Testing con Turbine + fakes: FakeTrainingRepository, FakeSessionRepository, FakeSettingsRepository, tests del ViewModel. Cada fase deja la app funcional y se ejecuta una a la vez.
 
-### UI
-
-- [ ] **TD-150** Los trainings archivados tambien se ordenan arrastrando
-  - LO PIDIO el usuario el 21-sep-2026: "los training archivados no permite ordenar arrastrando, deberia". Desde TD-138 solo se arrastran los visibles; los archivados se pintan con items() sin contentType reorderable, asi que el long-press no los toma.
-
-PLAN: (1) los archivados pasan a DraggableItem con su propio contentType, y Reorderable solo acepta como destino un item del MISMO contentType que el que se arrastra, para que un archivado no aterrice entre los visibles ni al reves -archivar sigue siendo el gesto de deslizar, no arrastrar-. (2) MasterViewModel.moveArchivedTraining(from, to), gemelo de moveVisibleTraining, con Archive.archivedIndices para traducir a posiciones reales. (3) Test en ArchiveTest de que mover dentro de los archivados no cambia el orden de los visibles.
-
-EDGE CASES: la fila Archived plegada no tiene nada que arrastrar; un solo archivado no tiene con quien cambiar; las pantallas que ya usan Reorderable (editor de training y de workout) tienen un solo contentType y no cambian.
-
 ## Hechos
 
 ### Branding
@@ -538,6 +529,7 @@ EDGE CASES: la fila Archived plegada no tiene nada que arrastrar; un solo archiv
 
 ### UI
 
+- [x] **TD-150** Los trainings archivados tambien se ordenan arrastrando
 - [x] **TD-109** La escala de dolor describe cada numero, no solo los extremos
 - [x] **TD-107** El centro del player cede sitio a la nota: contador junto a las reps y tarjeta de peso translucida
 - [x] **TD-074** Nombre del ejercicio en el player: dos lineas como mucho, sin cortar palabras y con alto fijo

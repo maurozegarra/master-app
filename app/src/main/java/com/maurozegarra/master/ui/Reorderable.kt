@@ -35,6 +35,14 @@ import kotlinx.coroutines.launch
  */
 const val ReorderableContentType = "reorderable"
 
+/**
+ * Un grupo aparte de arrastrables en la misma lista (TD-150): sus items se arrastran entre
+ * ellos y no aterrizan en los de otro grupo. Los trainings archivados se ordenan entre
+ * ellos, pero soltar uno entre los visibles seria desarchivarlo por un gesto que no es el
+ * de desarchivar.
+ */
+fun reorderableGroup(name: String): String = "$ReorderableContentType:$name"
+
 @Composable
 fun rememberDragDropState(
     lazyListState: LazyListState,
@@ -75,8 +83,10 @@ class DragDropState internal constructor(
     private val draggingItemLayoutInfo: LazyListItemInfo?
         get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == draggingItemIndex }
 
-    /** Sólo se consideran arrastrables los items marcados con [ReorderableContentType]. */
-    private fun LazyListItemInfo.isReorderable(): Boolean = contentType == ReorderableContentType
+    /** Sólo se consideran arrastrables los items marcados con [ReorderableContentType] o con
+     *  un [reorderableGroup]. */
+    private fun LazyListItemInfo.isReorderable(): Boolean =
+        (contentType as? String)?.let { it == ReorderableContentType || it.startsWith("$ReorderableContentType:") } == true
 
     internal fun onDragStart(offset: Offset) {
         state.layoutInfo.visibleItemsInfo
@@ -105,6 +115,8 @@ class DragDropState internal constructor(
 
         val targetItem = state.layoutInfo.visibleItemsInfo.find { item ->
             item.isReorderable() &&
+                // Solo dentro del mismo grupo (TD-150).
+                item.contentType == draggingItem.contentType &&
                 middleOffset.toInt() in item.offset..(item.offset + item.size) &&
                 draggingItem.index != item.index
         }

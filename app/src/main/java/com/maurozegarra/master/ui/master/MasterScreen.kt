@@ -84,6 +84,7 @@ import com.maurozegarra.master.ui.rememberPullToSyncState
 import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.settings.syncMessage
 import com.maurozegarra.master.ui.ReorderableContentType
+import com.maurozegarra.master.ui.reorderableGroup
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
 import com.maurozegarra.master.ui.theme.Dims
@@ -189,10 +190,20 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             }
         } else {
             val listState = rememberLazyListState()
-            // Lo que se arrastra son posiciones de lo VISIBLE; el ViewModel las traduce al
-            // orden real, donde lo archivado sigue estando (TD-138).
+            // Lo que se arrastra son posiciones de la LISTA; el ViewModel las traduce al orden
+            // real, donde lo visible y lo archivado van intercalados (TD-138, TD-150).
+            //
+            // Posiciones: 0 el calendario, luego los visibles, la fila "Archived" y los
+            // archivados. Reorderable no deja cruzar de un grupo al otro, asi que from y to
+            // caen siempre del mismo lado. El tamano se lee aqui dentro y no fuera: este
+            // lambda se recuerda una vez y un valor capturado se quedaria viejo.
             val dragDropState = rememberDragDropState(listState) { from, to ->
-                vm.moveVisibleTraining(from - 1, to - 1)
+                val inicioArchivados = 1 + vm.visibleTrainings.size + 1
+                if (from >= inicioArchivados) {
+                    vm.moveArchivedTraining(from - inicioArchivados, to - inicioArchivados)
+                } else {
+                    vm.moveVisibleTraining(from - 1, to - 1)
+                }
             }
             val visibles = vm.visibleTrainings
             val archivados = vm.archivedTrainings
@@ -268,7 +279,12 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                         // Clave distinta de la de la lista visible: al archivar, la tarjeta
                         // se desecha y vuelve a nacer aqui, sin arrastrar el desplazamiento
                         // del gesto que la trajo.
-                        items(archivados, key = { "archived_${it.id}" }) { tr ->
+                        itemsIndexed(
+                            archivados,
+                            key = { _, it -> "archived_${it.id}" },
+                            contentType = { _, _ -> ARCHIVED_GROUP },
+                        ) { index, tr ->
+                          DraggableItem(dragDropState, 1 + visibles.size + 1 + index) { _ ->
                             TrainingCard(
                                 training = tr,
                                 accent = accent,
@@ -294,6 +310,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                                 isArchived = true,
                                 minutos = TrainingDuration.minutes(tr, vm.sessions),
                             )
+                          }
                         }
                     }
                 }
@@ -774,3 +791,6 @@ private fun MiniPlayer(vm: MasterViewModel, accent: Color, modifier: Modifier = 
         }
     }
 }
+
+/** Los archivados se ordenan entre ellos, sin cruzar a los visibles (TD-150). */
+private val ARCHIVED_GROUP = reorderableGroup("archived")

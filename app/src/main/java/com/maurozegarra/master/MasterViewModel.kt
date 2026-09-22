@@ -1615,6 +1615,8 @@ class MasterViewModel(
     }
 
     fun moveTraining(from: Int, to: Int) {
+        // En sitio y no con Archive.move: vaciar y rellenar la lista a mitad de un arrastre
+        // recompone todas las tarjetas. Es la misma operacion, y ArchiveTest la cubre alli.
         if (from == to || from !in trainings.indices || to !in trainings.indices) return
         trainings.add(to, trainings.removeAt(from))
         persist()
@@ -1626,6 +1628,12 @@ class MasterViewModel(
      */
     fun moveVisibleTraining(from: Int, to: Int) {
         val reales = Archive.visibleIndices(trainings, archivedUids)
+        moveTraining(reales.getOrNull(from) ?: return, reales.getOrNull(to) ?: return)
+    }
+
+    /** Igual, dentro de lo archivado (TD-150). */
+    fun moveArchivedTraining(from: Int, to: Int) {
+        val reales = Archive.archivedIndices(trainings, archivedUids)
         moveTraining(reales.getOrNull(from) ?: return, reales.getOrNull(to) ?: return)
     }
 
