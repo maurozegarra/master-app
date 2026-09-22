@@ -58,6 +58,11 @@ object ExerciseCatalog {
         Triple("ex_shoulder_press", "Press de hombro", "Shoulder Press"),
         Triple("ex_assisted_dips", "Fondos asistidos", "Assisted Dips"),
         Triple("ex_pushups", "Flexiones", "Push-ups"),
+        // Traccion y agarre para el clinch (NIKO 3).
+        Triple("ex_inverted_row", "Remo invertido", "Inverted Row"),
+        Triple("ex_dumbbell_row", "Remo con mancuerna", "Dumbbell Row"),
+        Triple("ex_farmers_walk", "Paseo del granjero", "Farmer's Walk"),
+        Triple("ex_dead_hang", "Colgarse de la barra", "Dead Hang"),
         // Friki Niki extras
         Triple("ex_front_side_stretch", "Estiramiento frente/lateral", "Front/Side Stretch"),
         Triple("ex_bulgarian_split_squat", "Búlgaras", "Bulgarian Split Squat"),
@@ -70,9 +75,6 @@ object ExerciseCatalog {
         Triple("ex_walk", "Caminata", "Walk"),
         Triple("ex_hip_hinge", "Bisagra de cadera", "Hip Hinge"),
         Triple("ex_curl_up", "Curl-up", "Curl-up"),
-        // Izquierda y derecha son dos entradas y no una con nota "cada lado" porque el
-        // historial agrupa por ejercicio dentro del workout: con un solo id, las series
-        // de un lado pisarian las del otro y se perderia la mitad del registro.
         // Un solo movimiento, con los lados declarados en el ejercicio (TD-147). Eran dos
         // entradas clonadas porque el modelo no sabia lo que era un lado; ahora si.
         Triple("ex_side_plank", "Plancha lateral", "Side Plank"),

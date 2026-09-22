@@ -622,11 +622,12 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 7
+    const val NIKO_REVISION = 8
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
     const val NIKO_MUAY_THAI_ID = 960002L
+    const val NIKO_UPPER_ID = 960003L
 
     /**
      * Los dias de NIKO que ya existen, en orden (ver docs/niko.md).
@@ -639,6 +640,7 @@ object MasterDefaults {
     fun nikoTrainings(lang: String): List<Training> = listOf(
         nikoGluteHeavy(lang),
         nikoMuayThai(lang),
+        nikoUpperBody(lang),
     )
 
     /**
@@ -799,6 +801,79 @@ object MasterDefaults {
     }
 
     /**
+     * NIKO 3 · Tren superior: traccion para el clinch, que es el hueco mas grande de su
+     * rutina anterior (ver docs/niko.md).
+     *
+     * En el clinch gana quien jala, y ella casi no jalaba: su rutina era de piernas y de
+     * golpear. Por eso la traccion va PRIMERO, con los brazos frescos, y lleva mas series
+     * que el empuje.
+     *
+     * LAS CARGAS SON UN PUNTO DE PARTIDA: no se sabe cuanto mueve ella con el tren superior.
+     * Van conservadoras y se ajustan con el feedback de esta primera sesion.
+     *
+     * EL PASEO DEL GRANJERO VA POR VUELTAS Y NO POR TIEMPO, aunque el plan decia 3 x 40 s:
+     * una serie por tiempo no guarda el peso ni pregunta si fue ligero, y lo unico que se
+     * quiere saber de un carry es cuanto peso aguanta. Tres vueltas del pasillo son 36 m,
+     * unos 40 s caminando. Es el mismo arreglo que el suitcase carry de la lumbar (TD-095).
+     */
+    fun nikoUpperBody(lang: String): Training {
+        val b = NikoBlocks(lang, seqStart = 960300L)
+        val now = System.currentTimeMillis()
+        return Training(
+            id = NIKO_UPPER_ID,
+            name = "NIKO 3 · Tren superior",
+            workouts = listOf(
+                b.warmup(),
+                Workout(
+                    id = b.id(),
+                    name = "Tracción",
+                    exercises = listOf(
+                        b.ex("ex_inverted_row", "Barra del rack a la altura de la cadera. Pecho a la barra, cuerpo recto", 8, sets = 4, rest = 90),
+                        b.ex(
+                            "ex_dumbbell_row", "Hacia la cadera, codo pegado. El torso no gira", 10, rest = 60,
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 7.5, 10.0, 10.0),
+                        ).copy(sides = listOf("Izquierda", "Derecha")),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Empuje",
+                    exercises = listOf(
+                        b.ex("ex_pushups", "1 s abajo, sin apoyarte. Si no salen, rodillas al piso", 15, sets = 3, rest = 60),
+                        b.ex(
+                            "ex_shoulder_press", "De pie. La espalda baja no se arquea", 10, rest = 60,
+                            weightType = WeightType.DUMBBELL, weights = listOf(4.0, 5.0, 5.0),
+                        ),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Agarre",
+                    exercises = listOf(
+                        b.ex(
+                            "ex_farmers_walk", "3 vueltas del pasillo, ida y vuelta: 36 m. Hombros atrás", 3, rest = 60,
+                            weightType = WeightType.DUMBBELL, weights = listOf(10.0, 10.0, 10.0),
+                        ),
+                        // 15 s de preparacion y no 10: hay que subir al cajon para llegar. La
+                        // barra esta a 2.3 m y ella mide 1.55.
+                        b.ex("ex_dead_hang", "Sube al cajón. Hombros lejos de las orejas", 25, sets = 3, rest = 60, prep = 15, mode = WorkMode.TIME),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Cuello",
+                    exercises = listOf(
+                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta", 20, sets = 1, rest = 15, mode = WorkMode.TIME)
+                            .copy(sides = listOf("Adelante", "Atrás", "Derecha", "Izquierda")),
+                    ),
+                ),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
      * Lo que comparten los dias de NIKO: el constructor de ejercicios y el calentamiento.
      *
      * [seqStart] separa los ids de un dia y del otro, igual que en [LumbarBlocks].
@@ -852,7 +927,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 7
+    const val CATALOG_INSTRUCTIONS_REVISION = 8
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -1019,6 +1094,64 @@ object MasterDefaults {
                 "Baja saltando hacia atrás, igual de suave, y encadena el siguiente.",
                 "Ligera y rápida: el piso quema. No aterrices con el talón ni con la pierna rígida.",
                 "Si lo sientes en las rodillas, quédate en el piso saltando dentro y fuera del hueco, con los pies rápidos.",
+            ),
+        ),
+        "ex_inverted_row" to ExerciseMedia(
+            listOf(
+                "Una barra en el rack, a la altura de la cadera. Échate debajo y tómala con las manos un poco más abiertas que los hombros.",
+                "Talones en el piso y el cuerpo recto de la cabeza a los pies, como en una plancha.",
+                "Jala el PECHO hacia la barra juntando los omóplatos. Los codos van hacia atrás, pegados al cuerpo.",
+                "Un segundo arriba y baja lento, hasta estirar los brazos.",
+                "La cadera no se cae. Si se hunde, termina la serie ahí.",
+                "¿Muy difícil? Dobla las rodillas y apoya los pies planos. ¿Muy fácil? Baja la barra un agujero.",
+            ),
+        ),
+        "ex_dumbbell_row" to ExerciseMedia(
+            listOf(
+                "Una mano y la rodilla del mismo lado sobre la banca. La otra pierna en el piso, un poco atrás.",
+                "Espalda recta, paralela al piso. La mancuerna cuelga con el brazo estirado.",
+                "Jala la mancuerna hacia la CADERA, no hacia el hombro: el codo pasa pegado al cuerpo.",
+                "Arriba, aprieta la espalda un segundo. Baja lento.",
+                "El torso no gira para subir el peso. Si gira, es demasiado peso.",
+                "Todas las series de un lado y después las del otro: el app te dice cuál toca.",
+            ),
+        ),
+        "ex_pushups" to ExerciseMedia(
+            listOf(
+                "Manos en el piso, un poco más abiertas que los hombros. Cuerpo recto de la cabeza a los talones.",
+                "Aprieta el abdomen y los glúteos: la cadera no se cae ni se levanta.",
+                "Baja hasta que el pecho casi toque el piso, con los codos hacia atrás en diagonal, no abiertos a los costados.",
+                "Un segundo abajo sin apoyarte, y empuja para subir.",
+                "Si no llegas a las repeticiones, apoya las rodillas y sigue con el cuerpo recto desde las rodillas.",
+            ),
+        ),
+        "ex_shoulder_press" to ExerciseMedia(
+            listOf(
+                "De pie, con los pies al ancho de la cadera.",
+                "Una mancuerna en cada mano a la altura de los hombros, las palmas al frente y los codos debajo de las muñecas.",
+                "Empuja hacia arriba hasta estirar los brazos, sin chocar las mancuernas.",
+                "Aprieta el abdomen y los glúteos: la espalda baja no se arquea para ayudar.",
+                "Baja lento hasta los hombros.",
+                "Si pincha el hombro, gira las palmas para que se miren entre ellas.",
+            ),
+        ),
+        "ex_farmers_walk" to ExerciseMedia(
+            listOf(
+                "Una mancuerna en cada mano, a los costados, con los brazos estirados.",
+                "Derecho: hombros atrás y abajo, pecho arriba, mirada al frente.",
+                "Camina con pasos cortos y firmes, sin que las mancuernas se balanceen.",
+                "Cada serie son 3 vueltas del pasillo, ida y vuelta: 36 metros.",
+                "Si el agarre se abre, para: deja las mancuernas en el piso, no las sueltes de golpe.",
+            ),
+        ),
+        "ex_dead_hang" to ExerciseMedia(
+            listOf(
+                "Sube al cajón para llegar a la barra. Tómala con las palmas al frente y las manos al ancho de los hombros.",
+                "Saca los pies del cajón y deja el cuerpo colgando.",
+                "Hombros activos: un poco hacia abajo, lejos de las orejas. No te quedes colgando de las articulaciones.",
+                "Respira normal y aguanta.",
+                "Para bajar, vuelve a apoyar los pies en el cajón. No saltes al piso desde la barra.",
+                "Si no llegas al tiempo, apoya un poco los pies en el cajón y termina así.",
             ),
         ),
     )
