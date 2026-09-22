@@ -5,6 +5,33 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-21 — novena sesión: la primera corta, y la primera que empieza en cero
+
+**LUMBAR (short)**, de 05:12 a 05:57, **44 minutos**, completa. Lunes de oficina: es el día
+para el que se armó. Dolor **0 → 0**, la primera vez que arranca en cero. Sin irradiación.
+
+**El dolor al despertar sigue bajando:** 4 el sábado (se iba en 10 min), 2 el domingo (en
+15), **2 hoy, y se fue en 10**. Tercer dato de la serie.
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| McGill | 6 aguantes de 10 s por ejercicio | completos |
+| Side Plank | **6 izquierda · 20 s de cambio · 6 derecha** | completos |
+| Suitcase Carry | 12.5 · 15 · 17.5 | **las tres bien** |
+
+- **La plancha fundida funcionó en la primera sesión real:** un solo ejercicio, los dos
+  lados en el reloj y en el historial, cada uno con sus seis aguantes.
+- **El carry consolida:** segunda sesión seguida con las tres series "bien" al mismo peso. Se
+  queda; el corto y el completo lo comparten, así que el martes sale igual.
+- **La estimación se quedó corta:** se le dijeron unos 32 minutos y fueron 44, la misma
+  brecha que en el completo (el motor no ve lo que pasa entre ejercicios). Desde hoy la
+  tarjeta muestra 44, porque ya sale de su propia sesión (TD-040).
+
+**Sin cambios en la rutina.** Mañana martes toca el completo, con el puente en 16 / 26 /
+38.5, como quedó el domingo.
+
+---
+
 ## 2026-09-20 — octava sesion: los pesos aterrizan, y la semana se parte en dos
 
 **LUMBAR**, 78 minutos, completa. Dolor 1 -> **0**, tercera sesion seguida terminando en cero.
