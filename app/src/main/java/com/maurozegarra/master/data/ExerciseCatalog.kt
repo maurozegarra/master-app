@@ -43,6 +43,9 @@ object ExerciseCatalog {
         Triple("ex_romanian_deadlift", "Peso muerto rumano", "Romanian Deadlift"),
         Triple("ex_hip_abduction", "Abducción de cadera", "Hip Abduction"),
         Triple("ex_step_up", "Subida al cajón", "Step-Up"),
+        // Gluteo a una pierna (NIKO 4).
+        Triple("ex_single_leg_hip_thrust", "Empuje de cadera a una pierna", "Single-Leg Hip Thrust"),
+        Triple("ex_single_leg_deadlift", "Peso muerto a una pierna", "Single-Leg Deadlift"),
         Triple("ex_neck_iso", "Cuello isométrico", "Neck Isometric"),
         // Muay Thai y core rotacional (NIKO 2).
         Triple("ex_heavy_bag", "Saco", "Heavy Bag"),

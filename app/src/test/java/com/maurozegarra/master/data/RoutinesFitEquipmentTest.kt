@@ -57,7 +57,9 @@ class RoutinesFitEquipmentTest {
         // no revisaria porque solo mira barras y mancuernas. TOTAL es para maquinas -la
         // pantorrillera, la prensa-, donde no hay discos por lado que calcular. Si un
         // ejercicio de estas rutinas lo usa, tiene que estar en esta lista a conciencia.
-        val maquinas = emptySet<String>()
+        // La pantorrillera es de discos y no tiene lados: lo que se carga es lo que dice la
+        // maquina, asi que TOTAL es lo correcto (NIKO 4, 22-sep).
+        val maquinas = setOf("ex_seated_calf")
         rutinas.forEach { t ->
             t.workouts.flatMap { it.exercises }.filter { it.weightType == WeightType.TOTAL }.forEach { e ->
                 assertTrue("${t.name} / ${e.name} va en kilos totales: con barra o mancuerna no se puede saber que cargar", e.exerciseId in maquinas)

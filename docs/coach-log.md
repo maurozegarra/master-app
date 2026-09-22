@@ -5,6 +5,46 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-22 — décima sesión: pide más peso en todo, y aparece el lado flojo
+
+**LUMBAR** completo, de 07:26 a 08:53, **86 minutos**. Dolor **0 → 0**, sin irradiación, y
+tercer día seguido empezando en cero. Al despertar **2, se fue en 15 minutos**.
+
+**Marcó ligeras ocho de las nueve series con peso.** La única "bien" fue el tercer viaje del
+carry, con 17.5, que ya lo había marcado así el domingo.
+
+| | Hoy | Su respuesta | Revisión 13 |
+|---|---|---|---|
+| Glute Bridge | 16 · 26 · 38.5 | las tres ligeras | **21 · 31 · 41** |
+| Suitcase Carry | 12.5 · 15 · 17.5 | ligera · ligera · **bien** | **15 · 17.5 · 20** |
+| Box Squat | 15 · 17.5 · 20 | las tres ligeras | **17.5 · 20 · 22.5** |
+
+**El puente vuelve a 41 y no pasa de ahí.** El domingo 41 le pareció pesado y bajó a 38.5;
+hoy 38.5 salió ligero. En vez de seguir subiendo, la rampa se acerca por abajo —21 y 31— y
+la cima se queda en el único número que ya dijo que le costaba. Dos sesiones seguidas de
+"bien" ahí serán la señal para pasar de 41.
+
+### Lo que dice su nota, que vale más que los kilos
+
+*"Side plank mayor esfuerzo en izquierda, carry el agarre izquierdo mayor esfuerzo."*
+
+Dos ejercicios distintos apuntando al mismo lado. Es el primer dato de asimetría desde que
+la plancha lateral registra los lados por separado (TD-147), y llega tres días después de
+partirla. De momento **no se cambia nada**: los dos lados siguen con el mismo trabajo, que es
+como se cierra una diferencia, y lo que hay que ver es si el izquierdo deja de costar. Si en
+dos semanas sigue igual, entra una serie extra de ese lado.
+
+### El inventario y lo que no se puede medir
+
+- **Compró un par de discos de 15 kg**, para armar más rápido: un 35 por lado pasa de tres
+  discos a dos. Están en `equipo.md` y en el código, con su tope de uno por lado.
+- **Los ejercicios sin peso no preguntan nada** (TD-152). Hoy NIKO hizo remo invertido,
+  flexiones y colgarse de la barra, y de esos tres no queda ningún dato: él vio que el remo
+  le costó y las flexiones no, pero eso no está en ninguna parte. Sin eso, un ejercicio con
+  el peso del cuerpo no tiene cómo progresar.
+
+---
+
 ## 2026-09-21 — novena sesión: la primera corta, y la primera que empieza en cero
 
 **LUMBAR (short)**, de 05:12 a 05:57, **44 minutos**, completa. Lunes de oficina: es el día

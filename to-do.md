@@ -4,12 +4,30 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **94 / 151** hechos, 57 pendientes.
+Progreso: **94 / 154** hechos, 60 pendientes.
 
 ## Pendientes
 
 ### Bug
 
+- [ ] **TD-154** Apagar el video es una preferencia del telefono, no del training
+  - LO REPORTO el usuario el 22-sep-2026, dos sintomas de la misma causa:
+(1) Apaga el video de un ejercicio y, cuando el coach sube una revision de la rutina, vuelve a salir.
+(2) En el telefono de NIKO no se puede apagar ni encender: el boton del player no aparece.
+
+CAUSA: la preferencia vive DENTRO del training (Exercise.showVideo). Las rutinas lumbares se reemplazan enteras al subir LUMBAR_REVISION, y el showVideo vuelve al true de la definicion. Y un training asignado no se puede tocar -la siguiente sincronizacion lo devolveria a como estaba-, asi que toggleRunningVideo y ToggleVideoButton lo excluyen a proposito, y NIKO se queda sin boton.
+
+PROPUESTA: sacarla del training, igual que el archivado (TD-138): un conjunto en este telefono, por uid del training + exerciseId, con los videos APAGADOS. Sobrevive a las revisiones porque el uid se conserva, no viaja al asignar -es de quien mira, no de quien disena- y deja el boton disponible tambien en los trainings asignados. El interruptor "Show it in this training" del editor escribe en el mismo sitio. Migracion: los showVideo=false que ya existan pasan al conjunto una vez.
+
+A SABER: con la clave por exerciseId, dos apariciones del mismo movimiento en un training -la caminata de entrada y la de salida- comparten la preferencia. Es el mismo video, asi que parece lo correcto.
+- [ ] **TD-153** El lado del ejercicio se corta en el player: DERECHA sale HA
+  - LO REPORTO el usuario el 22-sep-2026: en el telefono de NIKO, DERECHA e IZQUIERDA salen como HA y DA, y no se distingue cual toca. Le afecta bastante: el cuello son cuatro direcciones y la plancha, el remo y los tres de pierna de NIKO 4 van por lados.
+
+CAUSA: el lado va colgado a la IZQUIERDA del numero grande (BigReadout, TD-147), desplazado por su propio ancho. Con un reloj ancho como 00:20 y un texto largo como "Derecha · 1/3", lo que no cabe se sale por el borde de la pantalla. En ingles (Left/Right) cabia de casualidad.
+
+LO QUE PIDIO: algo grafico que no dependa de lo largo del texto.
+
+PROPUESTA: una flecha en lugar de la palabra, de tamano fijo en ese mismo sitio: izquierda/Left ←, derecha/Right →, adelante/Front ↑, atras/Back ↓. Para una etiqueta que no sea una direccion, puntos de posicion -el lado 2 de 4, el segundo encendido-. La palabra completa pasa a la linea del nombre del ejercicio, que tiene todo el ancho. OJO con el espejo: mirando la pantalla, la derecha del atleta es la derecha de la pantalla, asi que → es derecha sin invertir nada.
 - [ ] **TD-149** Borrar una sesion en el telefono del atleta no la borra del servidor
   - LO QUE PASO, el 21-sep-2026: el coach le hizo a NIKO una demostracion del app en su telefono, con NIKO 1 y NIKO 2, y despues borro esas dos sesiones. Ya habian subido (TD-126) y el servidor no se entero del borrado: el telefono del coach las siguio bajando y el asistente las leyo como entrenamientos de ella -5 y 9 minutos, 'completos'-. Se quitaron a mano con un delete en el SQL Editor. Quedan en el servidor, por lo mismo, tres sesiones a medias del 19-sep (23:45-23:55) que ya no estan en su telefono.
 
@@ -29,6 +47,16 @@ HECHO en codigo el 21-sep, pendiente del SQL y de probarlo en el telefono de NIK
 
 ### Feature
 
+- [ ] **TD-152** Los ejercicios con el peso del cuerpo tampoco dicen si costaron
+  - LO PIDIO el usuario el 22-sep-2026, viendo la primera sesion de tren superior de NIKO: "remo invertido le costo a niko, las flexiones estuvieron normal, pero si seguimos asi, no sabremos como progresar".
+
+LO QUE HAY HOY: el feedback del player pregunta si la serie fue ligera, bien o pesada SOLO cuando el ejercicio lleva peso (TD-122), porque lo que devuelve es un ajuste en kilos. Flexiones, remo invertido, colgarse de la barra, plancha lateral, bird dog y McGill entero no preguntan nada. De la sesion del 22-sep quedan los kilos del remo con mancuerna y del press, y cero de los tres ejercicios con el peso del cuerpo.
+
+POR QUE IMPORTA: un ejercicio con el peso del cuerpo progresa por repeticiones, por segundos o por dificultad de la variante -rodillas en el piso, barra mas alta, pies apoyados-, y ninguna de esas palancas se puede mover sin saber como fue. Hoy se ajustan preguntandole al atleta, y NIKO entrena sola.
+
+A DECIDIR: (1) que devuelve la respuesta, porque no son kilos: lo natural es una sugerencia en repeticiones o en segundos, y en la variante cuando el ejercicio la tiene. (2) Si se pregunta por serie, como ahora con el peso, o una sola vez por ejercicio, que es menos toques en un ejercicio de tres series iguales. (3) Que pasa con los isometricos de la rutina lumbar -McGill son aguantes de 10 s con un protocolo fijo, y ahi la respuesta no deberia mover nada sola-.
+
+OJO: el feedback existente se guarda por serie con su lado (feedbackDeltaKg, TD-147), y el historial y las sugerencias leen ese campo. Lo nuevo tiene que convivir sin partir ese registro.
 - [ ] **TD-151** El dolor se anota cuando pasa, no al terminar el training
   - LO PIDIO el usuario el 21-sep-2026: el dolor al despertar, los minutos que tarda en aflojar y el dolor de antes se contestan en la pantalla final, despues de una hora de ejercicio, y se vuelve un ejercicio de memoria. "Mientras mas pronto registre el dolor, mejor": el de la manana apenas se despierta, y el alivio apenas pasa.
 

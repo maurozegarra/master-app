@@ -348,7 +348,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 12
+    const val LUMBAR_REVISION = 13
 
     /**
      * De quien es la rutina lumbar.
@@ -622,12 +622,13 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 8
+    const val NIKO_REVISION = 9
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
     const val NIKO_MUAY_THAI_ID = 960002L
     const val NIKO_UPPER_ID = 960003L
+    const val NIKO_SINGLE_LEG_ID = 960004L
 
     /**
      * Los dias de NIKO que ya existen, en orden (ver docs/niko.md).
@@ -641,6 +642,7 @@ object MasterDefaults {
         nikoGluteHeavy(lang),
         nikoMuayThai(lang),
         nikoUpperBody(lang),
+        nikoSingleLeg(lang),
     )
 
     /**
@@ -851,12 +853,89 @@ object MasterDefaults {
                     name = "Agarre",
                     exercises = listOf(
                         b.ex(
+                            // Revision 9: las tres ligeras el 22-sep, con 10 en cada mano.
                             "ex_farmers_walk", "3 vueltas del pasillo, ida y vuelta: 36 m. Hombros atrás", 3, rest = 60,
-                            weightType = WeightType.DUMBBELL, weights = listOf(10.0, 10.0, 10.0),
+                            weightType = WeightType.DUMBBELL, weights = listOf(12.5, 12.5, 12.5),
                         ),
                         // 15 s de preparacion y no 10: hay que subir al cajon para llegar. La
                         // barra esta a 2.3 m y ella mide 1.55.
                         b.ex("ex_dead_hang", "Sube al cajón. Hombros lejos de las orejas", 25, sets = 3, rest = 60, prep = 15, mode = WorkMode.TIME),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Cuello",
+                    exercises = listOf(
+                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta", 20, sets = 1, rest = 15, mode = WorkMode.TIME)
+                            .copy(sides = listOf("Adelante", "Atrás", "Derecha", "Izquierda")),
+                    ),
+                ),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
+     * NIKO 4 · Gluteo a una pierna: el segundo dia de gluteo, 72 horas despues del pesado
+     * (ver docs/niko.md).
+     *
+     * ES A UNA PIERNA A PROPOSITO, y no el dia 1 otra vez con mas kilos. En el dia 1 la
+     * pierna fuerte tapa a la otra: se empuja con las dos y el total sale igual aunque una
+     * haga mas. Aqui no hay donde esconderse, y ella ya enseno asimetria -el 22-sep marco
+     * PESADO el remo del lado izquierdo y no el del derecho-.
+     *
+     * Por eso los tres ejercicios de pierna van con los lados declarados (TD-147): el player
+     * dice cual toca y el historial los cuenta aparte, que es lo unico que deja ver si el
+     * lado flojo se acerca al otro.
+     *
+     * LAS CARGAS son conservadoras: a una pierna, lo que se movia con dos no vale de
+     * referencia, y el peso muerto a una pierna es sobre todo equilibrio la primera vez.
+     */
+    fun nikoSingleLeg(lang: String): Training {
+        val b = NikoBlocks(lang, seqStart = 960400L)
+        val now = System.currentTimeMillis()
+        val lados = listOf("Izquierda", "Derecha")
+        return Training(
+            id = NIKO_SINGLE_LEG_ID,
+            name = "NIKO 4 · Glúteo a una pierna",
+            workouts = listOf(
+                b.warmup(),
+                Workout(
+                    id = b.id(),
+                    name = "Despertar glúteos",
+                    exercises = listOf(
+                        b.ex("ex_glute_bridge", "Aprieta 2 s arriba. En el glúteo, no en los muslos", 15, sets = 2, rest = 30),
+                        b.ex("ex_hip_abduction", "De lado, tobillera de 1 kg. Lento", 20, sets = 2, rest = 30),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Una pierna",
+                    exercises = listOf(
+                        b.ex(
+                            "ex_step_up", "Cajón de 51 cm. Empuja con el talón de arriba, sin impulso", 10, rest = 60,
+                            weightType = WeightType.DUMBBELL, weights = listOf(5.0, 5.0, 7.5),
+                        ).copy(sides = lados),
+                        b.ex("ex_single_leg_hip_thrust", "Una pierna arriba. La cadera no se inclina", 10, sets = 3, rest = 60)
+                            .copy(sides = lados),
+                        b.ex(
+                            "ex_single_leg_deadlift", "Una mancuerna en la mano contraria. Cadera atrás", 8, rest = 60,
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 7.5, 7.5),
+                        ).copy(sides = lados),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Cadena posterior",
+                    exercises = listOf(
+                        b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 12, sets = 3, rest = 60),
+                        // La pantorrillera es de discos y va en kilos TOTALES: no hay lados que
+                        // calcular, la maquina dice lo que lleva.
+                        b.ex(
+                            "ex_seated_calf", "Sube lento y baja más lento. Rango completo", 12, rest = 45,
+                            weightType = WeightType.TOTAL, weights = listOf(5.0, 7.5, 7.5, 10.0),
+                        ),
                     ),
                 ),
                 Workout(
@@ -927,7 +1006,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 8
+    const val CATALOG_INSTRUCTIONS_REVISION = 9
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -1094,6 +1173,35 @@ object MasterDefaults {
                 "Baja saltando hacia atrás, igual de suave, y encadena el siguiente.",
                 "Ligera y rápida: el piso quema. No aterrices con el talón ni con la pierna rígida.",
                 "Si lo sientes en las rodillas, quédate en el piso saltando dentro y fuera del hueco, con los pies rápidos.",
+            ),
+        ),
+        "ex_single_leg_hip_thrust" to ExerciseMedia(
+            listOf(
+                "La parte alta de la espalda apoyada en el borde de la banca, justo debajo de los omóplatos.",
+                "Un solo pie en el piso, plano, con la canilla vertical cuando estés arriba. La otra pierna estirada al frente o con la rodilla al pecho.",
+                "Empuja con el talón y sube la cadera hasta que el cuerpo quede en línea recta.",
+                "La cadera no se inclina: los dos lados suben iguales. Si se cae de un lado, baja el rango.",
+                "Un segundo arriba apretando el glúteo, y baja controlando.",
+                "Todas las series de una pierna y después las de la otra: el app te dice cuál toca.",
+            ),
+        ),
+        "ex_single_leg_deadlift" to ExerciseMedia(
+            listOf(
+                "De pie sobre una pierna, con la mancuerna en la mano CONTRARIA a esa pierna.",
+                "Rodilla de apoyo un poco doblada, y así se queda.",
+                "Lleva la cadera hacia atrás y deja que la otra pierna suba estirada, formando una línea del talón a la cabeza.",
+                "Baja hasta sentir el tirón detrás del muslo de apoyo, no más. Espalda recta.",
+                "Sube apretando el glúteo de la pierna de apoyo.",
+                "Si pierdes el equilibrio, apoya dos dedos en la pared: es mejor eso que redondear la espalda.",
+            ),
+        ),
+        "ex_seated_calf" to ExerciseMedia(
+            listOf(
+                "Sentada o sentado en la máquina, con la parte de adelante de los pies en el apoyo y los talones en el aire.",
+                "El cojín sobre los muslos, cerca de las rodillas.",
+                "Baja los talones todo lo que puedas y siente el estiramiento abajo.",
+                "Sube hasta la punta de los pies y aprieta un segundo arriba.",
+                "Lento en las dos direcciones. Rebotar no entrena la pantorrilla, la castiga.",
             ),
         ),
         "ex_inverted_row" to ExerciseMedia(
@@ -1494,7 +1602,7 @@ object MasterDefaults {
         )
 
         private fun carry(): Exercise =
-            loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(12.5, 15.0, 17.5), WeightType.DUMBBELL)
+            loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL)
                 .copy(dumbbellCount = 1)
 
         fun hipGlute(): Workout = Workout(
@@ -1514,16 +1622,22 @@ object MasterDefaults {
                 // 41 ya se acerca a su hip thrust de MASTER (40-70). Hasta aqui se estaba
                 // alcanzando su nivel real; cuando llegue, cargar la cadera los siete dias deja
                 // de tener sentido y el bloque pasa a tres por semana (ver coach-log 19-sep).
-                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(10.0, 20.0, 32.5), WeightType.BARBELL, barWeight = 6.0),
+                //
+                // Revision 13 (22-sep): discos 15/25/35, o sea 21, 31 y 41. El domingo 41 fue
+                // PESADO y bajo a 38.5; el martes las tres salieron ligeras, asi que vuelve a
+                // 41 -la misma cima, con las dos de abajo mas cerca- en vez de pasar de largo.
+                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(15.0, 25.0, 35.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
                 // y el player no podia decir "1 de 10". El numero por serie es el mismo, asi
                 // que el historial no se parte.
-                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(12.5, 15.0, 17.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                // Revision 13: los dos primeros viajes ligeros el 22-sep y el tercero "bien"
+                // por segunda vez, asi que la rampa sube entera y 20 pasa a ser la cima.
+                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
                 // Despues de 20 viene la de 22.5 -no estaba en el inventario del 18-sep; la
                 // agrego el usuario el 19- y despues 25. El salto de 22.5 a 25 es de 11%.
-                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(17.5, 20.0, 22.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
             ),
         )
     }

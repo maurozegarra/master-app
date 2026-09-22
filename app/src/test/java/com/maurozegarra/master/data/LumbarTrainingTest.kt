@@ -123,16 +123,22 @@ class LumbarTrainingTest {
         // baja a 38.5 -6 + 10 + 5 + 1.25 por lado- y la de abajo sube de la barra sola a 16:
         // llevaba tres dias marcando la barra vacia como ligera, que es un dato que se
         // repite sin decir nada nuevo.
-        assertEquals(listOf(16.0, 26.0, 38.5), e.setList.map { e.weightTotal(it) })
+        //
+        // REVISION 13 (22-sep): las tres ligeras. Vuelve a 41 arriba -la misma cima que el
+        // domingo le parecio pesada- con las dos de abajo mas cerca, 21 y 31, en vez de
+        // pasar de largo por encima de lo unico que ya dijo que le costaba.
+        assertEquals(listOf(21.0, 31.0, 41.0), e.setList.map { e.weightTotal(it) })
         assertTrue(e.setList.all { it.reps == 12 })
     }
 
     @Test
     fun `el carry se queda y la sentadilla sube`() {
         // Suben en la revision 6 ("ligero" en las tres el 17-sep) y otra vez en la 9 (las nueve
-        // series del bloque marcadas ligeras el 19-sep).
-        assertEquals(listOf(12.5, 15.0, 17.5), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
-        assertEquals(listOf(15.0, 17.5, 20.0), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
+        // series del bloque marcadas ligeras el 19-sep). En la 13 suben las dos: el 22-sep
+        // marco ligeras ocho de las nueve series, y la unica "bien" fue el tercer viaje del
+        // carry, que por eso pasa a ser el primer peldano de la rampa nueva.
+        assertEquals(listOf(15.0, 17.5, 20.0), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertEquals(listOf(17.5, 20.0, 22.5), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
         // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
         // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el
         // mismo -una mancuerna de 10 pesa 10-, asi que el historial no se parte.

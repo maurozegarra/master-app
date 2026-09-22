@@ -167,8 +167,8 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 |---|---|---|
 | 1 | NIKO 1 · Glúteo pesado | asignado el 19-sep como "NIKO - Día de glúteo"; el nombre numerado le llega al reasignarlo |
 | 2 | NIKO 2 · Muay Thai | **hecho el lunes 21-sep**, completo (ver *Sus sesiones*) |
-| 3 | NIKO 3 · Tren superior | **sembrado el 21-sep para el martes 22**. El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
-| 4 | NIKO 4 · Glúteo a una pierna | plan base |
+| 3 | NIKO 3 · Tren superior | **hecho el martes 22-sep**, completo (ver *Sus sesiones*). El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
+| 4 | NIKO 4 · Glúteo a una pierna | **sembrado el 22-sep para el miércoles 23**, con los lados declarados en los tres ejercicios de pierna |
 | 5 | NIKO 5 · Muay Thai y potencia | plan base |
 | 6 | NIKO 6 · Mixto y movilidad | plan base |
 
@@ -273,6 +273,25 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 ## Sus sesiones
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
+
+### 2026-09-22 — NIKO 3 · Tren superior, y aparece el lado izquierdo
+
+**De 07:38 a 08:48, 69 minutos, completa.** Hizo todo, incluidas las 3 × 15 flexiones y los
+3 × 25 s colgada de la barra.
+
+| Ejercicio | Carga | Su respuesta |
+|---|---|---|
+| Remo con mancuerna | 7.5 · 7.5 · 10 · 10 por lado | **pesadas las dos de 10 del lado IZQUIERDO**; el derecho, sin marcar |
+| Press de hombro | 2×4 · 2×5 · 2×5 | bien |
+| Paseo del granjero | 2×10 | **las tres ligeras** |
+
+- **El remo se queda igual** una sesión más: el lado izquierdo ya pidió bajar, y subir el
+  peso ahora ensancharía la diferencia en vez de cerrarla. Es el mismo motivo por el que el
+  día 4 es a una pierna.
+- **El paseo del granjero sube a 2 × 12.5** (revisión 9). Le sobra agarre.
+- **De las flexiones, el remo invertido y el colgarse no hay ningún dato.** Son con el peso
+  del cuerpo y el app no pregunta nada ahí (TD-152). El coach vio que el remo invertido le
+  costó y las flexiones no; sin registro, eso se pierde.
 
 ### 2026-09-21 — NIKO 2 · Muay Thai, la primera que llega sola
 
