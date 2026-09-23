@@ -23,6 +23,8 @@ data class ImportSummary(val trainings: Int, val sessions: Int)
  */
 class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
 
+    private val morning = com.maurozegarra.master.morning.MorningStore(context)
+
     private val appCtx = context.applicationContext
     private val prefs = appCtx
         .getSharedPreferences("master", Context.MODE_PRIVATE)
@@ -315,6 +317,8 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
             sessions = loadSessions(),
             exerciseMedia = media.load(),
             athleteSessions = loadAthleteSessions(),
+            // Punto de contacto 2 de 3 de la alarma (TD-151): sus mananas van en el respaldo.
+            morning = morning.encoded(),
         ),
         exportedAt = System.currentTimeMillis(),
     )
@@ -335,6 +339,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         // del manifiesto en cuanto hagan falta.
         media.save(data.exerciseMedia)
         saveAthleteSessions(data.athleteSessions)
+        morning.restore(data.morning)
         return ImportSummary(trainings = data.trainings.size, sessions = data.sessions.size)
     }
 

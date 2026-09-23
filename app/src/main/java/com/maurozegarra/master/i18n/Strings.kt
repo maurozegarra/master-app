@@ -215,6 +215,8 @@ data class Strings(
      * misma familia, para dejar sitio.
      */
     val effort: EffortStrings,
+    /** La alarma de la mañana (TD-151). En bloque, por el tope de la JVM (ver arriba). */
+    val morning: MorningStrings,
     val nextSuggestions: String,
     val painOnWaking: String,
     val painFadeMin: String,
@@ -478,6 +480,16 @@ object I18n {
         applyColorTitle = "Apply color to",
         applyColorThisExercise = "This exercise only",
         applyColorAllTraining = "All exercises in training",
+        morning = MorningStrings(
+            title = "Morning alarm",
+            desc = "Rings, and turning it off is answering how your back feels before moving",
+            snooze = "Snooze",
+            dismissWithout = "Turn off without answering",
+            off = "Off",
+            next = "Next",
+            allowFullScreen = "Allow the alarm over the lock screen",
+            allowExact = "Allow alarms at an exact time, or it won't ring",
+        ),
         effort = EffortStrings(
             howWeightFelt = "How did the weight feel?",
             tooHeavy = "Too heavy",
@@ -563,4 +575,16 @@ data class EffortStrings(
     val repsDone: String,
     val record: String,
     val heldOf: String,
+)
+
+/** Los textos de la alarma de la mañana (TD-151). */
+data class MorningStrings(
+    val title: String,
+    val desc: String,
+    val snooze: String,
+    val dismissWithout: String,
+    val off: String,
+    val next: String,
+    val allowFullScreen: String,
+    val allowExact: String,
 )

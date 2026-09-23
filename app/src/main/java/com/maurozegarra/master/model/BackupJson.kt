@@ -19,6 +19,12 @@ data class BackupData(
      * poder leerse aunque ya llegara al teléfono del coach.
      */
     val athleteSessions: List<AthleteSession> = emptyList(),
+    /**
+     * Las mañanas de la alarma (formato 4, TD-151), como el JSON que guarda su módulo. Va
+     * crudo y no como tipo propio para que el respaldo no dependa del módulo: si la alarma
+     * se saca, esto se queda como un campo que ya nadie escribe.
+     */
+    val morning: String = "[]",
 )
 
 /**
@@ -29,10 +35,10 @@ data class BackupData(
 object BackupJson {
 
     /**
-     * Versión del formato. La 2 añadió `exerciseMedia`, la 3 `athleteSessions`; [decode]
+     * Versión del formato. La 2 añadió `exerciseMedia`, la 3 `athleteSessions`, la 4 `morning`; [decode]
      * acepta desde la 1, así que los respaldos viejos se siguen importando sin perder nada.
      */
-    const val FORMAT = 3
+    const val FORMAT = 4
 
     fun encode(data: BackupData, exportedAt: Long): String {
         val custom = JSONArray()
@@ -47,6 +53,7 @@ object BackupJson {
             .put("sessions", JSONArray(SessionJson.encode(data.sessions)))
             .put("exerciseMedia", JSONObject(ExerciseMediaJson.encode(data.exerciseMedia)))
             .put("athleteSessions", JSONArray(SessionSync.encodeAthleteSessions(data.athleteSessions)))
+            .put("morning", runCatching { JSONArray(data.morning) }.getOrDefault(JSONArray()))
             .toString(2)
     }
 
@@ -90,12 +97,16 @@ object BackupJson {
             ?.let { SessionSync.decodeAthleteSessions(it.toString()) }
             ?: emptyList()
 
+        // Ausente antes del formato 4.
+        val morning = root.optJSONArray("morning")?.toString() ?: "[]"
+
         return BackupData(
             trainings = trainings,
             customExercises = custom,
             sessions = sessions,
             exerciseMedia = media,
             athleteSessions = athletes,
+            morning = morning,
         )
     }
 }

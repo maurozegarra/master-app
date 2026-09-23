@@ -1242,6 +1242,25 @@ class MasterViewModel(
         pendingPainBefore = n
     }
 
+    /**
+     * Lo que contesto a la alarma esa manana, en la sesion recien cerrada (TD-151). Punto
+     * de contacto 1 de 3 de la alarma: si se saca el modulo, se va esto.
+     *
+     * Solo si la sesion todavia no lo tiene: lo contestado a mano al final manda.
+     */
+    private fun applyMorning() {
+        val s = lastSessionFeedback() ?: return
+        val m = com.maurozegarra.master.morning.MorningLog.forDay(
+            com.maurozegarra.master.morning.MorningStore(getApplication()).entries(),
+            s.startedAt.takeIf { it > 0 } ?: s.completedAt,
+            java.time.ZoneId.systemDefault(),
+        ) ?: return
+        saveHowItWent(
+            painOnWaking = m.painOnWaking.takeIf { s.painOnWaking == null },
+            painFadeMin = m.fadeMinutes.takeIf { s.painFadeMin == null },
+        )
+    }
+
     /** true si al training que se acaba de correr hay que preguntarle como se sintio. */
     fun asksHowItWent(): Boolean = trainings.firstOrNull { it.id == playerTrainingId }?.tracksPain == true
 
@@ -2282,6 +2301,7 @@ class MasterViewModel(
                             saveHowItWent(painBefore = it)
                             pendingPainBefore = null
                         }
+                        applyMorning()
                         snapshot()
                     }
                 }

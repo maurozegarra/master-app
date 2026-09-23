@@ -43,6 +43,21 @@ PLAN PROPUESTO:
 EDGE CASES: se despierta, anota, y no entrena ese dia; entrena dos veces el mismo dia; anota el alivio pero no el despertar; lo anota pasada la medianoche; importar un respaldo sin registros diarios; NIKO no tiene tracksPain y no ve nada de esto.
 
 PROPUESTA DEL USUARIO, el mismo 21-sep, y hacia donde se inclina: una ALARMA propia del app en vez de la tarjeta en la lista. Suena al despertar y la pantalla de la alarma es la pregunta del dolor, asi que se contesta apenas abre los ojos, antes de moverse, que es justo lo que mide painOnWaking. Queda como propuesta, sin decidir. A pensar antes de empezar: permisos de alarma exacta (SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM desde Android 12-14) y de pantalla completa sobre la de bloqueo (USE_FULL_SCREEN_INTENT, restringido desde Android 14); si reemplaza a la alarma que ya usa o convive con ella; que hacer si la apaga sin contestar; y como se enlaza con el "It eased", que seguiria necesitando un sitio -la misma notificacion, que se queda puesta hasta que afloja, es un candidato-.
+
+DECIDIDO el 22-sep con el usuario: la alarma, DENTRO de MASTER y no como app aparte, pero en su propio paquete (morning/) con solo tres puntos de contacto -la sesion toma el dolor del dia, el respaldo lo incluye, una entrada en Settings-, para poder sacarla si en una semana de prueba estorba al app de ejercicio. Sacarla seria mover el paquete y cambiar esos tres puntos por un puente entre apps.
+(1) REEMPLAZA a su despertador. La primera semana conviene su alarma de siempre dos minutos despues, de respaldo.
+(2) Una hora por dia: lunes, miercoles y jueves (presenciales) 5:00; los demas, 7:00. Cada dia se puede apagar.
+(3) Posponer 5 minutos, y la pregunta del dolor igual al apagarla de verdad.
+Apagarla ES contestar: la pantalla de la alarma es la escala 0-10, con un Dismiss pequeno para apagar sin contestar. Despues queda una notificacion fija "Tap when it eases" y los minutos los calcula el app. El dato es del DIA: los dias de descanso tambien cuentan.
+
+HECHO en codigo el 22-sep (v1.0.316-320), funcionando en su telefono; queda PENDIENTE la semana de prueba, desde el miercoles 23, para decidir si se queda en MASTER. Paquete morning/: Morning.kt (horario, entrada del dia, puro y con tests), MorningStore (su propio archivo de preferencias), MorningAlarm (setAlarmClock, posponer, apagar, "aflojo"), MorningReceiver (la hora, "It eased", y reprogramar al reiniciar, actualizar o cambiar la hora), MorningRingService (sonido en volumen de alarma, vibracion, se pospone sola a los 10 min hasta 3 veces), MorningActivity (0-10 grande sobre el bloqueo) y MorningSettings. Los tres puntos de contacto estan marcados en el codigo: applyMorning en el ViewModel, el campo morning del respaldo (formato 4) y la tarjeta de Settings.
+
+CUATRO FALLOS en la prueba, los cuatro del asistente:
+(1) El app se caia al encenderla: setAlarmClock SI pide permiso de alarma exacta desde Android 12, y se dio por hecho que no. USE_EXACT_ALARM, y reschedule ya no se cae si falta.
+(2) La pantalla no se encendia: canUseFullScreenIntent() decia que si y Samsung lo negaba igual, porque la operacion USE_FULL_SCREEN_INTENT estaba en su modo por defecto. Ahora se mira la operacion; se abrio por adb con permiso del usuario (appops set ... allow), y el app lleva al ajuste si vuelve a faltar.
+(3) La pantalla tardaba 10 s: Android difiere la notificacion de un servicio en primer plano salvo FOREGROUND_SERVICE_IMMEDIATE.
+(4) "Good morning" no se iba al contestar: cancelarla desde fuera no sirve mientras el servicio sigue en primer plano; ahora la quita el servicio en onDestroy.
+Y el texto de abajo quedaba bajo la barra de navegacion.
 - [ ] **TD-148** Estimar la duracion de un training que todavia nadie ha corrido
   - LO QUE QUEDO FLOJO de TD-040. La tarjeta usa la mediana de las sesiones reales, pero un training sin historial cae al calculo del motor, que se queda corto -unos 43 minutos frente a los 73 reales de LUMBAR-. Afecta a LUMBAR (short), a las rutinas de NIKO y a cualquiera nueva: dicen un numero bajo hasta que se entrenan una vez.
 

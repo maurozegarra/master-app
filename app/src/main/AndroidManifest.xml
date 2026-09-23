@@ -14,6 +14,20 @@
 
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <!-- La alarma de la manana (TD-151): sonar a la hora exacta, volver a programarla al
+         reiniciar, y la pantalla completa sobre el bloqueo.
+
+         setAlarmClock SI pide permiso de alarma exacta desde Android 12: la primera version
+         asumio que no y el app se caia al encender la alarma (SecurityException). USE_EXACT_ALARM
+         se concede al instalar y no se puede quitar; Play Store lo limita a apps de reloj, pero
+         este app no se instala desde Play. En Android 12 no existia, y va el otro. -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
     <application
         android:name=".MasterApp"
         android:allowBackup="true"
@@ -46,6 +60,35 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Workout routine player with step countdown" />
         </service>
+        <activity
+            android:name=".morning.MorningActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.Master" />
+
+        <service
+            android:name=".morning.MorningRingService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Wake-up alarm that plays until the user answers" />
+        </service>
+
+        <receiver
+            android:name=".morning.MorningReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
