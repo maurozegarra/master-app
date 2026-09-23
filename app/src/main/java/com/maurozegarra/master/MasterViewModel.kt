@@ -35,6 +35,8 @@ import com.maurozegarra.master.model.reorderedFrom
 import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionSync
 import com.maurozegarra.master.model.Archive
+import com.maurozegarra.master.model.AthleteSession
+import com.maurozegarra.master.model.AthleteHistory
 import com.maurozegarra.master.model.Effort
 import com.maurozegarra.master.model.VideoPrefs
 import com.maurozegarra.master.model.PublishSync
@@ -239,6 +241,13 @@ class MasterViewModel(
         store.hiddenVideos() ?: VideoPrefs.migrate(store.loadTrainings()).also { store.saveHiddenVideos(it) },
     )
         private set
+
+    /**
+     * Las sesiones de los atletas que bajo este telefono (TD-126), en memoria para que su
+     * historial se vea al abrirlo y se actualice solo cuando baje una nueva. Antes del
+     * `init` porque la sincronizacion que lanza el `init` escribe aqui.
+     */
+    val athleteSessions = mutableStateListOf<AthleteSession>().apply { addAll(store.loadAthleteSessions()) }
 
     /** El training como se ve en ESTE telefono: con sus videos apagados aplicados. */
     private fun asSeen(t: Training): Training = VideoPrefs.apply(t, hiddenVideos)
@@ -1397,6 +1406,8 @@ class MasterViewModel(
         private set
 
     fun openHistory() {
+        // El de la lista es siempre el propio: si quedo abierto el de un atleta, se cierra.
+        historyAthlete = null
         // Se recargan al abrir porque las escribe el servicio (otro contexto) al terminar.
         refreshSessions()
         showingHistory = true
@@ -1415,9 +1426,37 @@ class MasterViewModel(
         exerciseHistoryId = null
     }
 
+    // ---------- Historial de un atleta (TD-126, etapa 3) ----------
+
+    /**
+     * De quien es el historial abierto: null es el propio. Con un atleta, el historial y el
+     * de cada ejercicio leen SUS sesiones -las que bajo este telefono- y no se pueden borrar:
+     * el registro es de el o ella.
+     */
+    var historyAthlete by mutableStateOf<Profile?>(null)
+        private set
+
+    /** Las sesiones que ensena el historial abierto, de la mas nueva a la mas vieja. */
+    val historySessions: List<SessionLog>
+        get() = historyAthlete?.let { AthleteHistory.of(athleteSessions, it.id) } ?: sessions
+
+    fun athleteSessionCount(profileId: String): Int = athleteSessions.count { it.profileId == profileId }
+
+    /** Abre el historial de [profile] y baja lo ultimo, por si entreno hace un momento. */
+    fun openAthleteHistory(profile: Profile) {
+        historyAthlete = profile
+        exerciseHistoryId = null
+        syncSessions()
+    }
+
+    fun closeAthleteHistory() {
+        historyAthlete = null
+        exerciseHistoryId = null
+    }
+
     /** Sesiones que contienen un ejercicio específico (para ExerciseHistoryScreen). */
     fun sessionsForExercise(exerciseId: String): List<Pair<SessionLog, ExerciseRecord>> =
-        sessions.mapNotNull { s ->
+        historySessions.mapNotNull { s ->
             val er = s.exercises.firstOrNull { it.exerciseId == exerciseId }
             if (er != null) s to er else null
         }
@@ -1465,7 +1504,11 @@ class MasterViewModel(
                     assignments.athleteSessions()?.let { bajadas ->
                         if (bajadas != store.loadAthleteSessions()) {
                             store.saveAthleteSessions(bajadas)
-                            withContext(Dispatchers.Main) { snapshot() }
+                            withContext(Dispatchers.Main) {
+                                athleteSessions.clear()
+                                athleteSessions.addAll(bajadas)
+                                snapshot()
+                            }
                         }
                     }
                 }

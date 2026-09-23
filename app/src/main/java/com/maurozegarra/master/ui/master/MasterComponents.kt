@@ -77,10 +77,14 @@ internal fun fmtKg(d: Double): String = fmtNum(d)
 internal fun setSummary(sr: SetRecord, timeBased: Boolean, t: Strings): String {
     val kg = if (sr.weightKg > 0) "${fmtKg(sr.weightKg)} ${t.kg}" else null
     val kmh = sr.speedKmh?.let { "${fmtNum(it)} ${t.kmh}" }
+    // Lo que salio de verdad, contra lo planeado, cuando no fue igual (TD-152): "6/8 reps",
+    // "18s/25s". Es lo que dice que una serie costo sin tener que leer el icono.
+    val reps = sr.repsDone?.let { "$it/${sr.reps}" } ?: "${sr.reps}"
+    val tiempo = sr.plannedSec?.let { "${fmtSec(sr.durationSec)}/${fmtSec(it)}" } ?: fmtSec(sr.durationSec)
     return when {
-        timeBased -> listOfNotNull(fmtSec(sr.durationSec), kmh, kg).joinToString("  \u00b7  ")
-        kg != null -> "${sr.reps} \u00d7 $kg"
-        else -> "${sr.reps} ${t.repLabel}"
+        timeBased -> listOfNotNull(tiempo, kmh, kg).joinToString("  \u00b7  ")
+        kg != null -> "$reps \u00d7 $kg"
+        else -> "$reps ${t.repLabel}"
     }
 }
 
@@ -99,7 +103,9 @@ internal fun SetLine(index: Int, sr: SetRecord, timeBased: Boolean, t: Strings, 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("${index + 1}", color = AppTheme.colors.textFaded, fontSize = fontSize, modifier = Modifier.width(20.dp))
         Text(setSummary(sr, timeBased, t), color = AppTheme.colors.textDim, fontSize = fontSize)
-        val feel = sr.feedbackDeltaKg
+        // El peso (TD-117) o, en lo que no lo lleva, como fue (TD-152): mismas flechas y mismos
+        // colores. Un solo icono por serie, porque una serie tiene una de las dos cosas.
+        val feel = sr.feedbackDeltaKg ?: sr.effort?.toDouble()
         if (feel != null) {
             Spacer(Modifier.width(8.dp))
             Icon(

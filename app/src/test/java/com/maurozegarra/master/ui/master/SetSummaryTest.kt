@@ -32,4 +32,11 @@ class SetSummaryTest {
     fun `por tiempo con peso, el tiempo y el peso`() {
         assertEquals("30s  ·  10 kg", setSummary(SetRecord(durationSec = 30, weightKg = 10.0), timeBased = true, t))
     }
+
+    @Test
+    fun `lo que salio contra lo planeado, cuando no fue igual`() {
+        // TD-152: el historial decia 8 aunque salieran 6, y 25 s aunque se soltara a los 18.
+        assertEquals("6/8 ${t.repLabel}", setSummary(SetRecord(reps = 8, repsDone = 6), timeBased = false, t))
+        assertEquals("18s/25s", setSummary(SetRecord(durationSec = 18, plannedSec = 25), timeBased = true, t))
+    }
 }

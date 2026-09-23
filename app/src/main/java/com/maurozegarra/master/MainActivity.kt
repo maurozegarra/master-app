@@ -57,6 +57,8 @@ import com.maurozegarra.master.update.UpdateBar
 import com.maurozegarra.master.update.UpdateInfo
 import com.maurozegarra.master.ui.master.MasterScreen
 import com.maurozegarra.master.ui.settings.PeopleScreen
+import com.maurozegarra.master.ui.master.ExerciseHistoryScreen
+import com.maurozegarra.master.ui.master.HistoryScreen
 import com.maurozegarra.master.ui.settings.SettingsScreen
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.MasterTheme
@@ -163,7 +165,22 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
     // Ajustes: pantalla propia por encima de la sección principal, y dentro de ella la de
     // personas, que es un nivel más. El atrás cierra de dentro hacia fuera.
     if (showSettings) {
-        if (showPeople) {
+        val atleta = vm.historyAthlete
+        if (showPeople && atleta != null) {
+            // El historial de un atleta cuelga de People (TD-126): se entra desde su ficha y
+            // el atras vuelve a ella. Dentro, el de cada ejercicio es un nivel mas.
+            if (vm.exerciseHistoryId != null) {
+                BackHandler { vm.closeExerciseHistory() }
+                SettingsScaffold(title = t.exerciseHistory, onBack = { vm.closeExerciseHistory() }) {
+                    ExerciseHistoryScreen(vm, accent, t)
+                }
+            } else {
+                BackHandler { vm.closeAthleteHistory() }
+                SettingsScaffold(title = "${atleta.name} \u00b7 ${t.history}", onBack = { vm.closeAthleteHistory() }) {
+                    HistoryScreen(vm, accent, t)
+                }
+            }
+        } else if (showPeople) {
             BackHandler { showPeople = false }
             SettingsScaffold(title = t.people, onBack = { showPeople = false }) {
                 PeopleScreen(vm, t)

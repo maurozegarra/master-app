@@ -146,6 +146,9 @@ fun PeopleScreen(vm: MasterViewModel, t: Strings) {
                         },
                     )
                     if (abierto == p.id) {
+                        // Su historial va PRIMERO: es lo que se abre para ver como entreno;
+                        // lo asignado es para gestionar, y se mira menos.
+                        HistoryLink(vm.athleteSessionCount(p.id), accent, t) { vm.openAthleteHistory(p) }
                         AssignedList(
                             asignados = asignados,
                             cargando = cargandoAsignados,
@@ -316,6 +319,30 @@ private fun ProfileRow(
             fontSize = 14.sp,
             modifier = Modifier.clickable(onClick = onDelete),
         )
+    }
+}
+
+/**
+ * La puerta a su historial (TD-126, etapa 3): cuantas sesiones han llegado de esta persona,
+ * y un toque para verlas. Hasta aqui solo las podia leer el asistente, en el respaldo.
+ */
+@Composable
+private fun HistoryLink(count: Int, accent: Color, t: Strings, onOpen: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpen)
+            .padding(start = 28.dp, top = 4.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "${t.history}  \u00b7  $count ${t.sessionsCount}",
+            color = accent,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f),
+        )
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = accent)
     }
 }
 

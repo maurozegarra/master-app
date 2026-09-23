@@ -76,7 +76,9 @@ import java.time.format.FormatStyle
  */
 @Composable
 fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
-    val sessions = vm.sessions
+    // El propio o el de un atleta (TD-126): la misma pantalla. El de un atleta no se borra.
+    val sessions = vm.historySessions
+    val ajeno = vm.historyAthlete != null
 
     if (sessions.isEmpty()) {
         Column(
@@ -93,6 +95,9 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val zone = remember { ZoneId.systemDefault() }
     val timeFmt = remember { DateTimeFormatter.ofPattern("h:mm a") }
     // Se reagrupa cuando cambia la lista (snapshot inmutable como key).
+    // Con .toList() y no la lista: el historial propio es SIEMPRE la misma lista mutable, y
+    // como clave no cambiaba al borrar -la sesion borrada seguia en pantalla hasta salir y
+    // volver-. La copia si cambia. (Se rompio al abrir el historial a los atletas, TD-126.)
     val groups = remember(sessions.toList()) {
         sessions
             .sortedByDescending { it.completedAt }
@@ -155,7 +160,7 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
                         accent = accent,
                         t = t,
                         swipeController = swipeController,
-                        onDelete = { vm.deleteSession(s.id) },
+                        onDelete = if (ajeno) null else { { vm.deleteSession(s.id) } },
                         onExerciseClick = { exerciseId -> vm.openExerciseHistory(exerciseId) },
                     )
                 }
@@ -171,7 +176,8 @@ fun SessionRow(
     accent: Color,
     t: Strings,
     swipeController: SwipeRowsController,
-    onDelete: () -> Unit,
+    /** Null en el historial de un atleta: su registro no lo borra el coach. */
+    onDelete: (() -> Unit)?,
     onExerciseClick: (String) -> Unit,
     initiallyExpanded: Boolean = false,
 ) {
@@ -180,13 +186,13 @@ fun SessionRow(
 
     // Una sola acción: una sesión no se duplica ni se edita, solo se borra. El menú
     // desplegable que había aquí gastaba 48dp en ofrecer exactamente eso mismo.
-    val actions = listOf(SwipeAction(Icons.Outlined.Delete, t.delete) { confirmDelete = true })
+    val actions = if (onDelete == null) emptyList() else listOf(SwipeAction(Icons.Outlined.Delete, t.delete) { confirmDelete = true })
 
     // Borrar se desliza solo con la sesion CERRADA (TD-119). Abierta, la tarjeta es alta y
     // el deslizamiento arrastraba todo su contenido -las series quedaban cortadas por el
     // borde- y dejaba el tacho flotando a media altura. Y es cuando se esta leyendo: un
     // gesto lateral sin querer al hacer scroll ponia "borrar" delante de lo que se revisa.
-    SwipeActionsRow(actions = actions, controller = swipeController, enabled = !expanded) {
+    SwipeActionsRow(actions = actions, controller = swipeController, enabled = !expanded && onDelete != null) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -322,7 +328,7 @@ fun SessionRow(
             title = { Text(t.delete) },
             text = { Text(t.deleteSessionConfirm(session.trainingName)) },
             confirmButton = {
-                TextButton(onClick = { onDelete(); confirmDelete = false }) {
+                TextButton(onClick = { onDelete?.invoke(); confirmDelete = false }) {
                     Text(t.delete, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                 }
             },

@@ -38,7 +38,8 @@ import java.time.format.FormatStyle
 @Composable
 fun ExerciseHistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val exerciseId = vm.exerciseHistoryId ?: return
-    val entries = remember(vm.sessions.toList(), exerciseId) {
+    // .toList(): ver HistoryScreen, la misma lista mutable no cambia como clave.
+    val entries = remember(vm.historySessions.toList(), exerciseId) {
         vm.sessionsForExercise(exerciseId)
     }
 
