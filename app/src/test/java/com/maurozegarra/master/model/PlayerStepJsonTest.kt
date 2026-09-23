@@ -28,6 +28,7 @@ class PlayerStepJsonTest {
         side = "Izquierda",
         sideIndex = 1,
         sideCount = 2,
+        progression = Progression.ROUNDS,
         workoutName = "Warm Walk",
         workoutIndex = 3,
         totalWorkouts = 5,

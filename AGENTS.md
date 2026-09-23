@@ -275,6 +275,11 @@ dispositivo, no un camino para meter contenido.
   en `null` y el app se cae al arrancar, en bucle. Pasó con `syncing` y otra vez el 19-sep
   con el candado de las sesiones (v1.0.283). Es una carrera: a veces no se cae, y por eso
   pasa las pruebas.
+- **`i18n/Strings.kt` esta al tope de la JVM.** Un constructor no admite mas de 255
+  parametros, y el `copy` de una data class suma uno por campo mas las mascaras: con 245
+  campos se llega justo. Un texto mas y la clase no carga (`ClassFormatError: Too many
+  arguments`), y lo que se ve es que fallan tests que no tienen nada que ver. Lo nuevo va en
+  un bloque aparte, como `EffortStrings` (TD-152).
 - **No se borra un test para que pase el build.** Si un test falla, se arregla el código o se cambia el test con justificación explícita.
 
 ## Dispositivo de prueba

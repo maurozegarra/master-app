@@ -160,6 +160,7 @@ object StepEngine {
             side = side,
             sideIndex = sideIndex,
             sideCount = sideCount,
+            progression = Effort.of(e),
             workoutName = workoutName,
             workoutIndex = workoutIndex,
             totalWorkouts = totalWorkouts,

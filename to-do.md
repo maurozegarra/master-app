@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **97 / 154** hechos, 57 pendientes.
+Progreso: **98 / 154** hechos, 56 pendientes.
 
 ## Pendientes
 
@@ -29,16 +29,6 @@ HECHO en codigo el 21-sep, pendiente del SQL y de probarlo en el telefono de NIK
 
 ### Feature
 
-- [ ] **TD-152** Los ejercicios con el peso del cuerpo tampoco dicen si costaron
-  - LO PIDIO el usuario el 22-sep-2026, viendo la primera sesion de tren superior de NIKO: "remo invertido le costo a niko, las flexiones estuvieron normal, pero si seguimos asi, no sabremos como progresar".
-
-LO QUE HAY HOY: el feedback del player pregunta si la serie fue ligera, bien o pesada SOLO cuando el ejercicio lleva peso (TD-122), porque lo que devuelve es un ajuste en kilos. Flexiones, remo invertido, colgarse de la barra, plancha lateral, bird dog y McGill entero no preguntan nada. De la sesion del 22-sep quedan los kilos del remo con mancuerna y del press, y cero de los tres ejercicios con el peso del cuerpo.
-
-POR QUE IMPORTA: un ejercicio con el peso del cuerpo progresa por repeticiones, por segundos o por dificultad de la variante -rodillas en el piso, barra mas alta, pies apoyados-, y ninguna de esas palancas se puede mover sin saber como fue. Hoy se ajustan preguntandole al atleta, y NIKO entrena sola.
-
-A DECIDIR: (1) que devuelve la respuesta, porque no son kilos: lo natural es una sugerencia en repeticiones o en segundos, y en la variante cuando el ejercicio la tiene. (2) Si se pregunta por serie, como ahora con el peso, o una sola vez por ejercicio, que es menos toques en un ejercicio de tres series iguales. (3) Que pasa con los isometricos de la rutina lumbar -McGill son aguantes de 10 s con un protocolo fijo, y ahi la respuesta no deberia mover nada sola-.
-
-OJO: el feedback existente se guarda por serie con su lado (feedbackDeltaKg, TD-147), y el historial y las sugerencias leen ese campo. Lo nuevo tiene que convivir sin partir ese registro.
 - [ ] **TD-151** El dolor se anota cuando pasa, no al terminar el training
   - LO PIDIO el usuario el 21-sep-2026: el dolor al despertar, los minutos que tarda en aflojar y el dolor de antes se contestan en la pantalla final, despues de una hora de ejercicio, y se vuelve un ejercicio de memoria. "Mientras mas pronto registre el dolor, mejor": el de la manana apenas se despierta, y el alivio apenas pasa.
 
@@ -423,6 +413,7 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 
 ### Feature
 
+- [x] **TD-152** Los ejercicios con el peso del cuerpo tampoco dicen si costaron
 - [x] **TD-147** El ejercicio unilateral: el lado entra en el modelo
 - [x] **TD-145** El video es un campo mas del ejercicio: una sola tarjeta y sin carteles
 - [x] **TD-139** Las instrucciones dejan de viajar en el APK: una tabla por exerciseId

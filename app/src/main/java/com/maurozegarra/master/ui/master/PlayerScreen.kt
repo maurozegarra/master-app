@@ -113,6 +113,9 @@ import com.maurozegarra.master.model.SPEED_STEP
 import com.maurozegarra.master.model.Plates
 import com.maurozegarra.master.model.WeightType
 import com.maurozegarra.master.model.SideMark
+import com.maurozegarra.master.model.Progression
+import com.maurozegarra.master.model.EffortRecord
+import com.maurozegarra.master.model.Effort
 import com.maurozegarra.master.model.StepKind
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
@@ -777,6 +780,9 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Box(Modifier.align(Alignment.BottomCenter)) {
                 when {
                     step.kind == StepKind.WORK && step.weighted -> WeightFeedback(vm, step, accent, t)
+                    // Lo que no lleva peso tambien dice como fue (TD-152), y tambien en el
+                    // descanso: durante un aguante o un round no se puede tocar la pantalla.
+                    Effort.cardFor(step) -> EffortFeedback(vm, step, accent, t)
                     step.kind == StepKind.WORK && step.speedKmh != null -> SpeedCard(vm, step, t)
                     proximaCarga != null -> LoadCard(proximaCarga, t)
                 }
@@ -1361,23 +1367,89 @@ private fun WeightFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color,
                 fontSize = 16.sp,
             )
             Text(
-                "  ·  ${t.howWeightFelt}",
+                "  ·  ${t.effort.howWeightFelt}",
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 13.sp,
             )
         }
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FeedbackChip("${t.tooHeavy} ↓", current == -2.5, accent) {
+            FeedbackChip("${t.effort.tooHeavy} ↓", current == -2.5, accent) {
                 vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, -2.5, step.side)
             }
-            FeedbackChip(t.justRight, current == 0.0, accent) {
+            FeedbackChip(t.effort.justRight, current == 0.0, accent) {
                 vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 0.0, step.side)
             }
-            FeedbackChip("${t.tooLight} ↑", current == 2.5, accent) {
+            FeedbackChip("${t.effort.tooLight} ↑", current == 2.5, accent) {
                 vm.recordFeedback(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.ownerName, step.weightTotal, 2.5, step.side)
             }
         }
+    }
+}
+
+/**
+ * Cómo fue, en lo que no lleva peso (TD-152). La misma tarjeta que la del peso, en el mismo
+ * sitio, para que no se mueva nada y se conteste igual.
+ *
+ * Las flechas van en los botones y no solo la palabra: NIKO no lee inglés, y ↓ ↑ ya los
+ * conoce de la tarjeta del peso.
+ *
+ * "Hard" en una serie de repeticiones abre un contador con las planeadas, para bajar a las
+ * que salieron. Es la unica forma de que el historial diga 6 cuando fueron 6: guarda lo
+ * planeado, y el 22-sep el remo invertido "fueron 8" aunque le costo.
+ */
+@Composable
+private fun EffortFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color, t: Strings) {
+    val marca = vm.effortOf(step)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.10f))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            // En los rounds, CUAL: se pregunta en cada uno y el dato es en cual se cae.
+            if (step.progression == Progression.ROUNDS) "${t.round} ${step.setIndex + 1}  ·  ${t.effort.howItFelt}" else t.effort.howItFelt,
+            color = Color.White.copy(alpha = 0.85f),
+            fontSize = 13.sp,
+        )
+        Spacer(Modifier.height(8.dp))
+        EffortChips(marca?.value, accent, t) {
+            vm.recordEffort(step, it, if (it == Effort.HARD) marca?.repsDone ?: step.reps else null)
+        }
+        if (marca?.value == Effort.HARD && step.progression == Progression.REPS && step.reps > 0) {
+            Spacer(Modifier.height(8.dp))
+            RepsDoneRow(marca.repsDone ?: step.reps, step.reps, t) { vm.recordEffort(step, Effort.HARD, it) }
+        }
+    }
+}
+
+@Composable
+private fun EffortChips(current: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FeedbackChip("${t.effort.hard} ↓", current == Effort.HARD, accent) { onPick(Effort.HARD) }
+        FeedbackChip(t.effort.justRight, current == Effort.RIGHT, accent) { onPick(Effort.RIGHT) }
+        FeedbackChip("${t.effort.easy} ↑", current == Effort.EASY, accent) { onPick(Effort.EASY) }
+    }
+}
+
+@Composable
+private fun RepsDoneRow(done: Int, planned: Int, t: Strings, onChange: (Int) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(t.effort.repsDone, color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp)
+        Spacer(Modifier.width(10.dp))
+        SpeedStep("\u2212") { onChange((done - 1).coerceAtLeast(0)) }
+        Text(
+            "$done / $planned",
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(80.dp),
+        )
+        SpeedStep("+") { onChange((done + 1).coerceAtMost(planned)) }
     }
 }
 
@@ -1982,10 +2054,10 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
             val pendientes = vm.unmarkedWeightSets()
             if (pendientes.isNotEmpty()) {
                 item {
-                    Text(t.pendingFeedback, color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(t.effort.pendingFeedback, color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(4.dp))
                 }
-                items(pendientes, key = { "${it.ownerExerciseId}:${it.workoutIndex}:${it.setIndex}" }) { paso ->
+                items(pendientes, key = { "${it.ownerExerciseId}:${it.workoutIndex}:${it.setIndex}:${it.side}" }) { paso ->
                     val marcado = vm.weightFeedback[vm.feedbackKey(paso.ownerExerciseId, paso.workoutIndex, paso.setIndex, paso.side)]?.deltaKg
                     Column(
                         Modifier
@@ -2002,9 +2074,70 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
                         )
                         Spacer(Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FeedbackChip("${t.tooHeavy} ↓", marcado == -2.5, accent) { vm.markFinishedFeedback(paso, -2.5) }
-                            FeedbackChip(t.justRight, marcado == 0.0, accent) { vm.markFinishedFeedback(paso, 0.0) }
-                            FeedbackChip("${t.tooLight} ↑", marcado == 2.5, accent) { vm.markFinishedFeedback(paso, 2.5) }
+                            FeedbackChip("${t.effort.tooHeavy} ↓", marcado == -2.5, accent) { vm.markFinishedFeedback(paso, -2.5) }
+                            FeedbackChip(t.effort.justRight, marcado == 0.0, accent) { vm.markFinishedFeedback(paso, 0.0) }
+                            FeedbackChip("${t.effort.tooLight} ↑", marcado == 2.5, accent) { vm.markFinishedFeedback(paso, 2.5) }
+                        }
+                    }
+                }
+            }
+            // Lo mismo para lo que no lleva peso (TD-152): el ultimo round y la ultima serie
+            // de cada ejercicio no tienen descanso detras, asi que es aqui donde se contestan.
+            val sinContestar = vm.unmarkedEffortSets()
+            if (sinContestar.isNotEmpty()) {
+                if (pendientes.isEmpty()) {
+                    item {
+                        Text(t.effort.pendingFeedback, color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.height(4.dp))
+                    }
+                }
+                // Con el lado en la clave: sin el, izquierda y derecha de la misma serie
+                // chocaban y la lista se caia.
+                items(sinContestar, key = { "effort:${it.ownerExerciseId}:${it.workoutIndex}:${it.setIndex}:${it.side}" }) { paso ->
+                    val marca = vm.effortOf(paso)
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(AppTheme.colors.surface)
+                            .padding(14.dp),
+                    ) {
+                        Text(
+                            listOfNotNull(
+                                ExerciseCatalog.display(paso.ownerExerciseId, paso.ownerName, t.locale.language),
+                                paso.side.takeIf { it.isNotBlank() },
+                                if (paso.progression == Progression.ROUNDS) "${t.round} ${paso.setIndex + 1}" else null,
+                            ).joinToString("  ·  "),
+                            color = AppTheme.colors.textPrimary,
+                            fontSize = 15.sp,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FeedbackChip("${t.effort.hard} ↓", marca?.value == Effort.HARD, accent) { vm.markFinishedEffort(paso, Effort.HARD, paso.reps) }
+                            FeedbackChip(t.effort.justRight, marca?.value == Effort.RIGHT, accent) { vm.markFinishedEffort(paso, Effort.RIGHT) }
+                            FeedbackChip("${t.effort.easy} ↑", marca?.value == Effort.EASY, accent) { vm.markFinishedEffort(paso, Effort.EASY) }
+                        }
+                    }
+                }
+            }
+            // El registro de como fue, ejercicio por ejercicio: lo que el coach lee para
+            // ajustar la siguiente. Los rounds uno por uno, y los segundos reales de lo que
+            // se corto antes.
+            val registro = vm.lastSessionFeedback()?.let { EffortRecord.lines(it) }.orEmpty()
+            if (registro.isNotEmpty()) {
+                item {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(AppTheme.colors.surface)
+                            .padding(14.dp),
+                    ) {
+                        Text(t.effort.record, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Spacer(Modifier.height(8.dp))
+                        registro.forEach { l ->
+                            Text(effortLine(l, t), color = AppTheme.colors.textDim, fontSize = 14.sp)
+                            Spacer(Modifier.height(4.dp))
                         }
                     }
                 }
@@ -2039,4 +2172,25 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
             onClick = { vm.closePlayer() },
         )
     }
+}
+
+/** Una linea del registro de como fue, con las palabras de la pantalla (TD-152). */
+private fun effortLine(l: EffortRecord.Line, t: Strings): String {
+    fun palabra(e: Int?) = when (e) {
+        Effort.HARD -> t.effort.hard
+        Effort.EASY -> t.effort.easy
+        Effort.RIGHT -> t.effort.justRight
+        else -> "—"
+    }
+    val quien = listOfNotNull(ExerciseCatalog.display(l.exerciseId, l.name, t.locale.language), l.side.takeIf { it.isNotBlank() })
+        .joinToString(" · ")
+    val que = l.marks.joinToString("   ") { m ->
+        buildString {
+            if (l.numbered) append("${m.set + 1}·")
+            append(palabra(m.effort))
+            m.repsDone?.let { append(" ($it/${m.reps})") }
+            m.heldSec?.let { append(" (" + t.effort.heldOf.format(it, m.plannedSec) + ")") }
+        }
+    }
+    return "$quien:  $que"
 }

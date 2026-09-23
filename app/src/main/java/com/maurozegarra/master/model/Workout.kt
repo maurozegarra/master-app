@@ -130,6 +130,12 @@ data class Exercise(
      * otro, que es como se ejecuta una pirámide de McGill y como ya se venía haciendo.
      */
     val sides: List<String> = emptyList(),
+    /**
+     * Cómo progresa, cuando no es lo que le toca por lo que es (TD-152). Null = que lo
+     * deduzca [Effort.of]. Se declara para las excepciones: McGill va por tiempo pero es un
+     * protocolo fijo, y la cuerda del calentamiento no es un round.
+     */
+    val progression: Progression? = null,
 ) {
     fun withStageColor(kind: StepKind, color: Long): Exercise = when (kind) {
         StepKind.PREP -> copy(prepareCfg = prepareCfg.copy(color = color))
@@ -393,6 +399,19 @@ data class SetRecord(
     val feedbackDeltaKg: Double? = null,
     /** A qué velocidad se hizo, en km/h, si el ejercicio la lleva (TD-124). */
     val speedKmh: Double? = null,
+    /**
+     * Cómo fue, en lo que no lleva peso (TD-152): [Effort.HARD], [Effort.RIGHT] o
+     * [Effort.EASY]. Null es que no se preguntó o no se contestó.
+     */
+    val effort: Int? = null,
+    /** Las repeticiones que salieron, si no fueron las planeadas ([reps]). */
+    val repsDone: Int? = null,
+    /**
+     * Los segundos planeados, cuando se cortó antes (TD-152). Entonces [durationSec] es lo
+     * que se aguantó de verdad: el 22-sep el historial habría dicho 25 s aunque se soltara
+     * a los 18.
+     */
+    val plannedSec: Int? = null,
 )
 
 enum class ExerciseStatus {

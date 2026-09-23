@@ -35,6 +35,7 @@ import com.maurozegarra.master.model.reorderedFrom
 import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionSync
 import com.maurozegarra.master.model.Archive
+import com.maurozegarra.master.model.Effort
 import com.maurozegarra.master.model.VideoPrefs
 import com.maurozegarra.master.model.PublishSync
 import com.maurozegarra.master.model.MediaSync
@@ -2004,6 +2005,52 @@ class MasterViewModel(
             .filter { it.deltaKg != 0.0 }
             .map { Triple(it.name, it.weight, it.weight + it.deltaKg) }
 
+    // ---------- Como fue, en lo que no lleva peso (TD-152) ----------
+
+    /** Lo contestado en esta corrida, con la misma clave que el peso: serie y lado. */
+    val effortMarks = mutableStateMapOf<String, EffortMark>()
+
+    fun effortOf(step: PlayerStep): EffortMark? =
+        effortMarks[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.side)]
+
+    /**
+     * Anota como fue [step] y se lo manda al servicio, que es quien escribe el registro.
+     * [repsDone] solo cuando no salieron las planeadas; volver a "Right" o "Easy" lo borra.
+     */
+    fun recordEffort(step: PlayerStep, value: Int, repsDone: Int? = null) {
+        val hechas = repsDone.takeIf { value == Effort.HARD && it != step.reps }
+        effortMarks[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.side)] = EffortMark(value, hechas)
+        PlayerBus.command.tryEmit(PlayerCommand.EFFORT(step.ownerExerciseId, step.workoutIndex, step.setIndex, value, hechas, step.side))
+    }
+
+    /** Las series que preguntaban y se quedaron sin contestar, para cerrarlas al final. */
+    fun unmarkedEffortSets(): List<PlayerStep> =
+        playerSteps.filter { it.kind == StepKind.WORK && Effort.asks(it) && effortOf(it) == null }
+
+    /**
+     * Contesta una serie cuando la sesion YA se guardo, desde el resumen. Mismo criterio que
+     * [markFinishedFeedback]: lo anota el propio atleta minutos despues, sigue siendo medido.
+     */
+    fun markFinishedEffort(step: PlayerStep, value: Int, repsDone: Int? = null) {
+        val hechas = repsDone.takeIf { value == Effort.HARD && it != step.reps }
+        effortMarks[feedbackKey(step.ownerExerciseId, step.workoutIndex, step.setIndex, step.side)] = EffortMark(value, hechas)
+        val sesion = sessions.firstOrNull() ?: return
+        val ejercicios = sesion.exercises.map { er ->
+            if (er.exerciseId != step.ownerExerciseId || er.workoutIndex != step.workoutIndex ||
+                er.side != step.side || step.setIndex !in er.sets.indices
+            ) {
+                er
+            } else {
+                er.copy(sets = er.sets.mapIndexed { i, set -> if (i == step.setIndex) set.copy(effort = value, repsDone = hechas) else set })
+            }
+        }
+        if (ejercicios == sesion.exercises) return
+        sessions[0] = sesion.copy(exercises = ejercicios)
+        store.saveSessions(sessions.toList())
+        snapshot()
+        syncSessions()
+    }
+
     /** Evita recargar los índices de rotación más de una vez por corrida (finished puede repetir). */
     private var sessionReloaded = false
     private var pendingSessionRefresh = false
@@ -2022,6 +2069,7 @@ class MasterViewModel(
         PlayerBus.state.value = null
         sessionReloaded = false
         weightFeedback.clear()
+        effortMarks.clear()
         playerSteps = steps
         playerTrainingId = trainingId
         playerName = t.name
@@ -2264,6 +2312,9 @@ class MasterViewModel(
 }
 
 /** Lo marcado en la tarjeta del peso en una serie concreta. */
+/** Lo contestado en una serie sin peso (TD-152). */
+data class EffortMark(val value: Int, val repsDone: Int? = null)
+
 data class SetFeedback(
     val name: String,
     /** "exerciseId:workoutIndex": agrupa las series de un mismo ejercicio. */

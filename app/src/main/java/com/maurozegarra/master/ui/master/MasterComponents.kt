@@ -109,9 +109,9 @@ internal fun SetLine(index: Int, sr: SetRecord, timeBased: Boolean, t: Strings, 
                     else -> Icons.Filled.Check
                 },
                 contentDescription = when {
-                    feel < 0 -> t.tooHeavy
-                    feel > 0 -> t.tooLight
-                    else -> t.justRight
+                    feel < 0 -> t.effort.tooHeavy
+                    feel > 0 -> t.effort.tooLight
+                    else -> t.effort.justRight
                 },
                 tint = when {
                     feel < 0 -> FEEL_DOWN

@@ -152,6 +152,7 @@ class WorkoutPlayerService : Service() {
                     PlayerCommand.STOP -> stopPlayer()
                     is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.deltaKg, cmd.side)
                     is PlayerCommand.SPEED -> recorder.setSpeed(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.kmh, cmd.side)
+                    is PlayerCommand.EFFORT -> recorder.setEffort(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.effort, cmd.repsDone, cmd.side)
                 }
             }
         }
@@ -198,7 +199,7 @@ class WorkoutPlayerService : Service() {
 
     private fun advance() {
         if (finished) return
-        steps.getOrNull(index)?.let { if (it.kind == StepKind.WORK) recorder.onWorkStepCompleted(it) }
+        steps.getOrNull(index)?.let { if (it.kind == StepKind.WORK) recorder.onWorkStepCompleted(it, actualSec(it)) }
         val next = index + 1
         if (next >= steps.size) {
             finishPlayer()
@@ -206,6 +207,16 @@ class WorkoutPlayerService : Service() {
             alarmCue(steps.getOrNull(next))
             beginStep(next)
         }
+    }
+
+    /**
+     * Cuánto duró de verdad el paso por tiempo que se está cerrando (TD-152). Redondeado:
+     * pasar con 300 ms en el reloj es haberlo terminado, no haber cortado un segundo antes.
+     */
+    private fun actualSec(step: PlayerStep): Int? {
+        if (!step.timeBased || step.manual || step.durationSec <= 0) return null
+        val hecho = step.durationSec * 1000L - currentRemaining()
+        return ((hecho + 500) / 1000).toInt().coerceIn(0, step.durationSec)
     }
 
     private fun goBack() {
@@ -609,6 +620,37 @@ class WorkoutPlayerService : Service() {
             .apply()
     }
 
+    /**
+     * Vuelve a meter en el registrador una serie ya registrada, al recuperar una corrida.
+     *
+     * CON el lado, el esfuerzo y los segundos planeados. Antes de TD-152 se reconstruia sin
+     * lado, asi que si el proceso moria a mitad de un ejercicio por lados, al recuperarse
+     * las series de la izquierda y la derecha caian en el mismo registro y se pisaban.
+     */
+    private fun refeed(er: com.maurozegarra.master.model.ExerciseRecord, setIdx: Int, sr: com.maurozegarra.master.model.SetRecord) {
+        val step = PlayerStep(
+            kind = StepKind.WORK,
+            title = er.name,
+            ownerName = er.name,
+            ownerExerciseId = er.exerciseId,
+            side = er.side,
+            workoutName = er.workoutName,
+            workoutIndex = er.workoutIndex,
+            exerciseIndex = er.exerciseIndex,
+            setIndex = setIdx,
+            totalSets = er.totalSets,
+            reps = sr.reps,
+            durationSec = sr.plannedSec ?: sr.durationSec,
+            timeBased = er.timeBased,
+            weighted = sr.weightKg > 0,
+            weightTotal = sr.weightKg,
+            speedKmh = sr.speedKmh,
+        )
+        if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step, sr.durationSec)
+        sr.feedbackDeltaKg?.let { recorder.setFeedback(er.exerciseId, er.workoutIndex, setIdx, it, er.side) }
+        sr.effort?.let { recorder.setEffort(er.exerciseId, er.workoutIndex, setIdx, it, sr.repsDone, er.side) }
+    }
+
     private fun clearPersist() {
         prefs().edit().clear().apply()
     }
@@ -626,24 +668,7 @@ class WorkoutPlayerService : Service() {
             p.getString("recorderJson", null)?.let { rj ->
                 com.maurozegarra.master.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
                     er.sets.forEachIndexed { setIdx, sr ->
-                        val step = PlayerStep(
-                            kind = StepKind.WORK,
-                            title = er.name,
-                            ownerName = er.name,
-                            ownerExerciseId = er.exerciseId,
-                            workoutName = er.workoutName,
-                            workoutIndex = er.workoutIndex,
-                            setIndex = setIdx,
-                            totalSets = er.totalSets,
-                            reps = sr.reps,
-                            durationSec = sr.durationSec,
-                            timeBased = er.timeBased,
-                            weighted = sr.weightKg > 0,
-                            weightTotal = sr.weightKg,
-                            speedKmh = sr.speedKmh,
-                        )
-                        if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step)
-                        sr.feedbackDeltaKg?.let { recorder.setFeedback(er.exerciseId, er.workoutIndex, setIdx, it) }
+                        refeed(er, setIdx, sr)
                     }
                 }
             }
@@ -671,24 +696,7 @@ class WorkoutPlayerService : Service() {
         p.getString("recorderJson", null)?.let { rj ->
             com.maurozegarra.master.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
                 er.sets.forEachIndexed { setIdx, sr ->
-                    val step = PlayerStep(
-                        kind = StepKind.WORK,
-                        title = er.name,
-                        ownerName = er.name,
-                        ownerExerciseId = er.exerciseId,
-                        workoutName = er.workoutName,
-                        workoutIndex = er.workoutIndex,
-                        setIndex = setIdx,
-                        totalSets = er.totalSets,
-                        reps = sr.reps,
-                        durationSec = sr.durationSec,
-                        timeBased = er.timeBased,
-                        weighted = sr.weightKg > 0,
-                        weightTotal = sr.weightKg,
-                        speedKmh = sr.speedKmh,
-                    )
-                    if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step)
-                    sr.feedbackDeltaKg?.let { recorder.setFeedback(er.exerciseId, er.workoutIndex, setIdx, it) }
+                    refeed(er, setIdx, sr)
                 }
             }
         }

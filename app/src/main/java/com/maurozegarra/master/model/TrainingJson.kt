@@ -144,6 +144,7 @@ object TrainingJson {
             .put("cooldownCfg", stageToJson(e.cooldownCfg))
             .put("showVideo", e.showVideo)
             .put("sides", JSONArray(e.sides))
+            .also { o -> e.progression?.let { o.put("progression", it.name) } }
     }
 
     private fun exerciseFromJson(o: JSONObject): Exercise {
@@ -191,6 +192,8 @@ object TrainingJson {
             // como false apagaría de golpe todos los vídeos.
             showVideo = o.optBoolean("showVideo", true),
             sides = o.optJSONArray("sides")?.let { a -> (0 until a.length()).map { a.getString(it) } }.orEmpty(),
+            progression = o.optString("progression", "").takeIf { it.isNotBlank() }
+                ?.let { runCatching { Progression.valueOf(it) }.getOrNull() },
         )
     }
 

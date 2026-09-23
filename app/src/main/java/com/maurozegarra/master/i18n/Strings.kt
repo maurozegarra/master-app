@@ -207,12 +207,15 @@ data class Strings(
     val applyColorThisExercise: String,
     val applyColorAllTraining: String,
     val applyColorTitle: String,
-    val howWeightFelt: String,
-    val tooHeavy: String,
-    val justRight: String,
-    val tooLight: String,
+    /**
+     * TD-152: lo que no lleva peso tambien dice como fue. Agrupado y no suelto porque esta
+     * clase llego al tope de la JVM: un constructor no puede tener mas de 255 parametros, y
+     * al pasarlo la clase ni siquiera carga ("Too many arguments in method signature").
+     * Lo nuevo va en bloques como este; aqui se mudaron tambien los del peso, que son la
+     * misma familia, para dejar sitio.
+     */
+    val effort: EffortStrings,
     val nextSuggestions: String,
-    val pendingFeedback: String,
     val painOnWaking: String,
     val painFadeMin: String,
     val speedLabel: String,
@@ -475,12 +478,20 @@ object I18n {
         applyColorTitle = "Apply color to",
         applyColorThisExercise = "This exercise only",
         applyColorAllTraining = "All exercises in training",
-        howWeightFelt = "How did the weight feel?",
-        tooHeavy = "Too heavy",
-        justRight = "Just right",
-        tooLight = "Too light",
+        effort = EffortStrings(
+            howWeightFelt = "How did the weight feel?",
+            tooHeavy = "Too heavy",
+            justRight = "Just right",
+            tooLight = "Too light",
+            pendingFeedback = "How did these feel?",
+            howItFelt = "How was it?",
+            hard = "Hard",
+            easy = "Easy",
+            repsDone = "Reps done",
+            record = "How it went",
+            heldOf = "held %1${'$'}d of %2${'$'}d s",
+        ),
         nextSuggestions = "Suggested adjustments for next time",
-        pendingFeedback = "How did these feel?",
         painOnWaking = "On waking, before moving",
         painFadeMin = "Minutes until it eased",
         speedLabel = "Speed",
@@ -538,3 +549,18 @@ object I18n {
         noExercises = "No exercises recorded",
     )
 }
+
+/** Los textos de como fue una serie: el peso (TD-117) y lo que no lo lleva (TD-152). */
+data class EffortStrings(
+    val howWeightFelt: String,
+    val tooHeavy: String,
+    val justRight: String,
+    val tooLight: String,
+    val pendingFeedback: String,
+    val howItFelt: String,
+    val hard: String,
+    val easy: String,
+    val repsDone: String,
+    val record: String,
+    val heldOf: String,
+)

@@ -7,6 +7,7 @@ import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.SetRecord
+import com.maurozegarra.master.model.Progression
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.WorkMode
 import com.maurozegarra.master.model.setAt
@@ -348,7 +349,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 13
+    const val LUMBAR_REVISION = 14
 
     /**
      * De quien es la rutina lumbar.
@@ -622,7 +623,7 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 9
+    const val NIKO_REVISION = 10
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -999,7 +1000,9 @@ object MasterDefaults {
                 ex("ex_hip_rotation", "Cada lado", 10, prep = 5),
                 ex("ex_90_90", "Lento, sin forzar", 10, prep = 5),
                 ex("ex_shoulder_rotation", "Cada lado", 10, prep = 5),
-            ),
+            // Calentar no progresa: no pregunta como fue (TD-152). La cuerda lo necesita
+            // escrito, porque en NIKO 5 va por rounds y ahi si pregunta.
+            ).map { it.copy(progression = Progression.NONE) },
         )
     }
 
@@ -1566,6 +1569,9 @@ object MasterDefaults {
             ),
         )
 
+        // McGill es un protocolo fijo, no algo que progrese solo: no pregunta como fue
+        // (TD-152, decidido con el usuario el 22-sep). Sin esto, por ir por tiempo, el app
+        // le preguntaria en la ultima serie de cada uno.
         fun mcgill(blocks: List<Int> = listOf(6, 4, 2)): Workout = Workout(
             id = id(),
             name = "McGill Big 3",
@@ -1573,7 +1579,7 @@ object MasterDefaults {
                 pyramid("ex_curl_up", "Alternate the bent leg between blocks", blocks),
                 pyramid("ex_side_plank", "Elbow under the shoulder, knees at 90", blocks, sides = listOf("Left", "Right"), sideRest = 20),
                 pyramid("ex_bird_dog", "Alternate sides between holds", blocks),
-            ),
+            ).map { it.copy(progression = Progression.NONE) },
         )
 
         /**

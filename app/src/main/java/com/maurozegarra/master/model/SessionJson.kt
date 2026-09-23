@@ -23,6 +23,9 @@ object SessionJson {
                     if (sr.skipped) setObj.put("skipped", true)
                     sr.feedbackDeltaKg?.let { setObj.put("feedbackDeltaKg", it) }
                     sr.speedKmh?.let { setObj.put("speedKmh", it) }
+                    sr.effort?.let { setObj.put("effort", it) }
+                    sr.repsDone?.let { setObj.put("repsDone", it) }
+                    sr.plannedSec?.let { setObj.put("plannedSec", it) }
                     setsArr.put(setObj)
                 }
                 val erObj = JSONObject()
@@ -85,6 +88,9 @@ object SessionJson {
                                 feedbackDeltaKg = if (so.has("feedbackDeltaKg"))
                                     so.optDouble("feedbackDeltaKg", 0.0) else null,
                                 speedKmh = if (so.has("speedKmh")) so.optDouble("speedKmh", 0.0) else null,
+                                effort = if (so.has("effort")) so.optInt("effort") else null,
+                                repsDone = if (so.has("repsDone")) so.optInt("repsDone") else null,
+                                plannedSec = if (so.has("plannedSec")) so.optInt("plannedSec") else null,
                             ))
                         }
                     }
