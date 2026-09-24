@@ -217,6 +217,8 @@ data class Strings(
     val effort: EffortStrings,
     /** La alarma de la mañana (TD-151). En bloque, por el tope de la JVM (ver arriba). */
     val morning: MorningStrings,
+    /** Medir en metros (TD-095). En bloque, por el tope de la JVM. */
+    val distance: DistanceStrings,
     val nextSuggestions: String,
     val painOnWaking: String,
     val painFadeMin: String,
@@ -480,6 +482,10 @@ object I18n {
         applyColorTitle = "Apply color to",
         applyColorThisExercise = "This exercise only",
         applyColorAllTraining = "All exercises in training",
+        distance = DistanceStrings(
+            mode = "Meters",
+            unit = "m",
+        ),
         morning = MorningStrings(
             title = "Morning alarm",
             desc = "Rings, and turning it off is answering how your back feels before moving",
@@ -587,4 +593,10 @@ data class MorningStrings(
     val next: String,
     val allowFullScreen: String,
     val allowExact: String,
+)
+
+/** Los textos de medir en metros (TD-095). */
+data class DistanceStrings(
+    val mode: String,
+    val unit: String,
 )

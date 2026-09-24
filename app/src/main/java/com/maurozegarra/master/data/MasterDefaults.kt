@@ -349,7 +349,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 14
+    const val LUMBAR_REVISION = 15
 
     /**
      * De quien es la rutina lumbar.
@@ -623,7 +623,7 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 10
+    const val NIKO_REVISION = 11
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -855,9 +855,11 @@ object MasterDefaults {
                     exercises = listOf(
                         b.ex(
                             // Revision 9: las tres ligeras el 22-sep, con 10 en cada mano.
-                            "ex_farmers_walk", "3 vueltas del pasillo, ida y vuelta: 36 m. Hombros atrás", 3, rest = 60,
+                            "ex_farmers_walk", "3 vueltas del pasillo, ida y vuelta: 36 m. Hombros atrás", 36, rest = 60,
                             weightType = WeightType.DUMBBELL, weights = listOf(12.5, 12.5, 12.5),
-                        ),
+                        // En metros (TD-095, revision 11): eran "3 reps" -tres vueltas- y el
+                        // historial no decia cuanto camino. Sin lados: lleva peso en las dos manos.
+                        ).copy(workMode = WorkMode.DISTANCE),
                         // 15 s de preparacion y no 10: hay que subir al cajon para llegar. La
                         // barra esta a 2.3 m y ella mide 1.55.
                         b.ex("ex_dead_hang", "Sube al cajón. Hombros lejos de las orejas", 25, sets = 3, rest = 60, prep = 15, mode = WorkMode.TIME),
@@ -1607,9 +1609,18 @@ object MasterDefaults {
             exercises = listOf(carry()),
         )
 
+        /**
+         * El suitcase carry, el mismo en el completo y en el corto.
+         *
+         * Revision 15 (23-sep, TD-095): en METROS y POR LADOS. Era "2 reps" -un viaje por
+         * mano- y el historial decia "2 x 17.5 kg" cuando eran 36 m con cada una. Y el 22-sep
+         * anoto que el agarre IZQUIERDO le cuesta mas: con un registro por lado, eso se ve
+         * serie a serie. Todas las series de una mano y despues las de la otra, como la
+         * plancha; los pesos van en rampa en cada lado.
+         */
         private fun carry(): Exercise =
-            loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL)
-                .copy(dumbbellCount = 1)
+            loaded("ex_suitcase_carry", 36, "3 laps of the hallway: 36 m. Walk tall, don't lean", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL)
+                .copy(dumbbellCount = 1, workMode = WorkMode.DISTANCE, sides = listOf("Left", "Right"))
 
         fun hipGlute(): Workout = Workout(
             id = id(),
@@ -1639,7 +1650,7 @@ object MasterDefaults {
                 // que el historial no se parte.
                 // Revision 13: los dos primeros viajes ligeros el 22-sep y el tercero "bien"
                 // por segunda vez, asi que la rampa sube entera y 20 pasa a ser la cima.
-                loaded("ex_suitcase_carry", 2, "One trip of 30-40 m per side", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                carry(),
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
                 // Despues de 20 viene la de 22.5 -no estaba en el inventario del 18-sep; la
                 // agrego el usuario el 19- y despues 25. El salto de 22.5 a 25 es de 11%.

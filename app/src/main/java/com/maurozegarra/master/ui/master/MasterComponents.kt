@@ -79,6 +79,8 @@ internal fun setSummary(sr: SetRecord, timeBased: Boolean, t: Strings): String {
     val kmh = sr.speedKmh?.let { "${fmtNum(it)} ${t.kmh}" }
     // Lo que salio de verdad, contra lo planeado, cuando no fue igual (TD-152): "6/8 reps",
     // "18s/25s". Es lo que dice que una serie costo sin tener que leer el icono.
+    // En distancia, los metros (TD-095): "36 m × 17.5 kg" y no "2 × 17.5 kg".
+    if (sr.distanceM != null) return listOfNotNull("${sr.distanceM} ${t.distance.unit}", kg).joinToString(" \u00d7 ")
     val reps = sr.repsDone?.let { "$it/${sr.reps}" } ?: "${sr.reps}"
     val tiempo = sr.plannedSec?.let { "${fmtSec(sr.durationSec)}/${fmtSec(it)}" } ?: fmtSec(sr.durationSec)
     return when {

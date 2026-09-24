@@ -156,6 +156,7 @@ private data class PreviewGroup(
 
 private fun metaFor(s: PlayerStep): String = when {
     s.timeBased -> formatRemaining(s.durationSec * 1000L)
+    s.distance -> "${if (s.totalSets > 1) "${s.totalSets}×" else ""}${s.reps} m"
     s.totalSets > 1 && s.reps > 1 -> "${s.totalSets}×${s.reps}"
     s.totalSets > 1 -> "${s.totalSets}×"
     s.reps > 0 -> "×${s.reps}"
@@ -689,7 +690,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val ownerLabel = ExerciseCatalog.display(step.ownerExerciseId, step.ownerName, t.locale.language)
-        val repByRep = step.kind == StepKind.WORK && !step.timeBased && step.reps == 1 && step.totalSets > 1
+        val repByRep = step.kind == StepKind.WORK && !step.timeBased && !step.distance && step.reps == 1 && step.totalSets > 1
         // La palabra del lado va aqui, entera: la flecha junto al numero dice cual, y el
         // titulo -que tiene todo el ancho y se encoge para caber- lo dice con letras.
         val bigTitle = (when (step.kind) {
@@ -1243,7 +1244,11 @@ private fun RepsDisplay(step: PlayerStep, repByRep: Boolean, t: Strings, lead: S
     // palabra no hay que interpretarla. El reloj no la necesita: se delata solo, porque baja.
     BigReadout(
         value = if (repByRep) "${step.setIndex + 1} / ${step.totalSets}" else "${step.reps}",
-        mark = if (repByRep) t.repLabel else t.repsUnit.uppercase(),
+        mark = when {
+            repByRep -> t.repLabel
+            step.distance -> t.distance.unit.uppercase()
+            else -> t.repsUnit.uppercase()
+        },
         lead = lead,
         side = side,
     )

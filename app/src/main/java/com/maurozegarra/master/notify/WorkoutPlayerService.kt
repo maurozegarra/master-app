@@ -458,7 +458,7 @@ class WorkoutPlayerService : Service() {
         val title = stepTitleText(step)
         val manual = step?.manual == true
         val info = if (manual && step?.kind == StepKind.WORK && !step.timeBased) {
-            "${step.reps} reps"
+            if (step.distance) "${step.reps} m" else "${step.reps} reps"
         } else {
             fmtClock(currentRemaining())
         }
@@ -629,7 +629,9 @@ class WorkoutPlayerService : Service() {
             exerciseIndex = er.exerciseIndex,
             setIndex = setIdx,
             totalSets = er.totalSets,
-            reps = sr.reps,
+            // En distancia los metros viven en distanceM: se devuelven a reps para rehacer el paso.
+            reps = sr.distanceM ?: sr.reps,
+            distance = sr.distanceM != null,
             durationSec = sr.plannedSec ?: sr.durationSec,
             timeBased = er.timeBased,
             weighted = sr.weightKg > 0,

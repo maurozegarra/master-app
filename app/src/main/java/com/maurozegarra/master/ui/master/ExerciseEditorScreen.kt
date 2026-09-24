@@ -325,7 +325,7 @@ private fun StageBasics(kind: StepKind, ex: Exercise, accent: Color, t: Strings,
             DurationWheelField(t.secUnit, ex.prepareSec, accent, t, max = 1800) { onChange(ex.copy(prepareSec = it)) }
         StepKind.WORK -> {
             SegmentToggle(
-                options = listOf("TIME" to t.secUnit, "REPS" to t.repsUnit),
+                options = listOf("TIME" to t.secUnit, "REPS" to t.repsUnit, "DISTANCE" to t.distance.mode),
                 selected = ex.workMode.name,
                 accent = accent,
             ) { onChange(ex.copy(workMode = WorkMode.valueOf(it)).normalizedSets()) }
@@ -343,7 +343,11 @@ private fun StageBasics(kind: StepKind, ex: Exercise, accent: Color, t: Strings,
                     onChange = onChange,
                 )
             } else {
-                Stepper(t.repsUnit, ex.workValue, accent, min = 1, max = 200) { onChange(ex.copy(workValue = it).normalizedSets()) }
+                // En metros el tope es otro: un carry de 200 m es corriente, y 200 reps no.
+                val metros = ex.workMode == WorkMode.DISTANCE
+                Stepper(if (metros) t.distance.unit else t.repsUnit, ex.workValue, accent, min = 1, max = if (metros) 2000 else 200) {
+                    onChange(ex.copy(workValue = it).normalizedSets())
+                }
                 VSpace(14)
                 WeightSection(ex, accent, t, onChange)
             }
@@ -501,6 +505,7 @@ private fun WeightSection(ex: Exercise, accent: Color, t: Strings, onChange: (Ex
                     index = i,
                     set = ws,
                     type = ex.weightType,
+                    unit = if (ex.workMode == WorkMode.DISTANCE) t.distance.unit else t.repsUnit,
                     accent = accent,
                     t = t,
                     onChange = { newSet ->
@@ -519,6 +524,7 @@ private fun SetRow(
     index: Int,
     set: WorkSet,
     type: WeightType,
+    unit: String,
     accent: Color,
     t: Strings,
     onChange: (WorkSet) -> Unit,
@@ -532,7 +538,7 @@ private fun SetRow(
     ) {
         Text("SET ${index + 1}", color = AppTheme.colors.textDim, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         VSpace(6)
-        Stepper(t.repsUnit, set.reps, accent, min = 1, max = 200) { onChange(set.copy(reps = it)) }
+        Stepper(unit, set.reps, accent, min = 1, max = 2000) { onChange(set.copy(reps = it)) }
         VSpace(8)
         val label = when (type) {
             WeightType.DUMBBELL -> t.perHand

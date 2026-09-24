@@ -25,6 +25,7 @@ object SessionJson {
                     sr.speedKmh?.let { setObj.put("speedKmh", it) }
                     sr.effort?.let { setObj.put("effort", it) }
                     sr.repsDone?.let { setObj.put("repsDone", it) }
+                    sr.distanceM?.let { setObj.put("distanceM", it) }
                     sr.plannedSec?.let { setObj.put("plannedSec", it) }
                     setsArr.put(setObj)
                 }
@@ -90,6 +91,7 @@ object SessionJson {
                                 speedKmh = if (so.has("speedKmh")) so.optDouble("speedKmh", 0.0) else null,
                                 effort = if (so.has("effort")) so.optInt("effort") else null,
                                 repsDone = if (so.has("repsDone")) so.optInt("repsDone") else null,
+                                distanceM = if (so.has("distanceM")) so.optInt("distanceM") else null,
                                 plannedSec = if (so.has("plannedSec")) so.optInt("plannedSec") else null,
                             ))
                         }

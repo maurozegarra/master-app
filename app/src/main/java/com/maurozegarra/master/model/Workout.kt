@@ -1,7 +1,16 @@
 package com.maurozegarra.master.model
 
 /** Cómo se mide el trabajo (WORK) de un ejercicio. */
-enum class WorkMode { TIME, REPS }
+/**
+ * Cómo se mide el trabajo de un ejercicio.
+ *
+ * DISTANCE (TD-095): metros, para los carries. Hasta aquí el suitcase carry se anotaba como
+ * "2 reps" -un viaje por mano- cuando eran 36 metros con cada una, y el historial decía
+ * "2 × 17.5 kg". Por tiempo tampoco: el ritmo cambia de un día a otro y no dice nada del
+ * agarre; lo que se entrena es cuánto peso y cuánta distancia. Se comporta como REPS -paso
+ * manual, lleva peso, se confirma al terminar- con otra unidad.
+ */
+enum class WorkMode { TIME, REPS, DISTANCE }
 
 /** Cómo se muestra el reloj de una etapa en el player. */
 enum class DisplayMode { COUNTDOWN, STATIC, COUNTUP }
@@ -344,7 +353,7 @@ fun Exercise.weightTotal(s: WorkSet): Double = when (weightType) {
 
 /** Indica si el ejercicio lleva peso (reps + tipo de carga distinto de NONE). */
 val Exercise.isWeighted: Boolean
-    get() = workMode == WorkMode.REPS && weightType != WeightType.NONE
+    get() = workMode != WorkMode.TIME && weightType != WeightType.NONE
 
 /**
  * Definición de un ejercicio del catálogo. [custom] = creado por el usuario.
@@ -406,6 +415,8 @@ data class SetRecord(
     val effort: Int? = null,
     /** Las repeticiones que salieron, si no fueron las planeadas ([reps]). */
     val repsDone: Int? = null,
+    /** Metros, si el ejercicio se mide en distancia (TD-095); entonces [reps] es 0. */
+    val distanceM: Int? = null,
     /**
      * Los segundos planeados, cuando se cortó antes (TD-152). Entonces [durationSec] es lo
      * que se aguantó de verdad: el 22-sep el historial habría dicho 25 s aunque se soltara

@@ -38,6 +38,8 @@ data class PlayerStep(
      *  dirección que se pueda poner como flecha. */
     val sideIndex: Int = 0,
     val sideCount: Int = 0,
+    /** Si [reps] son METROS y no repeticiones (TD-095): cambia la unidad, nada más. */
+    val distance: Boolean = false,
     /** Cómo progresa el ejercicio, que decide si esta serie pregunta cómo fue (TD-152). */
     val progression: Progression = Progression.NONE,
     val workoutName: String = "",

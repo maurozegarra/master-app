@@ -101,17 +101,21 @@ class SessionRecorder {
                 speedKmh = step.speedKmh,
             )
         } else {
-            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = 0, speedKmh = step.speedKmh)
+            byUnit(step, SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = 0, speedKmh = step.speedKmh))
         }
         putSet(step, setRecord)
     }
+
+    /** En distancia, los metros van a su campo y no se hacen pasar por repeticiones (TD-095). */
+    private fun byUnit(step: PlayerStep, r: SetRecord): SetRecord =
+        if (step.distance) r.copy(reps = 0, distanceM = step.reps) else r
 
     fun onWorkStepSkipped(step: PlayerStep) {
         if (step.kind != StepKind.WORK) return
         val setRecord = if (step.timeBased) {
             SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = step.durationSec, skipped = true, speedKmh = step.speedKmh)
         } else {
-            SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = 0, skipped = true, speedKmh = step.speedKmh)
+            byUnit(step, SetRecord(reps = step.reps, weightKg = step.weightTotal, durationSec = 0, skipped = true, speedKmh = step.speedKmh))
         }
         putSet(step, setRecord)
     }

@@ -773,7 +773,7 @@ private fun MiniPlayer(vm: MasterViewModel, accent: Color, modifier: Modifier = 
                 maxLines = 1,
             )
             Text(
-                if (step.manual) "${step.reps} reps" else formatRemaining(vm.playerRemainingMs),
+                if (step.manual) "${step.reps} ${if (step.distance) "m" else "reps"}" else formatRemaining(vm.playerRemainingMs),
                 color = accent,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,

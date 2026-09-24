@@ -205,8 +205,10 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `lo cronometrado suma 38 minutos y 58 segundos`() {
-        assertEquals(2338, steps.sumOf { it.durationSec })
+    fun `lo cronometrado suma 41 minutos y 58 segundos`() {
+        // Tres minutos mas que en la revision 14: el carry por lados son seis viajes y no
+        // tres, con su minuto de descanso entre cada uno menos el ultimo -5 en vez de 2-.
+        assertEquals(2518, steps.sumOf { it.durationSec })
     }
 
     @Test
@@ -446,8 +448,10 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `la sesion recoge los once ejercicios, todos completos`() {
-        assertEquals(11, session.exercises.size)
+    fun `la sesion recoge los doce registros, todos completos`() {
+        // Doce registros de once ejercicios: desde la revision 15 el carry va por lados
+        // (TD-095) y deja uno por mano, igual que la plancha.
+        assertEquals(12, session.exercises.size)
         assertTrue(session.exercises.all { it.setsCompleted == it.totalSets })
         assertTrue(session.exercises.none { r -> r.sets.any { it.skipped } })
         assertEquals(com.maurozegarra.master.model.SessionStatus.COMPLETED, session.status)

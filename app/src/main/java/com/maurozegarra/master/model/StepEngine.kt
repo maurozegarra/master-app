@@ -34,7 +34,10 @@ object StepEngine {
                                 weightTotal = if (e.isWeighted) e.weightTotal(ws) else 0.0,
                                 weightLabel = if (e.isWeighted) weightLabel(e, ws) else "",
                                 workoutBase = w.name, variant = wVariant, rotating = w.rotating,
-                                secPerRep = e.secPerRep, exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size,
+                                // Un metro con carga es ~1 s caminando: con los 3 s por rep del
+                                // defecto, 36 m estimaban casi dos minutos por viaje.
+                                secPerRep = if (e.workMode == WorkMode.DISTANCE) 1 else e.secPerRep,
+                                exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size,
                             ),
                         )
                     }
@@ -161,6 +164,7 @@ object StepEngine {
             sideIndex = sideIndex,
             sideCount = sideCount,
             progression = Effort.of(e),
+            distance = e.workMode == WorkMode.DISTANCE,
             workoutName = workoutName,
             workoutIndex = workoutIndex,
             totalWorkouts = totalWorkouts,

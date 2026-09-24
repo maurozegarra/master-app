@@ -141,7 +141,11 @@ fun WorkoutEditorScreen(vm: MasterViewModel, accent: Color, t: Strings) {
 }
 
 private fun workSummary(ex: Exercise, t: Strings): String {
-    val work = if (ex.workMode == WorkMode.TIME) fmtSec(ex.workValue) else "${ex.workValue} ${t.repsUnit}"
+    val work = when (ex.workMode) {
+        WorkMode.TIME -> fmtSec(ex.workValue)
+        WorkMode.DISTANCE -> "${ex.workValue} ${t.distance.unit}"
+        WorkMode.REPS -> "${ex.workValue} ${t.repsUnit}"
+    }
     return "${ex.sets} × $work"
 }
 
