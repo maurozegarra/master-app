@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **99 / 154** hechos, 55 pendientes.
+Progreso: **100 / 155** hechos, 55 pendientes.
 
 ## Pendientes
 
@@ -389,6 +389,7 @@ Al escribir esa tabla casi se repite el error con el boton de instrucciones del 
 
 ### Bug
 
+- [x] **TD-155** McGill sale "Partial" en el historial con todo hecho
 - [x] **TD-154** Apagar el video es una preferencia del telefono, no del training
 - [x] **TD-153** El lado del ejercicio se corta en el player: DERECHA sale HA
 - [x] **TD-075** Fix: el video del ejercicio pausa la musica (Spotify) al reproducirse

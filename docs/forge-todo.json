@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-155",
+      "title": "McGill sale \"Partial\" en el historial con todo hecho",
+      "category": "Bug",
+      "status": "done",
+      "manual": "LO REPORTO el usuario el 23-sep, con captura: McGill Big 3 de LUMBAR (short) marcado Partial, y al desplegarlo ninguna serie a medias ni saltada.\n\nCAUSA: el historial dice que un bloque esta completo si tiene tantos registros como totalExercisesInWorkout y todos completos. Desde TD-147 la plancha deja UN REGISTRO POR LADO -McGill son 4 registros-, pero el servicio contaba el total de dos formas: al editar en marcha por (ejercicio, lado) y al ARRANCAR solo por ejercicio. Al arrancar daba 3, y 4 != 3. Salen Partial las sesiones del 22 y el 23-sep; las del 20 y 21 no, por la version con la que se grabaron.\n\nARREGLO: una sola cuenta, SessionRecorder.exercisesPerWorkout, por (ejercicio, lado), usada en los dos caminos. Y el historial compara con \"al menos\" y no con igualdad (SessionRecorder.workoutComplete): asi las del 22 y el 23, guardadas con el total mal contado, se leen bien sin reescribir datos, y lo que de verdad falta o quedo a medias sigue saliendo Partial. Afecta a todo ejercicio por lados: la plancha y el cuello de NIKO tambien. WorkoutCompleteTest.\n\nVALIDADO por el usuario el 23-sep (v1.0.321): McGill del lunes y del miercoles salen Complete."
+    },
+    {
       "id": "TD-154",
       "title": "Apagar el video es una preferencia del telefono, no del training",
       "category": "Bug",

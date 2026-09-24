@@ -86,11 +86,7 @@ class WorkoutPlayerService : Service() {
                     finished = false
                     advancedWorkouts.clear()
                     recorder.clear()
-                    recorder.setTotalExercisesByWorkout(
-                        steps.filter { it.kind == StepKind.WORK }
-                            .groupBy { it.workoutIndex }
-                            .mapValues { it.value.map { ex -> ex.ownerExerciseId }.distinct().size }
-                    )
+                    recorder.setTotalExercisesByWorkout(SessionRecorder.exercisesPerWorkout(steps))
                     startedAt = System.currentTimeMillis()
                     alarmCue(steps.getOrNull(0))
                     beginStep(0)
@@ -128,13 +124,7 @@ class WorkoutPlayerService : Service() {
         if (newSteps.isEmpty() || finished) return
         steps = newSteps
         index = newIndex.coerceIn(0, newSteps.lastIndex)
-        recorder.setTotalExercisesByWorkout(
-            newSteps.filter { it.kind == StepKind.WORK }
-                .groupBy { it.workoutIndex }
-                // Por (ejercicio, lado): con lados, uno cuenta como varios, que es lo que
-                // luego dice "3 de 8" en el historial (TD-147).
-                .mapValues { it.value.map { ex -> ex.ownerExerciseId to ex.side }.distinct().size }
-        )
+        recorder.setTotalExercisesByWorkout(SessionRecorder.exercisesPerWorkout(newSteps))
         persist()
         publishAndNotify()
     }

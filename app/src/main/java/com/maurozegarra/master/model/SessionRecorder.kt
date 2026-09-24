@@ -50,6 +50,36 @@ class SessionRecorder {
         val side: String = "",
     )
 
+    companion object {
+        /**
+         * Cuantos registros tiene que dejar cada workout: uno por ejercicio Y lado (TD-155).
+         *
+         * Es lo que el historial compara para decir si un bloque esta completo, y el
+         * recorder guarda un registro por lado (TD-147). Contar solo por ejercicio daba 3 en
+         * McGill cuando los registros son 4 -la plancha, izquierda y derecha-, y el bloque
+         * salia "Partial" con todo hecho. Paso el 22 y el 23-sep: el servicio lo contaba asi
+         * al ARRANCAR y bien al editar en marcha, dos cuentas del mismo numero. Ahora hay una.
+         */
+        fun exercisesPerWorkout(steps: List<PlayerStep>): Map<Int, Int> =
+            steps.filter { it.kind == StepKind.WORK }
+                .groupBy { it.workoutIndex }
+                .mapValues { (_, pasos) -> pasos.map { it.ownerExerciseId to it.side }.distinct().size }
+
+        /**
+         * Si un workout de una sesion guardada se hizo entero.
+         *
+         * "Al menos" y no "exactamente" tantos registros como dice el total: las sesiones del
+         * 22 y el 23-sep se guardaron con el total mal contado (3 en vez de 4), y con igualdad
+         * seguirian saliendo "Partial" para siempre. Lo que marca un bloque a medias es que
+         * FALTE un ejercicio o que alguno no se completara, y eso se sigue viendo igual.
+         */
+        fun workoutComplete(records: List<ExerciseRecord>): Boolean {
+            if (records.isEmpty()) return false
+            val total = records.first().totalExercisesInWorkout.takeIf { it > 0 } ?: records.size
+            return records.size >= total && records.all { it.setsCompleted == it.totalSets }
+        }
+    }
+
     fun setTotalExercisesByWorkout(map: Map<Int, Int>) {
         totalExercisesByWorkout.clear()
         totalExercisesByWorkout.putAll(map)

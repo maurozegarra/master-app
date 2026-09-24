@@ -55,6 +55,7 @@ import com.maurozegarra.master.ui.SwipeActionsRow
 import com.maurozegarra.master.ui.SwipeRowsController
 import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.model.SessionSource
+import com.maurozegarra.master.model.SessionRecorder
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
@@ -388,8 +389,7 @@ private fun WorkoutGroupSection(
     var expanded by remember { mutableStateOf(false) }
     val workoutName = exercises.firstOrNull()?.workoutName?.ifBlank { t.workout } ?: t.workout
     val allSkipped = exercises.isNotEmpty() && exercises.all { it.status == ExerciseStatus.SKIPPED }
-    val allComplete = !allSkipped && exercises.size == (exercises.firstOrNull()?.totalExercisesInWorkout ?: exercises.size) &&
-        exercises.all { it.setsCompleted == it.totalSets }
+    val allComplete = !allSkipped && SessionRecorder.workoutComplete(exercises)
     val badgeColor = when {
         allSkipped -> STATUS_SKIPPED
         allComplete -> STATUS_DONE
