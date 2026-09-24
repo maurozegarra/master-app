@@ -168,7 +168,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 | 1 | NIKO 1 · Glúteo pesado | asignado el 19-sep como "NIKO - Día de glúteo"; el nombre numerado le llega al reasignarlo |
 | 2 | NIKO 2 · Muay Thai | **hecho el lunes 21-sep**, completo (ver *Sus sesiones*) |
 | 3 | NIKO 3 · Tren superior | **hecho el martes 22-sep**, completo (ver *Sus sesiones*). El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
-| 4 | NIKO 4 · Glúteo a una pierna | **sembrado el 22-sep para el miércoles 23**, con los lados declarados en los tres ejercicios de pierna |
+| 4 | NIKO 4 · Glúteo a una pierna | sembrado el 22-sep, con los lados declarados en los tres ejercicios de pierna. **Pasa al jueves 24**: el 23 no hubo luz hasta las 13:36. Los días van numerados justo para esto: no se salta, se corre |
 | 5 | NIKO 5 · Muay Thai y potencia | plan base |
 | 6 | NIKO 6 · Mixto y movilidad | plan base |
 

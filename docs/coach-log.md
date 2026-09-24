@@ -5,6 +5,28 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-23 — undécima sesión: la primera mañana medida por la alarma
+
+**LUMBAR (short)**, de 05:15 a 05:52, **36 minutos**. Dolor **0 → 0**, sin irradiación.
+
+**La alarma, primer día real (TD-151).** Sonó a las 05:00 y contestó a las **05:00:40**:
+dolor al despertar **1**, y aflojó a las 05:15, **15 minutos**. Confirmado por él: aflojó de
+verdad a esa hora, que es cuando empezó a moverse. La sesión tomó los dos datos sola.
+
+La serie del despertar: 4 (sáb) · 2 (dom) · 2 (lun) · 2 (mar) · **1 (mié)**. Es la mejor
+desde que se mide, y la primera medida en el momento y no de memoria. En el respaldo queda
+una entrada del martes a las 21:42 con dolor 0: es la prueba de la alarma, no una mañana.
+
+- **Sin caminata de entrada:** no había luz en casa. Quedó registrada como no hecha. La de
+  salida la hizo en el pasillo, a 4 km/h.
+- **Carry con los pesos nuevos, 15 · 17.5 · 20: las tres "bien".** La subida de la revisión
+  13 entró sin costar de más. Se queda.
+- **36 minutos y no 44**, por los 10 de la caminata que faltó.
+
+**Sin cambios.** NIKO no entrenó por el mismo corte: NIKO 4 pasa al jueves.
+
+---
+
 ## 2026-09-22 — décima sesión: pide más peso en todo, y aparece el lado flojo
 
 **LUMBAR** completo, de 07:26 a 08:53, **86 minutos**. Dolor **0 → 0**, sin irradiación, y
