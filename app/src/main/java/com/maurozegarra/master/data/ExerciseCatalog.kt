@@ -72,6 +72,10 @@ object ExerciseCatalog {
         Triple("ex_long_knees", "Rodillas largas", "Long Knees"),
         Triple("ex_deep_knees", "Rodillas profundas", "Deep Knees"),
         Triple("ex_kicks", "Patadas", "Kicks"),
+        // Las dos patadas de NIKO 5, por separado: una sola "Patadas" no diria cual costo.
+        Triple("ex_teep", "Teep", "Teep"),
+        Triple("ex_low_kick", "Patada baja", "Low Kick"),
+        Triple("ex_box_jump", "Salto al cajón", "Box Jump"),
         Triple("ex_cable_pull", "Polea", "Cable Pull"),
         Triple("ex_walking_dog", "Perro caminando", "Walking Dog"),
         // Columna lumbar (McGill Big 3 + cadera)

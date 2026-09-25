@@ -145,6 +145,14 @@ data class Exercise(
      * protocolo fijo, y la cuerda del calentamiento no es un round.
      */
     val progression: Progression? = null,
+    /**
+     * Los lados se ALTERNAN dentro de cada serie en vez de hacer todas las de uno primero
+     * (TD-156): izquierda y derecha, descanso, izquierda y derecha. Es lo natural en un
+     * carry -mientras una mano camina, la otra descansa- y era como lo hacia antes de que el
+     * carry fuera por lados. Con el orden por lado, el 24-sep el carry "demoro el doble":
+     * cinco descansos en vez de dos.
+     */
+    val alternateSides: Boolean = false,
 ) {
     fun withStageColor(kind: StepKind, color: Long): Exercise = when (kind) {
         StepKind.PREP -> copy(prepareCfg = prepareCfg.copy(color = color))

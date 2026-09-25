@@ -772,6 +772,12 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // (TD-122) y confundia: arriba "45 kg" de la serie que paso, abajo "55 kg" de la que
         // viene, y no se sabia cual cargar. El feedback se puede volver a marcar yendo atras,
         // asi que en el descanso sobra.
+        val pendienteAnterior = if (step.kind == StepKind.PREP) {
+            vm.playerSteps.getOrNull(vm.playerIndex - 1)
+                ?.takeIf { it.kind == StepKind.WORK && it.timeBased && Effort.asks(it) && vm.effortOf(it) == null }
+        } else {
+            null
+        }
         val proximaCarga = if (step.kind == StepKind.WORK) {
             null
         } else {
@@ -784,6 +790,10 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                     // Lo que no lleva peso tambien dice como fue (TD-152), y tambien en el
                     // descanso: durante un aguante o un round no se puede tocar la pantalla.
                     Effort.cardFor(step) -> EffortFeedback(vm, step, accent, t)
+                    // Lo que quedo sin contestar del aguante anterior, en la preparacion del
+                    // siguiente (TD-156): la ultima serie de un aguante no tiene descanso, y
+                    // en el cuello de NIKO la ultima direccion se quedaba sin respuesta.
+                    pendienteAnterior != null -> EffortFeedback(vm, pendienteAnterior, accent, t)
                     step.kind == StepKind.WORK && step.speedKmh != null -> SpeedCard(vm, step, t)
                     proximaCarga != null -> LoadCard(proximaCarga, t)
                 }
@@ -1938,7 +1948,14 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
  */
 @Composable
 private fun FadeMinutes(value: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
-    Text(t.painFadeMin, color = AppTheme.colors.textDim, fontSize = 13.sp)
+    // Lo que viene de la alarma son minutos EXACTOS -24- y no uno de los botones: sin decirlo
+    // aqui, ningun boton se encendia y parecia que no habia dato (24-sep, TD-156).
+    val exacto = value?.takeIf { it !in listOf(0, 5, 10, 15, 20, 30, 45, 60) }
+    Text(
+        if (exacto != null) "${t.painFadeMin}: $exacto min" else t.painFadeMin,
+        color = if (exacto != null) AppTheme.colors.textPrimary else AppTheme.colors.textDim,
+        fontSize = 13.sp,
+    )
     Spacer(Modifier.height(6.dp))
     listOf(listOf(0, 5, 10, 15), listOf(20, 30, 45, 60)).forEach { fila ->
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {

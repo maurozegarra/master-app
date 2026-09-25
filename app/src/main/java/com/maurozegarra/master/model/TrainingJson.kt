@@ -145,6 +145,7 @@ object TrainingJson {
             .put("showVideo", e.showVideo)
             .put("sides", JSONArray(e.sides))
             .also { o -> e.progression?.let { o.put("progression", it.name) } }
+            .put("alternateSides", e.alternateSides)
     }
 
     private fun exerciseFromJson(o: JSONObject): Exercise {
@@ -194,6 +195,7 @@ object TrainingJson {
             sides = o.optJSONArray("sides")?.let { a -> (0 until a.length()).map { a.getString(it) } }.orEmpty(),
             progression = o.optString("progression", "").takeIf { it.isNotBlank() }
                 ?.let { runCatching { Progression.valueOf(it) }.getOrNull() },
+            alternateSides = o.optBoolean("alternateSides", false),
         )
     }
 

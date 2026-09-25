@@ -7,7 +7,23 @@ package com.maurozegarra.master.model
  */
 object StepEngine {
 
-    fun buildSteps(t: Training): List<PlayerStep> = buildList {
+    /** Si el ejercicio [ei] del workout [wi] es el ultimo que se hace en el training. */
+    private fun esElUltimo(t: Training, wi: Int, ei: Int): Boolean {
+        val quedan = t.workouts.drop(wi + 1).any { it.activeExercises().isNotEmpty() }
+        return !quedan && ei == t.workouts[wi].activeExercises().lastIndex
+    }
+
+    /** Lo que dura el respiro para contestar tras la ultima serie de un aguante (TD-156). */
+    const val ANSWER_SEC = 10
+
+    /**
+     * La cola de pasos de [t].
+     *
+     * [answerWindow]: si al final del training va un respiro para contestar la ultima serie
+     * (ver [ANSWER_SEC]). Lo pide el player, que es donde se contesta; la estructura del
+     * motor, sus estimados y sus tests no lo llevan.
+     */
+    fun buildSteps(t: Training, answerWindow: Boolean = false): List<PlayerStep> = buildList {
         val tw = t.workouts.size.coerceAtLeast(1)
         t.workouts.forEachIndexed { wi, w ->
             val wName = w.activeName()
@@ -18,12 +34,19 @@ object StepEngine {
                 }
                 val sets = e.sets.coerceAtLeast(1)
                 // Un ejercicio sin lados se comporta como siempre: una vuelta con etiqueta
-                // vacia. Con lados, TODAS las series de uno y despues las del otro (TD-147).
+                // vacia. Con lados, TODAS las series de uno y despues las del otro (TD-147),
+                // o alternados dentro de cada serie si el ejercicio lo pide (TD-156).
                 val sides = e.sides.ifEmpty { listOf("") }
-                for ((si, side) in sides.withIndex()) {
-                for (s in 0 until sets) {
+                val orden = if (e.alternateSides) {
+                    (0 until sets).flatMap { s -> sides.indices.map { si -> si to s } }
+                } else {
+                    sides.indices.flatMap { si -> (0 until sets).map { s -> si to s } }
+                }
+                for ((slot, par) in orden.withIndex()) {
+                    val (si, s) = par
+                    val side = sides[si]
                     if (e.workMode == WorkMode.TIME) {
-                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, speedKmh = e.speedKmh, side = side, sideIndex = si, sideCount = e.sides.size))
+                        add(stageStep(StepKind.WORK, e, wName, wi, tw, durationSec = e.workSecAt(s), setIndex = s, totalSets = sets, timeBased = true, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, speedKmh = e.speedKmh, side = side, sideIndex = si, sideCount = e.sides.size, slot = slot))
                     } else {
                         val ws = e.setAt(s)
                         add(
@@ -37,22 +60,33 @@ object StepEngine {
                                 // Un metro con carga es ~1 s caminando: con los 3 s por rep del
                                 // defecto, 36 m estimaban casi dos minutos por viaje.
                                 secPerRep = if (e.workMode == WorkMode.DISTANCE) 1 else e.secPerRep,
-                                exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size,
+                                exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size, slot = slot,
                             ),
                         )
                     }
                     // El ultimo de verdad es el ultimo del ULTIMO lado: entre un lado y el
                     // siguiente hay que cambiar de postura, asi que ese descanso se queda.
-                    val lastSet = s == sets - 1 && si == sides.lastIndex
+                    val lastSet = slot == orden.lastIndex
+                    // Alternando, entre un lado y el otro de la MISMA serie no se descansa:
+                    // se cambia de mano y se sigue. El descanso va al cerrar la serie.
+                    val cambioDeMano = e.alternateSides && si < sides.lastIndex
                     // El descanso que decide es el EFECTIVO de esta serie, no el del
                     // ejercicio: si no, una serie con descanso propio no generaria etapa
                     // en un ejercicio con restSec 0, que es justo como se escribe una
                     // piramide (series pegadas y un respiro largo solo en dos de ellas).
                     val rest = e.restSecAt(s)
-                    if (rest > 0 && !(e.restSkipOnLastSet && lastSet)) {
-                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size))
+                    val trabajo = last()
+                    if (!cambioDeMano && rest > 0 && !(e.restSkipOnLastSet && lastSet)) {
+                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size, slot = slot))
+                    } else if (answerWindow && lastSet && trabajo.timeBased && Effort.asks(trabajo) && esElUltimo(t, wi, ei)) {
+                        // Un respiro para contestar como fue, al FINAL del training (TD-156). Un
+                        // aguante o un round no se contesta mientras se hace -la tarjeta sale en
+                        // el descanso de despues- y la ultima serie no tiene descanso: el 24-sep,
+                        // en el cuello de NIKO, la ultima direccion terminaba la sesion "sin
+                        // tiempo para marcar". Entre ejercicios no hace falta: la tarjeta que
+                        // quedo sin contestar sale en la PREPARACION del siguiente.
+                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = ANSWER_SEC, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size, slot = slot))
                     }
-                }
                 }
                 if (e.cooldownSec > 0) {
                     add(stageStep(StepKind.COOLDOWN, e, wName, wi, tw, durationSec = e.cooldownSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
@@ -112,7 +146,9 @@ object StepEngine {
         { it.workoutIndex },
         { it.exerciseIndex },
         { stageGroup(it) },
-        { if (stageGroup(it) == 1) it.setIndex else 0 },
+        // El puesto y no la serie (TD-156): con lados, la serie sola repetia numero en cada
+        // lado y la reubicacion podia caer en un lado ya hecho.
+        { if (stageGroup(it) == 1) it.slot else 0 },
         { if (it.kind == StepKind.REST) 1 else 0 },
     )
 
@@ -145,6 +181,7 @@ object StepEngine {
         side: String = "",
         sideIndex: Int = 0,
         sideCount: Int = 0,
+        slot: Int = 0,
     ): PlayerStep {
         val cfg = when (kind) {
             StepKind.PREP -> e.prepareCfg
@@ -163,6 +200,7 @@ object StepEngine {
             side = side,
             sideIndex = sideIndex,
             sideCount = sideCount,
+            slot = slot,
             progression = Effort.of(e),
             distance = e.workMode == WorkMode.DISTANCE,
             workoutName = workoutName,

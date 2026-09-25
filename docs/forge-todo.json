@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-157",
+      "title": "La alarma confirma lo que se toco: vibracion, el numero en grande y \"Change\"",
+      "category": "UI",
+      "status": "done",
+      "manual": "LO PIDIO el usuario el 24-sep, con la alarma ya funcionando: \"al seleccionar el nivel de dolor no hay ningun feedback: vibracion, animacion o algo que me indique lo que acabo de seleccionar. Lo toco y se apaga, me da la sensacion como que el app se cerro, o hubo un error\".\n\nHECHO en codigo el mismo dia, como se le propuso: al tocar un numero se guarda y se calla la alarma EN EL ACTO -si el sistema cerrara el app durante la confirmacion, el dato ya esta-, vibra corto y doble (distinto del largo de la alarma), y durante 3 s la pantalla ensena el numero en grande con un rebote, \"Pain N · saved\", su descripcion de la escala y \"When it eases, tap the notification\". \"Change\" vuelve a la escala sin que vuelva a sonar y corrige el numero conservando la hora del despertar (MorningAlarm.correct). Snooze y apagar sin contestar tambien vibran y dicen \"Snoozed · 5 min\" / \"Alarm off\" durante 1.2 s. Sigue siendo UN toque: no hay boton de confirmar.\n\nVALIDADO por el usuario el 24-sep (v1.0.325)."
+    },
+    {
+      "id": "TD-156",
+      "title": "Lo que salio de la primera semana con metros y feedback: carry alternado, respiro para contestar, preparacion de la caminata",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "REPORTADO el 24-sep, cuatro cosas de una vez:\n(1) El usuario: \"Carry demoro el doble, no me gusto\". Con la revision 15 el carry iba por lados uno tras otro -tres viajes con la izquierda y despues tres con la derecha- con un minuto entre cada uno: cinco descansos en vez de los dos de antes.\n(2) NIKO: en el cuello, la ultima direccion \"no te da tiempo para marcar el feedback, la sesion simplemente termina\". Un aguante no se contesta mientras se hace, y la ultima serie no tiene descanso detras.\n(3) El usuario: en la caminata de LUMBAR no hay PREP, \"apenas le doy al play, el tiempo ya esta corriendo\".\n(4) El usuario: \"Minutes until it eased no lo veo marcado\". La alarma guardo 24 minutos, y la pantalla final solo tiene botones 0/5/10/15/20/30/45/60: ninguno se encendia.\n\nHECHO en codigo el mismo dia:\n(1) Exercise.alternateSides: izquierda y derecha dentro de cada serie, sin descanso entre manos y con el descanso al cerrar la serie. El carry lo usa (LUMBAR_REVISION 16).\n(2) Al final del training, un respiro de 10 s (StepEngine.ANSWER_SEC) si la ultima serie es por tiempo y pregunta como fue; lo pide el player con buildSteps(answerWindow = true), asi que ni los estimados ni los tests de estructura lo llevan. Entre ejercicios, la tarjeta que quedo sin contestar sale en la PREPARACION del siguiente.\n(3) Las caminatas lumbares llevan 10 s de preparacion.\n(4) FadeMinutes ensena el valor exacto (\"Minutes until it eased: 24 min\") cuando no es uno de los botones.\n\nUN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mitad de corrida, StepEngine comparaba por SERIE, y con lados la serie se repite en cada lado: estando en la serie 2 de la derecha podia volver a la serie 2 de la izquierda, ya hecha. Ahora cada paso lleva su PUESTO (PlayerStep.slot) en el orden en que se hace, que es lo que se compara. Y un ejercicio sin exerciseId no pregunta como fue: sin id no hay historial donde leerlo. AlternateSidesTest."
+    },
+    {
       "id": "TD-155",
       "title": "McGill sale \"Partial\" en el historial con todo hecho",
       "category": "Bug",

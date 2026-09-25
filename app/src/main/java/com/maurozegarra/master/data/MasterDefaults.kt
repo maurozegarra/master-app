@@ -349,7 +349,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 15
+    const val LUMBAR_REVISION = 16
 
     /**
      * De quien es la rutina lumbar.
@@ -623,13 +623,14 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 11
+    const val NIKO_REVISION = 12
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
     const val NIKO_MUAY_THAI_ID = 960002L
     const val NIKO_UPPER_ID = 960003L
     const val NIKO_SINGLE_LEG_ID = 960004L
+    const val NIKO_POWER_ID = 960005L
 
     /**
      * Los dias de NIKO que ya existen, en orden (ver docs/niko.md).
@@ -644,6 +645,7 @@ object MasterDefaults {
         nikoMuayThai(lang),
         nikoUpperBody(lang),
         nikoSingleLeg(lang),
+        nikoPower(lang),
     )
 
     /**
@@ -956,6 +958,86 @@ object MasterDefaults {
     }
 
     /**
+     * NIKO 5 · Muay Thai y potencia (ver docs/niko.md).
+     *
+     * La POTENCIA va primero, con las piernas frescas: el salto al cajon enseña a producir
+     * fuerza rapido, que es lo que tiene una patada, y cansado se aprende a caer mal. Pocas
+     * repeticiones y descanso largo a proposito: esto no es cardio.
+     *
+     * Las rodillas al saco y la cuerda van por ROUNDS -se pregunta en cada uno (TD-152)-, y
+     * las patadas POR LADO: una patada izquierda y una derecha son dos capacidades, y en el
+     * remo y el peso muerto a una pierna ya salio que sus lados no son iguales.
+     *
+     * El plan decia "teep y patada baja, 4 x 10 por lado": son dos patadas distintas, asi que
+     * van como dos ejercicios de 2 x 10 por lado. Con uno solo, el historial no diria cual.
+     */
+    fun nikoPower(lang: String): Training {
+        val b = NikoBlocks(lang, seqStart = 960500L)
+        val now = System.currentTimeMillis()
+        val lados = listOf("Izquierda", "Derecha")
+        return Training(
+            id = NIKO_POWER_ID,
+            name = "NIKO 5 · Muay Thai y potencia",
+            workouts = listOf(
+                b.warmup(),
+                Workout(
+                    id = b.id(),
+                    name = "Potencia",
+                    exercises = listOf(
+                        b.ex("ex_box_jump", "Cajón de 51 cm. Cae suave y BAJA CAMINANDO, no saltando", 5, sets = 4, rest = 90),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Rodillas al saco",
+                    exercises = listOf(
+                        b.ex("ex_long_knees", "Cadera adelante en cada rodilla. Manos arriba", 30, sets = 5, rest = 30, mode = WorkMode.TIME),
+                        b.ex("ex_deep_knees", "Agarre de clinch al saco. Jala hacia ti al subir la rodilla", 30, sets = 4, rest = 30, mode = WorkMode.TIME),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Patadas",
+                    exercises = listOf(
+                        b.ex("ex_teep", "Empuja con la planta, no con la punta. Vuelve a la guardia", 10, sets = 2, rest = 45)
+                            .copy(sides = lados),
+                        b.ex("ex_low_kick", "Gira la cadera y pega con la canilla. Guardia arriba", 10, sets = 2, rest = 45)
+                            .copy(sides = lados),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Cuerda",
+                    exercises = listOf(
+                        // Por rounds, como el saco: aqui la cuerda es acondicionamiento, no el
+                        // calentamiento de dos minutos. Declarado, porque por defecto seria un
+                        // aguante y preguntaria solo por tiempo.
+                        b.ex("ex_rope_jumping", "Ritmo de pelea: cambia de pie, acelera los últimos 30 s", 180, sets = 3, rest = 60, mode = WorkMode.TIME)
+                            .copy(progression = Progression.ROUNDS),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Core",
+                    exercises = listOf(
+                        b.ex("ex_leg_raises", "La espalda baja pegada al piso. Baja lento", 12, sets = 3, rest = 45),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Cuello",
+                    exercises = listOf(
+                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta", 20, sets = 1, rest = 15, mode = WorkMode.TIME)
+                            .copy(sides = listOf("Adelante", "Atrás", "Derecha", "Izquierda")),
+                    ),
+                ),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
      * Lo que comparten los dias de NIKO: el constructor de ejercicios y el calentamiento.
      *
      * [seqStart] separa los ids de un dia y del otro, igual que en [LumbarBlocks].
@@ -1011,7 +1093,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 9
+    const val CATALOG_INSTRUCTIONS_REVISION = 10
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -1207,6 +1289,59 @@ object MasterDefaults {
                 "Baja los talones todo lo que puedas y siente el estiramiento abajo.",
                 "Sube hasta la punta de los pies y aprieta un segundo arriba.",
                 "Lento en las dos direcciones. Rebotar no entrena la pantorrilla, la castiga.",
+            ),
+        ),
+        "ex_box_jump" to ExerciseMedia(
+            listOf(
+                "De frente al cajón, a medio paso. Pies al ancho de la cadera.",
+                "Baja la cadera un poco y lleva los brazos atrás; lánzalos arriba al saltar.",
+                "Cae SUAVE sobre todo el pie, con las rodillas dobladas y alineadas con la punta de los pies. Sin ruido.",
+                "Ponte de pie arriba, y BAJA CAMINANDO. Saltar hacia abajo es lo que lastima.",
+                "Cada salto es uno solo y bien hecho: descansa unos segundos entre salto y salto si hace falta.",
+                "Si el cajón da miedo o cae duro, usa el lado más bajo.",
+            ),
+        ),
+        "ex_long_knees" to ExerciseMedia(
+            listOf(
+                "De frente al saco, a un paso. Guardia arriba.",
+                "Lleva la cadera ADELANTE y sube la rodilla recto hacia el saco, como si lo atravesaras.",
+                "La pierna de apoyo sobre la punta del pie; el cuerpo un poco hacia atrás para dar alcance.",
+                "Vuelve a la guardia y cambia de pierna. Ritmo constante durante los 30 segundos.",
+            ),
+        ),
+        "ex_deep_knees" to ExerciseMedia(
+            listOf(
+                "Agarra el saco como en el clinch: las dos manos detrás, codos juntos.",
+                "Jala el saco hacia ti mientras subes la rodilla hacia el centro.",
+                "Rodillas cortas y rápidas, alternando. La espalda derecha, sin encorvarte sobre el saco.",
+                "Respira al pegar. Si te falta el aire, baja el ritmo, pero no pares.",
+            ),
+        ),
+        "ex_teep" to ExerciseMedia(
+            listOf(
+                "Desde la guardia, sube la rodilla de la pierna que patea hasta la cintura.",
+                "Estira la pierna empujando hacia adelante con la PLANTA del pie, como quien empuja una puerta.",
+                "La cadera empuja con la pierna; el cuerpo se va un poco atrás, sin perder la guardia.",
+                "Recoge la pierna por el mismo camino y vuelve a la guardia.",
+                "Diez con una pierna y después diez con la otra: el app te dice cuál toca.",
+            ),
+        ),
+        "ex_low_kick" to ExerciseMedia(
+            listOf(
+                "Desde la guardia, da un paso corto hacia afuera con el pie de apoyo.",
+                "Gira sobre la punta de ese pie y deja que la cadera arrastre la pierna.",
+                "Pega con la CANILLA, no con el empeine, a la altura del muslo del saco.",
+                "El brazo del mismo lado baja hacia atrás para dar vuelta; el otro protege la cara.",
+                "Vuelve a la guardia después de cada patada. Mejor diez bien hechas que diez rápidas.",
+            ),
+        ),
+        "ex_leg_raises" to ExerciseMedia(
+            listOf(
+                "Échate boca arriba, con las manos a los lados o debajo de la cadera.",
+                "Aprieta el abdomen: la espalda baja se queda pegada al piso todo el tiempo.",
+                "Sube las piernas juntas y estiradas hasta la vertical.",
+                "Bájalas LENTO, sin dejar que la espalda se despegue. Para justo antes de tocar el piso.",
+                "Si la espalda se levanta, dobla un poco las rodillas.",
             ),
         ),
         "ex_inverted_row" to ExerciseMedia(
@@ -1559,7 +1694,9 @@ object MasterDefaults {
         fun walk(name: String, sec: Int, note: String, kmh: Double?): Workout = Workout(
             id = id(),
             name = name,
-            exercises = listOf(ex("ex_walk", note = note, work = sec).copy(speedKmh = kmh)),
+            // Con 10 s de preparacion (revision 16): sin ella, el 24-sep "apenas le doy al
+            // play, el tiempo ya esta corriendo", antes de haber subido a la caminadora.
+            exercises = listOf(ex("ex_walk", note = note, work = sec, prep = 10).copy(speedKmh = kmh)),
         )
 
         fun mobility(): Workout = Workout(
@@ -1620,7 +1757,9 @@ object MasterDefaults {
          */
         private fun carry(): Exercise =
             loaded("ex_suitcase_carry", 36, "3 laps of the hallway: 36 m. Walk tall, don't lean", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL)
-                .copy(dumbbellCount = 1, workMode = WorkMode.DISTANCE, sides = listOf("Left", "Right"))
+                // Alternando (TD-156, revision 16): izquierda y derecha seguidas, y el descanso
+                // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
+                .copy(dumbbellCount = 1, workMode = WorkMode.DISTANCE, sides = listOf("Left", "Right"), alternateSides = true)
 
         fun hipGlute(): Workout = Workout(
             id = id(),

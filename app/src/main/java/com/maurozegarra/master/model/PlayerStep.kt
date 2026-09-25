@@ -38,6 +38,15 @@ data class PlayerStep(
      *  dirección que se pueda poner como flecha. */
     val sideIndex: Int = 0,
     val sideCount: Int = 0,
+    /**
+     * El puesto de esta serie dentro de su ejercicio, en el orden en que se hace (TD-156).
+     *
+     * Hace falta porque con lados la serie sola no ordena: la serie 2 de la derecha va
+     * DESPUES de la 3 de la izquierda si los lados van uno tras otro, y ANTES si se
+     * alternan. Reubicar sin esto, al editar a mitad de corrida, podia mandar de vuelta a un
+     * lado ya hecho.
+     */
+    val slot: Int = 0,
     /** Si [reps] son METROS y no repeticiones (TD-095): cambia la unidad, nada más. */
     val distance: Boolean = false,
     /** Cómo progresa el ejercicio, que decide si esta serie pregunta cómo fue (TD-152). */

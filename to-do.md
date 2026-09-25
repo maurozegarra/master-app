@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **137 / 155** hechos, 18 pendientes.
+Progreso: **138 / 157** hechos, 19 pendientes.
 
 ## Pendientes
 
@@ -145,6 +145,20 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 ### Fix
 
+- [ ] **TD-156** Lo que salio de la primera semana con metros y feedback: carry alternado, respiro para contestar, preparacion de la caminata
+  - REPORTADO el 24-sep, cuatro cosas de una vez:
+(1) El usuario: "Carry demoro el doble, no me gusto". Con la revision 15 el carry iba por lados uno tras otro -tres viajes con la izquierda y despues tres con la derecha- con un minuto entre cada uno: cinco descansos en vez de los dos de antes.
+(2) NIKO: en el cuello, la ultima direccion "no te da tiempo para marcar el feedback, la sesion simplemente termina". Un aguante no se contesta mientras se hace, y la ultima serie no tiene descanso detras.
+(3) El usuario: en la caminata de LUMBAR no hay PREP, "apenas le doy al play, el tiempo ya esta corriendo".
+(4) El usuario: "Minutes until it eased no lo veo marcado". La alarma guardo 24 minutos, y la pantalla final solo tiene botones 0/5/10/15/20/30/45/60: ninguno se encendia.
+
+HECHO en codigo el mismo dia:
+(1) Exercise.alternateSides: izquierda y derecha dentro de cada serie, sin descanso entre manos y con el descanso al cerrar la serie. El carry lo usa (LUMBAR_REVISION 16).
+(2) Al final del training, un respiro de 10 s (StepEngine.ANSWER_SEC) si la ultima serie es por tiempo y pregunta como fue; lo pide el player con buildSteps(answerWindow = true), asi que ni los estimados ni los tests de estructura lo llevan. Entre ejercicios, la tarjeta que quedo sin contestar sale en la PREPARACION del siguiente.
+(3) Las caminatas lumbares llevan 10 s de preparacion.
+(4) FadeMinutes ensena el valor exacto ("Minutes until it eased: 24 min") cuando no es uno de los botones.
+
+UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mitad de corrida, StepEngine comparaba por SERIE, y con lados la serie se repite en cada lado: estando en la serie 2 de la derecha podia volver a la serie 2 de la izquierda, ya hecha. Ahora cada paso lleva su PUESTO (PlayerStep.slot) en el orden en que se hace, que es lo que se compara. Y un ejercicio sin exerciseId no pregunta como fue: sin id no hay historial donde leerlo. AlternateSidesTest.
 - [ ] **TD-100** Dos instancias del mismo ejercicio en un workout se funden en un registro
   - ENCONTRADO al arreglar TD-099 y levantado a peticion del usuario. SessionRecorder agrupa por ExerciseKey (exerciseId, workoutIndex), asi que si un workout repite el mismo ejercicio del catalogo, las dos apariciones escriben en la MISMA casilla: la segunda pisa las series de la primera y en el historial queda un solo registro, con el nombre y las series de la ultima. Se pierde la mitad del trabajo hecho. DONDE MUERDE HOY: es la razon por la que la plancha lateral de la rutina lumbar necesito dos entradas de catalogo, ex_side_plank_l y ex_side_plank_r (TD-086), en vez de una con nota 'cada lado' como hace el resto del catalogo. Se eligio asi a proposito para no perder las series de un lado, pero es rodear el fallo, no arreglarlo. EL FIX APARENTE: meter exerciseIndex en la clave, que desde TD-099 ya viaja en el registro. Dos apariciones del mismo ejercicio pasan a ser dos filas. LO QUE HAY QUE PENSAR ANTES, porque cambia como se cuenta el historial: - Con la clave nueva, un workout con 'Pushups' dos veces pasa de una fila a dos. Es mas fiel, pero es un cambio visible en trainings que el usuario ya tiene (MASTER repite ejercicios en varios sitios: comprobarlo antes). - ExerciseHistoryScreen agrupa por ejercicio a lo largo del tiempo; hay que ver si dos filas por sesion le estropean la serie o la mejoran. - Las sesiones ya guardadas no se pueden separar hacia atras: lo que se fundio, se fundio. - Si se arregla, la plancha lateral podria volver a ser UNA entrada de catalogo con nota, y el catalogo quedaria mas limpio. Eso seria un cambio aparte y posterior. Relacionado con TD-101, que es el que decide que se puede tocar del historial y que no.
 - [ ] **TD-064** Fix: quitar rotativo a un workout borra todas las variantes menos la primera
@@ -316,6 +330,7 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 ### UI
 
+- [x] **TD-157** La alarma confirma lo que se toco: vibracion, el numero en grande y "Change"
 - [x] **TD-150** Los trainings archivados tambien se ordenan arrastrando
 - [x] **TD-109** La escala de dolor describe cada numero, no solo los extremos
 - [x] **TD-107** El centro del player cede sitio a la nota: contador junto a las reps y tarjeta de peso translucida

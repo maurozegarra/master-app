@@ -61,6 +61,9 @@ object Effort {
      */
     fun of(e: Exercise): Progression = e.progression ?: when {
         e.isWeighted -> Progression.LOAD
+        // Sin movimiento no hay nada que seguir: la respuesta se lee por ejercicio en el
+        // historial, y sin id no hay de quien. Todo lo del catalogo y lo propio lleva id.
+        e.exerciseId.isBlank() -> Progression.NONE
         e.exerciseId in NONE -> Progression.NONE
         e.exerciseId in ROUNDS -> Progression.ROUNDS
         e.workMode == WorkMode.TIME -> Progression.TIME

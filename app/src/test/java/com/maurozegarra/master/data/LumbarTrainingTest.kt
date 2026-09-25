@@ -205,10 +205,11 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `lo cronometrado suma 41 minutos y 58 segundos`() {
-        // Tres minutos mas que en la revision 14: el carry por lados son seis viajes y no
-        // tres, con su minuto de descanso entre cada uno menos el ultimo -5 en vez de 2-.
-        assertEquals(2518, steps.sumOf { it.durationSec })
+    fun `lo cronometrado suma 40 minutos y 58 segundos`() {
+        // Revision 16: el carry ALTERNA las manos dentro de cada serie, asi que vuelven a ser
+        // dos descansos y no cinco (-3 min respecto de la 15), y las dos caminatas ganan 10 s
+        // de preparacion cada una (+20 s): 2518 - 180 + 20.
+        assertEquals(2358, steps.sumOf { it.durationSec })
     }
 
     @Test

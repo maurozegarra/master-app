@@ -1658,7 +1658,7 @@ class MasterViewModel(
     private fun applyToRunningPlayer(updated: Training) {
         if (activePlayerTrainingId != updated.id) return
         val current = playerStep ?: return
-        val rebuilt = StepEngine.buildSteps(asSeen(updated))
+        val rebuilt = StepEngine.buildSteps(asSeen(updated), answerWindow = true)
         if (rebuilt.isEmpty()) return
         val at = StepEngine.relocate(current, rebuilt)
         val steps = if (StepEngine.sameSlot(rebuilt[at], current)) {
@@ -2126,7 +2126,7 @@ class MasterViewModel(
             return
         }
         val t = trainings.firstOrNull { it.id == trainingId } ?: return
-        val steps = StepEngine.buildSteps(asSeen(t))
+        val steps = StepEngine.buildSteps(asSeen(t), answerWindow = true)
         if (steps.isEmpty()) return
         PlayerBus.state.value = null
         sessionReloaded = false
