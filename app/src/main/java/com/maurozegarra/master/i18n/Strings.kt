@@ -495,6 +495,11 @@ object I18n {
             next = "Next",
             allowFullScreen = "Allow the alarm over the lock screen",
             allowExact = "Allow alarms at an exact time, or it won't ring",
+            saved = "Pain %1${'$'}d · saved",
+            easeHint = "When it eases, tap the notification",
+            change = "Change",
+            snoozed = "Snoozed · %1${'$'}d min",
+            turnedOff = "Alarm off",
         ),
         effort = EffortStrings(
             howWeightFelt = "How did the weight feel?",
@@ -593,6 +598,12 @@ data class MorningStrings(
     val next: String,
     val allowFullScreen: String,
     val allowExact: String,
+    /** La confirmacion al contestar, para que tocar no parezca que el app se cerro. */
+    val saved: String,
+    val easeHint: String,
+    val change: String,
+    val snoozed: String,
+    val turnedOff: String,
 )
 
 /** Los textos de medir en metros (TD-095). */

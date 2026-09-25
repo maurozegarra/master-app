@@ -91,6 +91,17 @@ object MorningAlarm {
         reschedule(context)
     }
 
+    /**
+     * Corrige el dolor de hoy, desde el "Change" de la confirmacion. Conserva la hora en que
+     * se contesto: esa es la del despertar, y de ella salen los minutos hasta aflojar.
+     */
+    fun correct(context: Context, pain: Int) {
+        val store = MorningStore(context)
+        val zone = ZoneId.systemDefault()
+        val hoy = MorningLog.forDay(store.entries(), System.currentTimeMillis(), zone) ?: return
+        store.saveEntries(MorningLog.upsert(store.entries(), hoy.copy(painOnWaking = pain), LocalDate.now(zone)))
+    }
+
     /** "Aflojó": anota la hora. Los minutos salen solos de [MorningEntry.fadeMinutes]. */
     fun eased(context: Context) {
         val store = MorningStore(context)
