@@ -168,8 +168,8 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 | 1 | NIKO 1 · Glúteo pesado | asignado el 19-sep como "NIKO - Día de glúteo"; el nombre numerado le llega al reasignarlo |
 | 2 | NIKO 2 · Muay Thai | **hecho el lunes 21-sep**, completo (ver *Sus sesiones*) |
 | 3 | NIKO 3 · Tren superior | **hecho el martes 22-sep**, completo (ver *Sus sesiones*). El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
-| 4 | NIKO 4 · Glúteo a una pierna | sembrado el 22-sep, con los lados declarados en los tres ejercicios de pierna. **Pasa al jueves 24**: el 23 no hubo luz hasta las 13:36. Los días van numerados justo para esto: no se salta, se corre |
-| 5 | NIKO 5 · Muay Thai y potencia | plan base |
+| 4 | NIKO 4 · Glúteo a una pierna | **hecho el jueves 24-sep**, corrido un día por el corte de luz del 23 (ver *Sus sesiones*) |
+| 5 | NIKO 5 · Muay Thai y potencia | **sembrado el 24-sep para el viernes 25**. Las patadas van como dos ejercicios, teep y patada baja, 2 × 10 por lado cada uno |
 | 6 | NIKO 6 · Mixto y movilidad | plan base |
 
 ### Los seis dias
@@ -273,6 +273,30 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 ## Sus sesiones
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
+
+### 2026-09-24 — NIKO 4 · Glúteo a una pierna, la primera que contesta serie por serie
+
+**De 08:06 a 09:28, 81 minutos, completa.** Primera sesión con la pregunta en cada serie de
+lo que no lleva peso (TD-152), y la contestó casi entera. Corrida un día por el corte de luz
+del 23.
+
+| Ejercicio | Lo que marcó | Para la próxima NIKO 4 |
+|---|---|---|
+| Peso muerto a una pierna, 7.5 kg | **izquierda: las tres fáciles** · derecha: bien, bien, fácil | 10 kg |
+| Subida al cajón | 2×5 bien · 2×5 bien · **2×7.5 pesado**, en los dos lados | la última en 2×5 |
+| Hiperextensión | **las tres "Hard"**, aunque hizo las 12 | 3 × 10, o brazos cruzados al pecho |
+| Pantorrilla sentada | 5 bien · **7.5, 7.5 y 10 pesado** | 5 · 5 · 7.5 · 7.5 |
+| Hip thrust a una pierna | las seis "bien" | igual |
+| Puente de activación | fácil | igual: es para despertar el glúteo |
+| Abducción | bien | igual |
+| Cuello | adelante y atrás "bien"; **derecha e izquierda sin contestar** | — |
+
+- **La asimetría no es de un lado entero.** En el peso muerto a una pierna, la izquierda fue
+  la fuerte; en el remo del 22, el brazo izquierdo fue el que pidió bajar. Solo se ve porque
+  cada lado se registra aparte.
+- **El cuello sin contestar era un fallo del app, no de ella** (TD-156): la última dirección
+  terminaba la sesión sin tiempo para marcar. Arreglado el mismo día.
+- Los ajustes van en la próxima NIKO 4, no antes: la semana sigue con NIKO 5 el viernes 25.
 
 ### 2026-09-22 — NIKO 3 · Tren superior, y aparece el lado izquierdo
 
