@@ -1,7 +1,7 @@
 {
+  "versionCode": 333,
   "minVersionCode": 1,
-  "versionName": "1.0.330",
-  "changelog": "release: circuitos para NIKO 6, el registro conserva lo hecho, la alarma con su icono",
-  "versionCode": 330,
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.330/master-1.0.330.apk"
+  "changelog": "release: el siguiente training primero, el historial de NIKO en History",
+  "versionName": "1.0.333",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.333/master-1.0.333.apk"
 }
