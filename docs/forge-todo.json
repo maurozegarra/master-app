@@ -2,11 +2,46 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-159",
+      "title": "Alarma: etiquetas de la noche, para cruzarlas con el dolor de la manana",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PROPUESTO el 24-sep y registrado el 25 (salio de TD-158, donde solo quedaba mencionado).\n\nPOR QUE, y es la de mas valor de las cinco: el 19-sep su mejor dato vino de la NOCHE y no del ejercicio -colchon rotado y almohada bajo las rodillas: cinco horas sin dolor-, y la noche siguiente empeoro por dormir de lado cuando NIKO se paso a su cama. Nadie va a recordar eso a mano semanas despues.\n\nQUE: tras contestar el dolor en la alarma, etiquetas OPCIONALES de un toque -almohada en las rodillas, dormi de lado, cena tarde, entrene tarde, otra cama, dormi poco-, guardadas en la manana del dia. En la pantalla Morning, con unas semanas de datos: el dolor medio con y sin cada etiqueta (\"con almohada 1.2, sin ella 2.8\").\n\nA DECIDIR: la lista de etiquetas -la propone el coach, la ajusta el usuario-; si se contestan en la misma pantalla de la alarma o despues, en Morning, para no alargar el primer toque del dia."
+    },
+    {
+      "id": "TD-160",
+      "title": "Alarma: aviso para ir a dormir, calculado desde la hora de la alarma",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PROPUESTO el 24-sep, registrado el 25. Un aviso a la noche -por ejemplo 7 h 30 antes de la alarma del dia siguiente- y, con la hora en que se apaga, cuanto se durmio. Da contexto a la serie del dolor: una manana mala tras cinco horas de sueno no dice lo mismo que tras ocho."
+    },
+    {
+      "id": "TD-161",
+      "title": "Alarma: sonido que sube de a poco",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PROPUESTO el 24-sep, registrado el 25. Que el volumen empiece bajo y llegue al maximo en unos 30 s, en vez de arrancar al maximo. Es un despertador para alguien con dolor lumbar: un sobresalto al despertar no ayuda."
+    },
+    {
+      "id": "TD-162",
+      "title": "Alarma: control rapido en el panel de Android",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PROPUESTO el 24-sep, registrado el 25. Un Quick Settings tile para encender, apagar o saltar la alarma de manana sin abrir el app."
+    },
+    {
+      "id": "TD-163",
+      "title": "Alarma: widget con la proxima alarma y las ultimas mananas",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PROPUESTO el 24-sep, registrado el 25. En la pantalla de inicio: la hora de la proxima alarma y el dolor de las ultimas 7 mananas, con su color y su numero."
+    },
+    {
       "id": "TD-158",
       "title": "La alarma sale de Settings: su propio icono \"Morning\", su pantalla y el dolor en el calendario",
       "category": "Feature",
       "status": "done",
-      "manual": "LO PIDIO el usuario el 25-sep: \"la alarma ya funciona... me gustaria hacerla un poquito mas independiente, dentro de settings estuvo bueno para probar... pero primero es ubicarla\". Se le propuso con \"creatividad\" y eligio el paquete completo del primer paso.\n\nHECHO en codigo el mismo dia, pendiente de validar:\n- SEGUNDA ENTRADA EN EL LANZADOR, \"Morning\", con su icono -un sol que sale, en el mismo negro, blanco y rojo que MASTER- (MorningHomeActivity, con taskAffinity propio: en recientes es otra tarjeta, como un app aparte, aunque viva en este paquete).\n- SU PANTALLA: hoy (contestado o no, el dolor en grande con su color y su descripcion, la hora; \"It eased\" si todavia no aflojo, \"Answer now\" si no contesto), la serie de 28 dias en DOS graficos -dolor al despertar 0-10 y minutos hasta aflojar-, nunca en uno con dos ejes, tocando una barra se lee el dia y el valor; y el horario con \"Skip tomorrow\" para saltar un dia sin tocar el horario.\n- EN LA BARRA DE MASTER, un despertador con la hora de la proxima alarma; abre la misma pantalla.\n- Settings ya no tiene la alarma.\n- Las mananas contestadas despues de las 18:00 no cuentan como mananas (MorningLog.mornings): son pruebas, como la del 22-sep a las 21:42. Se filtran al leer, no se borran.\n\nLo que viene, propuesto y sin hacer: etiquetas de la noche (almohada en las rodillas, dormi de lado, cena tarde...) para cruzarlas con el dolor; hora de dormir; sonido que sube de a poco; control rapido del panel de Android; widget.\n\nUN DATO PERDIDO Y RECUPERADO, visto en la primera captura: la manana real del jueves 24 (dolor 1, 24 min) no estaba. La prueba de la alarma que se le pidio al usuario a las 23:00 de ese dia la reemplazo, y el filtro de pruebas la descarto despues. Dos arreglos: una respuesta de noche ya no pisa una manana de verdad (MorningLog.mayRecord), y los dias sin manana se completan con el dolor que guardo la sesion de ese dia (MorningLog.fromSessions, llamado al arrancar desde el ViewModel, que ya era el puente con las sesiones). Asi volvio el 24 y la serie empieza el 19-sep, con los dias de antes de la alarma. Las barras de los minutos van en azul neutro: el rojo en esa pantalla significa dolor alto.\n\nAJUSTES del usuario el 25-sep, al verla: (1) el horario va PRIMERO en la pantalla; (2) la pantalla se mantiene despierta, como MASTER; (3) FUERA el dolor bajo el calendario de la lista de trainings: \"sobrecarga ese componente, dejalo como estaba antes de la alarma\". El calendario queda como antes y la serie vive solo en la pantalla Morning.\n\nVALIDADO por el usuario el 25-sep (v1.0.328)."
+      "manual": "LO PIDIO el usuario el 25-sep: \"la alarma ya funciona... me gustaria hacerla un poquito mas independiente, dentro de settings estuvo bueno para probar... pero primero es ubicarla\". Se le propuso con \"creatividad\" y eligio el paquete completo del primer paso.\n\nHECHO en codigo el mismo dia, pendiente de validar:\n- SEGUNDA ENTRADA EN EL LANZADOR, \"Morning\", con su icono -un sol que sale, en el mismo negro, blanco y rojo que MASTER- (MorningHomeActivity, con taskAffinity propio: en recientes es otra tarjeta, como un app aparte, aunque viva en este paquete).\n- SU PANTALLA: hoy (contestado o no, el dolor en grande con su color y su descripcion, la hora; \"It eased\" si todavia no aflojo, \"Answer now\" si no contesto), la serie de 28 dias en DOS graficos -dolor al despertar 0-10 y minutos hasta aflojar-, nunca en uno con dos ejes, tocando una barra se lee el dia y el valor; y el horario con \"Skip tomorrow\" para saltar un dia sin tocar el horario.\n- EN LA BARRA DE MASTER, un despertador con la hora de la proxima alarma; abre la misma pantalla.\n- Settings ya no tiene la alarma.\n- Las mananas contestadas despues de las 18:00 no cuentan como mananas (MorningLog.mornings): son pruebas, como la del 22-sep a las 21:42. Se filtran al leer, no se borran.\n\nLo que viene, propuesto y sin hacer, registrado aparte: TD-159 etiquetas de la noche, TD-160 hora de dormir, TD-161 sonido que sube de a poco, TD-162 control rapido del panel, TD-163 widget.\n\nUN DATO PERDIDO Y RECUPERADO, visto en la primera captura: la manana real del jueves 24 (dolor 1, 24 min) no estaba. La prueba de la alarma que se le pidio al usuario a las 23:00 de ese dia la reemplazo, y el filtro de pruebas la descarto despues. Dos arreglos: una respuesta de noche ya no pisa una manana de verdad (MorningLog.mayRecord), y los dias sin manana se completan con el dolor que guardo la sesion de ese dia (MorningLog.fromSessions, llamado al arrancar desde el ViewModel, que ya era el puente con las sesiones). Asi volvio el 24 y la serie empieza el 19-sep, con los dias de antes de la alarma. Las barras de los minutos van en azul neutro: el rojo en esa pantalla significa dolor alto.\n\nAJUSTES del usuario el 25-sep, al verla: (1) el horario va PRIMERO en la pantalla; (2) la pantalla se mantiene despierta, como MASTER; (3) FUERA el dolor bajo el calendario de la lista de trainings: \"sobrecarga ese componente, dejalo como estaba antes de la alarma\". El calendario queda como antes y la serie vive solo en la pantalla Morning.\n\nVALIDADO por el usuario el 25-sep (v1.0.328)."
     },
     {
       "id": "TD-157",

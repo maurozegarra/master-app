@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **139 / 158** hechos, 19 pendientes.
+Progreso: **139 / 163** hechos, 24 pendientes.
 
 ## Pendientes
 
@@ -40,6 +40,22 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
+- [ ] **TD-159** Alarma: etiquetas de la noche, para cruzarlas con el dolor de la manana
+  - PROPUESTO el 24-sep y registrado el 25 (salio de TD-158, donde solo quedaba mencionado).
+
+POR QUE, y es la de mas valor de las cinco: el 19-sep su mejor dato vino de la NOCHE y no del ejercicio -colchon rotado y almohada bajo las rodillas: cinco horas sin dolor-, y la noche siguiente empeoro por dormir de lado cuando NIKO se paso a su cama. Nadie va a recordar eso a mano semanas despues.
+
+QUE: tras contestar el dolor en la alarma, etiquetas OPCIONALES de un toque -almohada en las rodillas, dormi de lado, cena tarde, entrene tarde, otra cama, dormi poco-, guardadas en la manana del dia. En la pantalla Morning, con unas semanas de datos: el dolor medio con y sin cada etiqueta ("con almohada 1.2, sin ella 2.8").
+
+A DECIDIR: la lista de etiquetas -la propone el coach, la ajusta el usuario-; si se contestan en la misma pantalla de la alarma o despues, en Morning, para no alargar el primer toque del dia.
+- [ ] **TD-160** Alarma: aviso para ir a dormir, calculado desde la hora de la alarma
+  - PROPUESTO el 24-sep, registrado el 25. Un aviso a la noche -por ejemplo 7 h 30 antes de la alarma del dia siguiente- y, con la hora en que se apaga, cuanto se durmio. Da contexto a la serie del dolor: una manana mala tras cinco horas de sueno no dice lo mismo que tras ocho.
+- [ ] **TD-161** Alarma: sonido que sube de a poco
+  - PROPUESTO el 24-sep, registrado el 25. Que el volumen empiece bajo y llegue al maximo en unos 30 s, en vez de arrancar al maximo. Es un despertador para alguien con dolor lumbar: un sobresalto al despertar no ayuda.
+- [ ] **TD-162** Alarma: control rapido en el panel de Android
+  - PROPUESTO el 24-sep, registrado el 25. Un Quick Settings tile para encender, apagar o saltar la alarma de manana sin abrir el app.
+- [ ] **TD-163** Alarma: widget con la proxima alarma y las ultimas mananas
+  - PROPUESTO el 24-sep, registrado el 25. En la pantalla de inicio: la hora de la proxima alarma y el dolor de las ultimas 7 mananas, con su color y su numero.
 - [ ] **TD-151** El dolor se anota cuando pasa, no al terminar el training
   - LO PIDIO el usuario el 21-sep-2026: el dolor al despertar, los minutos que tarda en aflojar y el dolor de antes se contestan en la pantalla final, despues de una hora de ejercicio, y se vuelve un ejercicio de memoria. "Mientras mas pronto registre el dolor, mejor": el de la manana apenas se despierta, y el alivio apenas pasa.
 
