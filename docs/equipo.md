@@ -63,6 +63,11 @@ La de 22.5 no entro en el inventario del 18-sep; la agrego el 19.
 - **Chaleco lastrado:** hasta 10 kg, de kilo en kilo.
 - **Tobilleras:** pares de 0.5, 1, 2 y 4 kg.
 - **Banda elástica:** una sola, ligera, en uso para manguito rotador.
+- **Power bands** (bucle de látex de 208 cm), compradas el 26-sep: una de **1.3 cm** de ancho
+  (ligera: pallof press anclado al rack, pull-apart, face pull) y una de **3.2 cm** (media:
+  dominada asistida para NIKO, pallof más pesado).
+- **Bandas de tela para glúteo, set de 3** (ligera, media, fuerte): **pedidas el 26-sep**,
+  llegan entre el 27 y el 28. Caminata lateral, abducción, clamshell, activación.
 
 ### Soportes
 
@@ -138,7 +143,7 @@ sentadilla.
 - **El puente tiene recorrido largo por delante**: 41, 46 y más con la misma barra.
 - **El techo de las mancuernas es 25 kg**, con saltos de 2.5 hasta ahí.
 - **La caminadora no es el límite**: 18 km/h contra los 6 que camina hoy.
-- **Faltan bandas.** La que hay es ligera y está en uso. Es la única compra que hace falta,
+- **Faltaban bandas** (resuelto el 26-sep: las dos power bands compradas, las de tela en camino). La que había es ligera y está en uso. Es la única compra que hace falta,
   y se hace el lunes 21-sep:
 
   | Qué | Detalle | Para qué |
