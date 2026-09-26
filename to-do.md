@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **139 / 166** hechos, 27 pendientes.
+Progreso: **140 / 167** hechos, 27 pendientes.
 
 ## Pendientes
 
@@ -215,6 +215,7 @@ UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mit
 
 ### Feature
 
+- [x] **TD-167** El training que sigue va primero en la lista, con un destello en el borde
 - [x] **TD-158** La alarma sale de Settings: su propio icono "Morning", su pantalla y el dolor en el calendario
 - [x] **TD-152** Los ejercicios con el peso del cuerpo tampoco dicen si costaron
 - [x] **TD-147** El ejercicio unilateral: el lado entra en el modelo

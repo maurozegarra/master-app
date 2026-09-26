@@ -270,6 +270,16 @@ data class Training(
      * lumbares, desde el código; el editor todavía no la ofrece.
      */
     val tracksPain: Boolean = false,
+    /**
+     * Los días de la semana en que toca (TD-167), para saber cuál es el siguiente. Vacío =
+     * sin día fijo: el de día malo, o cualquiera que no se programe.
+     */
+    val scheduleDays: Set<java.time.DayOfWeek> = emptySet(),
+    /**
+     * El número de este día en un ciclo que se corre si se pierde uno, como los de NIKO: 1
+     * a 6 (TD-167). Null = no va en ciclo. Ver [NextTraining].
+     */
+    val cycleDay: Int? = null,
 )
 
 /**

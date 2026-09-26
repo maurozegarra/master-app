@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-167",
+      "title": "El training que sigue va primero en la lista, con un destello en el borde",
+      "category": "Feature",
+      "status": "done",
+      "manual": "LO PIDIO el usuario el 25-sep: \"el training programado para manana (training siguiente) que salga primero en la lista, lo mismo para Niko\", y que se note con \"un destello que recorre el borde\".\n\nDECIDIDO con el: el siguiente es el de HOY si todavia no entreno -a las 5 tiene que estar arriba el que le toca- y el de MANANA si ya entreno (una sesion completa; a medias no cuenta). En su telefono solo cuenta lo suyo: los de NIKO se miran en su historial.\n\nHECHO en codigo el mismo dia: Training.scheduleDays (su semana: el completo martes, viernes y sabado; el corto lunes, miercoles, jueves y domingo; el de dia malo sin dia) y Training.cycleDay (NIKO 1 a 6: el siguiente es el que viene despues del ultimo que completo, y del 6 vuelve al 1). Si hay de los dos, manda la semana: por eso en el telefono del coach el siguiente es el suyo. NextTraining, puro, con NextTrainingTest. Viaja con la asignacion (LUMBAR_REVISION 17, NIKO_REVISION 15).\n\nEN LA LISTA: el siguiente va fijo arriba y no se arrastra; el resto se arrastra como siempre, ahora movido por identidad porque las posiciones de pantalla ya no son las del orden guardado. El destello es el del player (AnimatedGlowBorder), mas fino -1 dp, ajustado por el usuario desde 1.5- y mas lento -una vuelta cada 5.5 s-.\n\nVALIDADO por el usuario el 25-sep (v1.0.332), en su telefono. En el de NIKO se vera con el proximo release."
+    },
+    {
       "id": "TD-166",
       "title": "Circuitos en el editor de workouts",
       "category": "Deseable",

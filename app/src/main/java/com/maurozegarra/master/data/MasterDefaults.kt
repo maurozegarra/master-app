@@ -349,7 +349,7 @@ object MasterDefaults {
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
      */
-    const val LUMBAR_REVISION = 16
+    const val LUMBAR_REVISION = 17
 
     /**
      * De quien es la rutina lumbar.
@@ -401,6 +401,8 @@ object MasterDefaults {
             id = LUMBAR_ID,
             name = "LUMBAR",
             tracksPain = true,
+            // Su semana (ver docs/coach.md, La semana): lo que decide cual va primero (TD-167).
+            scheduleDays = setOf(java.time.DayOfWeek.TUESDAY, java.time.DayOfWeek.FRIDAY, java.time.DayOfWeek.SATURDAY),
             workouts = listOf(
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
                 b.mobility(),
@@ -485,6 +487,8 @@ object MasterDefaults {
             id = LUMBAR_SHORT_ID,
             name = "LUMBAR (short)",
             tracksPain = true,
+            // Su semana (ver docs/coach.md, La semana): lo que decide cual va primero (TD-167).
+            scheduleDays = setOf(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.WEDNESDAY, java.time.DayOfWeek.THURSDAY, java.time.DayOfWeek.SUNDAY),
             workouts = listOf(
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = 6.0),
                 b.mobility(),
@@ -623,7 +627,7 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 14
+    const val NIKO_REVISION = 15
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -680,6 +684,7 @@ object MasterDefaults {
             // Numerado y no con nombre de dia: si un dia no puede, al siguiente sigue con el
             // numero que le toca, en vez de tener que saltarse "el lunes".
             name = "NIKO 1 · Glúteo pesado",
+            cycleDay = 1,
             workouts = listOf(
                 b.warmup(),
                 Workout(
@@ -761,6 +766,7 @@ object MasterDefaults {
         return Training(
             id = NIKO_MUAY_THAI_ID,
             name = "NIKO 2 · Muay Thai",
+            cycleDay = 2,
             workouts = listOf(
                 b.warmup(),
                 Workout(
@@ -829,6 +835,7 @@ object MasterDefaults {
         return Training(
             id = NIKO_UPPER_ID,
             name = "NIKO 3 · Tren superior",
+            cycleDay = 3,
             workouts = listOf(
                 b.warmup(),
                 Workout(
@@ -906,6 +913,7 @@ object MasterDefaults {
         return Training(
             id = NIKO_SINGLE_LEG_ID,
             name = "NIKO 4 · Glúteo a una pierna",
+            cycleDay = 4,
             workouts = listOf(
                 b.warmup(),
                 Workout(
@@ -980,6 +988,7 @@ object MasterDefaults {
         return Training(
             id = NIKO_POWER_ID,
             name = "NIKO 5 · Muay Thai y potencia",
+            cycleDay = 5,
             workouts = listOf(
                 b.warmup(),
                 Workout(
@@ -1057,6 +1066,7 @@ object MasterDefaults {
         return Training(
             id = NIKO_MIXED_ID,
             name = "NIKO 6 · Mixto y movilidad",
+            cycleDay = 6,
             workouts = listOf(
                 b.warmup(),
                 Workout(

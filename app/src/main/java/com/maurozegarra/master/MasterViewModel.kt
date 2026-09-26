@@ -35,6 +35,7 @@ import com.maurozegarra.master.model.reorderedFrom
 import com.maurozegarra.master.model.SessionSource
 import com.maurozegarra.master.model.SessionSync
 import com.maurozegarra.master.model.Archive
+import com.maurozegarra.master.model.NextTraining
 import com.maurozegarra.master.model.AthleteSession
 import com.maurozegarra.master.model.AthleteHistory
 import com.maurozegarra.master.model.Effort
@@ -1710,6 +1711,23 @@ class MasterViewModel(
     fun moveVisibleTraining(from: Int, to: Int) {
         val reales = Archive.visibleIndices(trainings, archivedUids)
         moveTraining(reales.getOrNull(from) ?: return, reales.getOrNull(to) ?: return)
+    }
+
+    /**
+     * El training que sigue (TD-167): el de hoy si todavia no entreno, el de mañana si ya.
+     * Va primero en la lista y lleva el destello. Solo entre lo visible: lo archivado no se
+     * propone. Ver [NextTraining].
+     */
+    val nextTrainingId: Long?
+        get() = NextTraining.of(visibleTrainings, sessions, java.time.LocalDate.now(), java.time.ZoneId.systemDefault())
+
+    /**
+     * Mover por identidad y no por posicion (TD-167): en la lista, el siguiente va arriba
+     * aunque en el orden guardado este en otro sitio, asi que las posiciones de pantalla ya
+     * no son las del orden. Soltar una tarjeta sobre otra la pone donde estaba esa otra.
+     */
+    fun moveTrainingById(fromId: Long, toId: Long) {
+        moveTraining(trainings.indexOfFirst { it.id == fromId }, trainings.indexOfFirst { it.id == toId })
     }
 
     /** Igual, dentro de lo archivado (TD-150). */

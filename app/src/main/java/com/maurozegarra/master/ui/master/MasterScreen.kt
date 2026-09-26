@@ -84,6 +84,8 @@ import com.maurozegarra.master.ui.rememberPullToSyncState
 import com.maurozegarra.master.ui.rememberSwipeRowsController
 import com.maurozegarra.master.ui.settings.syncMessage
 import com.maurozegarra.master.ui.ReorderableContentType
+import com.maurozegarra.master.ui.glowColors
+import com.maurozegarra.master.ui.AnimatedGlowBorder
 import com.maurozegarra.master.ui.reorderableGroup
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
@@ -202,10 +204,21 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                 if (from >= inicioArchivados) {
                     vm.moveArchivedTraining(from - inicioArchivados, to - inicioArchivados)
                 } else {
-                    vm.moveVisibleTraining(from - 1, to - 1)
+                    // El siguiente va fijo arriba y no se arrastra (TD-167): las posiciones
+                    // arrastrables son las del resto, y se mueven por identidad.
+                    val prox = vm.nextTrainingId
+                    val resto = vm.visibleTrainings.filter { it.id != prox }.map { it.id }
+                    val base = if (prox != null) 2 else 1
+                    val a = resto.getOrNull(from - base)
+                    val b = resto.getOrNull(to - base)
+                    if (a != null && b != null) vm.moveTrainingById(a, b)
                 }
             }
             val visibles = vm.visibleTrainings
+            // El que sigue, primero y con el destello (TD-167). Solo cambia lo que se VE: el
+            // orden guardado -el que se arrastra- no se toca.
+            val proximo = vm.nextTrainingId?.let { id -> visibles.firstOrNull { it.id == id } }
+            val resto = if (proximo != null) visibles.filter { it.id != proximo.id } else visibles
             val archivados = vm.archivedTrainings
             var archivedExpanded by rememberSaveable { mutableStateOf(false) }
             // Al hacer scroll se cierra la fila abierta: dejarla abierta fuera de vista
@@ -213,22 +226,11 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             LaunchedEffect(listState.isScrollInProgress) {
                 if (listState.isScrollInProgress) swipeController.closeAll()
             }
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize().dragContainer(dragDropState),
-                contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item(key = "week_calendar") {
-                    WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- }, onDayClick = { selectedDate = it })
-                }
-                itemsIndexed(
-                    visibles,
-                    key = { _, it -> it.id },
-                    contentType = { _, _ -> ReorderableContentType },
-                ) { index, tr ->
-                    DraggableItem(dragDropState, index + 1) { _ ->
-                        TrainingCard(
+            // La tarjeta de un training visible, con todas sus acciones. Una sola definicion
+            // para el que va fijo arriba y para los que se arrastran.
+            @Composable
+            fun VisibleCard(tr: Training, isNext: Boolean) {
+                TrainingCard(
                             training = tr,
                             accent = accent,
                             t = t,
@@ -259,8 +261,32 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             } else {
                                 null
                             },
-                            minutos = TrainingDuration.minutes(tr, vm.sessions),
-                        )
+                    minutos = TrainingDuration.minutes(tr, vm.sessions),
+                    isNext = isNext,
+                )
+            }
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize().dragContainer(dragDropState),
+                contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                item(key = "week_calendar") {
+                    WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- }, onDayClick = { selectedDate = it })
+                }
+                if (proximo != null) {
+                    // Con su propio tipo: no se arrastra ni recibe arrastres, va fijo arriba.
+                    item(key = proximo.id, contentType = "next_training") {
+                        VisibleCard(proximo, isNext = true)
+                    }
+                }
+                itemsIndexed(
+                    resto,
+                    key = { _, it -> it.id },
+                    contentType = { _, _ -> ReorderableContentType },
+                ) { index, tr ->
+                    DraggableItem(dragDropState, index + (if (proximo != null) 2 else 1)) { _ ->
+                        VisibleCard(tr, isNext = false)
                     }
                 }
 
@@ -601,6 +627,8 @@ private fun TrainingCard(
     isArchived: Boolean = false,
     /** Cuanto dura, en minutos. Ver [TrainingDuration] (TD-040). */
     minutos: Int = 0,
+    /** El que sigue (TD-167): lleva el destello que recorre el borde. */
+    isNext: Boolean = false,
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
     // Los de la corrida que viene: en un workout rotativo, los de la variante ACTIVA. Antes
@@ -645,6 +673,7 @@ private fun TrainingCard(
     }
 
     SwipeActionsRow(actions = actions, controller = swipeController, rightAction = rightAction) {
+    Box {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -714,6 +743,12 @@ private fun TrainingCard(
             )
         }
 
+    }
+    // El destello del que sigue (TD-167): el mismo del player, mas fino -1 dp- y mas lento, para
+    // que se note sin llamar la atencion. Encima de la tarjeta y siguiendo sus esquinas.
+    if (isNext) {
+        AnimatedGlowBorder(cornerRadius = Dims.row, colors = glowColors(accent), strokeWidth = 1.dp, durationMillis = 5500)
+    }
     }
     }
 
