@@ -137,7 +137,10 @@ private fun MorningHome() {
         }
 
         Card {
-            Hoy(deHoy, zone, t, onAnswer = {
+            Hoy(deHoy, zone, t, onEdit = { n ->
+                MorningAlarm.edit(ctx, hoy, n)
+                vuelta++
+            }, onAnswer = {
                 ctx.startActivity(Intent(ctx, MorningActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }, onEased = {
                 MorningAlarm.eased(ctx)
@@ -195,7 +198,7 @@ private fun Card(content: @Composable () -> Unit) {
 
 /** Lo de hoy: contestado o no, y si ya aflojó; con el botón que toca en cada caso. */
 @Composable
-private fun Hoy(entry: MorningEntry?, zone: ZoneId, t: Strings, onAnswer: () -> Unit, onEased: () -> Unit) {
+private fun Hoy(entry: MorningEntry?, zone: ZoneId, t: Strings, onEdit: (Int) -> Unit, onAnswer: () -> Unit, onEased: () -> Unit) {
     Text(t.morning.today, color = AppTheme.colors.textDim, fontSize = 13.sp)
     Spacer(Modifier.height(10.dp))
     val pain = entry?.painOnWaking
@@ -205,8 +208,13 @@ private fun Hoy(entry: MorningEntry?, zone: ZoneId, t: Strings, onAnswer: () -> 
         Boton(t.morning.answerNow, onAnswer)
         return
     }
+    // Tocar el número lo corrige (TD-164): la escala se abre en el sitio.
+    var corrigiendo by remember(entry.date) { mutableStateOf(false) }
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(64.dp).clip(CircleShape).background(painColor(pain)), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.size(64.dp).clip(CircleShape).background(painColor(pain)).clickable { corrigiendo = !corrigiendo },
+            contentAlignment = Alignment.Center,
+        ) {
             Text("$pain", color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.width(14.dp))
@@ -216,6 +224,33 @@ private fun Hoy(entry: MorningEntry?, zone: ZoneId, t: Strings, onAnswer: () -> 
                 val hora = Instant.ofEpochMilli(it).atZone(zone).toLocalTime().format(DateTimeFormatter.ofPattern("H:mm"))
                 Text(t.morning.answeredAt.format(hora), color = AppTheme.colors.textDim, fontSize = 13.sp)
             }
+        }
+    }
+    if (corrigiendo) {
+        Spacer(Modifier.height(12.dp))
+        Text(t.morning.change, color = AppTheme.colors.textDim, fontSize = 13.sp)
+        Spacer(Modifier.height(6.dp))
+        (0..10).chunked(6).forEach { fila ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                fila.forEach { n ->
+                    Box(
+                        Modifier
+                            .weight(1f)
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(if (n == pain) painColor(n) else AppTheme.colors.track)
+                            .clickable {
+                                onEdit(n)
+                                corrigiendo = false
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("$n", color = if (n == pain) Color.White else AppTheme.colors.textDim, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                repeat(6 - fila.size) { Spacer(Modifier.weight(1f)) }
+            }
+            Spacer(Modifier.height(6.dp))
         }
     }
     Spacer(Modifier.height(12.dp))

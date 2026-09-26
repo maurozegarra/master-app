@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **139 / 163** hechos, 24 pendientes.
+Progreso: **139 / 166** hechos, 27 pendientes.
 
 ## Pendientes
 
@@ -29,6 +29,8 @@ HECHO en codigo el 21-sep, pendiente del SQL y de probarlo en el telefono de NIK
 
 ### Deseable
 
+- [ ] **TD-166** Circuitos en el editor de workouts
+  - DESEABLE, no prioridad, decidido por el usuario el 25-sep: "cada vez lo veo mas improbable que yo entre y cree un Training". Los trainings entran desde el codigo (el coach los arma), y Workout.circuit (TD-137) ya funciona asi. Seria un interruptor "Circuit" en el editor del workout, junto al de rotativo.
 - [ ] **TD-133** El app en español, para NIKO y para cualquiera que no lea ingles
   - PEDIDO el 19-sep-2026: 'niko no maneja el ingles, lo ideal seria que el app tenga soporte para español, apuntalo como un TD'. Para salir del paso ese dia se pusieron en español las instrucciones del catalogo (TD-131) y el texto libre de su rutina (TD-127 revision 3).
 
@@ -40,6 +42,14 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
+- [ ] **TD-164** Corregir el dolor de la manana desde la pantalla Morning
+  - LO PIDIO el usuario el 25-sep: contesto 1 en la alarma, le parecio "demasiado optimista", "y como no hay forma de editarlo, lo hice cuando tuve la oportunidad" -en la sesion, horas despues-, "pero tuve que hacer el esfuerzo de no olvidarlo".
+
+HECHO en codigo el mismo dia: en Morning, tocar el numero de hoy abre la escala en el sitio y corrige (MorningAlarm.edit), a cualquier hora y conservando la hora del despertar. La sesion de ese dia no se reescribe: la serie se lee de las mananas.
+- [ ] **TD-165** Dolor habitual y dolor de crisis, separados: la sesion ya no pregunta por la crisis
+  - LO EXPLICO el usuario el 25-sep, al preguntarle por que no contesto el dolor final ni la irradiacion: "entendia que eso tenia que ver con los dias que estuve en crisis, y eso es importante distinguirlo. El dolor al despertar es un dolor habitual, hasta diria normalizado, y es muy distinto al dolor de los dias que estuve en crisis. Si bien usamos la misma escala, estan separados por una razon. El dolor de la crisis ya se fue, lo que me queda es el dolor habitual y eso es lo que hay que ir mejorando. No marque porque ya no existe ese dolor ni al comienzo ni al final, y sin ese dolor, no hay irradiacion."
+
+HECHO en codigo el mismo dia: la pantalla previa ya no pregunta "How is your back right now?", y al final, el dolor antes/despues y la irradiacion van plegados detras de "Back crisis today" -abierto solo si se toca, o si ya tiene algo-. El habitual lo pregunta la alarma y la sesion lo toma de ahi. Anotado en docs/coach.md: un Pain before vacio ya no es un olvido.
 - [ ] **TD-159** Alarma: etiquetas de la noche, para cruzarlas con el dolor de la manana
   - PROPUESTO el 24-sep y registrado el 25 (salio de TD-158, donde solo quedaba mencionado).
 
@@ -121,6 +131,10 @@ Y MIRA LAS VARIANTES: un workout rotativo esconde sus ejercicios dentro de ellas
   - LIMITACION DEL MODELO, encontrada al diseñar el dia 6 de NIKO (19-sep-2026). Lo ideal para defensa personal es un circuito: saco 60 s → sprawl 30 s → saco 60 s..., repetido por rounds. El player hace un ejercicio con TODAS sus series y recien pasa al siguiente, asi que un circuito no se puede expresar: hoy va como series seguidas de cada ejercicio.
 
 Es la regla del coach -'lo que se propone tiene que entrar en el modelo'- aplicada: se diseña con lo que hay y se anota lo que falta, como paso con la piramide de McGill (TD-085). Seria un workout con 'rounds': repetir su lista de ejercicios N veces, con descanso entre vueltas.
+
+HECHO el 25-sep, pedido por el usuario "para que manana tenga todo lo que necesita" (NIKO 6, sabado 26): Workout.circuit. El motor arma la cola normal y la reordena round a round -mismos pasos, otro orden-, con la preparacion de cada ejercicio solo la primera vez. La reubicacion tras editar en marcha compara por round y despues por ejercicio. NIKO 6 lo usa: saco 3 min -> sprawl 30 s -> 1 min, cuatro veces (NIKO_REVISION 14). Sin interruptor en el editor todavia: los circuitos entran desde el codigo. CircuitTest.
+
+Y DE PASO, del 25-sep: NIKO hizo la cuerda entera, volvio atras solo para marcar, y el registro de 180 s se piso con uno de 1 s. SessionRecorder ahora conserva lo hecho: volver a una serie completada no la acorta ni la desmarca.
 - [ ] **TD-111** El historial no distingue la pauta de lo que de verdad movio
   - EL HUECO, destapado el 16-sep-2026 al leer la sesion del telefono. El historial guardo 'puente de gluteos 12 x 26 kg' y el coach no pudo saber si eso era lo que MOVIO o lo que el app le PROPUSO: el player escribe en el registro el peso que estaba en pantalla, y si el usuario no toca el dial, la pauta y lo hecho son el mismo numero. La vispera la diferencia era real -la pauta pedia 26 y se quedo en 21 porque le parecio mucho- y solo se supo porque lo conto por chat.
 

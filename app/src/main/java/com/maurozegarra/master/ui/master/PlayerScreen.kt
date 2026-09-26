@@ -241,10 +241,9 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
             // Contestar es opcional: el boton de empezar no espera a nadie. Una pregunta que
             // bloquea el entrenamiento se contesta de cualquier forma con tal de pasar, y
             // ese dato vale menos que ninguno.
-            if (vm.asksHowItWent()) {
-                PainScale(t.painNow, vm.pendingPainBefore, accent, t) { vm.setPainBefore(it) }
-                Spacer(Modifier.height(12.dp))
-            }
+            // Ya no se pregunta aqui "How is your back right now?" (TD-165): era el dolor de
+            // CRISIS, y la crisis paso. El habitual lo pregunta la alarma al despertar; el de
+            // una crisis, si vuelve, se anota al final, detras de "Back crisis today".
             PrimaryButton(
                 label = t.start,
                 accent = accent,
@@ -1895,6 +1894,22 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
         FadeMinutes(saved?.painFadeMin, accent, t) { vm.saveHowItWent(painFadeMin = it) }
         Spacer(Modifier.height(12.dp))
 
+        // El dolor de CRISIS, aparte y plegado (TD-165). El usuario, el 25-sep: el dolor al
+        // despertar es el habitual, "normalizado", y el de la crisis es otro, aunque use la
+        // misma escala; "ya no existe ese dolor ni al comienzo ni al final, y sin ese dolor
+        // no hay irradiacion". Preguntarlo siempre lo convertia en una casilla vacia que
+        // parecia un olvido. Se abre solo si se toca, o si ya tiene algo contestado.
+        val yaHayCrisis = saved?.painBefore != null || saved?.painAfter != null || saved?.radiating != null
+        var crisis by remember(saved?.id) { mutableStateOf(yaHayCrisis) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(t.crisis.toggle, color = AppTheme.colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(t.crisis.hint, color = AppTheme.colors.textDim, fontSize = 12.sp)
+            }
+            androidx.compose.material3.Switch(checked = crisis, onCheckedChange = { crisis = it })
+        }
+        Spacer(Modifier.height(12.dp))
+        if (crisis) {
         PainScale(t.painBefore, saved?.painBefore, accent, t) { vm.saveHowItWent(painBefore = it) }
         Spacer(Modifier.height(12.dp))
         PainScale(t.painAfter, saved?.painAfter, accent, t) { vm.saveHowItWent(painAfter = it) }
@@ -1907,6 +1922,7 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
             FeedbackChip(t.painRadiating, saved?.radiating == true, accent) { vm.saveHowItWent(radiating = true) }
         }
         Spacer(Modifier.height(12.dp))
+        }
 
         OutlinedTextField(
             value = note,

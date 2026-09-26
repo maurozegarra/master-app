@@ -219,6 +219,8 @@ data class Strings(
     val morning: MorningStrings,
     /** Medir en metros (TD-095). En bloque, por el tope de la JVM. */
     val distance: DistanceStrings,
+    /** Dolor habitual y dolor de crisis, separados (TD-165). En bloque, por el tope de la JVM. */
+    val crisis: CrisisStrings,
     val nextSuggestions: String,
     val painOnWaking: String,
     val painFadeMin: String,
@@ -482,6 +484,10 @@ object I18n {
         applyColorTitle = "Apply color to",
         applyColorThisExercise = "This exercise only",
         applyColorAllTraining = "All exercises in training",
+        crisis = CrisisStrings(
+            toggle = "Back crisis today",
+            hint = "Only on a bad day: pain before, after, and whether it radiates",
+        ),
         distance = DistanceStrings(
             mode = "Meters",
             unit = "m",
@@ -645,4 +651,10 @@ data class MorningStrings(
 data class DistanceStrings(
     val mode: String,
     val unit: String,
+)
+
+/** El dolor de crisis, aparte del habitual (TD-165). */
+data class CrisisStrings(
+    val toggle: String,
+    val hint: String,
 )

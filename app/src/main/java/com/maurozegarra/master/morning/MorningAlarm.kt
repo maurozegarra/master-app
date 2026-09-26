@@ -120,6 +120,21 @@ object MorningAlarm {
         store.saveEntries(MorningLog.upsert(store.entries(), hoy.copy(painOnWaking = pain), LocalDate.now(zone)))
     }
 
+    /**
+     * Corrige el dolor de la mañana de [date] a cualquier hora, desde la pantalla Morning
+     * (TD-164). A diferencia de [correct], no mira la hora: corregir una mañana de verdad a
+     * mediodía es legítimo; lo que no puede es una PRUEBA de noche pisarla.
+     *
+     * El 25-sep el usuario contestó 1, le pareció "demasiado optimista", y como no había
+     * forma de editarlo tuvo que acordarse de cambiarlo en la sesión, horas después.
+     */
+    fun edit(context: Context, date: LocalDate, pain: Int) {
+        val store = MorningStore(context)
+        val zone = ZoneId.systemDefault()
+        val dia = store.entries().firstOrNull { it.date == date.toString() } ?: MorningEntry(date.toString())
+        store.saveEntries(MorningLog.upsert(store.entries(), dia.copy(painOnWaking = pain), LocalDate.now(zone)))
+    }
+
     /** "Aflojó": anota la hora. Los minutos salen solos de [MorningEntry.fadeMinutes]. */
     fun eased(context: Context) {
         val store = MorningStore(context)

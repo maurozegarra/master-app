@@ -2,6 +2,27 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-166",
+      "title": "Circuitos en el editor de workouts",
+      "category": "Deseable",
+      "status": "pending",
+      "manual": "DESEABLE, no prioridad, decidido por el usuario el 25-sep: \"cada vez lo veo mas improbable que yo entre y cree un Training\". Los trainings entran desde el codigo (el coach los arma), y Workout.circuit (TD-137) ya funciona asi. Seria un interruptor \"Circuit\" en el editor del workout, junto al de rotativo."
+    },
+    {
+      "id": "TD-164",
+      "title": "Corregir el dolor de la manana desde la pantalla Morning",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "LO PIDIO el usuario el 25-sep: contesto 1 en la alarma, le parecio \"demasiado optimista\", \"y como no hay forma de editarlo, lo hice cuando tuve la oportunidad\" -en la sesion, horas despues-, \"pero tuve que hacer el esfuerzo de no olvidarlo\".\n\nHECHO en codigo el mismo dia: en Morning, tocar el numero de hoy abre la escala en el sitio y corrige (MorningAlarm.edit), a cualquier hora y conservando la hora del despertar. La sesion de ese dia no se reescribe: la serie se lee de las mananas."
+    },
+    {
+      "id": "TD-165",
+      "title": "Dolor habitual y dolor de crisis, separados: la sesion ya no pregunta por la crisis",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "LO EXPLICO el usuario el 25-sep, al preguntarle por que no contesto el dolor final ni la irradiacion: \"entendia que eso tenia que ver con los dias que estuve en crisis, y eso es importante distinguirlo. El dolor al despertar es un dolor habitual, hasta diria normalizado, y es muy distinto al dolor de los dias que estuve en crisis. Si bien usamos la misma escala, estan separados por una razon. El dolor de la crisis ya se fue, lo que me queda es el dolor habitual y eso es lo que hay que ir mejorando. No marque porque ya no existe ese dolor ni al comienzo ni al final, y sin ese dolor, no hay irradiacion.\"\n\nHECHO en codigo el mismo dia: la pantalla previa ya no pregunta \"How is your back right now?\", y al final, el dolor antes/despues y la irradiacion van plegados detras de \"Back crisis today\" -abierto solo si se toca, o si ya tiene algo-. El habitual lo pregunta la alarma y la sesion lo toma de ahi. Anotado en docs/coach.md: un Pain before vacio ya no es un olvido."
+    },
+    {
       "id": "TD-159",
       "title": "Alarma: etiquetas de la noche, para cruzarlas con el dolor de la manana",
       "category": "Feature",
@@ -188,7 +209,7 @@
       "title": "Circuitos: alternar ejercicios por rounds en vez de terminar uno para empezar otro",
       "category": "Feature",
       "status": "pending",
-      "manual": "LIMITACION DEL MODELO, encontrada al diseñar el dia 6 de NIKO (19-sep-2026). Lo ideal para defensa personal es un circuito: saco 60 s → sprawl 30 s → saco 60 s..., repetido por rounds. El player hace un ejercicio con TODAS sus series y recien pasa al siguiente, asi que un circuito no se puede expresar: hoy va como series seguidas de cada ejercicio.\n\nEs la regla del coach -'lo que se propone tiene que entrar en el modelo'- aplicada: se diseña con lo que hay y se anota lo que falta, como paso con la piramide de McGill (TD-085). Seria un workout con 'rounds': repetir su lista de ejercicios N veces, con descanso entre vueltas."
+      "manual": "LIMITACION DEL MODELO, encontrada al diseñar el dia 6 de NIKO (19-sep-2026). Lo ideal para defensa personal es un circuito: saco 60 s → sprawl 30 s → saco 60 s..., repetido por rounds. El player hace un ejercicio con TODAS sus series y recien pasa al siguiente, asi que un circuito no se puede expresar: hoy va como series seguidas de cada ejercicio.\n\nEs la regla del coach -'lo que se propone tiene que entrar en el modelo'- aplicada: se diseña con lo que hay y se anota lo que falta, como paso con la piramide de McGill (TD-085). Seria un workout con 'rounds': repetir su lista de ejercicios N veces, con descanso entre vueltas.\n\nHECHO el 25-sep, pedido por el usuario \"para que manana tenga todo lo que necesita\" (NIKO 6, sabado 26): Workout.circuit. El motor arma la cola normal y la reordena round a round -mismos pasos, otro orden-, con la preparacion de cada ejercicio solo la primera vez. La reubicacion tras editar en marcha compara por round y despues por ejercicio. NIKO 6 lo usa: saco 3 min -> sprawl 30 s -> 1 min, cuatro veces (NIKO_REVISION 14). Sin interruptor en el editor todavia: los circuitos entran desde el codigo. CircuitTest.\n\nY DE PASO, del 25-sep: NIKO hizo la cuerda entera, volvio atras solo para marcar, y el registro de 180 s se piso con uno de 1 s. SessionRecorder ahora conserva lo hecho: volver a una serie completada no la acorta ni la desmarca."
     },
     {
       "id": "TD-136",
