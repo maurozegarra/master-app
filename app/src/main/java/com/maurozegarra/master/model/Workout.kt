@@ -184,6 +184,17 @@ data class Workout(
     val rotating: Boolean = false,
     val rotationIndex: Int = 0,
     val variants: List<WorkoutVariant> = emptyList(),
+    /**
+     * CIRCUITO (TD-137): los ejercicios se alternan por rounds en vez de terminar uno para
+     * empezar el otro. Round 1 de cada uno, round 2 de cada uno... El descanso de cada serie
+     * es el de su ejercicio: lo que va de un ejercicio al siguiente dentro del round se
+     * escribe como el descanso del primero.
+     *
+     * Existe por el Muay Thai: el acondicionamiento de pelea es saco, sprawl, saco, y hecho
+     * en bloques -todo el saco y luego todos los sprawls- es otro entrenamiento. El plan de
+     * NIKO 6 lo pedia desde el 19-sep.
+     */
+    val circuit: Boolean = false,
 )
 
 /** Variante activa de un workout rotativo (o null si no rota). */

@@ -38,6 +38,7 @@ object PlayerStepJson {
                     .put("progression", s.progression.name)
                     .put("distance", s.distance)
                     .put("slot", s.slot)
+                    .put("circuit", s.circuit)
                     .put("workoutName", s.workoutName)
                     .put("workoutIndex", s.workoutIndex)
                     .put("totalWorkouts", s.totalWorkouts)
@@ -86,6 +87,7 @@ object PlayerStepJson {
                 progression = runCatching { Progression.valueOf(o.optString("progression")) }.getOrDefault(Progression.NONE),
                 distance = o.optBoolean("distance", false),
                 slot = o.optInt("slot", 0),
+                circuit = o.optBoolean("circuit", false),
                 workoutName = o.optString("workoutName", ""),
                 workoutIndex = o.optInt("workoutIndex", 0),
                 totalWorkouts = o.optInt("totalWorkouts", 1),

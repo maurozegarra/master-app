@@ -106,6 +106,22 @@ class SessionRecorder {
         putSet(step, setRecord)
     }
 
+    /**
+     * Lo que se hizo, se hizo: volver a una serie ya completada no la acorta ni la borra.
+     *
+     * El 25-sep NIKO hizo los tres rounds de cuerda enteros, se quedo sin aire, y volvio
+     * atras solo para marcar como le fue. Volver atras reinicia el paso, y al avanzar un
+     * segundo despues, el registro de 180 s se piso con uno de 1 s: su historial decia que no
+     * habia hecho la cuerda. Ahora, si la serie ya estaba hecha, se queda lo mas largo, y
+     * saltarla despues no la desmarca.
+     */
+    private fun keepDone(previo: SetRecord?, nuevo: SetRecord): SetRecord {
+        if (previo == null || previo.skipped) return nuevo
+        if (nuevo.skipped) return previo
+        if (nuevo.durationSec >= previo.durationSec) return nuevo
+        return nuevo.copy(durationSec = previo.durationSec, plannedSec = previo.plannedSec)
+    }
+
     /** En distancia, los metros van a su campo y no se hacen pasar por repeticiones (TD-095). */
     private fun byUnit(step: PlayerStep, r: SetRecord): SetRecord =
         if (step.distance) r.copy(reps = 0, distanceM = step.reps) else r
@@ -123,7 +139,7 @@ class SessionRecorder {
     private fun putSet(step: PlayerStep, setRecord: SetRecord) {
         val key = ExerciseKey(step.ownerExerciseId, step.workoutIndex, step.side)
         val setMap = sets.getOrPut(key) { mutableMapOf() }
-        setMap[step.setIndex] = setRecord
+        setMap[step.setIndex] = keepDone(setMap[step.setIndex], setRecord)
         val orderedSets = orderedWithFeedback(key, setMap, step.totalSets)
         val completedCount = orderedSets.count { !it.skipped }
         records[key] = ExerciseRecord(

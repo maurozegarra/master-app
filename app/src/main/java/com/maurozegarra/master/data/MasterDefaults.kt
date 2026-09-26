@@ -623,7 +623,7 @@ object MasterDefaults {
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
      */
-    const val NIKO_REVISION = 12
+    const val NIKO_REVISION = 14
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -631,6 +631,7 @@ object MasterDefaults {
     const val NIKO_UPPER_ID = 960003L
     const val NIKO_SINGLE_LEG_ID = 960004L
     const val NIKO_POWER_ID = 960005L
+    const val NIKO_MIXED_ID = 960006L
 
     /**
      * Los dias de NIKO que ya existen, en orden (ver docs/niko.md).
@@ -646,6 +647,7 @@ object MasterDefaults {
         nikoUpperBody(lang),
         nikoSingleLeg(lang),
         nikoPower(lang),
+        nikoMixed(lang),
     )
 
     /**
@@ -1038,6 +1040,69 @@ object MasterDefaults {
     }
 
     /**
+     * NIKO 6 · Mixto y movilidad: el cierre de la semana (ver docs/niko.md).
+     *
+     * EL SACO Y EL SPRAWL VAN EN CIRCUITO (TD-137, revision 14): round de saco, sprawl, un
+     * minuto, y otra vez. Es como se entrena el acondicionamiento de pelea, y lo que pedia el
+     * plan desde el 19-sep; la primera version los ponia en bloques porque el app todavia no
+     * sabia alternar.
+     *
+     * La MOVILIDAD va al final y sin prisa: es la mitad del nombre del dia, no el
+     * enfriamiento. No pregunta como fue -no progresa-, salvo la cosaca, que es fuerza de
+     * cadera en rango largo y va por lados.
+     */
+    fun nikoMixed(lang: String): Training {
+        val b = NikoBlocks(lang, seqStart = 960600L)
+        val now = System.currentTimeMillis()
+        return Training(
+            id = NIKO_MIXED_ID,
+            name = "NIKO 6 · Mixto y movilidad",
+            workouts = listOf(
+                b.warmup(),
+                Workout(
+                    id = b.id(),
+                    name = "Sombra",
+                    exercises = listOf(
+                        b.ex("ex_shadow_boxing", "Guardia arriba siempre. Trabaja los ángulos", 180, sets = 2, rest = 60, mode = WorkMode.TIME),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Saco y sprawl",
+                    // En circuito: del round de saco se pasa directo al sprawl -descanso 0- y el
+                    // minuto de descanso va despues del sprawl.
+                    circuit = true,
+                    exercises = listOf(
+                        b.ex("ex_heavy_bag", "Combinaciones libres: 2 o 3 golpes y cierra con patada o rodilla", 180, sets = 4, rest = 0, mode = WorkMode.TIME),
+                        b.ex("ex_burpees", "Sprawl: caderas al piso rápido, y de vuelta a la guardia", 30, sets = 4, rest = 60, mode = WorkMode.TIME),
+                    ),
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Movilidad",
+                    exercises = listOf(
+                        b.ex("ex_90_90", "Lento. Llega hasta donde llegues y respira", 10, sets = 2, rest = 20),
+                        b.ex("ex_cossack_squat", "Talón apoyado, pecho arriba. Baja solo hasta donde controles", 8, sets = 2, rest = 30)
+                            .copy(sides = listOf("Izquierda", "Derecha")),
+                        b.ex("ex_hip_rotation", "Círculos grandes y lentos", 10, sets = 1, rest = 0),
+                        b.ex("ex_front_side_stretch", "Sin rebotes. Respira hondo en cada posición", 60, sets = 1, rest = 0, mode = WorkMode.TIME),
+                    ).map { if (it.exerciseId == "ex_cossack_squat") it else it.copy(progression = Progression.NONE) },
+                ),
+                Workout(
+                    id = b.id(),
+                    name = "Cuello",
+                    exercises = listOf(
+                        b.ex("ex_neck_iso", "Mano contra la cabeza, empuja y aguanta", 20, sets = 1, rest = 15, mode = WorkMode.TIME)
+                            .copy(sides = listOf("Adelante", "Atrás", "Derecha", "Izquierda")),
+                    ),
+                ),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
      * Lo que comparten los dias de NIKO: el constructor de ejercicios y el calentamiento.
      *
      * [seqStart] separa los ids de un dia y del otro, igual que en [LumbarBlocks].
@@ -1093,7 +1158,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 10
+    const val CATALOG_INSTRUCTIONS_REVISION = 11
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -1289,6 +1354,32 @@ object MasterDefaults {
                 "Baja los talones todo lo que puedas y siente el estiramiento abajo.",
                 "Sube hasta la punta de los pies y aprieta un segundo arriba.",
                 "Lento en las dos direcciones. Rebotar no entrena la pantorrilla, la castiga.",
+            ),
+        ),
+        "ex_burpees" to ExerciseMedia(
+            listOf(
+                "Aquí es un SPRAWL, la defensa contra el derribo: desde la guardia, lleva las manos al piso y lanza las piernas atrás.",
+                "Las caderas bajan al piso rápido y pesadas, con el pecho arriba. No es una flexión.",
+                "Recoge las piernas de un salto y vuelve a la guardia en el acto.",
+                "Rápido, pero cayendo suave: las manos reciben, no golpean.",
+                "Repite sin parar durante los 30 segundos.",
+            ),
+        ),
+        "ex_cossack_squat" to ExerciseMedia(
+            listOf(
+                "De pie con las piernas muy abiertas, las puntas de los pies un poco hacia afuera.",
+                "Baja hacia un lado doblando esa rodilla; la otra pierna queda estirada, con la punta hacia arriba.",
+                "El talón de la pierna doblada no se despega del piso. El pecho, arriba.",
+                "Baja solo hasta donde controles; con el tiempo el rango crece solo.",
+                "Sube empujando con esa pierna. Todas las de un lado y después las del otro.",
+            ),
+        ),
+        "ex_front_side_stretch" to ExerciseMedia(
+            listOf(
+                "De pie, piernas abiertas. Primero al frente: dobla la cadera con la espalda recta y deja caer los brazos.",
+                "Después a cada lado: una mano por arriba de la cabeza, inclinándote hacia el lado contrario.",
+                "Unos 20 segundos en cada posición, sin rebotes.",
+                "Respira hondo y suelta un poco más al sacar el aire.",
             ),
         ),
         "ex_box_jump" to ExerciseMedia(

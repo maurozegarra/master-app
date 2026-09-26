@@ -31,6 +31,7 @@ class PlayerStepJsonTest {
         progression = Progression.ROUNDS,
         distance = true,
         slot = 3,
+        circuit = true,
         workoutName = "Warm Walk",
         workoutIndex = 3,
         totalWorkouts = 5,

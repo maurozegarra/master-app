@@ -47,6 +47,8 @@ data class PlayerStep(
      * lado ya hecho.
      */
     val slot: Int = 0,
+    /** Si el paso es de un workout en circuito (TD-137): cambia el orden en que se compara. */
+    val circuit: Boolean = false,
     /** Si [reps] son METROS y no repeticiones (TD-095): cambia la unidad, nada más. */
     val distance: Boolean = false,
     /** Cómo progresa el ejercicio, que decide si esta serie pregunta cómo fue (TD-152). */

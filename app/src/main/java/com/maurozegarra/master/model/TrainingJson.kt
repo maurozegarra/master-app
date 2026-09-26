@@ -67,6 +67,7 @@ object TrainingJson {
             .put("rotating", w.rotating)
             .put("rotationIndex", w.rotationIndex)
             .put("variants", variants)
+            .put("circuit", w.circuit)
     }
 
     private fun workoutFromJson(o: JSONObject): Workout {
@@ -85,6 +86,7 @@ object TrainingJson {
             rotating = o.optBoolean("rotating", false),
             rotationIndex = o.optInt("rotationIndex", 0),
             variants = variants,
+            circuit = o.optBoolean("circuit", false),
         )
     }
 

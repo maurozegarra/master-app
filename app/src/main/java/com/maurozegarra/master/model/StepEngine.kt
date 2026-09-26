@@ -28,6 +28,7 @@ object StepEngine {
         t.workouts.forEachIndexed { wi, w ->
             val wName = w.activeName()
             val wVariant = if (w.rotating) (w.activeVariant()?.name ?: "") else ""
+            val pasosW = buildList {
             w.activeExercises().forEachIndexed { ei, e ->
                 if (e.prepareSec > 0) {
                     add(stageStep(StepKind.PREP, e, wName, wi, tw, durationSec = e.prepareSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
@@ -92,7 +93,33 @@ object StepEngine {
                     add(stageStep(StepKind.COOLDOWN, e, wName, wi, tw, durationSec = e.cooldownSec, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei))
                 }
             }
+            }
+            addAll(if (w.circuit) enCircuito(pasosW) else pasosW)
         }
+    }
+
+    /**
+     * Los pasos de un workout, en orden de circuito (TD-137): round a round, cada ejercicio
+     * con su serie de ese round. Se arma sobre la cola normal, reordenandola, para que un
+     * circuito tenga exactamente los mismos pasos que el mismo workout en bloques -mismas
+     * series, lados, descansos y preguntas- y solo cambie el orden.
+     *
+     * La preparacion de cada ejercicio va solo la primera vez que aparece: en un circuito se
+     * pasa de uno a otro sin pausa, y diez segundos de "prepare" en cada cambio lo romperian.
+     * El enfriamiento, al final de todo.
+     */
+    private fun enCircuito(pasos: List<PlayerStep>): List<PlayerStep> {
+        val porEjercicio = pasos.groupBy { it.exerciseIndex }.toSortedMap()
+        val rounds = pasos.filter { it.kind == StepKind.WORK || it.kind == StepKind.REST }.maxOfOrNull { it.slot } ?: return pasos
+        return buildList {
+            for (r in 0..rounds) {
+                porEjercicio.forEach { (_, ps) ->
+                    if (r == 0) addAll(ps.filter { it.kind == StepKind.PREP })
+                    addAll(ps.filter { (it.kind == StepKind.WORK || it.kind == StepKind.REST) && it.slot == r })
+                }
+            }
+            porEjercicio.forEach { (_, ps) -> addAll(ps.filter { it.kind == StepKind.COOLDOWN }) }
+        }.map { it.copy(circuit = true) }
     }
 
     /**
@@ -141,16 +168,29 @@ object StepEngine {
         if (fresh.timeBased != running.timeBased) fresh
         else fresh.copy(durationSec = running.durationSec, reps = running.reps)
 
-    private fun compareSteps(a: PlayerStep, b: PlayerStep): Int = compareValuesBy(
-        a, b,
-        { it.workoutIndex },
-        { it.exerciseIndex },
-        { stageGroup(it) },
-        // El puesto y no la serie (TD-156): con lados, la serie sola repetia numero en cada
-        // lado y la reubicacion podia caer en un lado ya hecho.
-        { if (stageGroup(it) == 1) it.slot else 0 },
-        { if (it.kind == StepKind.REST) 1 else 0 },
-    )
+    private fun compareSteps(a: PlayerStep, b: PlayerStep): Int =
+        if (a.circuit && b.circuit && a.workoutIndex == b.workoutIndex) {
+            // En circuito manda el ROUND y despues el ejercicio (TD-137): el round 2 del
+            // primero va despues del round 1 del ultimo.
+            compareValuesBy(
+                a, b,
+                { if (it.kind == StepKind.COOLDOWN) Int.MAX_VALUE else it.slot },
+                { it.exerciseIndex },
+                { stageGroup(it) },
+                { if (it.kind == StepKind.REST) 1 else 0 },
+            )
+        } else {
+            compareValuesBy(
+                a, b,
+                { it.workoutIndex },
+                { it.exerciseIndex },
+                { stageGroup(it) },
+                // El puesto y no la serie (TD-156): con lados, la serie sola repetia numero
+                // en cada lado y la reubicacion podia caer en un lado ya hecho.
+                { if (stageGroup(it) == 1) it.slot else 0 },
+                { if (it.kind == StepKind.REST) 1 else 0 },
+            )
+        }
 
     private fun stageGroup(s: PlayerStep): Int = when (s.kind) {
         StepKind.PREP -> 0
