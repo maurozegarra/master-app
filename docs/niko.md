@@ -236,9 +236,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 
 - **Las cargas de tren superior son un punto de partida conservador:** no se sabe cuanto
   mueve ella. Se ajustan con lo que marque en la primera sesion de ese dia.
-- **El sabado no puede ser un circuito de verdad.** Lo ideal seria alternar saco → sprawl
-  → saco, pero el app hace un ejercicio con todas sus series y recien pasa al siguiente.
-  Limitacion del modelo: TD-137.
+- **El sabado ya es un circuito de verdad** (TD-137, 25-sep): saco, sprawl, un minuto, cuatro veces. Hasta entonces el app terminaba un ejercicio antes de empezar el otro.
 - **Con las bandas** (ver `equipo.md`, compra del lunes 21) entran el pallof press en el
   dia 2 y la caminata lateral en el dia 4.
 - **Ejercicios nuevos para ella** -saco, giro ruso, remo invertido, remo con mancuerna,

@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **141 / 168** hechos, 27 pendientes.
+Progreso: **141 / 170** hechos, 29 pendientes.
 
 ## Pendientes
 
@@ -42,6 +42,14 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
+- [ ] **TD-169** Historial de un atleta: su avatar y el detalle de su peso semanal
+  - PEDIDO por el usuario el 26-sep, al pedir el selector de History (TD-168): "dejemos para despues un avatar y ver detalles de su peso semanal". Quedo mencionado dentro de TD-168 y sin registrar; se registra aparte para que no se pierda.
+
+QUE: (1) un avatar por perfil -en el selector Me / NIKO y donde aparezca su nombre-; (2) el peso semanal del atleta, en el app.
+
+DE DONDE SALE EL DATO YA ESTA ESTABLECIDO, y el asistente lo pregunto por error: los dos se pesan LOS SABADOS AL DESPERTAR, peso y cintura a la altura del ombligo, se lo pasan al coach por el chat, y la serie se anota en docs/objetivos.md (el usuario) y docs/niko.md (NIKO), con cintura/estatura como indice. Hoy vive solo en esos documentos.
+
+A DECIDIR: solo como llega al app -sembrado desde el codigo con cada pesaje, como las rutinas, o anotado en el app y subido por Supabase como las sesiones-. Y el avatar: foto propia o iniciales con color.
 - [ ] **TD-164** Corregir el dolor de la manana desde la pantalla Morning
   - LO PIDIO el usuario el 25-sep: contesto 1 en la alarma, le parecio "demasiado optimista", "y como no hay forma de editarlo, lo hice cuando tuve la oportunidad" -en la sesion, horas despues-, "pero tuve que hacer el esfuerzo de no olvidarlo".
 
@@ -196,6 +204,10 @@ UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mit
 
 ### Mantenimiento
 
+- [ ] **TD-170** Quitar el ajuste "Leading zeros in clock"
+  - PEDIDO por el usuario el 26-sep, para despues: quitar de Settings > Player el ajuste "Leading zeros in clock" (MasterConfig.padPlayerClock), que decide si el reloj del player dice 05:00 o 5:00.
+
+A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el ajuste es fijar un comportamiento, no borrar una casilla: hay que preguntar cual. Y limpiar lo que lo usa -SettingsViewModel.setPadPlayerClock, el parametro padded de formatPlayerClock y del player- sin dejar un campo huerfano en la configuracion guardada.
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
 
