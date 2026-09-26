@@ -97,11 +97,6 @@ fun SettingsScreen(
             )
         }
 
-        // Punto de contacto 3 de 3 de la alarma (TD-151): si se saca el modulo, se va esto.
-        SettingsCard(t.morning.title) {
-            com.maurozegarra.master.morning.MorningSettings(t, accent)
-        }
-
         SettingsCard(t.groupGeneral) {
             Text(t.color, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(10.dp))

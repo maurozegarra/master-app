@@ -125,10 +125,10 @@ fun MorningSettings(t: Strings, accent: Color) {
         }
     }
 
-    // La próxima, tal como quedó programada. `cambios` fuerza a recalcularla.
-    val proxima = remember(cambios, schedule) {
-        schedule.next(java.time.ZonedDateTime.now())
-    }
+    // La próxima, tal como quedó programada -con el día saltado-. `cambios` la recalcula.
+    val proxima = remember(cambios, schedule) { MorningAlarm.nextRing(ctx) }
+    val manana = java.time.LocalDate.now().plusDays(1)
+    val saltado = remember(cambios) { store.skipDate == manana }
     Spacer(Modifier.height(8.dp))
     Text(
         proxima?.let {
@@ -137,6 +137,39 @@ fun MorningSettings(t: Strings, accent: Color) {
         color = AppTheme.colors.textDim,
         fontSize = 13.sp,
     )
+
+    // Saltar mañana sin tocar el horario: un feriado, un viaje. Solo si mañana sonaria.
+    if (schedule.at(manana.dayOfWeek) != null) {
+        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                if (saltado) t.morning.tomorrowSkipped else t.morning.skipTomorrow,
+                color = if (saltado) AppTheme.colors.textPrimary else accent,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .weight(1f)
+                    .then(if (saltado) Modifier else Modifier.clickable {
+                        store.skipDate = manana
+                        MorningAlarm.reschedule(ctx)
+                        cambios++
+                    }),
+            )
+            if (saltado) {
+                Text(
+                    t.morning.undo,
+                    color = accent,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable {
+                        store.skipDate = null
+                        MorningAlarm.reschedule(ctx)
+                        cambios++
+                    },
+                )
+            }
+        }
+    }
 
     // Sin permiso de alarma exacta no suena: se dice, y se lleva al ajuste.
     val programable = remember(cambios) { MorningAlarm.canSchedule(ctx) }

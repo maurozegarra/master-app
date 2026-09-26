@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MASTER</string>
+    <!-- La segunda entrada del lanzador, la de la alarma (TD-158). -->
+    <string name="morning_name">Morning</string>
 </resources>

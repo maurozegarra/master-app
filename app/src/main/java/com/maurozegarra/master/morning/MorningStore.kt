@@ -43,6 +43,11 @@ class MorningStore(context: Context) {
         get() = prefs.getLong(KEY_SNOOZE, 0L)
         set(v) = prefs.edit().putLong(KEY_SNOOZE, v).apply()
 
+    /** Un día que no suena, puesto con "Skip tomorrow" (ISO), o null. */
+    var skipDate: java.time.LocalDate?
+        get() = prefs.getString(KEY_SKIP, null)?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() }
+        set(v) = prefs.edit().putString(KEY_SKIP, v?.toString()).apply()
+
     fun entries(): List<MorningEntry> = decode(prefs.getString(KEY_ENTRIES, "[]") ?: "[]")
 
     fun saveEntries(list: List<MorningEntry>) {
@@ -64,6 +69,7 @@ class MorningStore(context: Context) {
         private const val KEY_SCHEDULE = "schedule"
         private const val KEY_SNOOZE = "snoozed_until"
         private const val KEY_ENTRIES = "entries"
+        private const val KEY_SKIP = "skip_date"
 
         fun encode(list: List<MorningEntry>): String {
             val a = JSONArray()
@@ -87,6 +93,8 @@ class MorningStore(context: Context) {
                     painOnWaking = if (o.has("painOnWaking")) o.optInt("painOnWaking") else null,
                     answeredAt = if (o.has("answeredAt")) o.optLong("answeredAt") else null,
                     easedAt = if (o.has("easedAt")) o.optLong("easedAt") else null,
+                    // Solo cuenta cuando no hay horas: si las hay, fadeMinutes las recalcula.
+                    fadeMin = if (o.has("fadeMinutes") && !(o.has("answeredAt") && o.has("easedAt"))) o.optInt("fadeMinutes") else null,
                 )
             }
         }.getOrDefault(emptyList())

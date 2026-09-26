@@ -22,6 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.History
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -245,6 +253,26 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                 actions = {
                     // Historial y engranaje solo se muestran en la raíz (lista de trainings).
                     if (!canGoBack) {
+                        // La alarma, con la hora de la próxima (TD-158). Abre su propia
+                        // pantalla, la misma que el ícono "Morning" del lanzador.
+                        val proxima = com.maurozegarra.master.morning.rememberNextRing()
+                        Row(
+                            Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable { com.maurozegarra.master.morning.MorningHomeActivity.open(context) }
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                Icons.Outlined.Alarm,
+                                contentDescription = t.morning.home,
+                                tint = if (proxima != null) AppTheme.colors.textPrimary else AppTheme.colors.textDim,
+                            )
+                            if (proxima != null) {
+                                Spacer(Modifier.width(4.dp))
+                                Text(proxima, color = AppTheme.colors.textPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
                         IconButton(onClick = { vm.openHistory() }) {
                             Icon(
                                 Icons.Outlined.History,

@@ -92,4 +92,46 @@ class MorningTest {
         val vuelta = com.maurozegarra.master.model.BackupJson.decode(com.maurozegarra.master.model.BackupJson.encode(data, exportedAt = 0L))!!
         assertEquals(log, MorningStore.decode(vuelta.morning))
     }
+
+    @Test
+    fun `saltar manana no toca el horario`() {
+        // Martes a las 20:00 con el miercoles saltado: la siguiente es el jueves a las 5.
+        val martes = at(2026, 9, 22, 20, 0)
+        assertEquals(at(2026, 9, 24, 5, 0), MorningSchedule.DEFAULT.next(martes, skip = LocalDate.of(2026, 9, 23)))
+        assertEquals(at(2026, 9, 23, 5, 0), MorningSchedule.DEFAULT.next(martes))
+    }
+
+    @Test
+    fun `una respuesta de noche no es una manana`() {
+        // La prueba de la alarma del 22-sep a las 21:42 decia "dolor 0" en una manana que fue 2.
+        val prueba = MorningEntry("2026-09-22", painOnWaking = 0, answeredAt = at(2026, 9, 22, 21, 42).toInstant().toEpochMilli())
+        val real = MorningEntry("2026-09-23", painOnWaking = 1, answeredAt = at(2026, 9, 23, 5, 0).toInstant().toEpochMilli())
+        assertEquals(listOf(real), MorningLog.mornings(listOf(prueba, real), lima))
+        assertEquals(mapOf(LocalDate.of(2026, 9, 23) to 1), MorningLog.painByDate(listOf(prueba, real), lima))
+    }
+
+    @Test
+    fun `una prueba de noche no pisa la manana de verdad`() {
+        // El 24-sep a las 23:00, probando la alarma, se perdio la manana real de ese dia.
+        val real = MorningEntry("2026-09-24", painOnWaking = 1, answeredAt = at(2026, 9, 24, 5, 0).toInstant().toEpochMilli())
+        assertEquals(false, MorningLog.mayRecord(real, at(2026, 9, 24, 23, 0).toInstant().toEpochMilli(), lima))
+        assertEquals(true, MorningLog.mayRecord(real, at(2026, 9, 24, 5, 3).toInstant().toEpochMilli(), lima))
+        assertEquals(true, MorningLog.mayRecord(null, at(2026, 9, 24, 23, 0).toInstant().toEpochMilli(), lima))
+    }
+
+    @Test
+    fun `los dias sin alarma salen de las sesiones, y lo real no se toca`() {
+        val sesion = { d: Int, dolor: Int?, min: Int? -> Triple(at(2026, 9, d, 7, 0).toInstant().toEpochMilli(), dolor, min) }
+        val real = MorningEntry("2026-09-23", painOnWaking = 1, answeredAt = at(2026, 9, 23, 5, 0).toInstant().toEpochMilli(), easedAt = at(2026, 9, 23, 5, 15).toInstant().toEpochMilli())
+        val prueba = MorningEntry("2026-09-24", painOnWaking = 0, answeredAt = at(2026, 9, 24, 23, 0).toInstant().toEpochMilli())
+        val log = MorningLog.fromSessions(
+            listOf(real, prueba),
+            listOf(sesion(20, 2, 15), sesion(23, 3, 40), sesion(24, 1, 24), sesion(25, null, null)),
+            lima,
+        )
+        // El 20 aparece, el 23 sigue siendo el de la alarma, y el 24 vuelve de la sesion.
+        assertEquals(listOf("2026-09-20", "2026-09-23", "2026-09-24"), log.map { it.date })
+        assertEquals(listOf(2, 1, 1), log.map { it.painOnWaking })
+        assertEquals(listOf(15, 15, 24), log.map { it.fadeMinutes })
+    }
 }

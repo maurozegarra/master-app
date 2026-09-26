@@ -50,7 +50,7 @@ object MorningAlarm {
         }
         val now = System.currentTimeMillis()
         val pospuesta = store.snoozedUntil.takeIf { it > now }
-        val at = pospuesta ?: store.schedule().next(ZonedDateTime.now(ZoneId.systemDefault()))?.toInstant()?.toEpochMilli()
+        val at = pospuesta ?: nextRing(context)?.toInstant()?.toEpochMilli()
         if (at == null) {
             am.cancel(fire)
             return true
@@ -59,6 +59,19 @@ object MorningAlarm {
         return runCatching {
             am.setAlarmClock(AlarmManager.AlarmClockInfo(at, showPending(context)), fire)
         }.isSuccess
+    }
+
+    /**
+     * La próxima vez que suena según el horario y el día saltado, o null. Lo que enseñan la
+     * pantalla de la mañana y la barra de MASTER, y lo que se programa.
+     */
+    fun nextRing(context: Context): ZonedDateTime? {
+        val store = MorningStore(context)
+        if (!store.enabled) return null
+        val zone = ZoneId.systemDefault()
+        // Un salto ya pasado no sirve para nada: se olvida para que no confunda.
+        store.skipDate?.let { if (it.isBefore(LocalDate.now(zone))) store.skipDate = null }
+        return store.schedule().next(ZonedDateTime.now(zone), store.skipDate)
     }
 
     /** Si Android deja programar alarmas exactas. */
@@ -84,9 +97,13 @@ object MorningAlarm {
         if (pain != null) {
             val now = System.currentTimeMillis()
             val zone = ZoneId.systemDefault()
-            val entry = MorningEntry(MorningLog.dateOf(now, zone), painOnWaking = pain, answeredAt = now)
-            store.saveEntries(MorningLog.upsert(store.entries(), entry, LocalDate.now(zone)))
-            showEaseNotification(context)
+            val existente = MorningLog.forDay(store.entries(), now, zone)
+            // Una prueba de noche no pisa la mañana de verdad de ese día (ver mayRecord).
+            if (MorningLog.mayRecord(existente, now, zone)) {
+                val entry = MorningEntry(MorningLog.dateOf(now, zone), painOnWaking = pain, answeredAt = now)
+                store.saveEntries(MorningLog.upsert(store.entries(), entry, LocalDate.now(zone)))
+                showEaseNotification(context)
+            }
         }
         reschedule(context)
     }
@@ -99,6 +116,7 @@ object MorningAlarm {
         val store = MorningStore(context)
         val zone = ZoneId.systemDefault()
         val hoy = MorningLog.forDay(store.entries(), System.currentTimeMillis(), zone) ?: return
+        if (!MorningLog.mayRecord(hoy, System.currentTimeMillis(), zone)) return
         store.saveEntries(MorningLog.upsert(store.entries(), hoy.copy(painOnWaking = pain), LocalDate.now(zone)))
     }
 

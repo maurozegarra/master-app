@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Capa frontal del ícono de la mañana (TD-158): un sol que sale sobre el horizonte.
+  Mismo lenguaje que el de MASTER -fondo negro, blanco y el rojo #E63946-, para que se
+  lean como hermanos en el lanzador. Dentro del círculo seguro de 66dp del ícono adaptativo.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Medio sol (rojo), apoyado en el horizonte -->
+    <path
+        android:fillColor="#E63946"
+        android:pathData="M38,62 A16,16 0 0,1 70,62 Z" />
+    <!-- Horizonte (blanco) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,64h52v4h-52z" />
+    <!-- Rayos (blancos) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52,34h4v9h-4z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M33.6,42.4l2.8,-2.8l6.4,6.4l-2.8,2.8z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74.4,42.4l-2.8,-2.8l-6.4,6.4l2.8,2.8z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M26,55h9v4h-9z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M73,55h9v4h-9z" />
+    <!-- Suelo, más corto: el paso del día -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,72h32v3h-32z" />
+</vector>

@@ -60,6 +60,24 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Workout routine player with step countdown" />
         </service>
+        <!-- La segunda entrada del lanzador, "Morning" (TD-158): la casa de la alarma. Su
+             propia tarea -taskAffinity- para que en recientes sea otra tarjeta, como un app
+             aparte, aunque viva en este paquete. -->
+        <activity
+            android:name=".morning.MorningHomeActivity"
+            android:exported="true"
+            android:label="@string/morning_name"
+            android:icon="@mipmap/ic_morning"
+            android:roundIcon="@mipmap/ic_morning_round"
+            android:taskAffinity="com.maurozegarra.master.morning"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Master">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".morning.MorningActivity"
             android:exported="false"

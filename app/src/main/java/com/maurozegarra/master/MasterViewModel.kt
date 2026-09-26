@@ -317,6 +317,8 @@ class MasterViewModel(
         migrateRestorePrefs()
         restorePlayerState()
         refreshSessions()
+        // Despues de cargar las sesiones: es de ellas de donde salen las mananas que faltan.
+        backfillMornings()
         exerciseMedia.putAll(mediaStore.load())
         snapshotReady = true
         // Si una correccion del arranque cambio los datos, el respaldo tiene que decirlo: el
@@ -1248,6 +1250,22 @@ class MasterViewModel(
      *
      * Solo si la sesion todavia no lo tiene: lo contestado a mano al final manda.
      */
+    /**
+     * Las mañanas de antes de la alarma -y las que una prueba de noche dejó vacías- se
+     * completan con lo que guardaron las sesiones (TD-158). Mismo punto de contacto que
+     * [applyMorning], en la otra dirección.
+     */
+    private fun backfillMornings() {
+        val store = com.maurozegarra.master.morning.MorningStore(getApplication())
+        val antes = store.entries()
+        val despues = com.maurozegarra.master.morning.MorningLog.fromSessions(
+            antes,
+            sessions.map { Triple(it.startedAt.takeIf { s -> s > 0 } ?: it.completedAt, it.painOnWaking, it.painFadeMin) },
+            java.time.ZoneId.systemDefault(),
+        )
+        if (despues != antes) store.saveEntries(despues)
+    }
+
     private fun applyMorning() {
         val s = lastSessionFeedback() ?: return
         val m = com.maurozegarra.master.morning.MorningLog.forDay(

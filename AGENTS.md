@@ -192,6 +192,7 @@ Las que más se usan (el app está en inglés, TD-133):
 | Quitar un training de la lista sin borrarlo | Lista de trainings → deslizar la tarjeta a la **derecha** (archiva). Vuelven desde la fila **Archived · N** del final, con el mismo gesto |
 | Respaldo manual | Settings → Data → **Export backup** / **Import backup** |
 | Instrucciones de un ejercicio, en el player | tocar la pantalla para que salga la franja de arriba → ícono de **lista** (≡) |
+| La alarma de la mañana: hoy, la serie y el horario | ícono **Morning** del lanzador, o el **despertador** de la barra de MASTER (TD-158). Ya no está en Settings |
 
 ### Publicar un vídeo
 
