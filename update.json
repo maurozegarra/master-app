@@ -1,7 +1,7 @@
 {
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.322/master-1.0.322.apk",
   "minVersionCode": 1,
-  "versionCode": 322,
-  "changelog": "release: los carries en metros, Partial corregido, la alarma y el historial de NIKO",
-  "versionName": "1.0.322"
+  "versionName": "1.0.330",
+  "changelog": "release: circuitos para NIKO 6, el registro conserva lo hecho, la alarma con su icono",
+  "versionCode": 330,
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.330/master-1.0.330.apk"
 }
