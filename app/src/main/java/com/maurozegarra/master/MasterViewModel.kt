@@ -1444,10 +1444,11 @@ class MasterViewModel(
         private set
 
     fun openHistory() {
-        // El de la lista es siempre el propio: si quedo abierto el de un atleta, se cierra.
+        // Se abre siempre en el propio; el de un atleta se elige arriba (TD-168).
         historyAthlete = null
         // Se recargan al abrir porque las escribe el servicio (otro contexto) al terminar.
         refreshSessions()
+        loadHistoryOwners()
         showingHistory = true
     }
 
@@ -1479,6 +1480,24 @@ class MasterViewModel(
         get() = historyAthlete?.let { AthleteHistory.of(athleteSessions, it.id) } ?: sessions
 
     fun athleteSessionCount(profileId: String): Int = athleteSessions.count { it.profileId == profileId }
+
+    /**
+     * De quien se puede ver el historial, para el selector de History (TD-168): los atletas
+     * con sesiones en este telefono, con su nombre. El nombre sale del directorio de
+     * perfiles; mientras no llega -o sin red- se usa el id, que ya se entiende.
+     */
+    var historyOwners by mutableStateOf<List<Profile>>(emptyList())
+        private set
+
+    fun loadHistoryOwners() {
+        val ids = athleteSessions.map { it.profileId }.distinct()
+        historyOwners = ids.map { Profile(it, it.replaceFirstChar { c -> c.uppercase() }) }
+        if (!isCoach || ids.isEmpty()) return
+        loadProfiles { perfiles ->
+            val nombres = perfiles.orEmpty().associate { it.id to it.name }
+            historyOwners = ids.map { Profile(it, nombres[it] ?: it.replaceFirstChar { c -> c.uppercase() }) }
+        }
+    }
 
     /** Abre el historial de [profile] y baja lo ultimo, por si entreno hace un momento. */
     fun openAthleteHistory(profile: Profile) {

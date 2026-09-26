@@ -221,6 +221,8 @@ data class Strings(
     val distance: DistanceStrings,
     /** Dolor habitual y dolor de crisis, separados (TD-165). En bloque, por el tope de la JVM. */
     val crisis: CrisisStrings,
+    /** De quien es el historial (TD-168). En bloque, por el tope de la JVM. */
+    val historyOf: HistoryOwnerStrings,
     val nextSuggestions: String,
     val painOnWaking: String,
     val painFadeMin: String,
@@ -484,6 +486,9 @@ object I18n {
         applyColorTitle = "Apply color to",
         applyColorThisExercise = "This exercise only",
         applyColorAllTraining = "All exercises in training",
+        historyOf = HistoryOwnerStrings(
+            me = "Me",
+        ),
         crisis = CrisisStrings(
             toggle = "Back crisis today",
             hint = "Only on a bad day: pain before, after, and whether it radiates",
@@ -657,4 +662,9 @@ data class DistanceStrings(
 data class CrisisStrings(
     val toggle: String,
     val hint: String,
+)
+
+/** El selector de History: el propio o el de un atleta (TD-168). */
+data class HistoryOwnerStrings(
+    val me: String,
 )

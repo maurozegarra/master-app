@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **140 / 167** hechos, 27 pendientes.
+Progreso: **140 / 168** hechos, 28 pendientes.
 
 ## Pendientes
 
@@ -198,6 +198,14 @@ UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mit
 
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
+
+### UI
+
+- [ ] **TD-168** Tres ajustes de pantalla: la hora de la alarma en JetBrains Mono, el historial de NIKO en History, y menos hueco bajo el wordmark
+  - PEDIDO por el usuario el 26-sep:
+(1) "el 7:00 al costado del icono de la alarma, usa la fuente JetBrains Mono". Va SemiBold y recortada a cifras y dos puntos: 14 KB en el APK en vez de 270 (res/font/jetbrains_mono_digits.ttf, licencia OFL).
+(2) "para ver el historial de Niko, quitalo de Settings y agrega un combo en History donde salgamos Yo y Niko". Chips arriba de History: "Me" y un chip por cada atleta con sesiones en este telefono, con su nombre del directorio. People ya no tiene el enlace. Borrar todo el historial solo se ofrece en el propio. Para despues, sin registrar todavia: un avatar y el detalle de su peso semanal.
+(3) "entre el wordmark MASTER y el dia de la semana hay mucho espacio": el relleno de arriba de la lista pasa de 16 dp a 4.
 
 ## Hechos
 

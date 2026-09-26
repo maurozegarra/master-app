@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-168",
+      "title": "Tres ajustes de pantalla: la hora de la alarma en JetBrains Mono, el historial de NIKO en History, y menos hueco bajo el wordmark",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO por el usuario el 26-sep:\n(1) \"el 7:00 al costado del icono de la alarma, usa la fuente JetBrains Mono\". Va SemiBold y recortada a cifras y dos puntos: 14 KB en el APK en vez de 270 (res/font/jetbrains_mono_digits.ttf, licencia OFL).\n(2) \"para ver el historial de Niko, quitalo de Settings y agrega un combo en History donde salgamos Yo y Niko\". Chips arriba de History: \"Me\" y un chip por cada atleta con sesiones en este telefono, con su nombre del directorio. People ya no tiene el enlace. Borrar todo el historial solo se ofrece en el propio. Para despues, sin registrar todavia: un avatar y el detalle de su peso semanal.\n(3) \"entre el wordmark MASTER y el dia de la semana hay mucho espacio\": el relleno de arriba de la lista pasa de 16 dp a 4."
+    },
+    {
       "id": "TD-167",
       "title": "El training que sigue va primero en la lista, con un destello en el borde",
       "category": "Feature",

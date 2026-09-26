@@ -81,6 +81,56 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val sessions = vm.historySessions
     val ajeno = vm.historyAthlete != null
 
+    // De quien es, arriba, antes que nada (TD-168): el historial de NIKO se elige aqui y ya
+    // no se busca en Settings. Sin atletas no hay nada que elegir y no se dibuja.
+    if (vm.historyOwners.isNotEmpty()) {
+        Column(Modifier.fillMaxSize()) {
+            HistoryOwnerPicker(vm, accent, t)
+            Box(Modifier.weight(1f)) { HistoryBody(vm, sessions, ajeno, accent, t) }
+        }
+        return
+    }
+    HistoryBody(vm, sessions, ajeno, accent, t)
+}
+
+/**
+ * Chips con el propio y cada atleta (TD-168). Chips y no un desplegable: son dos o tres
+ * nombres, y verlos todos a la vez es un toque menos que abrir un menu.
+ */
+@Composable
+private fun HistoryOwnerPicker(vm: MasterViewModel, accent: Color, t: Strings) {
+    val actual = vm.historyAthlete?.id
+    Row(
+        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        OwnerChip(t.historyOf.me, actual == null, accent) { vm.closeAthleteHistory() }
+        vm.historyOwners.forEach { p ->
+            OwnerChip(p.name, actual == p.id, accent) { vm.openAthleteHistory(p) }
+        }
+    }
+}
+
+@Composable
+private fun OwnerChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(if (selected) accent else AppTheme.colors.surface)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Text(
+            label,
+            color = if (selected) AppTheme.colors.onAccent else AppTheme.colors.textPrimary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+@Composable
+private fun HistoryBody(vm: MasterViewModel, sessions: List<SessionLog>, ajeno: Boolean, accent: Color, t: Strings) {
     if (sessions.isEmpty()) {
         Column(
             modifier = Modifier.fillMaxSize().padding(32.dp),

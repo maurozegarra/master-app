@@ -65,8 +65,6 @@ import com.maurozegarra.master.update.UpdateBar
 import com.maurozegarra.master.update.UpdateInfo
 import com.maurozegarra.master.ui.master.MasterScreen
 import com.maurozegarra.master.ui.settings.PeopleScreen
-import com.maurozegarra.master.ui.master.ExerciseHistoryScreen
-import com.maurozegarra.master.ui.master.HistoryScreen
 import com.maurozegarra.master.ui.settings.SettingsScreen
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.MasterTheme
@@ -173,22 +171,7 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
     // Ajustes: pantalla propia por encima de la sección principal, y dentro de ella la de
     // personas, que es un nivel más. El atrás cierra de dentro hacia fuera.
     if (showSettings) {
-        val atleta = vm.historyAthlete
-        if (showPeople && atleta != null) {
-            // El historial de un atleta cuelga de People (TD-126): se entra desde su ficha y
-            // el atras vuelve a ella. Dentro, el de cada ejercicio es un nivel mas.
-            if (vm.exerciseHistoryId != null) {
-                BackHandler { vm.closeExerciseHistory() }
-                SettingsScaffold(title = t.exerciseHistory, onBack = { vm.closeExerciseHistory() }) {
-                    ExerciseHistoryScreen(vm, accent, t)
-                }
-            } else {
-                BackHandler { vm.closeAthleteHistory() }
-                SettingsScaffold(title = "${atleta.name} \u00b7 ${t.history}", onBack = { vm.closeAthleteHistory() }) {
-                    HistoryScreen(vm, accent, t)
-                }
-            }
-        } else if (showPeople) {
+        if (showPeople) {
             BackHandler { showPeople = false }
             SettingsScaffold(title = t.people, onBack = { showPeople = false }) {
                 PeopleScreen(vm, t)
@@ -270,7 +253,10 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                             )
                             if (proxima != null) {
                                 Spacer(Modifier.width(4.dp))
-                                Text(proxima, color = AppTheme.colors.textPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                // En JetBrains Mono, pedido por el usuario: una hora se lee mejor
+                                // con cifras de ancho fijo. La fuente va recortada a digitos y dos
+                                // puntos (14 KB en vez de 270).
+                                Text(proxima, color = AppTheme.colors.textPrimary, fontSize = 13.sp, fontFamily = MonoDigits)
                             }
                         }
                         IconButton(onClick = { vm.openHistory() }) {
@@ -288,7 +274,9 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                             )
                         }
                     }
-                    if (vm.showingHistory) {
+                    // Borrar todo el historial es solo del propio: el de un atleta no se
+                    // toca desde aqui (TD-168).
+                    if (vm.showingHistory && vm.historyAthlete == null) {
                         Box {
                             IconButton(onClick = { showClearMenu = true }) {
                                 Icon(
@@ -423,3 +411,6 @@ private fun goBack(vm: MasterViewModel) {
         vm.draft != null -> vm.closeTrainingEditor()
     }
 }
+
+/** JetBrains Mono SemiBold, solo cifras y dos puntos: para horas que se leen de un vistazo. */
+private val MonoDigits = androidx.compose.ui.text.font.FontFamily(androidx.compose.ui.text.font.Font(R.font.jetbrains_mono_digits))

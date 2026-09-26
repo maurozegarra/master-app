@@ -268,7 +268,9 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize().dragContainer(dragDropState),
-                contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, 96.dp),
+                // 4 dp arriba y no 16: la barra de arriba ya separa, y los 16 dejaban un
+                // hueco entre el wordmark y la semana (26-sep).
+                contentPadding = PaddingValues(16.dp, 4.dp, 16.dp, 96.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item(key = "week_calendar") {
