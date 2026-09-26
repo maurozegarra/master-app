@@ -169,8 +169,8 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 | 2 | NIKO 2 · Muay Thai | **hecho el lunes 21-sep**, completo (ver *Sus sesiones*) |
 | 3 | NIKO 3 · Tren superior | **hecho el martes 22-sep**, completo (ver *Sus sesiones*). El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
 | 4 | NIKO 4 · Glúteo a una pierna | **hecho el jueves 24-sep**, corrido un día por el corte de luz del 23 (ver *Sus sesiones*) |
-| 5 | NIKO 5 · Muay Thai y potencia | **sembrado el 24-sep para el viernes 25**. Las patadas van como dos ejercicios, teep y patada baja, 2 × 10 por lado cada uno |
-| 6 | NIKO 6 · Mixto y movilidad | plan base |
+| 5 | NIKO 5 · Muay Thai y potencia | **hecho el viernes 25-sep** (ver *Sus sesiones*). Las patadas van como dos ejercicios, teep y patada baja |
+| 6 | NIKO 6 · Mixto y movilidad | **sembrado el 25-sep para el sábado 26**, con el saco y el sprawl **en circuito** (TD-137) |
 
 ### Los seis dias
 
@@ -273,6 +273,31 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 ## Sus sesiones
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
+
+### 2026-09-25 — NIKO 5 · Muay Thai y potencia: la cuerda la dejó sin aire
+
+**De 08:45 a 09:41, 55 minutos, completa.**
+
+| Ejercicio | Lo que marcó |
+|---|---|
+| Salto al cajón, 4 × 5 | **las cuatro fáciles** |
+| Rodillas largas, 5 × 30 s | fáciles |
+| Rodillas profundas, 4 × 30 s | bien, la última fácil |
+| Teep, 2 × 10 por lado | fácil, los dos lados |
+| Patada baja, 2 × 10 por lado | bien, los dos lados |
+| **Cuerda, 3 rounds × 3 min** | **"Hard" los tres** |
+| Elevación de piernas, 3 × 12 | bien |
+| Cuello | tres direcciones bien; la última sin contestar |
+
+- **La cuerda la hizo entera y le costó tanto que perdía el aire** entre rounds, según el
+  usuario. Volvió atrás solo para marcar, y eso pisó el registro: el historial dice 1, 0 y 2
+  segundos de 180. **Es un fallo del app, no lo que pasó** (corregido en TD-137: volver a
+  una serie hecha ya no la acorta). Lo mismo el último round de cada rodilla.
+- **Para la próxima NIKO 5:** la cuerda en rounds de 2 minutos, o de 3 con 90 s de
+  descanso. Sin decidir.
+- **El salto al cajón, fácil las cuatro:** la próxima, 4 × 6, o el cajón en su lado alto.
+- **El cuello sin la última dirección, otra vez:** su teléfono todavía no tiene el respiro
+  del final (TD-156, llega con el siguiente release).
 
 ### 2026-09-24 — NIKO 4 · Glúteo a una pierna, la primera que contesta serie por serie
 

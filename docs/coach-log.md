@@ -5,6 +5,36 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-25 — duodécima sesión: 41 sale bien, y el dolor habitual se separa del de crisis
+
+**LUMBAR** completo, de 07:36 a 09:00, **84 minutos**. Alarma a las 7:00; contestó a las 7:11.
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| Glute Bridge | 21 · 31 · 41 | **las tres bien** |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20, por mano, **alternado** | las seis bien |
+| Box Squat | 17.5 · 20 · 22.5 | bien · **ligera · ligera** |
+
+- **41 en el puente, "bien" por primera vez.** El domingo fue pesado. Es la primera de las
+  dos sesiones que se pidieron antes de pasar de 41.
+- **La sentadilla pide subir**: las dos de arriba ligeras. Si el martes se repite, sube.
+- **El carry alternado**, izquierda y derecha dentro de cada serie: *"me gusta más como
+  está"*. Queda así.
+
+**El dolor al despertar: 1 en la alarma, 2 en la sesión.** Contestó 1, le pareció *"demasiado
+optimista"*, y lo corrigió en la sesión porque la alarma no dejaba editarlo. Vale el **2**,
+y aflojó en **39 minutos**, el más largo de la serie (15, 24, 39). Tres mañanas no son una
+tendencia, pero hay que mirarlo. Desde TD-164 la corrección se hace en la pantalla Morning.
+
+### Lo que no contestó, y por qué no era un olvido
+
+No marcó el dolor final ni si irradiaba. Su explicación cambia cómo se leen sus datos: el
+dolor al despertar es el **habitual** y el de antes/después es el de **crisis**, y la crisis ya
+pasó. Anotado en `coach.md`, y el app deja de preguntarlo salvo que diga que hay crisis
+(TD-165).
+
+---
+
 ## 2026-09-23 — undécima sesión: la primera mañana medida por la alarma
 
 **LUMBAR (short)**, de 05:15 a 05:52, **36 minutos**. Dolor **0 → 0**, sin irradiación.

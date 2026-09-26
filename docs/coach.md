@@ -31,11 +31,27 @@ se leen antes de entrenar. Ahí se quedan, y no se repiten en cada conversación
    ajuste: la revisión las sustituye a todas.
 6. Vuelta a 1.
 
+## Dos dolores distintos, con la misma escala
+
+**Desde el 25-sep-2026 se distinguen, y la distinción es suya:**
+
+- **El habitual** es el del despertar: lleva años, él lo llama *"normalizado"*, y es **el que
+  hay que ir mejorando**. Se mide con la alarma (TD-151), al abrir los ojos, y los minutos
+  hasta que afloja. Es la serie que manda.
+- **El de crisis** es el de los días malos de septiembre: dolor antes y después de entrenar,
+  y si irradia a la pierna. **Ya se fue.** Sus preguntas van plegadas al final de la sesión,
+  detrás de *Back crisis today* (TD-165), y solo se contestan si vuelve.
+
+En sus palabras: *"ya no existe ese dolor ni al comienzo ni al final, y sin ese dolor, no hay
+irradiación"*. **Un *Pain before* vacío no es un olvido**: es que no hay crisis. Leerlo como
+olvido es preguntarle cada día por algo que no tiene.
+
 ## Qué se le pide después de entrenar
 
 Cuatro cosas, y ninguna necesita que se acuerde de nada raro:
 
-- **Dolor antes, durante y después.** Un número del 0 al 10 basta.
+- **Dolor habitual al despertar**, que ya contesta la alarma. **El de crisis, antes y
+  después, solo si hay crisis** (ver arriba).
 - **Dónde.** Centrado en la espalda, o irradiado a la pierna. Si se mueve de la pierna
   hacia la espalda va bien; si baja hacia la pierna, ese ejercicio sale de la rutina ese
   día y se anota.
