@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-172",
+      "title": "En un circuito, el ejercicio que pasa directo al siguiente nunca pregunta como fue",
+      "category": "Fix",
+      "status": "pending",
+      "manual": "ENCONTRADO el 26-sep leyendo NIKO 6, la primera sesion en circuito (TD-137). Saco 4 x 3 min con descanso 0 y sprawl 4 x 30 s con 60 s, alternados. Del sprawl contesto los cuatro; del saco solo el primero.\n\nLa causa: la tarjeta de un round sale en el descanso de DESPUES, y el saco no tiene descanso porque pasa directo al sprawl. El primero lo alcanzo en la preparacion del sprawl, que en un circuito solo va la primera vez (enCircuito). Los rounds 2 a 4 no tuvieron ningun momento para contestar. El respiro de TD-156 no lo cubre: solo va al final del training.\n\nHECHO el 26-sep con el OK del usuario: en el descanso que cierra un round, UNA tarjeta con cada ejercicio del round y sus tres respuestas (Effort.roundAt). El ultimo round no tiene descanso, asi que se pregunta en la preparacion de lo que sigue, si algo quedo sin contestar. Un descanso a mitad de round solo pregunta por lo ya hecho. Tests en CircuitTest.\n\nVA JUNTO, por pedido del mismo dia, el MONTAJE del lumbar (revision 18): el puente rodando la barra desde los pies y la sentadilla empezando sentado con la mancuerna sobre los muslos, en la nota y en las instrucciones. Las instrucciones del lumbar se sembraban sin pisar; ahora reemplazan las viejas que siguen tal cual se sembraron (mergeLumbarInstructions), y lo escrito a mano se queda."
+    },
+    {
       "id": "TD-171",
       "title": "La voz de los pitidos, por telefono: cada uno suena distinto al entrenar juntos",
       "category": "Feature",

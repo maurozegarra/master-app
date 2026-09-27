@@ -65,6 +65,39 @@ class CircuitTest {
     }
 
     @Test
+    fun `el descanso del round pregunta por todo el round`() {
+        // El 26-sep NIKO contesto los cuatro sprawls y solo el primer saco (TD-172).
+        val ps = StepEngine.buildSteps(t(circuit = true))
+        val descanso2 = ps.indexOfFirst { it.kind == StepKind.REST && it.slot == 1 }
+        assertEquals(listOf("Saco 2", "Sprawl 2"), etiquetas(Effort.roundAt(ps, descanso2)))
+    }
+
+    @Test
+    fun `el ultimo round, sin descanso, se pregunta en la preparacion de lo que sigue`() {
+        val movilidad = Exercise(id = 3L, exerciseId = "ex_90_90", name = "90", sets = 1, workValue = 10, prepareSec = 10)
+        val tr = t(circuit = true).let { it.copy(workouts = it.workouts + Workout(id = 2L, name = "M", exercises = listOf(movilidad))) }
+        val ps = StepEngine.buildSteps(tr)
+        val prep = ps.indexOfFirst { it.kind == StepKind.PREP && it.ownerName == "90" }
+        assertEquals(listOf("Saco 3", "Sprawl 3"), etiquetas(Effort.roundAt(ps, prep)))
+    }
+
+    @Test
+    fun `un descanso a mitad de round no pregunta por lo que falta`() {
+        val conDescanso = saco.copy(restSec = 30)
+        val tr = Training(id = 1L, name = "T", workouts = listOf(Workout(id = 1L, name = "W", exercises = listOf(conDescanso, sprawl), circuit = true)))
+        val ps = StepEngine.buildSteps(tr)
+        val tras = ps.indexOfFirst { it.kind == StepKind.REST && it.ownerName == "Saco" }
+        assertEquals(listOf("Saco 1"), etiquetas(Effort.roundAt(ps, tras)))
+    }
+
+    @Test
+    fun `fuera de un circuito no hay round`() {
+        val ps = StepEngine.buildSteps(t(circuit = false))
+        val descanso = ps.indexOfFirst { it.kind == StepKind.REST }
+        assertTrue(Effort.roundAt(ps, descanso).isEmpty())
+    }
+
+    @Test
     fun `NIKO 6 alterna el saco con el sprawl`() {
         val niko6 = MasterDefaults.nikoTrainings("es").single { it.name.startsWith("NIKO 6") }
         val trabajo = StepEngine.buildSteps(niko6).filter { it.kind == StepKind.WORK && it.ownerExerciseId in setOf("ex_heavy_bag", "ex_burpees") }

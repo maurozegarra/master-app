@@ -98,4 +98,29 @@ object Effort {
      */
     fun cardFor(step: PlayerStep): Boolean =
         (step.kind == StepKind.WORK || step.kind == StepKind.REST) && asks(step)
+
+    /**
+     * Las series del round de circuito que se acaba de cerrar en el paso [index] (TD-172):
+     * en su descanso, o en la preparacion de lo que sigue al circuito. Vacia fuera de eso.
+     *
+     * En un circuito se pasa de un ejercicio al siguiente sin descanso -el saco va directo
+     * al sprawl-, y la tarjeta de un round sale en el descanso de DESPUES. El 26-sep NIKO
+     * contesto los cuatro sprawls y solo el primer round de saco: los otros tres no tuvieron
+     * donde preguntarse. Por eso el descanso del round pregunta por todo el round.
+     *
+     * Solo lo hecho ANTES de [index]: si un ejercicio del medio tiene descanso propio, en
+     * ese descanso todavia no se pregunta por lo que falta del round.
+     */
+    fun roundAt(steps: List<PlayerStep>, index: Int): List<PlayerStep> {
+        val paso = steps.getOrNull(index) ?: return emptyList()
+        val cierre = when (paso.kind) {
+            StepKind.REST -> paso
+            StepKind.PREP -> steps.getOrNull(index - 1)?.takeIf { it.kind == StepKind.WORK }
+            else -> null
+        }?.takeIf { it.circuit } ?: return emptyList()
+        return steps.take(index).filter {
+            it.kind == StepKind.WORK && it.circuit && it.workoutIndex == cierre.workoutIndex &&
+                it.slot == cierre.slot && asks(it)
+        }
+    }
 }

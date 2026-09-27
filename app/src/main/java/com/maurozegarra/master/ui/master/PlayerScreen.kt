@@ -777,6 +777,12 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         } else {
             null
         }
+        // El round entero de un circuito, cuando tiene mas de un ejercicio que contestar
+        // (TD-172). En la preparacion de lo que sigue, solo si algo quedo sin contestar,
+        // igual que [pendienteAnterior].
+        val ronda = Effort.roundAt(vm.playerSteps, vm.playerIndex).takeIf { r ->
+            r.size > 1 && (step.kind == StepKind.REST || r.any { vm.effortOf(it) == null })
+        }
         val proximaCarga = if (step.kind == StepKind.WORK) {
             null
         } else {
@@ -786,6 +792,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             Box(Modifier.align(Alignment.BottomCenter)) {
                 when {
                     step.kind == StepKind.WORK && step.weighted -> WeightFeedback(vm, step, accent, t)
+                    ronda != null -> EffortRoundFeedback(vm, ronda, accent, t)
                     // Lo que no lleva peso tambien dice como fue (TD-152), y tambien en el
                     // descanso: durante un aguante o un round no se puede tocar la pantalla.
                     Effort.cardFor(step) -> EffortFeedback(vm, step, accent, t)
@@ -1436,6 +1443,42 @@ private fun EffortFeedback(vm: MasterViewModel, step: PlayerStep, accent: Color,
         if (marca?.value == Effort.HARD && step.progression == Progression.REPS && step.reps > 0) {
             Spacer(Modifier.height(8.dp))
             RepsDoneRow(marca.repsDone ?: step.reps, step.reps, t) { vm.recordEffort(step, Effort.HARD, it) }
+        }
+    }
+}
+
+/**
+ * Una tarjeta para todo un round de circuito (TD-172): el nombre de cada ejercicio y sus
+ * tres respuestas. Una sola tarjeta y no una por ejercicio: cuelga del hueco elastico, y
+ * dos tarjetas completas se comian el sitio -ya paso con la del peso en TD-092-.
+ */
+@Composable
+private fun EffortRoundFeedback(vm: MasterViewModel, steps: List<PlayerStep>, accent: Color, t: Strings) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.10f))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            "${t.round} ${steps.first().slot + 1}  ·  ${t.effort.howItFelt}",
+            color = Color.White.copy(alpha = 0.85f),
+            fontSize = 13.sp,
+        )
+        steps.forEach { s ->
+            val marca = vm.effortOf(s)
+            Spacer(Modifier.height(8.dp))
+            Text(ownerNameFor(s, t), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(4.dp))
+            EffortChips(marca?.value, accent, t) {
+                vm.recordEffort(s, it, if (it == Effort.HARD) marca?.repsDone ?: s.reps else null)
+            }
+            if (marca?.value == Effort.HARD && s.progression == Progression.REPS && s.reps > 0) {
+                Spacer(Modifier.height(6.dp))
+                RepsDoneRow(marca.repsDone ?: s.reps, s.reps, t) { vm.recordEffort(s, Effort.HARD, it) }
+            }
         }
     }
 }
