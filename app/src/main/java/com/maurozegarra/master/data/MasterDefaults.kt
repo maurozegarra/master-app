@@ -348,8 +348,13 @@ object MasterDefaults {
      *
      * Historial: sin riesgo. Los ids estan fijos, asi que reemplazar el contenido no
      * desconecta ninguna sesion ya registrada.
+     *
+     * Revision 18 (26-sep): el montaje del puente y de la sentadilla, no las cargas. Ver
+     * [LUMBAR_INSTRUCTIONS_SUPERSEDED].
+     *
+     * Revision 19 (26-sep): el puente pasa a hip thrust en su banca. Ver [LumbarBlocks.hipGlute].
      */
-    const val LUMBAR_REVISION = 17
+    const val LUMBAR_REVISION = 19
 
     /**
      * De quien es la rutina lumbar.
@@ -1876,14 +1881,31 @@ object MasterDefaults {
                 // es buena idea-. La de arriba fue 21 -> 26 -> 31 -> 36 -> 41, cada subida
                 // pedida por el cuerpo: el 19-sep marco LIGERAS las nueve series del bloque.
                 //
-                // 41 ya se acerca a su hip thrust de MASTER (40-70). Hasta aqui se estaba
-                // alcanzando su nivel real; cuando llegue, cargar la cadera los siete dias deja
-                // de tener sentido y el bloque pasa a tres por semana (ver coach-log 19-sep).
+                // El "hip thrust de MASTER (40-70)" con el que se comparaba era la PLANTILLA de
+                // ese training, no algo que hiciera: el 26-sep conto que nunca llego a esos
+                // pesos, y que lo ultimo fue hip thrust a una pierna con 10 kg. No cambia lo
+                // hecho -cada subida la pidio el cuerpo-, pero 41 no es "acercarse a su nivel":
+                // es su nivel. Cargar la cadera todos los dias paso a tres por semana igual
+                // (ver coach-log 19-sep).
                 //
                 // Revision 13 (22-sep): discos 15/25/35, o sea 21, 31 y 41. El domingo 41 fue
                 // PESADO y bajo a 38.5; el martes las tres salieron ligeras, asi que vuelve a
                 // 41 -la misma cima, con las dos de abajo mas cerca- en vez de pasar de largo.
-                loaded("ex_glute_bridge", 12, "Bar on the hips, push through the heels", listOf(15.0, 25.0, 35.0), WeightType.BARBELL, barWeight = 6.0),
+                //
+                // Revision 18 (26-sep): la nota cuenta el MONTAJE. El usuario: "la dificultad no
+                // es el peso a cargar, es ponerme en posicion". La subia echado, levantando el
+                // extremo de la cabeza -unos 20 kg- por encima del cuerpo y girando sobre el
+                // disco de la cadera: torsion con carga, lo que esta rutina cuida. Rodarla desde
+                // los pies no levanta nada. 41 se queda hasta que el montaje salga; despues, 46.
+                //
+                // REVISION 19 (26-sep): HIP THRUST en su banca, en vez del puente. La banca es
+                // hecha a medida para la barra EZ y la deja apoyada en alto: se entra por
+                // debajo y el montaje deja de ser un problema. Y el puente ya se le quedaba
+                // ligero en 41. El hip thrust es NUEVO para el -lo ultimo fue a una pierna con
+                // 10 kg-, y el recorrido es mas largo: 21 · 31 · 36 lo pidio el mismo, "el mayor
+                // recorrido es lo que prefiero evaluar bien antes de subirle el peso". 10 reps
+                // con pausa de 2 s arriba. El historial del puente se queda en el suyo.
+                loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
                 // y el player no podia decir "1 de 10". El numero por serie es el mismo, asi
@@ -1894,7 +1916,10 @@ object MasterDefaults {
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
                 // Despues de 20 viene la de 22.5 -no estaba en el inventario del 18-sep; la
                 // agrego el usuario el 19- y despues 25. El salto de 22.5 a 25 es de 11%.
-                loaded("ex_box_squat", 8, "Goblet at the chest, chest up", listOf(17.5, 20.0, 22.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                // Revision 18: se empieza SENTADO, con la mancuerna sobre los muslos. Subir 22.5
+                // kg del piso al pecho era flexion con carga fuera del ejercicio, y "ponerse en
+                // posicion cuesta" mas que la sentadilla.
+                loaded("ex_box_squat", 8, "Start seated, dumbbell on the thighs. Chest up", listOf(17.5, 20.0, 22.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
             ),
         )
     }
@@ -1950,8 +1975,24 @@ object MasterDefaults {
         ),
         "ex_glute_bridge" to ExerciseMedia(
             listOf(
+                "With the bar: sit on the floor, legs straight, bar across your shins. Roll it up your legs to the hip crease, then lie back.",
+                "Never lift it or swing it over your body. If it does not clear your thighs, set each plate on a step and slide under.",
+                "A folded towel on the hips takes the pressure.",
                 "Push through the heels, squeeze the glute at the top.",
                 "If you feel the lower back working, you are not using the glute.",
+                "To finish, sit up and roll it back down to your feet.",
+            ),
+        ),
+        // Revision 19: reemplaza al puente en el dia completo. Las del catalogo estan en
+        // espanol y son para NIKO; estas llevan lo de su espalda y su banca.
+        "ex_hip_thrust" to ExerciseMedia(
+            listOf(
+                "Upper back on the bench, just below the shoulder blades. Slide under the bar on the supports and set it on the hip crease, with a pad.",
+                "Feet flat, shoulder width. At the top, shins vertical.",
+                "Ribs down, chin tucked, eyes forward, not at the ceiling.",
+                "Push through the heels until knees, hips and shoulders are in line. No higher: past that line it is the lower back arching, not the glute.",
+                "2 s pause at the top, squeezing the glutes.",
+                "Lower under control. To finish, let the bar rest back on the supports.",
             ),
         ),
         "ex_suitcase_carry" to ExerciseMedia(
@@ -1963,11 +2004,54 @@ object MasterDefaults {
         ),
         "ex_box_squat" to ExerciseMedia(
             listOf(
-                "To a box or a chair, no weight.",
+                "Start seated on the bench, dumbbell standing on your thighs. Bring it to your chest while seated, back straight, then stand up.",
                 "Controlled on the way down until you touch, then stand up. Chest up.",
+                "To finish, sit and lower the dumbbell to your thighs. It never goes to or comes from the floor.",
+                "Without weight, the same: to a box or a chair.",
             ),
         ),
     )
+
+    /**
+     * Las instrucciones del lumbar tal y como se sembraron antes, por ejercicio (TD-172).
+     *
+     * Las del lumbar se siembran sin pisar, porque un ejercicio del catalogo puede traer
+     * instrucciones escritas por el usuario. Pero el 26-sep el puente y la sentadilla
+     * cambiaron de MONTAJE -rodar la barra desde los pies, empezar sentado con la
+     * mancuerna-, y sin reemplazo no habrian llegado nunca a su telefono. Se reemplaza solo
+     * lo que sigue palabra por palabra como se sembro: eso no lo toco nadie.
+     */
+    private val LUMBAR_INSTRUCTIONS_SUPERSEDED: Map<String, List<ExerciseMedia>> by lazy { mapOf(
+        // Revision 19: en su telefono el hip thrust tenia las del catalogo, en espanol y
+        // escritas para NIKO, porque lo hizo en el training MASTER.
+        "ex_hip_thrust" to listOf(catalogInstructions().getValue("ex_hip_thrust")),
+        "ex_glute_bridge" to listOf(
+            ExerciseMedia(
+                listOf(
+                    "Push through the heels, squeeze the glute at the top.",
+                    "If you feel the lower back working, you are not using the glute.",
+                ),
+            ),
+        ),
+        "ex_box_squat" to listOf(
+            ExerciseMedia(
+                listOf(
+                    "To a box or a chair, no weight.",
+                    "Controlled on the way down until you touch, then stand up. Chest up.",
+                ),
+            ),
+        ),
+    ) }
+
+    /**
+     * [current] con las instrucciones del lumbar: donde no hay nada, o donde sigue una
+     * version vieja tal cual se sembro. Lo escrito a mano no coincide y se queda.
+     */
+    fun mergeLumbarInstructions(current: Map<String, ExerciseMedia>): Map<String, ExerciseMedia> =
+        current + lumbarInstructions().filterKeys { id ->
+            val actual = current[id]
+            actual == null || actual in LUMBAR_INSTRUCTIONS_SUPERSEDED[id].orEmpty()
+        }
 
     /**
      * Las indicaciones de la caminata **tal y como se sembraron el 13-sep-2026**, antes de

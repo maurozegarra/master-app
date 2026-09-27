@@ -653,7 +653,7 @@ class MasterViewModel(
 
     private fun seedLumbarInstructions() {
         val current = mediaStore.load()
-        val merged = current + MasterDefaults.lumbarInstructions().filterKeys { it !in current }
+        val merged = MasterDefaults.mergeLumbarInstructions(current)
         if (merged != current) mediaStore.save(merged)
     }
 

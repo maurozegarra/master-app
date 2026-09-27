@@ -107,8 +107,9 @@ class LumbarTrainingTest {
         t.workouts.first { it.name == "Hip & Glute" }.exercises.associateBy { it.exerciseId }
 
     @Test
-    fun `el puente de gluteos usa la barra de 6 kilos, no la de 20 por defecto`() {
-        val e = cadera(training).getValue("ex_glute_bridge")
+    fun `el hip thrust usa la barra de 6 kilos, no la de 20 por defecto`() {
+        // Hasta la revision 18 era el puente de gluteos; la barra y su historia son las mismas.
+        val e = cadera(training).getValue("ex_hip_thrust")
 
         assertEquals(WeightType.BARBELL, e.weightType)
         // 20 era el defecto del app y el 15-sep le enseno "40 kg" cuando iban a ser 26:
@@ -127,8 +128,12 @@ class LumbarTrainingTest {
         // REVISION 13 (22-sep): las tres ligeras. Vuelve a 41 arriba -la misma cima que el
         // domingo le parecio pesada- con las dos de abajo mas cerca, 21 y 31, en vez de
         // pasar de largo por encima de lo unico que ya dijo que le costaba.
-        assertEquals(listOf(21.0, 31.0, 41.0), e.setList.map { e.weightTotal(it) })
-        assertTrue(e.setList.all { it.reps == 12 })
+        //
+        // REVISION 19 (26-sep): hip thrust en su banca, nuevo para el. Arranca por debajo del
+        // 41 del puente, a pedido suyo, para evaluar el recorrido antes de cargar.
+        assertEquals(listOf(21.0, 31.0, 36.0), e.setList.map { e.weightTotal(it) })
+        assertTrue(e.setList.all { it.reps == 10 })
+        assertFalse(cadera(training).containsKey("ex_glute_bridge"))
     }
 
     @Test
@@ -469,11 +474,11 @@ class LumbarTrainingTest {
 
     @Test
     fun `lo que va por repeticiones se anota con sus reps y sin duracion`() {
-        val puente = session.exercises.single { it.exerciseId == "ex_glute_bridge" }
+        val sentadilla = session.exercises.single { it.exerciseId == "ex_box_squat" }
 
-        assertFalse(puente.timeBased)
-        assertEquals(listOf(12, 12, 12), puente.sets.map { it.reps })
-        assertTrue(puente.sets.all { it.durationSec == 0 })
+        assertFalse(sentadilla.timeBased)
+        assertEquals(listOf(8, 8, 8), sentadilla.sets.map { it.reps })
+        assertTrue(sentadilla.sets.all { it.durationSec == 0 })
     }
 
     @Test
@@ -483,5 +488,29 @@ class LumbarTrainingTest {
             .single()
 
         assertEquals(session, back)
+    }
+
+    @Test
+    fun `el montaje nuevo reemplaza las instrucciones viejas, no las escritas a mano`() {
+        // 26-sep: el puente y la sentadilla cambian de montaje, y las del lumbar se siembran
+        // sin pisar. Sin reemplazo no habrian llegado nunca.
+        val viejo = com.maurozegarra.master.model.ExerciseMedia(
+            listOf(
+                "Push through the heels, squeeze the glute at the top.",
+                "If you feel the lower back working, you are not using the glute.",
+            ),
+        )
+        val suya = com.maurozegarra.master.model.ExerciseMedia(listOf("Mi forma de montarlo"))
+        val merged = MasterDefaults.mergeLumbarInstructions(mapOf("ex_glute_bridge" to viejo, "ex_box_squat" to suya))
+        assertEquals(MasterDefaults.lumbarInstructions()["ex_glute_bridge"], merged["ex_glute_bridge"])
+        assertEquals(suya, merged["ex_box_squat"])
+        // Las del catalogo del hip thrust, que estaban en su telefono, tambien (revision 19).
+        val catalogo = MasterDefaults.catalogInstructions().getValue("ex_hip_thrust")
+        assertEquals(
+            MasterDefaults.lumbarInstructions()["ex_hip_thrust"],
+            MasterDefaults.mergeLumbarInstructions(mapOf("ex_hip_thrust" to catalogo))["ex_hip_thrust"],
+        )
+        // Y lo que falta se siembra.
+        assertEquals(MasterDefaults.lumbarInstructions()["ex_suitcase_carry"], merged["ex_suitcase_carry"])
     }
 }

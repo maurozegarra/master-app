@@ -83,7 +83,12 @@ La de 22.5 no entro en el inventario del 18-sep; la agrego el 19.
   siempre es **porcentaje**, no grados — conviene confirmarlo antes de prescribir cuesta).
 - Banca dual de hiperextensiones y curl nórdico.
 - Pantorrillera sentado, a discos.
-- Banca de hip thrust.
+- **Banca de hip thrust hecha a medida para la barra EZ de 6 kg**: respaldo, plataforma para
+  los pies y soportes a los lados donde **la barra queda apoyada en alto**. Sin mecanismo:
+  es banca y barra libre, y los kilos son los de la barra. Lo que resuelve es el
+  montaje: se entra por debajo de una barra ya elevada, sin subirla desde el piso -el problema
+  del puente con barra (26-sep)-. (El 26-sep se describió mal, como una palanca, por una foto
+  de catálogo; lo corrigió el usuario.)
 - Prensa horizontal de bloques, **100 kg máximo**.
 - Saco banana de 1.8 m.
 - **Llanta** de 40 cm interior, 75 exterior, 20 de alto. La usa para saltos; ya aparece en
