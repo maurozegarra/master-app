@@ -146,6 +146,40 @@ fun SettingsScreen(
                     masterVm.previewBeepVolume(it)
                 },
             )
+            Spacer(Modifier.height(16.dp))
+            Text(t.more.voice.title, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(2.dp))
+            Text(t.more.voice.desc, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Spacer(Modifier.height(8.dp))
+            // Solo las que existen en ESTE telefono: las de Samsung, si esta el archivo.
+            // Elegir una la hace sonar, tic y aviso, al volumen elegido arriba.
+            val voces = androidx.compose.runtime.remember {
+                com.maurozegarra.master.model.BeepVoices.available(com.maurozegarra.master.audio.BeepVoiceAudio::exists)
+            }
+            val actual = com.maurozegarra.master.model.BeepVoices.resolve(
+                cfg.masterConfig.beepVoice, com.maurozegarra.master.audio.BeepVoiceAudio::exists,
+            ).id
+            voces.forEach { v ->
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            vm.setBeepVoice(v.id)
+                            masterVm.previewBeepVoice(v.id, cfg.masterConfig.beepVolume)
+                        }
+                        .padding(vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        v.label,
+                        color = if (v.id == actual) accent else AppTheme.colors.textPrimary,
+                        fontSize = 15.sp,
+                        fontWeight = if (v.id == actual) FontWeight.Bold else FontWeight.Normal,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (v.id == actual) Text("\u2713", color = accent, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
         }
 
         SettingsCard(t.groupData) {

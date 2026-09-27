@@ -280,7 +280,8 @@ dispositivo, no un camino para meter contenido.
   parametros, y el `copy` de una data class suma uno por campo mas las mascaras: con 245
   campos se llega justo. Un texto mas y la clase no carga (`ClassFormatError: Too many
   arguments`), y lo que se ve es que fallan tests que no tienen nada que ver. Lo nuevo va en
-  un bloque aparte, como `EffortStrings` (TD-152).
+  un bloque aparte, como `EffortStrings` (TD-152), y desde TD-171 ni el bloque cabe en
+  `Strings`: los bloques nuevos entran como campo de `MoreStrings` (`t.more.xxx`).
 - **No se borra un test para que pase el build.** Si un test falla, se arregla el código o se cambia el test con justificación explícita.
 
 ## Dispositivo de prueba

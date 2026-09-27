@@ -28,6 +28,8 @@ data class MasterConfig(
      * pitidos, no por etapa. Por defecto 100, que es como sonaban antes de existir el ajuste.
      */
     val beepVolume: Int = 100,
+    /** La voz de los pitidos de este teléfono (TD-171). Ver [BeepVoices]. */
+    val beepVoice: String = "classic",
 )
 
 /** Los niveles que se ofrecen en Ajustes. Pocos y separados, para que cada uno se note. */

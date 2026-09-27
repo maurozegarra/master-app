@@ -2404,6 +2404,18 @@ class MasterViewModel(
     )
     fun stopBeepPreview() = alarmPlayer.stopPreview()
 
+    /** Suena la voz [id]: primero el tic de la cuenta atrás y después el aviso de etapa. */
+    fun previewBeepVoice(id: String, percent: Int) {
+        val app = getApplication<Application>()
+        val voz = com.maurozegarra.master.model.BeepVoices.resolve(id, com.maurozegarra.master.audio.BeepVoiceAudio::exists)
+        val audio = com.maurozegarra.master.audio.BeepVoiceAudio
+        alarmPlayer.previewTone(audio.uri(app, voz.tick), percent / 100f)
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(700)
+            alarmPlayer.beepTone(audio.uri(app, voz.cue), percent / 100f)
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         alarmPlayer.stop()

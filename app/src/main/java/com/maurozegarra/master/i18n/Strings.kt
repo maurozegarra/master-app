@@ -221,8 +221,11 @@ data class Strings(
     val distance: DistanceStrings,
     /** Dolor habitual y dolor de crisis, separados (TD-165). En bloque, por el tope de la JVM. */
     val crisis: CrisisStrings,
-    /** De quien es el historial (TD-168). En bloque, por el tope de la JVM. */
-    val historyOf: HistoryOwnerStrings,
+    /**
+     * Los bloques desde TD-168. Esta clase ya no admite ni un campo mas (TD-171 lo intento y
+     * no cargo), asi que los bloques nuevos entran en [MoreStrings] y no aqui.
+     */
+    val more: MoreStrings,
     val nextSuggestions: String,
     val painOnWaking: String,
     val painFadeMin: String,
@@ -486,8 +489,14 @@ object I18n {
         applyColorTitle = "Apply color to",
         applyColorThisExercise = "This exercise only",
         applyColorAllTraining = "All exercises in training",
-        historyOf = HistoryOwnerStrings(
-            me = "Me",
+        more = MoreStrings(
+            historyOf = HistoryOwnerStrings(
+                me = "Me",
+            ),
+            voice = VoiceStrings(
+                title = "Beep voice",
+                desc = "Each phone its own: training together, you can tell whose beep it is",
+            ),
         ),
         crisis = CrisisStrings(
             toggle = "Back crisis today",
@@ -667,4 +676,19 @@ data class CrisisStrings(
 /** El selector de History: el propio o el de un atleta (TD-168). */
 data class HistoryOwnerStrings(
     val me: String,
+)
+
+/** La voz de los pitidos del teléfono (TD-171). */
+data class VoiceStrings(
+    val title: String,
+    val desc: String,
+)
+
+/**
+ * Donde entran los bloques de textos nuevos: [Strings] esta al tope de parametros de la JVM.
+ * Esta tiene sitio de sobra, pero la regla es la misma: cada funcionalidad, su bloque.
+ */
+data class MoreStrings(
+    val historyOf: HistoryOwnerStrings,
+    val voice: VoiceStrings,
 )

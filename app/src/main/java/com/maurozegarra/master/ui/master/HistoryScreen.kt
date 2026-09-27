@@ -104,7 +104,7 @@ private fun HistoryOwnerPicker(vm: MasterViewModel, accent: Color, t: Strings) {
         Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        OwnerChip(t.historyOf.me, actual == null, accent) { vm.closeAthleteHistory() }
+        OwnerChip(t.more.historyOf.me, actual == null, accent) { vm.closeAthleteHistory() }
         vm.historyOwners.forEach { p ->
             OwnerChip(p.name, actual == p.id, accent) { vm.openAthleteHistory(p) }
         }

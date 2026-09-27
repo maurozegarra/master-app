@@ -330,16 +330,18 @@ class WorkoutPlayerService : Service() {
     private fun beepVolume(): Float =
         com.maurozegarra.master.data.SettingsStore(this).loadConfig().masterConfig.beepVolume / 100f
 
+    // Lo personalizado por etapa manda; si no hay, suena la voz del TELEFONO (TD-171), que es
+    // lo que distingue el pitido de cada uno cuando entrenan dos personas juntas.
     private fun playBeep(step: com.maurozegarra.master.model.PlayerStep) {
         val uri = step.beepSoundUri
-            ?: "android.resource://${packageName}/${R.raw.beep_second}"
+            ?: com.maurozegarra.master.audio.BeepVoiceAudio.let { it.uri(this, it.current(this).tick) }
         beepPlayer.beepTone(uri, beepVolume())
     }
 
     private fun alarmCue(step: com.maurozegarra.master.model.PlayerStep? = null) {
         if (step?.alarm == false) return
         val uri = step?.beepSoundUri
-            ?: "android.resource://${packageName}/${R.raw.beep_work}"
+            ?: com.maurozegarra.master.audio.BeepVoiceAudio.let { it.uri(this, it.current(this).cue) }
         beepPlayer.beepTone(uri, beepVolume())
     }
 

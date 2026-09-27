@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-171",
+      "title": "La voz de los pitidos, por telefono: cada uno suena distinto al entrenar juntos",
+      "category": "Feature",
+      "status": "done",
+      "manual": "LO PIDIO el usuario el 26-sep: \"cuando hacemos ejercicio Niko y yo, un beep unico nos confunde, no sabemos si es el suyo o el mio\". El sonido por etapa ya existia, pero es del training; hacia falta uno del TELEFONO. Y \"no se trata de seleccionar cualquier sonido, deberia ser uno usable como beep de ejercicio\".\n\nHECHO en codigo el mismo dia: Settings > Player > \"Beep voice\". Cuatro voces del app, generadas para distinguirse por tono y por ritmo -Classic (la de siempre), High (aguda), Low (grave y seca, tipo bloque de madera), Double (dos tics)-, cada una con su tic de cuenta atras y su aviso de etapa; y, como pidio el usuario, cuatro sonidos de interfaz de su Samsung (Volume, Volume Retro, Dial Retro, Timepicker), que solo se ofrecen si el archivo esta en el telefono y si falta caen a Classic. Lo personalizado por etapa sigue mandando. Elegir una voz la hace sonar. BeepVoices, puro, con BeepVoiceTest.\n\nVALIDADO por el usuario el 26-sep en la v1.0.334. De paso, Strings llego al tope y ya no admitia ni un bloque mas: los bloques nuevos van en MoreStrings (t.more.xxx), anotado en AGENTS.md."
+    },
+    {
       "id": "TD-170",
       "title": "Quitar el ajuste \"Leading zeros in clock\"",
       "category": "Mantenimiento",
