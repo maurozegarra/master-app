@@ -1830,14 +1830,15 @@ object MasterDefaults {
         /**
          * El bloque de cadera y gluteo, con carga desde TD-098.
          *
-         * A peso corporal se le quedaba corto y sus propios datos decian por que: en el
-         * training MASTER empuja hip thrust con 40, 50, 60 y 70 kg, y aqui estaba haciendo
-         * el puente a peso corporal. Empezar en 40 es conservador a proposito.
+         * A peso corporal se le quedaba corto. (Se justifico con un "hip thrust con 40, 50,
+         * 60 y 70 kg" del training MASTER que resulto ser la plantilla, no lo que hacia: ver
+         * coach-log 26-sep. Cada subida la pidio igual su cuerpo.)
          *
-         * Sigue siendo puente de SUELO y no hip thrust: menos recorrido de extension
-         * lumbar, que es lo que interesa en una rutina de columna. Y la sentadilla va
-         * goblet y no con barra porque el peso delante ayuda a mantener el pecho arriba y
-         * carga menos la espalda.
+         * Fue puente de SUELO hasta la revision 18: menos recorrido de extension lumbar, lo
+         * que convenia en plena crisis. Desde la 19 es hip thrust en su banca, con la crisis
+         * pasada y el montaje del puente convertido en el problema. La sentadilla va goblet
+         * y no con barra porque el peso delante ayuda a mantener el pecho arriba y carga
+         * menos la espalda.
          */
         /**
          * Solo el carry, para el dia con prisa (revision 11).
