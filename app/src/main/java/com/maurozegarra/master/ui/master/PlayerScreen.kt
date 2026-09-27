@@ -109,6 +109,10 @@ import com.maurozegarra.master.ui.ExerciseVideo
 import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.model.DisplayMode
 import com.maurozegarra.master.model.PlayerStep
+import com.maurozegarra.master.model.PreviewBlock
+import com.maurozegarra.master.model.PreviewItem
+import com.maurozegarra.master.model.PreviewWords
+import com.maurozegarra.master.model.TrainingPreview
 import com.maurozegarra.master.model.SPEED_STEP
 import com.maurozegarra.master.model.Plates
 import com.maurozegarra.master.model.WeightType
@@ -137,54 +141,23 @@ fun PlayerScreen(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> 
     }
 }
 
-private data class PreviewExercise(
-    val name: String,
-    val exerciseId: String,
-    val meta: String,
-    /** Del paso, o sea de ESTA instancia: un ejercicio con el vídeo apagado no enseña miniatura. */
-    val showVideo: Boolean,
-)
-
-private data class PreviewGroup(
-    val index: Int,
-    val title: String,
-    val rotating: Boolean,
-    val variant: String,
-    val durationSec: Int,
-    val exercises: List<PreviewExercise>,
-)
-
-private fun metaFor(s: PlayerStep): String = when {
-    s.timeBased -> formatRemaining(s.durationSec * 1000L)
-    s.distance -> "${if (s.totalSets > 1) "${s.totalSets}×" else ""}${s.reps} m"
-    s.totalSets > 1 && s.reps > 1 -> "${s.totalSets}×${s.reps}"
-    s.totalSets > 1 -> "${s.totalSets}×"
-    s.reps > 0 -> "×${s.reps}"
-    else -> ""
-}
-
-private fun buildPreviewGroups(steps: List<PlayerStep>): List<PreviewGroup> =
-    steps.groupBy { it.workoutIndex }.entries.sortedBy { it.key }.map { (idx, list) ->
-        val first = list.first()
-        val exercises = list.filter { it.kind == StepKind.WORK }
-            .distinctBy { it.ownerName + "|" + it.ownerExerciseId }
-            .map { s -> PreviewExercise(s.ownerName, s.ownerExerciseId, metaFor(s), s.showVideo) }
-        PreviewGroup(
-            index = idx,
-            title = first.workoutBaseName.ifBlank { first.workoutName },
-            rotating = first.rotating,
-            variant = first.variantName,
-            durationSec = list.sumOf { it.durationSec },
-            exercises = exercises,
-        )
-    }
-
 @Composable
 private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
     val steps = vm.playerSteps
-    val groups = remember(steps) { buildPreviewGroups(steps) }
-    val totalExercises = groups.sumOf { it.exercises.size }
+    // La receta entera de cada ejercicio, armada sobre la cola que va a correr (TD-173).
+    val groups = remember(steps) { TrainingPreview.of(steps) }
+    val totalExercises = groups.sumOf { it.items.size }
+    val totalSec = remember(steps) { steps.sumOf { it.estimatedSec } }
     val expanded = remember(steps) { mutableStateMapOf<Int, Boolean>() }
+    val words = PreviewWords(
+        rest = t.more.preview.rest,
+        eachSide = t.more.preview.eachSide,
+        alternating = t.more.preview.alternating,
+        reps = t.more.preview.reps,
+        kg = t.kg,
+    )
+    // Tocar un ejercicio abre sus instrucciones: repasarlas es parte de revisar el training.
+    var sheetTarget by remember { mutableStateOf<InstructionsTarget?>(null) }
 
     // Revisar el training antes de hacerlo es el momento en que se sabe qué ejercicios
     // vienen y todavía queda tiempo para traer sus vídeos. Los que este training lleva
@@ -213,14 +186,26 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
             item {
                 Text(vm.playerName, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 Text(
-                    "$totalExercises ${t.exercise} · ${groups.size} ${t.workout}",
+                    buildString {
+                        append("$totalExercises ${t.exercise} · ${groups.size} ${t.workout}")
+                        if (totalSec > 0) append(" · ~${formatRemaining(totalSec * 1000L)}")
+                    },
                     color = AppTheme.colors.textDim,
                     fontSize = 14.sp,
                 )
             }
             items(groups, key = { it.index }) { g ->
                 val open = expanded[g.index] ?: false
-                WorkoutGroupCard(g, open, accent, t, vm::videoFileFor) { expanded[g.index] = !open }
+                WorkoutGroupCard(
+                    g, open, accent, t, words, vm::videoFileFor,
+                    onToggle = { expanded[g.index] = !open },
+                    onExercise = { item ->
+                        sheetTarget = InstructionsTarget(
+                            title = ExerciseCatalog.display(item.exerciseId, item.name, t.locale.language),
+                            steps = vm.mediaFor(item.exerciseId)?.instructions.orEmpty(),
+                        )
+                    },
+                )
             }
         }
         Column(
@@ -234,35 +219,43 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
                 .background(AppTheme.colors.bg)
                 .padding(16.dp),
         ) {
-            // Se pregunta AQUI, en la pantalla previa, y no al terminar: "mientras mas
-            // inmediata la pregunta, mas pegada a la realidad sera la respuesta". Al final,
-            // el dolor de antes ya es un recuerdo de hace una hora.
-            //
-            // Contestar es opcional: el boton de empezar no espera a nadie. Una pregunta que
-            // bloquea el entrenamiento se contesta de cualquier forma con tal de pasar, y
-            // ese dato vale menos que ninguno.
             // Ya no se pregunta aqui "How is your back right now?" (TD-165): era el dolor de
             // CRISIS, y la crisis paso. El habitual lo pregunta la alarma al despertar; el de
             // una crisis, si vuelve, se anota al final, detras de "Back crisis today".
-            PrimaryButton(
-                label = t.start,
-                accent = accent,
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onStart,
-            )
+            //
+            // La prueba va al lado de Start y mas chica (TD-174): es para revisar como se
+            // comporta un training sin que quede registrado, y no debe poder confundirse
+            // con empezar de verdad.
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                com.maurozegarra.master.ui.AppOutlineButton(
+                    label = t.more.testRun.button,
+                    accent = accent,
+                    modifier = Modifier.weight(1f),
+                    onClick = { vm.playerTest = true; onStart() },
+                )
+                PrimaryButton(
+                    label = t.start,
+                    accent = accent,
+                    modifier = Modifier.weight(2f),
+                    onClick = { vm.playerTest = false; onStart() },
+                )
+            }
         }
+        sheetTarget?.let { InstructionsSheet(it) { sheetTarget = null } }
     }
 }
 
 @Composable
 private fun WorkoutGroupCard(
-    g: PreviewGroup,
+    g: PreviewBlock,
     open: Boolean,
     accent: Color,
     t: Strings,
+    words: PreviewWords,
     /** El vídeo ya descargado de ese ejercicio, o null. Lambda y no el ViewModel: la tarjeta solo pinta. */
     videoFor: (String) -> java.io.File?,
     onToggle: () -> Unit,
+    onExercise: (PreviewItem) -> Unit,
 ) {
     Column(
         Modifier
@@ -294,14 +287,19 @@ private fun WorkoutGroupCard(
                         Spacer(Modifier.width(8.dp))
                         StatusBadge(text = t.rotatingTag, color = accent)
                     }
+                    if (g.circuit) {
+                        Spacer(Modifier.width(8.dp))
+                        StatusBadge(text = t.more.preview.circuit, color = accent)
+                    }
                 }
                 val sub = buildString {
                     if (g.rotating && g.variant.isNotBlank()) {
                         append("${t.activeVariantLabel}: ${g.variant}")
                     } else {
-                        append("${g.exercises.size} ${t.exercise}")
+                        append("${g.items.size} ${t.exercise}")
                     }
-                    if (g.durationSec > 0) append(" · ${formatRemaining(g.durationSec * 1000L)}")
+                    if (g.circuit) append(" · ${g.rounds} ${t.more.preview.rounds}")
+                    if (g.estimatedSec > 0) append(" · ~${formatRemaining(g.estimatedSec * 1000L)}")
                 }
                 Text(sub, color = AppTheme.colors.textDim, fontSize = 12.sp)
             }
@@ -318,15 +316,15 @@ private fun WorkoutGroupCard(
         if (open) {
             Spacer(Modifier.height(10.dp))
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                g.exercises.forEachIndexed { i, ex ->
+                g.items.forEach { ex ->
+                    // Sin el riel de puntos a la izquierda: solo quitaba ancho a la receta.
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        TimelineRail(isFirst = i == 0, isLast = i == g.exercises.lastIndex, accent = accent)
-                        Spacer(Modifier.width(10.dp))
                         Row(
                             Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(AppTheme.colors.track)
+                                .clickable { onExercise(ex) }
                                 .padding(10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -341,55 +339,25 @@ private fun WorkoutGroupCard(
                                 ExerciseGlyph(name = exLabel, color = 0xFF2E9E5BL, sizeDp = 30, exerciseId = ex.exerciseId)
                             }
                             Spacer(Modifier.width(10.dp))
-                            Text(
-                                exLabel,
-                                color = AppTheme.colors.textPrimary,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.weight(1f),
-                            )
-                            if (ex.meta.isNotBlank()) {
-                                Text(ex.meta, color = AppTheme.colors.textDim, fontSize = 12.sp)
+                            // La receta va DEBAJO del nombre y no a su derecha: con series,
+                            // pesos, lados y descanso ya no cabe en una columna al margen.
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    exLabel,
+                                    color = AppTheme.colors.textPrimary,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                                val receta = TrainingPreview.describe(ex, words)
+                                if (receta.isNotBlank()) {
+                                    Text(receta, color = AppTheme.colors.textDim, fontSize = 12.sp)
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun TimelineRail(isFirst: Boolean, isLast: Boolean, accent: Color) {
-    Box(
-        Modifier
-            .width(18.dp)
-            .fillMaxHeight(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            Modifier.fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(
-                Modifier
-                    .width(2.dp)
-                    .weight(1f)
-                    .background(if (isFirst) Color.Transparent else AppTheme.colors.track),
-            )
-            Box(
-                Modifier
-                    .width(2.dp)
-                    .weight(1f)
-                    .background(if (isLast) Color.Transparent else AppTheme.colors.track),
-            )
-        }
-        Box(
-            Modifier
-                .size(10.dp)
-                .clip(CircleShape)
-                .background(if (isFirst) accent else AppTheme.colors.textDim),
-        )
     }
 }
 
@@ -833,6 +801,30 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // Hermano del chrome, no hijo suyo: por eso sigue abierto cuando las franjas ya se
         // fueron. Solo lo cierra el usuario.
         sheetTarget?.let { InstructionsSheet(it) { sheetTarget = null } }
+        // La marca de prueba (TD-174), SIEMPRE visible: tiene que saberse de un vistazo que
+        // esta corrida no se va a registrar. Superpuesta y en el hueco central de la franja
+        // de arriba -entre el "3 / 10" y el porcentaje-, asi no mueve nada de sitio.
+        if (vm.playerTest) {
+            Box(
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .windowInsetsPadding(WindowInsets.systemBars)
+                    .padding(top = 6.dp)
+                    .height(36.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    t.more.testRun.badge,
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.Black.copy(alpha = 0.35f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                )
+            }
+        }
         AnimatedGlowBorder(cornerRadius = 0.dp, colors = glowColors(color), strokeWidth = 3.dp)
     }
 }
@@ -2113,6 +2105,7 @@ private fun PainScale(label: String, value: Int?, accent: Color, t: Strings, onP
 
 @Composable
 private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
+    if (vm.playerTest) return TestFinishedView(vm, accent, t)
     val suggestions = vm.weightSuggestions()
     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
         LazyColumn(
@@ -2274,4 +2267,38 @@ private fun effortLine(l: EffortRecord.Line, t: Strings): String {
         }
     }
     return "$quien:  $que"
+}
+
+/**
+ * El final de una corrida de prueba (TD-174). Sin nada de lo que trae el final normal:
+ * las tarjetas de lo que quedo sin contestar, el dolor y el registro escriben en la ULTIMA
+ * sesion guardada, y en una prueba esa sesion es la anterior, la de verdad. Contestar aqui
+ * la habria pisado.
+ */
+@Composable
+private fun TestFinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
+        Column(
+            Modifier.align(Alignment.Center).padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(t.more.testRun.finished, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                t.more.testRun.nothingSaved,
+                color = AppTheme.colors.textDim,
+                fontSize = 15.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+        }
+        PrimaryButton(
+            label = t.close,
+            accent = accent,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(16.dp),
+            onClick = { vm.closePlayer() },
+        )
+    }
 }

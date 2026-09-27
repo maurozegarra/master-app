@@ -60,6 +60,13 @@ class WorkoutPlayerService : Service() {
     private var startedAt = 0L
     private var lastPersistAt = 0L
     private val recorder = SessionRecorder()
+    /**
+     * Corrida de prueba (TD-174): el player corre igual, pero no deja nada. Ni sesion en el
+     * historial -y por tanto nada que subir al servidor ni que cuente para cual training va
+     * primero-, ni rotacion de los workouts rotativos, que es un cambio en el training.
+     * Va con la corrida en lo persistido: si el proceso muere, se recupera como prueba.
+     */
+    private var testRun = false
     /** Índices de workout cuya rotación ya se avanzó en esta corrida (rotación independiente). */
     private val advancedWorkouts = mutableSetOf<Int>()
 
@@ -82,6 +89,7 @@ class WorkoutPlayerService : Service() {
                 steps = decodeSteps(json)
                 workoutId = intent.getLongExtra(EXTRA_WORKOUT_ID, 0L)
                 name = intent.getStringExtra(EXTRA_NAME) ?: ""
+                testRun = intent.getBooleanExtra(EXTRA_TEST, false)
                 if (steps.isNotEmpty()) {
                     finished = false
                     advancedWorkouts.clear()
@@ -353,7 +361,7 @@ class WorkoutPlayerService : Service() {
     private fun markCompletedWorkouts(uptoExclusive: Int) {
         for (wi in StepEngine.workoutsToRotate(advancedWorkouts, uptoExclusive)) {
             advancedWorkouts.add(wi)
-            advanceWorkoutRotation(wi)
+            if (!testRun) advanceWorkoutRotation(wi)
         }
         persist()
     }
@@ -376,6 +384,7 @@ class WorkoutPlayerService : Service() {
     }
 
     private fun recordSession(status: SessionStatus) {
+        if (testRun) return
         try {
             val store = WorkoutStore(this, ExerciseMediaStore(this))
             val now = System.currentTimeMillis()
@@ -433,6 +442,7 @@ class WorkoutPlayerService : Service() {
             remainingMs = currentRemaining(),
             running = running,
             finished = finished,
+            test = testRun,
         )
     }
 
@@ -481,7 +491,7 @@ class WorkoutPlayerService : Service() {
         val builder = Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_timer)
             .setColor(Color.parseColor("#FF8C00"))
-            .setContentTitle("$title$round")
+            .setContentTitle(if (testRun) "PREVIEW · $title$round" else "$title$round")
             .setContentText(info)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -601,6 +611,7 @@ class WorkoutPlayerService : Service() {
             .putString("advancedWorkouts", advancedWorkouts.joinToString(","))
             .putLong("startedAt", startedAt)
             .putLong("lastPersistAt", lastPersistAt)
+            .putBoolean("testRun", testRun)
             .putString("recorderJson", com.maurozegarra.master.model.SessionJson.encode(
                 listOf(com.maurozegarra.master.model.SessionLog(
                     id = 0L, trainingId = 0L, trainingName = "",
@@ -658,6 +669,7 @@ class WorkoutPlayerService : Service() {
             workoutId = p.getLong("workoutId", 0L)
             name = p.getString("name", "") ?: ""
             startedAt = p.getLong("startedAt", 0L)
+            testRun = p.getBoolean("testRun", false)
             recorder.clear()
             p.getString("recorderJson", null)?.let { rj ->
                 com.maurozegarra.master.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
@@ -686,6 +698,7 @@ class WorkoutPlayerService : Service() {
         }
         startedAt = p.getLong("startedAt", 0L)
         lastPersistAt = p.getLong("lastPersistAt", 0L)
+        testRun = p.getBoolean("testRun", false)
         recorder.clear()
         p.getString("recorderJson", null)?.let { rj ->
             com.maurozegarra.master.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
@@ -731,14 +744,16 @@ class WorkoutPlayerService : Service() {
         private const val EXTRA_WORKOUT_ID = "workoutId"
         private const val EXTRA_INDEX = "index"
         private const val EXTRA_NAME = "name"
+        private const val EXTRA_TEST = "test"
         private const val ZOMBIE_TIMEOUT_MS = 12 * 60 * 60 * 1000L
 
-        fun start(context: Context, trainingId: Long, name: String, steps: List<PlayerStep>) {
+        fun start(context: Context, trainingId: Long, name: String, steps: List<PlayerStep>, test: Boolean = false) {
             val intent = Intent(context, WorkoutPlayerService::class.java)
                 .setAction(ACTION_START)
                 .putExtra(EXTRA_STEPS, encodeSteps(steps))
                 .putExtra(EXTRA_WORKOUT_ID, trainingId)
                 .putExtra(EXTRA_NAME, name)
+                .putExtra(EXTRA_TEST, test)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {

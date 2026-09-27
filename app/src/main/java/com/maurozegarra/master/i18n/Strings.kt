@@ -497,6 +497,21 @@ object I18n {
                 title = "Beep voice",
                 desc = "Each phone its own: training together, you can tell whose beep it is",
             ),
+            preview = PreviewStrings(
+                rest = "rest",
+                eachSide = "each side",
+                alternating = "sides alternating",
+                reps = "reps",
+                circuit = "Circuit",
+                rounds = "rounds",
+            ),
+            testRun = TestRunStrings(
+                // En mayusculas, pedido por el usuario: "PREVIEW" y no "Test run".
+                button = "PREVIEW",
+                badge = "PREVIEW",
+                finished = "Preview finished",
+                nothingSaved = "Nothing was saved: no history, no feedback, no rotation.",
+            ),
         ),
         crisis = CrisisStrings(
             toggle = "Back crisis today",
@@ -691,4 +706,24 @@ data class VoiceStrings(
 data class MoreStrings(
     val historyOf: HistoryOwnerStrings,
     val voice: VoiceStrings,
+    val preview: PreviewStrings,
+    val testRun: TestRunStrings,
+)
+
+/** La receta de cada ejercicio en la pantalla previa (TD-173). */
+data class PreviewStrings(
+    val rest: String,
+    val eachSide: String,
+    val alternating: String,
+    val reps: String,
+    val circuit: String,
+    val rounds: String,
+)
+
+/** Correr un training sin que quede nada registrado (TD-174). */
+data class TestRunStrings(
+    val button: String,
+    val badge: String,
+    val finished: String,
+    val nothingSaved: String,
 )

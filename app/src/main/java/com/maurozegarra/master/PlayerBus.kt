@@ -51,6 +51,8 @@ data class PlayerSnapshot(
     val remainingMs: Long,
     val running: Boolean,
     val finished: Boolean,
+    /** Corrida de prueba (TD-174): el servicio no registra nada. */
+    val test: Boolean = false,
 )
 
 /**

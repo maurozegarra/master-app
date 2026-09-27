@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **142 / 172** hechos, 30 pendientes.
+Progreso: **142 / 174** hechos, 32 pendientes.
 
 ## Pendientes
 
@@ -42,6 +42,12 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
+- [ ] **TD-174** Probar un training sin que quede registrado: modo prueba en el player
+  - PEDIDO por el usuario el 26-sep: "cuando quiero revisar el comportamiento de un training, al final tengo que eliminarlo y en ocasiones son varios cambios por evaluar y termino con varios registros que no son trainings realmente".
+
+HECHO el 27-sep con el OK del usuario: un boton "Test run" en la pantalla previa, al lado de Start. El player corre igual, con una marca TEST visible, y al terminar o al salir NO deja nada: ni sesion en History, ni subida al servidor, ni feedback que mueva la progresion, ni cuenta para cual training va primero. Se sabe que es prueba aunque el proceso muera y se restaure. Tampoco avanza la rotacion de un workout rotativo, que es un cambio en el training. El final de una prueba no ofrece contestar nada: esas tarjetas escriben en la ultima sesion guardada, que en una prueba es la anterior, la de verdad.
+
+AJUSTE del 27-sep, pedido por el usuario: el boton y la marca dicen "PREVIEW", en mayusculas, y no "Test run". Y en la pantalla previa (TD-173) se quito el riel de puntos a la izquierda de cada ejercicio: "solo quita espacio innecesariamente".
 - [ ] **TD-169** Historial de un atleta: su avatar y el detalle de su peso semanal
   - PEDIDO por el usuario el 26-sep, al pedir el selector de History (TD-168): "dejemos para despues un avatar y ver detalles de su peso semanal". Quedo mencionado dentro de TD-168 y sin registrar; se registra aparte para que no se pierda.
 
@@ -218,6 +224,15 @@ UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mit
 A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el ajuste es fijar un comportamiento, no borrar una casilla: hay que preguntar cual. Y limpiar lo que lo usa -SettingsViewModel.setPadPlayerClock, el parametro padded de formatPlayerClock y del player- sin dejar un campo huerfano en la configuracion guardada.
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
+
+### UI
+
+- [ ] **TD-173** La pantalla previa del training muestra lo que de verdad se va a hacer
+  - PEDIDO por el usuario el 26-sep: "casi no muestra detalle. Por ejemplo Curl-up 0:10, eso me dice que el ejercicio dura 10 segundos y no es cierto, no veo los pesos".
+
+La causa: cada fila muestra el primer paso de trabajo del ejercicio -un aguante de 10 s de doce-, y el bloque suma solo los pasos con reloj, sin las repeticiones.
+
+HECHO el 27-sep con el OK del usuario ("dale, haz las dos"): cada ejercicio con su receta completa -series x trabajo, los pesos serie por serie, metros, lados (uno y despues otro, o alternados), descanso-, el circuito marcado con sus rounds, y el tiempo de cada bloque y del total con el mismo estimado del player. Tocar un ejercicio abre sus instrucciones. Modelo puro en TrainingPreview, con TrainingPreviewTest.
 
 ## Hechos
 

@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-174",
+      "title": "Probar un training sin que quede registrado: modo prueba en el player",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PEDIDO por el usuario el 26-sep: \"cuando quiero revisar el comportamiento de un training, al final tengo que eliminarlo y en ocasiones son varios cambios por evaluar y termino con varios registros que no son trainings realmente\".\n\nHECHO el 27-sep con el OK del usuario: un boton \"Test run\" en la pantalla previa, al lado de Start. El player corre igual, con una marca TEST visible, y al terminar o al salir NO deja nada: ni sesion en History, ni subida al servidor, ni feedback que mueva la progresion, ni cuenta para cual training va primero. Se sabe que es prueba aunque el proceso muera y se restaure. Tampoco avanza la rotacion de un workout rotativo, que es un cambio en el training. El final de una prueba no ofrece contestar nada: esas tarjetas escriben en la ultima sesion guardada, que en una prueba es la anterior, la de verdad.\n\nAJUSTE del 27-sep, pedido por el usuario: el boton y la marca dicen \"PREVIEW\", en mayusculas, y no \"Test run\". Y en la pantalla previa (TD-173) se quito el riel de puntos a la izquierda de cada ejercicio: \"solo quita espacio innecesariamente\"."
+    },
+    {
+      "id": "TD-173",
+      "title": "La pantalla previa del training muestra lo que de verdad se va a hacer",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO por el usuario el 26-sep: \"casi no muestra detalle. Por ejemplo Curl-up 0:10, eso me dice que el ejercicio dura 10 segundos y no es cierto, no veo los pesos\".\n\nLa causa: cada fila muestra el primer paso de trabajo del ejercicio -un aguante de 10 s de doce-, y el bloque suma solo los pasos con reloj, sin las repeticiones.\n\nHECHO el 27-sep con el OK del usuario (\"dale, haz las dos\"): cada ejercicio con su receta completa -series x trabajo, los pesos serie por serie, metros, lados (uno y despues otro, o alternados), descanso-, el circuito marcado con sus rounds, y el tiempo de cada bloque y del total con el mismo estimado del player. Tocar un ejercicio abre sus instrucciones. Modelo puro en TrainingPreview, con TrainingPreviewTest."
+    },
+    {
       "id": "TD-172",
       "title": "En un circuito, el ejercicio que pasa directo al siguiente nunca pregunta como fue",
       "category": "Fix",

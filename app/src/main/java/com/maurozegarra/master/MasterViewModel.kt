@@ -123,6 +123,12 @@ class MasterViewModel(
         private set
     var playerStarted by mutableStateOf(false)
         private set
+
+    /**
+     * Si la corrida es de prueba (TD-174). Lo pide la pantalla previa antes de arrancar; una
+     * vez corriendo, manda lo que dice el servicio, que es quien lo guarda con la corrida.
+     */
+    var playerTest by mutableStateOf(false)
     var playerFinished by mutableStateOf(false)
         private set
     var playerRunning by mutableStateOf(false)
@@ -2187,6 +2193,7 @@ class MasterViewModel(
         sessionReloaded = false
         weightFeedback.clear()
         effortMarks.clear()
+        playerTest = false
         playerSteps = steps
         playerTrainingId = trainingId
         playerName = t.name
@@ -2203,7 +2210,7 @@ class MasterViewModel(
         val id = playerTrainingId ?: return
         if (playerSteps.isEmpty()) return
         playerStarted = true
-        WorkoutPlayerService.start(getApplication(), id, playerName, playerSteps)
+        WorkoutPlayerService.start(getApplication(), id, playerName, playerSteps, test = playerTest)
         activePlayerTrainingId = id
     }
 
@@ -2246,6 +2253,7 @@ class MasterViewModel(
         playerFinished = false
         playerStep = null
         activePlayerTrainingId = null
+        playerTest = false
         reload()
     }
 
@@ -2321,6 +2329,7 @@ class MasterViewModel(
                 playerRemainingMs = snap.remainingMs
                 playerRunning = snap.running
                 playerFinished = snap.finished
+                playerTest = snap.test
                 playerName = snap.name
                 playerStep = playerSteps.getOrNull(snap.index) ?: PlayerStep(
                     kind = snap.stepKind,
