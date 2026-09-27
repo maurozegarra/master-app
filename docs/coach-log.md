@@ -5,6 +5,57 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-26 — decimotercera sesión: 41 sale ligero, y lo que cuesta es ponerse en posición
+
+**LUMBAR** completo, de 08:28 a 10:00, **92 minutos**. Alarma a las 7:00, contestada al
+momento: **dolor 1, aflojó en 16 minutos** (39 el viernes).
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| Glute Bridge | 21 · 31 · 41 | ligera · bien · **ligera** |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20, por mano, alternado | las seis bien |
+| Box Squat | 17.5 · 20 · 22.5 | las tres bien |
+
+- **41 en el puente, segunda sesión seguida sin que pese**: el viernes bien, hoy ligera. Es
+  lo que se pedía para pasar de 41.
+- **La sentadilla, bien las tres.** El viernes las dos de arriba fueron ligeras; hoy no.
+  Se queda.
+
+### Su nota, que cambia el problema
+
+> *"Glute bridge, la dificultad no es el peso a cargar, es ponerme en posición con ese peso.
+> Lo mismo pasa con goblet squat, las piernas podrían cargar más pero ponerse en posición
+> cuesta."*
+
+**El límite ya no es el músculo, es el montaje.** Y en una rutina de columna el montaje es
+la parte peligrosa: levantar 22.5 kg del suelo hasta el pecho, o subir 41 kg a la cadera
+desde el suelo, es flexión con carga fuera del ejercicio. Subir peso sin resolver eso
+empeora justo lo que la rutina cuida. **Sembrado el mismo día (revisión 18):** el puente
+rodando la barra desde los pies, y la sentadilla empezando sentado con la mancuerna sobre
+los muslos.
+
+### Una corrección: nunca hizo hip thrust con 40-70
+
+El 14-sep se leyó en su training MASTER *"hip thrust con 40, 50, 60 y 70 kg"* y se tomó como
+lo que movía (TD-098 partió de ahí). **Era la plantilla del training, no lo que hacía**: lo
+aclaró él, *"nunca hice hip thrust ni con 40, menos a 70"*. Lo último fue **hip thrust a una
+pierna con 10 kg** en mancuerna. No invalida lo hecho -cada subida del puente la pidió su
+cuerpo, serie por serie-, pero **41 en el puente no es acercarse a su nivel: es su nivel**.
+Lección de coach: un número de una plantilla no es un dato de lo que alguien levanta.
+
+Salió al preguntar si su banca de hip thrust sirve para el puente. La banca apoya la barra
+en alto a los lados (ver `equipo.md`), y resuelve el montaje: se entra por debajo, y el peso
+no se sube desde el piso.
+
+**Decidido (revisión 19):** desde el martes 29, **hip thrust en su banca en vez del puente**,
+3 × 10 con pausa de 2 s arriba, **21 · 31 · 36** con la barra EZ. Los pesos los bajó él: *"el
+mayor recorrido es lo que prefiero evaluar bien antes de subirle el peso"*. Sube cuando el
+recorrido esté evaluado, no antes. El puente sigue en LUMBAR (short), a peso corporal.
+
+**Pesaje del sábado:** 84.7 kg (+0.3) y **cintura 93 (-0.5)**, 0.51. En `objetivos.md`.
+
+---
+
 ## 2026-09-25 — duodécima sesión: 41 sale bien, y el dolor habitual se separa del de crisis
 
 **LUMBAR** completo, de 07:36 a 09:00, **84 minutos**. Alarma a las 7:00; contestó a las 7:11.

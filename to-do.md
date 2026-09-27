@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **141 / 170** hechos, 29 pendientes.
+Progreso: **142 / 172** hechos, 30 pendientes.
 
 ## Pendientes
 
@@ -183,6 +183,14 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 ### Fix
 
+- [ ] **TD-172** En un circuito, el ejercicio que pasa directo al siguiente nunca pregunta como fue
+  - ENCONTRADO el 26-sep leyendo NIKO 6, la primera sesion en circuito (TD-137). Saco 4 x 3 min con descanso 0 y sprawl 4 x 30 s con 60 s, alternados. Del sprawl contesto los cuatro; del saco solo el primero.
+
+La causa: la tarjeta de un round sale en el descanso de DESPUES, y el saco no tiene descanso porque pasa directo al sprawl. El primero lo alcanzo en la preparacion del sprawl, que en un circuito solo va la primera vez (enCircuito). Los rounds 2 a 4 no tuvieron ningun momento para contestar. El respiro de TD-156 no lo cubre: solo va al final del training.
+
+HECHO el 26-sep con el OK del usuario: en el descanso que cierra un round, UNA tarjeta con cada ejercicio del round y sus tres respuestas (Effort.roundAt). El ultimo round no tiene descanso, asi que se pregunta en la preparacion de lo que sigue, si algo quedo sin contestar. Un descanso a mitad de round solo pregunta por lo ya hecho. Tests en CircuitTest.
+
+VA JUNTO, por pedido del mismo dia, el MONTAJE del lumbar (revision 18): el puente rodando la barra desde los pies y la sentadilla empezando sentado con la mancuerna sobre los muslos, en la nota y en las instrucciones. Las instrucciones del lumbar se sembraban sin pisar; ahora reemplazan las viejas que siguen tal cual se sembraron (mergeLumbarInstructions), y lo escrito a mano se queda.
 - [ ] **TD-156** Lo que salio de la primera semana con metros y feedback: carry alternado, respiro para contestar, preparacion de la caminata
   - REPORTADO el 24-sep, cuatro cosas de una vez:
 (1) El usuario: "Carry demoro el doble, no me gusto". Con la revision 15 el carry iba por lados uno tras otro -tres viajes con la izquierda y despues tres con la derecha- con un minuto entre cada uno: cinco descansos en vez de los dos de antes.
@@ -227,6 +235,7 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 
 ### Feature
 
+- [x] **TD-171** La voz de los pitidos, por telefono: cada uno suena distinto al entrenar juntos
 - [x] **TD-167** El training que sigue va primero en la lista, con un destello en el borde
 - [x] **TD-158** La alarma sale de Settings: su propio icono "Morning", su pantalla y el dolor en el calendario
 - [x] **TD-152** Los ejercicios con el peso del cuerpo tampoco dicen si costaron

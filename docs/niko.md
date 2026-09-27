@@ -47,8 +47,14 @@ dia. La medicion de verdad es la cinta.
 |---|---|---|---|---|
 | 12-sep | 49.7 | - | - | 18.0 |
 | 19-sep | 49.9 | **67** | **0.43** | 18.4 |
+| 26-sep | 49.5 | **66** | **0.43** | 18.2 |
 
 Cintura entre estatura de 0.43: muy bien, lejos del 0.5.
+
+26-sep: **-0.4 kg y el musculo esqueletico -0.2**. Una semana de balanza no es tendencia,
+pero es la direccion contraria a la que se busca: ella tiene que construir, y con seis dias
+de entreno perder peso apunta a que come menos de lo que gasta. La cinta baja 1 cm. Si el
+sabado 3 vuelve a bajar, el tema es la comida, no la rutina.
 
 ### Su equipo
 
@@ -170,7 +176,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 | 3 | NIKO 3 · Tren superior | **hecho el martes 22-sep**, completo (ver *Sus sesiones*). El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
 | 4 | NIKO 4 · Glúteo a una pierna | **hecho el jueves 24-sep**, corrido un día por el corte de luz del 23 (ver *Sus sesiones*) |
 | 5 | NIKO 5 · Muay Thai y potencia | **hecho el viernes 25-sep** (ver *Sus sesiones*). Las patadas van como dos ejercicios, teep y patada baja |
-| 6 | NIKO 6 · Mixto y movilidad | **sembrado el 25-sep para el sábado 26**, con el saco y el sprawl **en circuito** (TD-137) |
+| 6 | NIKO 6 · Mixto y movilidad | **hecho el sábado 26-sep**, completo, con el saco y el sprawl **en circuito** (TD-137) (ver *Sus sesiones*) |
 
 ### Los seis dias
 
@@ -271,6 +277,31 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 ## Sus sesiones
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
+
+### 2026-09-26 — NIKO 6 · Mixto y movilidad: el primer circuito, y la semana completa
+
+**De 08:27 a 09:26, 59 minutos, completa.** Con esta cierra los seis días.
+
+| Ejercicio | Lo que marcó |
+|---|---|
+| Sombra, 2 × 3 min | bien el primero; el segundo sin contestar |
+| **Saco 4 × 3 min, en circuito con el sprawl** | **bien el primer round; los otros tres sin contestar** |
+| **Sprawl 4 × 30 s** | **bien los cuatro** |
+| Sentadilla cosaca, 2 × 8 por lado | **fácil las cuatro** |
+| 90/90, rotación de cadera, estiramiento | completos |
+| Cuello | **bien las cuatro direcciones** |
+
+- **El circuito funcionó en su teléfono** (TD-137): saco y sprawl alternados, y cada serie
+  quedó con su tiempo completo.
+- **Los tres rounds de saco sin contestar no son olvido: el app no le preguntó.** El saco
+  va con descanso 0 porque pasa directo al sprawl, y la tarjeta de un round sale en el
+  descanso de después. El primero lo alcanzó a contestar en la preparación del sprawl, que
+  en un circuito solo va la primera vez. Registrado como TD-172.
+- **Todo lo que contestó es "bien"**: el formato de 3 + 30 s con 1 minuto le queda.
+- **La cosaca, fácil las cuatro:** la próxima, con una mancuerna de 5 kg al pecho.
+- **El cuello completo**, sin el respiro del final (su teléfono sigue en la 1.0.330).
+- **Sigue NIKO 1 el lunes 28**, asignado el domingo. Es la primera vuelta de la semana, y
+  entra con lo aprendido: las bandas nuevas y lo pendiente de *Para la próxima* de cada día.
 
 ### 2026-09-25 — NIKO 5 · Muay Thai y potencia: la cuerda la dejó sin aire
 
