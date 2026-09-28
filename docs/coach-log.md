@@ -5,6 +5,35 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-27 — decimocuarta sesión: el carry pesa un poco más a la izquierda
+
+**LUMBAR (short)**, de 10:30 a 11:20, **50 minutos**, completo. Alarma de domingo: **dolor 2,
+aflojó en 14 minutos** (16 el sábado).
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| McGill 3-2-1 | 6 aguantes por movimiento | — |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20, por mano, alternado | las seis bien |
+
+Su nota:
+
+> *"En carry yo siento un ligero desbalance, la izquierda sufre un poco más que la derecha
+> [...] en escala del 1 al 10, derecha está en 7 e izquierda en 8."*
+
+- **Sí vale la pena registrarlo.** En un carry a una mano trabaja sobre todo el lado
+  CONTRARIO del tronco -oblicuos y cuadrado lumbar- para no inclinarse, además del agarre.
+  Una diferencia estable entre lados es exactamente lo que la rutina lumbar tiene que ver.
+- **El app ya lo separa por lado**, pero la escala de tres (pesado · bien · ligero) no llega
+  a un 7 contra un 8: por eso marcó "bien" en las seis. Por ahora va en la nota y aquí.
+- **Es solo el AGARRE**, ni siquiera el antebrazo: *"en general siempre he tenido un agarre
+  bastante subdesarrollado"*. El tronco no muestra diferencia, que es lo que importaba para
+  la espalda. No cambia nada del carry: ya alterna empezando por la izquierda (se le propuso
+  "empezar por la izquierda" sin mirar que ya lo hacia).
+- El agarre como limite es un dato para cuando suba el carry: puede fallar la mano antes
+  que el cuerpo.
+
+---
+
 ## 2026-09-26 — decimotercera sesión: 41 sale ligero, y lo que cuesta es ponerse en posición
 
 **LUMBAR** completo, de 08:28 a 10:00, **92 minutos**. Alarma a las 7:00, contestada al
