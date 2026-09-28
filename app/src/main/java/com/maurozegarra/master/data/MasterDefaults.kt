@@ -631,8 +631,10 @@ object MasterDefaults {
     /**
      * Revision de las rutinas de NIKO (TD-127). Mismo mecanismo que [LUMBAR_REVISION]:
      * cambiar la rutina es editar la funcion y subir este numero.
+     *
+     * Revision 16 (27-sep): NIKO 1, su segunda vez. La hiperextension baja a 3 x 10.
      */
-    const val NIKO_REVISION = 15
+    const val NIKO_REVISION = 16
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -735,7 +737,11 @@ object MasterDefaults {
                         ),
                         // A 45 grados: la banca es regulable, y el usuario pidio que ella lo
                         // tenga presente al armarla.
-                        b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 12, sets = 3, rest = 60),
+                        // Revision 16: 3 x 10. En NIKO 4 marco "Hard" las tres de 12. Lo demas
+                        // del dia se queda: el 19-sep hizo este mismo dia con estos pesos -el hip
+                        // thrust hasta 71 es suyo, no una plantilla- y no hay respuesta que pida
+                        // cambiarlos (entonces el app aun no preguntaba).
+                        b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 10, sets = 3, rest = 60),
                     ),
                 ),
                 Workout(

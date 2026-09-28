@@ -171,7 +171,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 
 | Dia | Training | Estado |
 |---|---|---|
-| 1 | NIKO 1 · Glúteo pesado | asignado el 19-sep como "NIKO - Día de glúteo"; el nombre numerado le llega al reasignarlo |
+| 1 | NIKO 1 · Glúteo pesado | **hecho el sábado 19-sep** como "NIKO - Glute Day", completo: hip thrust 45·55·65·70 (así registrado; 71 real), rumano, búlgara 5·7.5·10 por mano. Sin respuestas: el app aún no preguntaba. **Segunda vez el lunes 28** (revisión 16): igual, la hiperextensión a 3 × 10 |
 | 2 | NIKO 2 · Muay Thai | **hecho el lunes 21-sep**, completo (ver *Sus sesiones*) |
 | 3 | NIKO 3 · Tren superior | **hecho el martes 22-sep**, completo (ver *Sus sesiones*). El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
 | 4 | NIKO 4 · Glúteo a una pierna | **hecho el jueves 24-sep**, corrido un día por el corte de luz del 23 (ver *Sus sesiones*) |
