@@ -1,6 +1,7 @@
 package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -292,6 +293,43 @@ internal fun SegmentToggle(
                 )
             }
         }
+    }
+}
+
+/**
+ * La tarjeta de una fila de lista: la de un training, y la de una alarma (TD-175). Mismo
+ * radio, fondo, contorno y relleno, para que todo lo que es "un elemento" se vea igual.
+ */
+@Composable
+internal fun Modifier.listCard(): Modifier = this
+    .fillMaxWidth()
+    .clip(RoundedCornerShape(Dims.row))
+    .background(AppTheme.colors.surface)
+    // El mismo radio que el clip: si no, el contorno se dibuja por fuera de la forma
+    // recortada y las esquinas se ven dobles.
+    .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(Dims.row))
+    .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)
+
+/**
+ * Un día en un círculo: el de la semana de la lista de trainings, y los días de una alarma
+ * (TD-175). Marcado, lleno del acento; si no, solo el contorno.
+ */
+@Composable
+internal fun DayCircle(text: String, selected: Boolean, accent: Color, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(if (selected) accent else Color.Transparent)
+            .border(1.dp, if (selected) accent else AppTheme.colors.track, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = if (selected) AppTheme.colors.onAccent else AppTheme.colors.textPrimary,
+            fontSize = 14.sp,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+        )
     }
 }
 

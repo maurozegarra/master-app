@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **142 / 174** hechos, 32 pendientes.
+Progreso: **142 / 175** hechos, 33 pendientes.
 
 ## Pendientes
 
@@ -42,6 +42,20 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
+- [ ] **TD-175** La alarma como despertador: varias alarmas en tarjetas, y fuera del lanzador
+  - PEDIDO por el usuario el 27-sep, con la alarma ya probada: "ya no quiero depender de mi anterior app de alarma".
+
+(1) "quita el Morning del launcher, la opcion en MASTER, icono de alarma, me es suficiente". Fuera la entrada del lanzador y su icono; la pantalla se abre desde el despertador de la barra, dentro de la tarea de MASTER (el atras vuelve a la lista).
+
+(2) "en vez de listar todos los dias [...] 2 cards, uno para las 5:00 y otro para las 7:00 y dentro del card habilitar los dias [...] un boton para habilitar o deshabilitar la alarma. La idea es tener soporte para multiples alarmas." Cada alarma es una tarjeta: la hora grande en JetBrains Mono (tocarla la cambia), su interruptor, los siete dias para marcar, y Delete. "+ Add alarm" pide la hora y nace de lunes a viernes. El interruptor general desaparece: suena si alguna esta encendida.
+
+Migracion: el horario de antes (dia -> hora) pasa a una alarma por hora distinta, con el interruptor que tenia. Sin nada guardado, las dos por defecto nacen APAGADAS: el app llega a otros telefonos.
+
+Dos alarmas el mismo dia suenan las dos, pero la pregunta del dolor se guarda solo la primera vez: la segunda pisaria la hora del despertar y los minutos hasta aflojar (MorningLog.alreadyAnswered). Tests en MorningTest.
+
+AJUSTE del 27-sep. El usuario lo valido, con un reparo: "demasiado aire [...] no pueden medir lo mismo de las cards de Training [...] no crees componentes a medida [...] los colores los estas poniendo a mano, eso deberia salir de una paleta". Tenia razon: la tarjeta de alarma era un disenio propio. Ahora comparte lo que ya existia, extraido a MasterComponents/CommonComponents: Modifier.listCard() (la tarjeta de un training, que la usa tambien), DayCircle (el circulo de la tira de la semana, que lo usa tambien) y AppSwitch (el de SwitchRow). Borrar va deslizando a la izquierda, como un training. Add alarm es AppOutlineButton. La proxima y "Skip tomorrow" suben a la cabecera. Los dos colores escritos a mano -el pulgar del interruptor y el azul de los minutos- pasan a la paleta (SWITCH_THUMB_OFF, CHART_FADE).
+
+Y tres mas, revisando la captura juntos: la pantalla lleva la barra de las demas de MASTER (SettingsScaffold, con flecha atras) en vez de un titulo propio; Today y Last 28 days usan SectionCard y no una tarjeta propia; "Skip tomorrow" va en la linea del titulo.
 - [ ] **TD-174** Probar un training sin que quede registrado: modo prueba en el player
   - PEDIDO por el usuario el 26-sep: "cuando quiero revisar el comportamiento de un training, al final tengo que eliminarlo y en ocasiones son varios cambios por evaluar y termino con varios registros que no son trainings realmente".
 

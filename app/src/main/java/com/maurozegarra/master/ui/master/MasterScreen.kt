@@ -527,25 +527,7 @@ private fun WeekCalendar(
                     fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
                 )
                 Spacer(Modifier.height(4.dp))
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(if (isToday) accent else Color.Transparent)
-                        .border(
-                            1.dp,
-                            if (isToday) accent else AppTheme.colors.track,
-                            CircleShape,
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = date.dayOfMonth.toString(),
-                        color = if (isToday) AppTheme.colors.onAccent else AppTheme.colors.textPrimary,
-                        fontSize = 14.sp,
-                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.SemiBold,
-                    )
-                }
+                DayCircle(date.dayOfMonth.toString(), selected = isToday, accent = accent)
                 Spacer(Modifier.height(4.dp))
                 val sessionStatus = sessionDates[date]
                 Box(
@@ -677,14 +659,7 @@ private fun TrainingCard(
     SwipeActionsRow(actions = actions, controller = swipeController, rightAction = rightAction) {
     Box {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(Dims.row))
-            .background(AppTheme.colors.surface)
-            // El mismo radio que el clip de arriba: si no, el contorno se dibuja por fuera
-            // de la forma recortada y las esquinas se ven dobles.
-            .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(Dims.row))
-            .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+        modifier = Modifier.listCard(),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

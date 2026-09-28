@@ -674,6 +674,10 @@ data class MorningStrings(
     val tomorrowSkipped: String,
     val undo: String,
     val alarmOff: String,
+    /** Varias alarmas (TD-175). */
+    val alarms: String = "Alarms",
+    val addAlarm: String = "Add alarm",
+    val deleteAlarm: String = "Delete",
 )
 
 /** Los textos de medir en metros (TD-095). */

@@ -22,29 +22,51 @@ import java.time.ZonedDateTime
  */
 
 /**
- * A qué hora suena cada día; null = ese día no suena.
+ * Una alarma: su hora, los días en que suena y si está encendida (TD-175).
  *
- * Por defecto, lo que dijo el usuario el 22-sep: 5:00 los días presenciales -lunes,
- * miércoles y jueves- y 7:00 los demás.
+ * Hasta TD-175 el horario era un mapa día -> hora, y se editaba día por día. El usuario lo
+ * pidió como un despertador: *"2 cards, uno para las 5:00 y otro para las 7:00 y dentro del
+ * card habilitar los días"*, cada una con su interruptor, y con soporte para más de dos.
  */
-data class MorningSchedule(val times: Map<DayOfWeek, LocalTime?>) {
+data class MorningAlarmSpec(
+    val id: Long,
+    val time: LocalTime,
+    val days: Set<DayOfWeek>,
+    val enabled: Boolean = true,
+)
 
-    fun at(day: DayOfWeek): LocalTime? = times[day]
+/** Las alarmas del teléfono. Suena la que toque primero. */
+data class MorningSchedule(val alarms: List<MorningAlarmSpec>) {
 
-    fun with(day: DayOfWeek, time: LocalTime?): MorningSchedule = copy(times = times + (day to time))
+    /** Si alguna puede sonar: encendida y con al menos un día. */
+    val anyOn: Boolean get() = alarms.any { it.enabled && it.days.isNotEmpty() }
+
+    /** Si algo suena el día [day]. */
+    fun ringsOn(day: DayOfWeek): Boolean = alarms.any { it.enabled && day in it.days }
+
+    fun update(a: MorningAlarmSpec): MorningSchedule = copy(alarms = alarms.map { if (it.id == a.id) a else it })
+
+    fun remove(id: Long): MorningSchedule = copy(alarms = alarms.filter { it.id != id })
+
+    /** Una alarma nueva, ordenada por hora con las demás. */
+    fun add(time: LocalTime, days: Set<DayOfWeek>): MorningSchedule =
+        copy(alarms = (alarms + MorningAlarmSpec((alarms.maxOfOrNull { it.id } ?: 0L) + 1, time, days)).sortedBy { it.time })
 
     /**
-     * La próxima vez que tiene que sonar, estrictamente después de [now]. Null si no suena
-     * ningún día.
+     * La próxima vez que tiene que sonar, estrictamente después de [now]: la más temprana de
+     * todas las alarmas encendidas. Null si ninguna suena.
      */
     fun next(now: ZonedDateTime, skip: LocalDate? = null): ZonedDateTime? {
         for (i in 0..8) {
             val day = now.toLocalDate().plusDays(i.toLong())
-            // Un dia saltado a mano -"Skip tomorrow"- no suena, sin tocar el horario.
+            // Un dia saltado a mano -"Skip tomorrow"- no suena, sin tocar las alarmas.
             if (day == skip) continue
-            val time = at(day.dayOfWeek) ?: continue
-            val at = day.atTime(time).atZone(now.zone)
-            if (at.isAfter(now)) return at
+            val hoy = alarms
+                .filter { it.enabled && day.dayOfWeek in it.days }
+                .map { day.atTime(it.time).atZone(now.zone) }
+                .filter { it.isAfter(now) }
+                .minOrNull()
+            if (hoy != null) return hoy
         }
         return null
     }
@@ -52,9 +74,28 @@ data class MorningSchedule(val times: Map<DayOfWeek, LocalTime?>) {
     companion object {
         private val OFICINA = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
 
-        val DEFAULT = MorningSchedule(
-            DayOfWeek.entries.associateWith { if (it in OFICINA) LocalTime.of(5, 0) else LocalTime.of(7, 0) },
+        /**
+         * Lo que dijo el usuario el 22-sep: 5:00 los días presenciales -lunes, miércoles y
+         * jueves- y 7:00 los demás. Dos alarmas.
+         */
+        fun default(enabled: Boolean) = MorningSchedule(
+            listOf(
+                MorningAlarmSpec(1, LocalTime.of(5, 0), OFICINA, enabled),
+                MorningAlarmSpec(2, LocalTime.of(7, 0), DayOfWeek.entries.toSet() - OFICINA, enabled),
+            ),
         )
+
+        /**
+         * El horario de antes de TD-175 -día -> hora- pasado a alarmas: una por cada hora
+         * distinta, con sus días. Un teléfono que ya la usaba no pierde nada.
+         */
+        fun fromDays(times: Map<DayOfWeek, LocalTime?>, enabled: Boolean): MorningSchedule =
+            MorningSchedule(
+                times.entries.filter { it.value != null }
+                    .groupBy({ it.value!! }, { it.key })
+                    .entries.sortedBy { it.key }
+                    .mapIndexed { i, (hora, dias) -> MorningAlarmSpec(i + 1L, hora, dias.toSet(), enabled) },
+            )
     }
 }
 
@@ -131,6 +172,15 @@ object MorningLog {
         if (existing == null || !isMorning(existing, zone)) return true
         return java.time.Instant.ofEpochMilli(now).atZone(zone).hour < EVENING_HOUR
     }
+
+    /**
+     * Si una alarma que suena cuando la mañana YA se contestó debe guardar otra respuesta.
+     * No (TD-175): con varias alarmas, un día puede sonar a las 5 y a las 7, y el despertar
+     * es el primero. La segunda respuesta pisaría la hora de contestar, y con ella los
+     * minutos hasta aflojar. Corregir el número sigue siendo cosa de la pantalla Morning.
+     */
+    fun alreadyAnswered(existing: MorningEntry?, zone: ZoneId): Boolean =
+        existing?.painOnWaking != null && isMorning(existing, zone)
 
     /**
      * Las mañanas que faltan, sacadas de las sesiones: el dolor al despertar y los minutos se

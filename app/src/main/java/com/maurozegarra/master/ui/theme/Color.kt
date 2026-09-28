@@ -23,6 +23,15 @@ val TEXT_DIM = Color(0xFF9AA0A3)
 val TEXT_FADED = Color(0xFF5A5D5F)
 val ON_ACCENT = Color(0xFF001316)
 
+/** El pulgar de un interruptor apagado. Vivia escrito a mano en cada interruptor. */
+val SWITCH_THUMB_OFF = Color(0xFFCFD3D6)
+
+/**
+ * Los minutos hasta que afloja el dolor, en la pantalla Morning: un azul tranquilo, lejos
+ * de los tres del dolor ([FEEL_UP], [FEEL_STEADY], [FEEL_DOWN]).
+ */
+val CHART_FADE = Color(0xFF5B9BD5)
+
 /** Acento por defecto (placeholder). */
 const val DEFAULT_ACCENT = 0xFFFF5252
 

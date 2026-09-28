@@ -16,26 +16,31 @@ class MorningStore(context: Context) {
 
     private val prefs = context.applicationContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
-    var enabled: Boolean
-        get() = prefs.getBoolean(KEY_ENABLED, false)
-        set(v) = prefs.edit().putBoolean(KEY_ENABLED, v).apply()
-
+    /**
+     * Las alarmas (TD-175). Sin guardar todavía, se leen del horario de antes -día -> hora,
+     * con su interruptor general- para que el teléfono que ya la usaba siga igual. Sin nada
+     * de nada, las dos por defecto APAGADAS: el app llega a otros teléfonos, y ninguno debe
+     * empezar a sonar solo por actualizar.
+     */
     fun schedule(): MorningSchedule {
-        val raw = prefs.getString(KEY_SCHEDULE, null) ?: return MorningSchedule.DEFAULT
+        prefs.getString(KEY_ALARMS, null)?.let { raw ->
+            runCatching { return decodeAlarms(raw) }
+        }
+        val antes = prefs.getBoolean(KEY_ENABLED, false)
+        val raw = prefs.getString(KEY_SCHEDULE, null) ?: return MorningSchedule.default(antes)
         return runCatching {
             val o = JSONObject(raw)
-            MorningSchedule(
+            MorningSchedule.fromDays(
                 DayOfWeek.entries.associateWith { d ->
                     if (!o.has(d.name) || o.isNull(d.name)) null else LocalTime.parse(o.getString(d.name))
                 },
+                antes,
             )
-        }.getOrDefault(MorningSchedule.DEFAULT)
+        }.getOrDefault(MorningSchedule.default(antes))
     }
 
     fun saveSchedule(s: MorningSchedule) {
-        val o = JSONObject()
-        DayOfWeek.entries.forEach { d -> o.put(d.name, s.at(d)?.toString() ?: JSONObject.NULL) }
-        prefs.edit().putString(KEY_SCHEDULE, o.toString()).apply()
+        prefs.edit().putString(KEY_ALARMS, encodeAlarms(s)).apply()
     }
 
     /** Hasta cuándo está pospuesta, o 0. Mientras lo esté, manda sobre el horario. */
@@ -70,6 +75,37 @@ class MorningStore(context: Context) {
         private const val KEY_SNOOZE = "snoozed_until"
         private const val KEY_ENTRIES = "entries"
         private const val KEY_SKIP = "skip_date"
+        private const val KEY_ALARMS = "alarms"
+
+        fun encodeAlarms(s: MorningSchedule): String {
+            val a = JSONArray()
+            s.alarms.forEach { al ->
+                a.put(
+                    JSONObject()
+                        .put("id", al.id)
+                        .put("time", al.time.toString())
+                        .put("days", JSONArray(al.days.sortedBy { it.value }.map { it.name }))
+                        .put("enabled", al.enabled),
+                )
+            }
+            return a.toString()
+        }
+
+        fun decodeAlarms(json: String): MorningSchedule {
+            val a = JSONArray(json)
+            return MorningSchedule(
+                (0 until a.length()).map { i ->
+                    val o = a.getJSONObject(i)
+                    val d = o.getJSONArray("days")
+                    MorningAlarmSpec(
+                        id = o.getLong("id"),
+                        time = LocalTime.parse(o.getString("time")),
+                        days = (0 until d.length()).mapNotNull { k -> runCatching { DayOfWeek.valueOf(d.getString(k)) }.getOrNull() }.toSet(),
+                        enabled = o.optBoolean("enabled", true),
+                    )
+                },
+            )
+        }
 
         fun encode(list: List<MorningEntry>): String {
             val a = JSONArray()

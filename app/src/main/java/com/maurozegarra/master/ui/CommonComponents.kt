@@ -150,15 +150,25 @@ internal fun SwitchRow(
             }
         }
         Spacer(Modifier.width(12.dp))
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = c.onAccent,
-                checkedTrackColor = accent,
-                uncheckedThumbColor = Color(0xFFCFD3D6),
-                uncheckedTrackColor = c.track,
-            ),
-        )
+        AppSwitch(checked, accent, onCheckedChange)
     }
+}
+
+/**
+ * El interruptor del app, con los colores de la paleta. Lo usan [SwitchRow] y las
+ * tarjetas que llevan uno sin etiqueta, como las alarmas (TD-175).
+ */
+@Composable
+internal fun AppSwitch(checked: Boolean, accent: Color, onCheckedChange: (Boolean) -> Unit) {
+    val c = AppTheme.colors
+    Switch(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        colors = SwitchDefaults.colors(
+            checkedThumbColor = c.onAccent,
+            checkedTrackColor = accent,
+            uncheckedThumbColor = com.maurozegarra.master.ui.theme.SWITCH_THUMB_OFF,
+            uncheckedTrackColor = c.track,
+        ),
+    )
 }

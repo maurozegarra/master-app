@@ -355,7 +355,8 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SettingsScaffold(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
+// Interna y no privada: la usa tambien la pantalla Morning (TD-175), que es otra actividad.
+internal fun SettingsScaffold(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
     Scaffold(
         containerColor = AppTheme.colors.bg,
         topBar = {

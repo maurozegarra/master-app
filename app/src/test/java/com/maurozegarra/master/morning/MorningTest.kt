@@ -1,7 +1,9 @@
 package com.maurozegarra.master.morning
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -14,42 +16,95 @@ class MorningTest {
 
     private val lima = ZoneId.of("America/Lima")
 
+    private val DEFAULT = MorningSchedule.default(enabled = true)
+
     private fun at(y: Int, m: Int, d: Int, h: Int, min: Int) = ZonedDateTime.of(y, m, d, h, min, 0, 0, lima)
 
     @Test
-    fun `por defecto, 5 los dias presenciales y 7 los demas`() {
+    fun `por defecto, dos alarmas, 5 los dias presenciales y 7 los demas`() {
         // Lo que dijo el usuario el 22-sep: lunes, miercoles y jueves a las 5.
-        val s = MorningSchedule.DEFAULT
-        assertEquals(LocalTime.of(5, 0), s.at(DayOfWeek.MONDAY))
-        assertEquals(LocalTime.of(7, 0), s.at(DayOfWeek.TUESDAY))
-        assertEquals(LocalTime.of(5, 0), s.at(DayOfWeek.WEDNESDAY))
-        assertEquals(LocalTime.of(5, 0), s.at(DayOfWeek.THURSDAY))
-        assertEquals(LocalTime.of(7, 0), s.at(DayOfWeek.SUNDAY))
+        val (cinco, siete) = DEFAULT.alarms
+        assertEquals(LocalTime.of(5, 0), cinco.time)
+        assertEquals(setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY), cinco.days)
+        assertEquals(LocalTime.of(7, 0), siete.time)
+        assertEquals(DayOfWeek.entries.toSet() - cinco.days, siete.days)
+    }
+
+    @Test
+    fun `sin nada guardado, las alarmas nacen apagadas`() {
+        // El app llega a otros telefonos: ninguno debe sonar solo por actualizar.
+        assertFalse(MorningSchedule.default(false).anyOn)
+    }
+
+    @Test
+    fun `el horario por dia de antes pasa a una alarma por hora`() {
+        // TD-175: el telefono que ya la usaba no pierde nada.
+        val antes = DayOfWeek.entries.associateWith { d ->
+            when (d) {
+                DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY -> LocalTime.of(5, 0)
+                DayOfWeek.FRIDAY -> null
+                else -> LocalTime.of(7, 0)
+            }
+        }
+        val s = MorningSchedule.fromDays(antes, enabled = true)
+        assertEquals(listOf(LocalTime.of(5, 0), LocalTime.of(7, 0)), s.alarms.map { it.time })
+        assertEquals(setOf(DayOfWeek.TUESDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY), s.alarms[1].days)
+        assertTrue(s.alarms.all { it.enabled })
+    }
+
+    @Test
+    fun `dos alarmas el mismo dia suenan las dos, en orden`() {
+        val s = DEFAULT.add(LocalTime.of(6, 30), setOf(DayOfWeek.WEDNESDAY))
+        // Miercoles 23-sep: 5:00, luego 6:30.
+        assertEquals(at(2026, 9, 23, 5, 0), s.next(at(2026, 9, 22, 22, 0)))
+        assertEquals(at(2026, 9, 23, 6, 30), s.next(at(2026, 9, 23, 5, 0)))
+    }
+
+    @Test
+    fun `una alarma apagada no suena, aunque tenga dias`() {
+        val sinCinco = DEFAULT.update(DEFAULT.alarms[0].copy(enabled = false))
+        // Martes 20:00 -> la de las 5 esta apagada: la siguiente es el viernes a las 7.
+        assertEquals(at(2026, 9, 25, 7, 0), sinCinco.next(at(2026, 9, 22, 20, 0)))
+    }
+
+    @Test
+    fun `las alarmas sobreviven al guardado`() {
+        val s = DEFAULT.add(LocalTime.of(6, 15), setOf(DayOfWeek.FRIDAY))
+        assertEquals(s, MorningStore.decodeAlarms(MorningStore.encodeAlarms(s)))
+    }
+
+    @Test
+    fun `la segunda alarma del dia no pisa la primera respuesta`() {
+        val manana = MorningEntry("2026-09-23", painOnWaking = 2, answeredAt = at(2026, 9, 23, 5, 1).toInstant().toEpochMilli())
+        assertTrue(MorningLog.alreadyAnswered(manana, lima))
+        assertFalse(MorningLog.alreadyAnswered(null, lima))
+        assertFalse(MorningLog.alreadyAnswered(manana.copy(painOnWaking = null), lima))
     }
 
     @Test
     fun `la proxima es la de manana si la de hoy ya paso`() {
         // Martes 22-sep a las 20:36 -> miercoles 23 a las 5.
-        assertEquals(at(2026, 9, 23, 5, 0), MorningSchedule.DEFAULT.next(at(2026, 9, 22, 20, 36)))
+        assertEquals(at(2026, 9, 23, 5, 0), DEFAULT.next(at(2026, 9, 22, 20, 36)))
         // Martes a las 6:59 -> hoy a las 7.
-        assertEquals(at(2026, 9, 22, 7, 0), MorningSchedule.DEFAULT.next(at(2026, 9, 22, 6, 59)))
+        assertEquals(at(2026, 9, 22, 7, 0), DEFAULT.next(at(2026, 9, 22, 6, 59)))
     }
 
     @Test
     fun `justo a la hora no vuelve a sonar hoy`() {
         // Al sonar se reprograma: si "a las 7" contara, sonaria en bucle.
-        assertEquals(at(2026, 9, 23, 5, 0), MorningSchedule.DEFAULT.next(at(2026, 9, 22, 7, 0)))
+        assertEquals(at(2026, 9, 23, 5, 0), DEFAULT.next(at(2026, 9, 22, 7, 0)))
     }
 
     @Test
     fun `un dia apagado se salta`() {
-        val sinMiercoles = MorningSchedule.DEFAULT.with(DayOfWeek.WEDNESDAY, null)
+        val cinco = DEFAULT.alarms[0]
+        val sinMiercoles = DEFAULT.update(cinco.copy(days = cinco.days - DayOfWeek.WEDNESDAY))
         assertEquals(at(2026, 9, 24, 5, 0), sinMiercoles.next(at(2026, 9, 22, 20, 0)))
     }
 
     @Test
     fun `sin ningun dia no hay proxima`() {
-        val nada = MorningSchedule(DayOfWeek.entries.associateWith { null })
+        val nada = MorningSchedule(DEFAULT.alarms.map { it.copy(days = emptySet()) })
         assertNull(nada.next(at(2026, 9, 22, 20, 0)))
     }
 
@@ -97,8 +152,8 @@ class MorningTest {
     fun `saltar manana no toca el horario`() {
         // Martes a las 20:00 con el miercoles saltado: la siguiente es el jueves a las 5.
         val martes = at(2026, 9, 22, 20, 0)
-        assertEquals(at(2026, 9, 24, 5, 0), MorningSchedule.DEFAULT.next(martes, skip = LocalDate.of(2026, 9, 23)))
-        assertEquals(at(2026, 9, 23, 5, 0), MorningSchedule.DEFAULT.next(martes))
+        assertEquals(at(2026, 9, 24, 5, 0), DEFAULT.next(martes, skip = LocalDate.of(2026, 9, 23)))
+        assertEquals(at(2026, 9, 23, 5, 0), DEFAULT.next(martes))
     }
 
     @Test

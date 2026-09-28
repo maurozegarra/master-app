@@ -44,7 +44,7 @@ object MorningAlarm {
         val store = MorningStore(context)
         val am = context.getSystemService(AlarmManager::class.java)
         val fire = firePending(context)
-        if (!store.enabled) {
+        if (!store.schedule().anyOn) {
             am.cancel(fire)
             return true
         }
@@ -67,11 +67,12 @@ object MorningAlarm {
      */
     fun nextRing(context: Context): ZonedDateTime? {
         val store = MorningStore(context)
-        if (!store.enabled) return null
+        val horario = store.schedule()
+        if (!horario.anyOn) return null
         val zone = ZoneId.systemDefault()
         // Un salto ya pasado no sirve para nada: se olvida para que no confunda.
         store.skipDate?.let { if (it.isBefore(LocalDate.now(zone))) store.skipDate = null }
-        return store.schedule().next(ZonedDateTime.now(zone), store.skipDate)
+        return horario.next(ZonedDateTime.now(zone), store.skipDate)
     }
 
     /** Si Android deja programar alarmas exactas. */
@@ -98,8 +99,9 @@ object MorningAlarm {
             val now = System.currentTimeMillis()
             val zone = ZoneId.systemDefault()
             val existente = MorningLog.forDay(store.entries(), now, zone)
-            // Una prueba de noche no pisa la mañana de verdad de ese día (ver mayRecord).
-            if (MorningLog.mayRecord(existente, now, zone)) {
+            // Una prueba de noche no pisa la mañana de verdad de ese día (ver mayRecord), ni
+            // una segunda alarma del mismo día la primera respuesta (TD-175).
+            if (MorningLog.mayRecord(existente, now, zone) && !MorningLog.alreadyAnswered(existente, zone)) {
                 val entry = MorningEntry(MorningLog.dateOf(now, zone), painOnWaking = pain, answeredAt = now)
                 store.saveEntries(MorningLog.upsert(store.entries(), entry, LocalDate.now(zone)))
                 showEaseNotification(context)

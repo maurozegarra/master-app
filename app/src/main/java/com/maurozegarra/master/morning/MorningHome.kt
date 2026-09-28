@@ -53,6 +53,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.maurozegarra.master.i18n.I18n
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.ui.master.SectionCard
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.MasterTheme
 import com.maurozegarra.master.ui.theme.FEEL_DOWN
@@ -82,26 +83,29 @@ class MorningHomeActivity : ComponentActivity() {
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContent {
             MasterTheme(darkTheme = true) {
-                MorningHome()
+                MorningHome(onBack = { finish() })
             }
         }
     }
 
     companion object {
         fun open(context: Context) {
-            context.startActivity(Intent(context, MorningHomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            // Sin NEW_TASK desde una actividad: queda encima de MASTER y el atras vuelve ahi.
+            val i = Intent(context, MorningHomeActivity::class.java)
+            if (context !is android.app.Activity) i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(i)
         }
     }
 }
 
-/** El color de los minutos: un azul tranquilo, lejos de los tres del dolor. */
-private val FADE_BAR = Color(0xFF5B9BD5)
+/** El color de los minutos: sale de la paleta (TD-175). */
+private val FADE_BAR = com.maurozegarra.master.ui.theme.CHART_FADE
 
 /** Cuántos días enseña la serie: cuatro semanas, lo justo para ver una tendencia. */
 private const val DIAS = 28
 
 @Composable
-private fun MorningHome() {
+private fun MorningHome(onBack: () -> Unit) {
     val ctx = LocalContext.current
     val t = I18n.EN
     val zone = remember { ZoneId.systemDefault() }
@@ -118,25 +122,22 @@ private fun MorningHome() {
     val hoy = LocalDate.now(zone)
     val deHoy = mananas.firstOrNull { it.date == hoy.toString() }
 
+    // La barra de las demas pantallas de MASTER, con su flecha atras (TD-175): desde que no
+    // esta en el lanzador, se entra desde MASTER y tiene que verse como una pantalla suya.
+    com.maurozegarra.master.SettingsScaffold(title = t.morning.home, onBack = onBack) {
     Column(
         Modifier
             .fillMaxSize()
-            .background(AppTheme.colors.bg)
-            .windowInsetsPadding(WindowInsets.systemBars)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(t.morning.home, color = AppTheme.colors.textPrimary, fontSize = 28.sp, fontWeight = FontWeight.Bold)
 
-        // El horario primero, pedido por el usuario el 25-sep: es lo que se viene a tocar.
-        Card {
-            Text(t.morning.schedule, color = AppTheme.colors.textPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(10.dp))
-            MorningSettings(t, AppTheme.colors.accent)
-        }
+        // Las alarmas primero, pedido por el usuario el 25-sep: es lo que se viene a tocar.
+        // Cada una en su tarjeta (TD-175).
+        MorningSettings(t, AppTheme.colors.accent)
 
-        Card {
+        SectionCard {
             Hoy(deHoy, zone, t, onEdit = { n ->
                 MorningAlarm.edit(ctx, hoy, n)
                 vuelta++
@@ -148,7 +149,7 @@ private fun MorningHome() {
             })
         }
 
-        Card {
+        SectionCard {
             Text(t.morning.lastDays.format(DIAS), color = AppTheme.colors.textDim, fontSize = 13.sp)
             Spacer(Modifier.height(12.dp))
             if (mananas.isEmpty()) {
@@ -181,20 +182,10 @@ private fun MorningHome() {
                 )
             }
         }
-
+    }
     }
 }
 
-@Composable
-private fun Card(content: @Composable () -> Unit) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(AppTheme.colors.surface)
-            .padding(16.dp),
-    ) { content() }
-}
 
 /** Lo de hoy: contestado o no, y si ya aflojó; con el botón que toca en cada caso. */
 @Composable
