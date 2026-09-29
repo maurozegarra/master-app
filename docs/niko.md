@@ -278,6 +278,26 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
 
+### 2026-09-28 — NIKO 1 · Glúteo pesado, la segunda vez y la primera con respuestas
+
+**De 08:14 a 09:18, 64 minutos, completa.**
+
+| Ejercicio | Carga | Lo que marcó | Para la próxima NIKO 1 |
+|---|---|---|---|
+| Puente de activación · abducción | peso corporal · tobillera | bien las cuatro | igual |
+| Hip thrust, pausa 2 s | 46 · 56 · 66 · 71 | **bien las cuatro** | igual una vez más |
+| Peso muerto rumano | 26 · 31 · 36 · 36 | bien las cuatro | la última a 41 |
+| Búlgara | 5 · 7.5 · 10 por mano | **ligera · ligera** · bien | 7.5 · 10 · 10 |
+| Hiperextensión, 3 × 10 | su peso | bien las tres | igual |
+| Cuello | 4 × 20 s | bien las cuatro | — |
+
+- **El hip thrust hasta 71 salió "bien" en las cuatro**: es su nivel, como dijo el usuario.
+  Se repite antes de subir, porque es la primera vez que queda con respuestas.
+- **La búlgara pide subir abajo**: las dos primeras ligeras.
+- **La hiperextensión a 3 × 10 ya salió bien**, después de las tres "Hard" de 3 × 12.
+- **Contestó el cuello completo**, las cuatro direcciones.
+- Sigue **NIKO 2 · Muay Thai** el martes 29, que ya tiene asignado.
+
 ### 2026-09-26 — NIKO 6 · Mixto y movilidad: el primer circuito, y la semana completa
 
 **De 08:27 a 09:26, 59 minutos, completa.** Con esta cierra los seis días.

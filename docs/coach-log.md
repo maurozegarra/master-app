@@ -5,6 +5,24 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-28 — decimoquinta sesión: la primera mañana con la alarma nueva
+
+**LUMBAR (short)**, de 05:15 a 05:55, **40 minutos**, completo. La alarma de las 5:00 -la
+primera con las alarmas en tarjetas, TD-175- sonó y se contestó a las 05:00: **dolor 1**,
+aflojó a las 05:25, **25 minutos** según la alarma.
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| McGill 3-2-1 | 6 aguantes por movimiento | — |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20, por mano, alternado | las seis bien |
+
+- **Los minutos no cuadran:** la mañana dice 25 (de 5:00 a 5:25) y la sesión guarda **10**,
+  justo lo que va del inicio de la sesión (5:15) a cuando aflojó. Preguntado si lo anotó él
+  al final; vale el de la alarma, que mide desde el despertar.
+- Mañana martes, el primer **hip thrust en su banca**: 21 · 31 · 36, pausa de 2 s.
+
+---
+
 ## 2026-09-27 — decimocuarta sesión: el carry pesa un poco más a la izquierda
 
 **LUMBAR (short)**, de 10:30 a 11:20, **50 minutos**, completo. Alarma de domingo: **dolor 2,
