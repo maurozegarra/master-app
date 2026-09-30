@@ -1286,6 +1286,20 @@ class MasterViewModel(
         )
     }
 
+    /**
+     * Si la alarma ya tiene la mañana de [s] -dolor y minutos- (TD-176). Entonces la sesion
+     * no los pregunta: la alarma es la fuente, y se corrigen en Morning.
+     */
+    fun morningAnsweredFor(s: SessionLog?): Boolean {
+        s ?: return false
+        val m = com.maurozegarra.master.morning.MorningLog.forDay(
+            com.maurozegarra.master.morning.MorningStore(getApplication()).entries(),
+            s.startedAt.takeIf { it > 0 } ?: s.completedAt,
+            java.time.ZoneId.systemDefault(),
+        ) ?: return false
+        return m.painOnWaking != null && m.fadeMinutes != null
+    }
+
     /** true si al training que se acaba de correr hay que preguntarle como se sintio. */
     fun asksHowItWent(): Boolean = trainings.firstOrNull { it.id == playerTrainingId }?.tracksPain == true
 

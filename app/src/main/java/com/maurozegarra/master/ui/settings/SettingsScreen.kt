@@ -635,8 +635,9 @@ private fun AccentPicker(selected: Long, onSelect: (Long) -> Unit) {
     }
 }
 
+// Interna: la usa tambien la pantalla Morning, para el aviso de dormir (TD-160).
 @Composable
-private fun SegmentedRow(
+internal fun SegmentedRow(
     options: List<Pair<Int, String>>,
     selected: Int,
     accent: Color,

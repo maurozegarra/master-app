@@ -69,11 +69,17 @@ fun MorningSettings(t: Strings, accent: Color) {
         onDispose { ciclo.lifecycle.removeObserver(obs) }
     }
 
-    fun aplicar(s: MorningSchedule) {
+    fun aplicar(s: MorningSchedule, avisar: Boolean = true) {
         val encendia = schedule.anyOn
         schedule = s
         store.saveSchedule(s)
         MorningAlarm.reschedule(ctx)
+        // "Alarm in 8 h 27 min" al poner o cambiar una alarma, como su despertador de antes:
+        // confirma en el acto que quedo bien puesta (28-sep). No al borrar ni al apagar.
+        if (avisar) MorningAlarm.nextRing(ctx)?.let { ring ->
+            val min = java.time.Duration.between(java.time.ZonedDateTime.now(ring.zone), ring).toMinutes().toInt()
+            android.widget.Toast.makeText(ctx, t.morning.alarmIn.format(Countdown.text(min)), android.widget.Toast.LENGTH_SHORT).show()
+        }
         // Al encender la primera, los permisos que la hacen sonar de verdad. Sin
         // notificaciones no hay pantalla de alarma ni "It eased"; sin pantalla completa
         // suena como una notificacion y hay que tocarla (22-sep).
@@ -95,6 +101,14 @@ fun MorningSettings(t: Strings, accent: Color) {
 
     // La próxima, tal como quedó programada -con el día saltado-. `cambios` la recalcula.
     val proxima = remember(cambios, schedule) { MorningAlarm.nextRing(ctx) }
+    // Cuanto falta, al minuto: se recalcula solo mientras la pantalla esta abierta.
+    var ahora by remember { mutableStateOf(java.time.ZonedDateTime.now()) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(20_000)
+            ahora = java.time.ZonedDateTime.now()
+        }
+    }
     val manana = java.time.LocalDate.now().plusDays(1)
     val saltado = remember(cambios) { store.skipDate == manana }
     val swipe = com.maurozegarra.master.ui.rememberSwipeRowsController()
@@ -124,7 +138,12 @@ fun MorningSettings(t: Strings, accent: Color) {
             }
             Text(
                 if (saltado) t.morning.tomorrowSkipped
-                else proxima?.let { "${t.morning.next}: ${it.dayOfWeek.getDisplayName(TextStyle.FULL, t.locale)} ${it.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("H:mm"))}" }
+                // Con cuanto falta, pedido por el usuario el 28-sep: lo que extrañaba de su
+                // despertador. Va en la linea de la proxima, que es donde se mira.
+                else proxima?.let {
+                    val falta = Countdown.text(java.time.Duration.between(ahora, it).toMinutes().toInt())
+                    "${t.morning.next}: ${it.dayOfWeek.getDisplayName(TextStyle.FULL, t.locale)} ${it.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("H:mm"))} · ${t.morning.inTime.format(falta)}"
+                }
                     ?: t.morning.alarmOff,
                 color = AppTheme.colors.textDim,
                 fontSize = 13.sp,
@@ -136,14 +155,14 @@ fun MorningSettings(t: Strings, accent: Color) {
                 actions = listOf(
                     com.maurozegarra.master.ui.SwipeAction(
                         androidx.compose.material.icons.Icons.Outlined.Delete, t.morning.deleteAlarm,
-                    ) { aplicar(schedule.remove(a.id)) },
+                    ) { aplicar(schedule.remove(a.id), avisar = false) },
                 ),
                 controller = swipe,
             ) {
                 AlarmCard(
                     a, t, accent,
                     onTime = { elegirHora(a.time) { h -> aplicar(schedule.update(a.copy(time = h))) } },
-                    onToggle = { on -> aplicar(schedule.update(a.copy(enabled = on))) },
+                    onToggle = { on -> aplicar(schedule.update(a.copy(enabled = on)), avisar = on) },
                     onDay = { d -> aplicar(schedule.update(a.copy(days = if (d in a.days) a.days - d else a.days + d))) },
                 )
             }
@@ -160,6 +179,50 @@ fun MorningSettings(t: Strings, accent: Color) {
                 }
             },
         )
+    }
+
+    // El aviso para ir a dormir (TD-160). Es un bloque de AJUSTES, no un elemento de lista:
+    // va en SectionCard, como Today, y no en la tarjeta de las alarmas.
+    var cama by remember { mutableStateOf(store.bedtime()) }
+    fun aplicarCama(c: BedtimeConfig) {
+        cama = c
+        store.saveBedtime(c)
+        MorningAlarm.reschedule(ctx)
+        cambios++
+    }
+    val avisoCama = remember(cambios, cama, schedule) { MorningAlarm.nextBedtime(ctx) }
+    val hm = java.time.format.DateTimeFormatter.ofPattern("H:mm")
+    // El margen derecho de las alarmas de arriba, para que los interruptores caigan en la
+    // misma linea.
+    com.maurozegarra.master.ui.master.SectionCard(endPadding = com.maurozegarra.master.ui.theme.Dims.rowPaddingEnd) {
+        com.maurozegarra.master.ui.SwitchRow(
+            label = t.morning.bedtime,
+            desc = avisoCama?.let { (aviso, ring) -> t.morning.bedBy.format(Bedtime.bedBy(ring, cama).format(hm), aviso.format(hm)) },
+            checked = cama.enabled,
+            accent = accent,
+            onCheckedChange = { aplicarCama(cama.copy(enabled = it)) },
+        )
+        if (cama.enabled) {
+            Spacer(Modifier.height(12.dp))
+            Text(t.morning.sleepGoal, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Spacer(Modifier.height(6.dp))
+            com.maurozegarra.master.ui.settings.SegmentedRow(
+                // Duraciones y no horas: "7:30" al lado de "Bed by 23:30" se leia como reloj.
+                options = listOf(420 to "7 h", 450 to "7 h 30", 480 to "8 h"),
+                selected = cama.sleepMin,
+                accent = accent,
+                onSelect = { aplicarCama(cama.copy(sleepMin = it)) },
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(t.morning.reminderLead, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Spacer(Modifier.height(6.dp))
+            com.maurozegarra.master.ui.settings.SegmentedRow(
+                options = listOf(15 to "15 min", 30 to "30 min", 45 to "45 min"),
+                selected = cama.leadMin,
+                accent = accent,
+                onSelect = { aplicarCama(cama.copy(leadMin = it)) },
+            )
+        }
     }
 
     if (!schedule.anyOn) return

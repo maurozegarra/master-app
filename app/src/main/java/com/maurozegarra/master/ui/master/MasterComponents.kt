@@ -308,7 +308,7 @@ internal fun Modifier.listCard(): Modifier = this
     // El mismo radio que el clip: si no, el contorno se dibuja por fuera de la forma
     // recortada y las esquinas se ven dobles.
     .border(1.dp, AppTheme.colors.textDim.copy(alpha = 0.3f), RoundedCornerShape(Dims.row))
-    .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)
+    .padding(start = Dims.rowPadding, end = Dims.rowPaddingEnd, top = 12.dp, bottom = 12.dp)
 
 /**
  * Un día en un círculo: el de la semana de la lista de trainings, y los días de una alarma
@@ -334,13 +334,18 @@ internal fun DayCircle(text: String, selected: Boolean, accent: Color, modifier:
 }
 
 @Composable
-internal fun SectionCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+internal fun SectionCard(
+    modifier: Modifier = Modifier,
+    /** El margen derecho. [Dims.rowPaddingEnd] cuando se apila con filas de lista (TD-160). */
+    endPadding: androidx.compose.ui.unit.Dp = 16.dp,
+    content: @Composable () -> Unit,
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Dims.card))
             .background(AppTheme.colors.surface)
-            .padding(16.dp),
+            .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = endPadding),
     ) { content() }
 }
 
@@ -413,3 +418,48 @@ internal fun ExerciseGlyph(name: String, color: Long, sizeDp: Int = 44, exercise
 
 @Composable
 internal fun VSpace(h: Int) = Spacer(Modifier.height(h.dp))
+
+/**
+ * Cuántos minutos tardó en aflojar el dolor de la mañana (TD-125). Lo usan la sesión y,
+ * desde TD-176, la pantalla Morning para corregirlos.
+ *
+ * Opciones sueltas y no un contador: nadie mide esto con cronómetro, se dice "unos quince".
+ * Los valores están elegidos para que el paso normal -entre 10 y 15 minutos- se conteste de
+ * un toque, y para que la cifra que cambiaría el cuadro -45 o más- exista y se pueda marcar.
+ */
+@Composable
+internal fun FadeMinutes(value: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
+    // Lo que viene de la alarma son minutos EXACTOS -24- y no uno de los botones: sin decirlo
+    // aqui, ningun boton se encendia y parecia que no habia dato (24-sep, TD-156).
+    val exacto = value?.takeIf { it !in listOf(0, 5, 10, 15, 20, 30, 45, 60) }
+    Text(
+        if (exacto != null) "${t.painFadeMin}: $exacto min" else t.painFadeMin,
+        color = if (exacto != null) AppTheme.colors.textPrimary else AppTheme.colors.textDim,
+        fontSize = 13.sp,
+    )
+    Spacer(Modifier.height(6.dp))
+    listOf(listOf(0, 5, 10, 15), listOf(20, 30, 45, 60)).forEach { fila ->
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            fila.forEach { min ->
+                val activo = value == min
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (activo) accent else AppTheme.colors.track)
+                        .clickable { onPick(min) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        if (min == 60) "60+" else "$min",
+                        color = if (activo) AppTheme.colors.onAccent else AppTheme.colors.textDim,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+    }
+}

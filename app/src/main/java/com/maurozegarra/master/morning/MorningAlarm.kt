@@ -28,10 +28,13 @@ object MorningAlarm {
     const val CHANNEL_EASE = "morning_ease"
     const val NOTIF_RING = 4101
     const val NOTIF_EASE = 4102
+    const val NOTIF_BED = 4103
+    const val CHANNEL_BED = "morning_bed"
     const val SNOOZE_MIN = 5L
 
     private const val REQ_FIRE = 41
     private const val REQ_SHOW = 42
+    private const val REQ_BED = 44
 
     /**
      * Programa la siguiente según el horario, o la cancela si está apagada.
@@ -41,6 +44,13 @@ object MorningAlarm {
      * esto corre también al reiniciar el teléfono, donde un fallo no lo vería nadie.
      */
     fun reschedule(context: Context): Boolean {
+        // El aviso para ir a dormir sale de las mismas alarmas: se reprograma con ellas, en
+        // todos los caminos, para que nunca apunte a una alarma que ya no existe (TD-160).
+        scheduleBedtime(context)
+        return rescheduleAlarm(context)
+    }
+
+    private fun rescheduleAlarm(context: Context): Boolean {
         val store = MorningStore(context)
         val am = context.getSystemService(AlarmManager::class.java)
         val fire = firePending(context)
@@ -102,7 +112,7 @@ object MorningAlarm {
             // Una prueba de noche no pisa la mañana de verdad de ese día (ver mayRecord), ni
             // una segunda alarma del mismo día la primera respuesta (TD-175).
             if (MorningLog.mayRecord(existente, now, zone) && !MorningLog.alreadyAnswered(existente, zone)) {
-                val entry = MorningEntry(MorningLog.dateOf(now, zone), painOnWaking = pain, answeredAt = now)
+                val entry = MorningLog.answer(existente, MorningLog.dateOf(now, zone), pain, now)
                 store.saveEntries(MorningLog.upsert(store.entries(), entry, LocalDate.now(zone)))
                 showEaseNotification(context)
             }
@@ -135,6 +145,83 @@ object MorningAlarm {
         val zone = ZoneId.systemDefault()
         val dia = store.entries().firstOrNull { it.date == date.toString() } ?: MorningEntry(date.toString())
         store.saveEntries(MorningLog.upsert(store.entries(), dia.copy(painOnWaking = pain), LocalDate.now(zone)))
+    }
+
+    /**
+     * Corrige los minutos hasta aflojar de la mañana de [date], desde la pantalla Morning
+     * (TD-176). El 28-sep la notificación quedó en 25 porque se tocó tarde, y el usuario
+     * -que lo había anotado en 10 al final de la sesión- no encontró cómo corregirlo.
+     */
+    fun editFade(context: Context, date: LocalDate, min: Int) {
+        val store = MorningStore(context)
+        val dia = store.entries().firstOrNull { it.date == date.toString() } ?: return
+        store.saveEntries(MorningLog.upsert(store.entries(), MorningLog.withFade(dia, min), LocalDate.now(ZoneId.systemDefault())))
+    }
+
+    /** El próximo aviso para ir a dormir y la alarma a la que apunta (TD-160). */
+    fun nextBedtime(context: Context): Pair<ZonedDateTime, ZonedDateTime>? {
+        val store = MorningStore(context)
+        return Bedtime.next(store.schedule(), store.skipDate, store.bedtime(), ZonedDateTime.now(ZoneId.systemDefault()))
+    }
+
+    /**
+     * Programa el aviso para ir a dormir. Con setExactAndAllowWhileIdle y no setAlarmClock:
+     * no es un despertador -no debe poner un reloj en la barra ni encender la pantalla-,
+     * pero sí tiene que llegar a su hora aunque el teléfono esté en reposo.
+     */
+    private fun scheduleBedtime(context: Context) {
+        val am = context.getSystemService(AlarmManager::class.java)
+        val pi = bedPending(context)
+        val at = nextBedtime(context)?.first?.toInstant()?.toEpochMilli()
+        if (at == null) {
+            am.cancel(pi)
+            return
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !am.canScheduleExactAlarms()) return
+        runCatching { am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi) }
+    }
+
+    /** La notificación de la hora de acostarse, con "Going to bed". */
+    fun showBedtime(context: Context) {
+        ensureChannels(context)
+        val t = com.maurozegarra.master.i18n.I18n.EN
+        // La alarma a la que apunta es la próxima: el aviso sonó justo antes de su hora.
+        val ring = nextRing(context) ?: return
+        val cfg = MorningStore(context).bedtime()
+        val fmt = java.time.format.DateTimeFormatter.ofPattern("H:mm")
+        val toBed = PendingIntent.getBroadcast(
+            context, 45,
+            Intent(context, MorningReceiver::class.java).setAction(MorningReceiver.ACTION_TO_BED),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val n = NotificationCompat.Builder(context, CHANNEL_BED)
+            .setSmallIcon(R.drawable.ic_notif_play)
+            .setContentTitle(t.morning.bedNotifTitle)
+            .setContentText(t.morning.bedNotifText.format(Bedtime.bedBy(ring, cfg).format(fmt), ring.format(fmt)))
+            .setAutoCancel(true)
+            .setContentIntent(toBed)
+            .addAction(0, t.morning.goingToBed, toBed)
+            .build()
+        context.getSystemService(NotificationManager::class.java).notify(NOTIF_BED, n)
+    }
+
+    /** "Going to bed": anota la hora en la mañana que le toca. */
+    fun toBed(context: Context) {
+        val store = MorningStore(context)
+        store.saveEntries(MorningLog.withBed(store.entries(), System.currentTimeMillis(), ZoneId.systemDefault()))
+        context.getSystemService(NotificationManager::class.java).cancel(NOTIF_BED)
+    }
+
+    /**
+     * Corrige la hora de acostarse de la mañana de [date], desde Morning: si se tocó "Going
+     * to bed" y después se siguió despierto. [time] de mediodía en adelante es la noche antes.
+     */
+    fun editBed(context: Context, date: LocalDate, time: java.time.LocalTime) {
+        val zone = ZoneId.systemDefault()
+        val noche = if (time.hour >= 12) date.minusDays(1) else date
+        val at = noche.atTime(time).atZone(zone).toInstant().toEpochMilli()
+        val store = MorningStore(context)
+        store.saveEntries(MorningLog.withBed(store.entries(), at, zone))
     }
 
     /** "Aflojó": anota la hora. Los minutos salen solos de [MorningEntry.fadeMinutes]. */
@@ -173,6 +260,10 @@ object MorningAlarm {
         nm.createNotificationChannel(
             NotificationChannel(CHANNEL_EASE, "Morning pain", NotificationManager.IMPORTANCE_LOW),
         )
+        // Un aviso normal, con su sonido de notificación: no es la alarma (TD-160).
+        nm.createNotificationChannel(
+            NotificationChannel(CHANNEL_BED, "Bedtime", NotificationManager.IMPORTANCE_DEFAULT),
+        )
     }
 
     private fun showEaseNotification(context: Context) {
@@ -192,6 +283,12 @@ object MorningAlarm {
             .build()
         context.getSystemService(NotificationManager::class.java).notify(NOTIF_EASE, n)
     }
+
+    private fun bedPending(context: Context): PendingIntent = PendingIntent.getBroadcast(
+        context, REQ_BED,
+        Intent(context, MorningReceiver::class.java).setAction(MorningReceiver.ACTION_BEDTIME),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
 
     private fun firePending(context: Context): PendingIntent = PendingIntent.getBroadcast(
         context, REQ_FIRE,

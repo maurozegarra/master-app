@@ -23,6 +23,13 @@ class MorningReceiver : BroadcastReceiver() {
                 MorningAlarm.startRinging(context)
             }
             ACTION_EASED -> MorningAlarm.eased(context)
+            // El aviso para ir a dormir (TD-160): se enseña y se programa el de la noche
+            // siguiente, que sale de la alarma que viene después.
+            ACTION_BEDTIME -> {
+                MorningAlarm.showBedtime(context)
+                MorningAlarm.reschedule(context)
+            }
+            ACTION_TO_BED -> MorningAlarm.toBed(context)
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_TIME_CHANGED,
@@ -34,5 +41,7 @@ class MorningReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_FIRE = "com.maurozegarra.master.morning.FIRE"
         const val ACTION_EASED = "com.maurozegarra.master.morning.EASED"
+        const val ACTION_BEDTIME = "com.maurozegarra.master.morning.BEDTIME"
+        const val ACTION_TO_BED = "com.maurozegarra.master.morning.TO_BED"
     }
 }

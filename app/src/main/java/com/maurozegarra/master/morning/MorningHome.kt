@@ -53,6 +53,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.maurozegarra.master.i18n.I18n
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.ui.master.FadeMinutes
 import com.maurozegarra.master.ui.master.SectionCard
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.MasterTheme
@@ -146,6 +147,12 @@ private fun MorningHome(onBack: () -> Unit) {
             }, onEased = {
                 MorningAlarm.eased(ctx)
                 vuelta++
+            }, onFade = { min ->
+                MorningAlarm.editFade(ctx, hoy, min)
+                vuelta++
+            }, onBed = { hora ->
+                MorningAlarm.editBed(ctx, hoy, hora)
+                vuelta++
             })
         }
 
@@ -180,6 +187,20 @@ private fun MorningHome(onBack: () -> Unit) {
                     // no son dolor.
                     color = { FADE_BAR },
                 )
+                // Las horas en cama (TD-160), en minutos por dentro y en "7 h 30" por fuera.
+                val enCama = dias.map { porDia[it]?.inBedMinutes }
+                if (enCama.any { it != null }) {
+                    Spacer(Modifier.height(20.dp))
+                    BarChart(
+                        title = t.morning.inBedChart,
+                        dias = dias,
+                        valores = enCama,
+                        maximo = 600,
+                        unidad = "",
+                        color = { FADE_BAR },
+                        formato = ::horas,
+                    )
+                }
             }
         }
     }
@@ -189,7 +210,9 @@ private fun MorningHome(onBack: () -> Unit) {
 
 /** Lo de hoy: contestado o no, y si ya aflojó; con el botón que toca en cada caso. */
 @Composable
-private fun Hoy(entry: MorningEntry?, zone: ZoneId, t: Strings, onEdit: (Int) -> Unit, onAnswer: () -> Unit, onEased: () -> Unit) {
+private fun Hoy(entry: MorningEntry?, zone: ZoneId, t: Strings, onEdit: (Int) -> Unit, onAnswer: () -> Unit, onEased: () -> Unit, onFade: (Int) -> Unit, onBed: (java.time.LocalTime) -> Unit) {
+    // La hora de acostarse, arriba del todo: es lo primero que paso (TD-160).
+    EnCama(entry, zone, t, onBed)
     Text(t.morning.today, color = AppTheme.colors.textDim, fontSize = 13.sp)
     Spacer(Modifier.height(10.dp))
     val pain = entry?.painOnWaking
@@ -247,13 +270,52 @@ private fun Hoy(entry: MorningEntry?, zone: ZoneId, t: Strings, onEdit: (Int) ->
     Spacer(Modifier.height(12.dp))
     val minutos = entry.fadeMinutes
     if (minutos != null) {
-        Text(t.morning.easedAfter.format(minutos), color = AppTheme.colors.textPrimary, fontSize = 15.sp)
+        // Tocar los minutos los corrige (TD-176), igual que el número del dolor: con el
+        // mismo selector que la sesión.
+        var corrigiendoMin by remember(entry.date) { mutableStateOf(false) }
+        Text(
+            t.morning.easedAfter.format(minutos),
+            color = AppTheme.colors.textPrimary,
+            fontSize = 15.sp,
+            modifier = Modifier.clickable { corrigiendoMin = !corrigiendoMin },
+        )
+        if (corrigiendoMin) {
+            Spacer(Modifier.height(12.dp))
+            FadeMinutes(minutos, AppTheme.colors.accent, t) {
+                onFade(it)
+                corrigiendoMin = false
+            }
+        }
     } else {
         // El mismo "It eased" que la notificación, sin tener que buscarla.
         Text(t.morning.notEased, color = AppTheme.colors.textDim, fontSize = 14.sp)
         Spacer(Modifier.height(10.dp))
         Boton(t.morning.easedNow, onEased)
     }
+}
+
+/** 440 -> "7 h 20". */
+private fun horas(min: Int): String = if (min % 60 == 0) "${min / 60} h" else "${min / 60} h ${min % 60}"
+
+/**
+ * A qué hora se acostó y cuánto estuvo en cama (TD-160). Tocarla la corrige: si se tocó
+ * "Going to bed" y después se siguió despierto.
+ */
+@Composable
+private fun EnCama(entry: MorningEntry?, zone: ZoneId, t: Strings, onBed: (java.time.LocalTime) -> Unit) {
+    val bed = entry?.bedAt ?: return
+    val ctx = LocalContext.current
+    val hora = Instant.ofEpochMilli(bed).atZone(zone).toLocalTime()
+    val texto = hora.format(DateTimeFormatter.ofPattern("H:mm"))
+    Text(
+        entry.inBedMinutes?.let { t.morning.inBedFor.format(texto, horas(it)) } ?: t.morning.inBedAt.format(texto),
+        color = AppTheme.colors.textPrimary,
+        fontSize = 15.sp,
+        modifier = Modifier.clickable {
+            android.app.TimePickerDialog(ctx, { _, hh, mm -> onBed(java.time.LocalTime.of(hh, mm)) }, hora.hour, hora.minute, true).show()
+        },
+    )
+    Spacer(Modifier.height(12.dp))
 }
 
 @Composable
@@ -293,6 +355,8 @@ private fun BarChart(
     maximo: Int,
     unidad: String,
     color: @Composable (Int) -> Color,
+    /** Cómo se lee un valor, arriba y en el eje. Por defecto, el número con su unidad. */
+    formato: (Int) -> String = { "$it$unidad" },
 ) {
     val t = I18n.EN
     var elegido by remember(valores) { mutableStateOf(valores.indexOfLast { it != null }) }
@@ -301,7 +365,7 @@ private fun BarChart(
     val sel = valores.getOrNull(elegido)
     val etiqueta = if (elegido >= 0 && sel != null) {
         val d = dias[elegido]
-        "${d.dayOfWeek.getDisplayName(TextStyle.SHORT, t.locale)} ${d.dayOfMonth} · $sel$unidad"
+        "${d.dayOfWeek.getDisplayName(TextStyle.SHORT, t.locale)} ${d.dayOfMonth} · ${formato(sel)}"
     } else {
         ""
     }
@@ -312,7 +376,7 @@ private fun BarChart(
     Spacer(Modifier.height(8.dp))
     Row {
         Column(Modifier.height(120.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            Text("$maximo", color = AppTheme.colors.textDim, fontSize = 11.sp)
+            Text(formato(maximo).removeSuffix(unidad), color = AppTheme.colors.textDim, fontSize = 11.sp)
             Text("0", color = AppTheme.colors.textDim, fontSize = 11.sp)
         }
         Spacer(Modifier.width(6.dp))

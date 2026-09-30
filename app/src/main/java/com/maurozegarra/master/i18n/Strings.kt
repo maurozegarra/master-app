@@ -676,6 +676,22 @@ data class MorningStrings(
     val alarmOff: String,
     /** Varias alarmas (TD-175). */
     val alarms: String = "Alarms",
+    /** Lo de la mañana ya lo tiene la alarma (TD-176). */
+    /** El aviso para ir a dormir (TD-160). */
+    val bedtime: String = "Bedtime reminder",
+    /** Cuánto falta (28-sep). */
+    val inTime: String = "in %1${'$'}s",
+    val alarmIn: String = "Alarm in %1${'$'}s",
+    val bedBy: String = "Bed by %1${'$'}s · reminder at %2${'$'}s",
+    val sleepGoal: String = "Sleep",
+    val reminderLead: String = "Reminder before",
+    val bedNotifTitle: String = "Time to wind down",
+    val bedNotifText: String = "Bed by %1${'$'}s · alarm at %2${'$'}s",
+    val goingToBed: String = "Going to bed",
+    val inBedAt: String = "In bed at %1${'$'}s",
+    val inBedFor: String = "In bed at %1${'$'}s · %2${'$'}s",
+    val inBedChart: String = "Hours in bed",
+    val fromAlarm: String = "Pain on waking and when it eased: from the morning alarm. To change them, open Morning.",
     val addAlarm: String = "Add alarm",
     val deleteAlarm: String = "Delete",
 )

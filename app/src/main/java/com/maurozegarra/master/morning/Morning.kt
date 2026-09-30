@@ -116,7 +116,25 @@ data class MorningEntry(
      * vienen de una sesión (ver [MorningLog.fromSessions]) traen el número, no los instantes.
      */
     val fadeMin: Int? = null,
+    /**
+     * Cuándo se acostó la noche ANTERIOR a esta mañana, con "Going to bed" (TD-160). Vive en
+     * la mañana y no en la noche porque es lo que explica: un dolor después de pocas horas
+     * en cama no se lee como uno después de ocho.
+     */
+    val bedAt: Long? = null,
 ) {
+    /**
+     * Minutos en cama: de acostarse a contestar la alarma. Es tiempo en CAMA, no sueño
+     * medido: el app no tiene sensor.
+     */
+    val inBedMinutes: Int?
+        get() {
+            val desde = bedAt ?: return null
+            val hasta = answeredAt ?: return null
+            if (hasta <= desde) return null
+            return ((hasta - desde + 30_000) / 60_000).toInt()
+        }
+
     /**
      * Minutos entre contestar y aflojar, redondeados. Null si todavía no aflojó.
      *
@@ -195,7 +213,9 @@ object MorningLog {
         sessions: List<Triple<Long, Int?, Int?>>,
         zone: ZoneId,
     ): List<MorningEntry> {
-        val reales = mornings(entries, zone).map { it.date }.toSet()
+        // Solo cuenta como mañana de verdad la que tiene dolor: una que solo trae la hora de
+        // acostarse (TD-160) no debe tapar lo que dijo la sesión.
+        val reales = mornings(entries, zone).filter { it.painOnWaking != null }.map { it.date }.toSet()
         val nuevas = sessions
             .filter { (_, dolor, _) -> dolor != null }
             .groupBy { (inicio, _, _) -> dateOf(inicio, zone) }
@@ -212,11 +232,92 @@ object MorningLog {
         return entries.firstOrNull { it.date == dia }
     }
 
+    /**
+     * La respuesta a la alarma sobre lo que ya hubiera de ese día: conserva la hora de
+     * acostarse (TD-160), que se anotó la noche antes en esta misma mañana.
+     */
+    fun answer(existing: MorningEntry?, date: String, pain: Int, now: Long): MorningEntry =
+        (existing ?: MorningEntry(date)).copy(painOnWaking = pain, answeredAt = now, easedAt = null, fadeMin = null)
+
+    /** La mañana a la que pertenece acostarse a [millis]: de mediodía en adelante, la siguiente. */
+    fun morningOf(millis: Long, zone: ZoneId): LocalDate {
+        val t = java.time.Instant.ofEpochMilli(millis).atZone(zone)
+        return if (t.hour >= 12) t.toLocalDate().plusDays(1) else t.toLocalDate()
+    }
+
+    /** [entries] con "me acosté a [bedAt]" en la mañana que le toca. */
+    fun withBed(entries: List<MorningEntry>, bedAt: Long, zone: ZoneId): List<MorningEntry> {
+        val dia = morningOf(bedAt, zone)
+        val e = entries.firstOrNull { it.date == dia.toString() } ?: MorningEntry(dia.toString())
+        return upsert(entries, e.copy(bedAt = bedAt), java.time.LocalDate.now(zone))
+    }
+
+    /**
+     * [e] con los minutos hasta aflojar corregidos a [min] (TD-176).
+     *
+     * Se mueve la hora de "aflojó" y no se guarda un número suelto: los minutos salen de las
+     * dos horas, y así la corrección se lee igual en todas partes. Sin hora de contestar -una
+     * mañana que vino de una sesión-, queda el número.
+     */
+    fun withFade(e: MorningEntry, min: Int): MorningEntry {
+        val desde = e.answeredAt ?: return e.copy(fadeMin = min, easedAt = null)
+        return e.copy(easedAt = desde + min * 60_000L, fadeMin = null)
+    }
+
     /** [entries] con la de su día reemplazada por [entry], y sin lo más viejo que [KEEP_DAYS]. */
     fun upsert(entries: List<MorningEntry>, entry: MorningEntry, today: LocalDate): List<MorningEntry> {
         val corte = today.minusDays(KEEP_DAYS.toLong()).toString()
         return (entries.filter { it.date != entry.date } + entry)
             .filter { it.date >= corte }
             .sortedBy { it.date }
+    }
+}
+
+/**
+ * El aviso para ir a dormir (TD-160): [sleepMin] de sueño antes de la alarma, y el aviso
+ * [leadMin] antes de eso. Lo que eligió el usuario el 28-sep: 7 h 30 y media hora.
+ */
+data class BedtimeConfig(
+    val enabled: Boolean = false,
+    val sleepMin: Int = 450,
+    val leadMin: Int = 30,
+)
+
+object Bedtime {
+
+    /** La hora de acostarse para que [ring] deje las horas de sueño elegidas. */
+    fun bedBy(ring: ZonedDateTime, cfg: BedtimeConfig): ZonedDateTime = ring.minusMinutes(cfg.sleepMin.toLong())
+
+    /**
+     * El próximo aviso, estrictamente después de [now], y la alarma a la que apunta; null si
+     * está apagado o no suena ninguna.
+     *
+     * Si el aviso de la próxima alarma ya pasó -son las 22:00 y mañana suena a las 5-, no se
+     * avisa a destiempo: se busca el de la alarma siguiente. Avisar "acuéstate a las 21:30"
+     * a las 22:00 no sirve de nada.
+     */
+    fun next(schedule: MorningSchedule, skip: LocalDate?, cfg: BedtimeConfig, now: ZonedDateTime): Pair<ZonedDateTime, ZonedDateTime>? {
+        if (!cfg.enabled) return null
+        var desde = now
+        repeat(4) {
+            val ring = schedule.next(desde, skip) ?: return null
+            val aviso = bedBy(ring, cfg).minusMinutes(cfg.leadMin.toLong())
+            if (aviso.isAfter(now)) return aviso to ring
+            desde = ring
+        }
+        return null
+    }
+}
+
+/** Cuánto falta para la próxima alarma, como lo decía su despertador (28-sep). */
+object Countdown {
+    /** 507 -> "8 h 27 min", 45 -> "45 min", 0 -> "1 min" (lo que falta nunca es cero). */
+    fun text(minutes: Int): String {
+        val m = minutes.coerceAtLeast(1)
+        return when {
+            m < 60 -> "$m min"
+            m % 60 == 0 -> "${m / 60} h"
+            else -> "${m / 60} h ${m % 60} min"
+        }
     }
 }

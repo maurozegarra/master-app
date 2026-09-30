@@ -1924,10 +1924,19 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
         // el de la sesión. Y se pregunta aquí, al terminar, y no antes de empezar: la
         // pantalla de arranque tiene que dejar darle Start, y a esa hora es lo único que se
         // quiere hacer.
-        PainScale(t.painOnWaking, saved?.painOnWaking, accent, t) { vm.saveHowItWent(painOnWaking = it) }
-        Spacer(Modifier.height(12.dp))
-        FadeMinutes(saved?.painFadeMin, accent, t) { vm.saveHowItWent(painFadeMin = it) }
-        Spacer(Modifier.height(12.dp))
+        //
+        // Si la alarma ya tiene esa mañana, no se pregunta otra vez (TD-176): la alarma es la
+        // fuente, y dos sitios guardando lo mismo terminaron el 28-sep con 25 minutos en uno
+        // y 10 en otro. Se corrige en Morning, que es donde se mide.
+        if (vm.morningAnsweredFor(saved)) {
+            Text(t.morning.fromAlarm, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Spacer(Modifier.height(12.dp))
+        } else {
+            PainScale(t.painOnWaking, saved?.painOnWaking, accent, t) { vm.saveHowItWent(painOnWaking = it) }
+            Spacer(Modifier.height(12.dp))
+            FadeMinutes(saved?.painFadeMin, accent, t) { vm.saveHowItWent(painFadeMin = it) }
+            Spacer(Modifier.height(12.dp))
+        }
 
         // El dolor de CRISIS, aparte y plegado (TD-165). El usuario, el 25-sep: el dolor al
         // despertar es el habitual, "normalizado", y el de la crisis es otro, aunque use la
@@ -1990,50 +1999,6 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
  * servir para comparar. Es la idea que Freeletics aplica con palabras -cada opcion se
  * explica sola- traida a una escala numerica, que para el dolor es lo estandar.
  */
-/**
- * Cuántos minutos tardó en aflojar el dolor de la mañana (TD-125).
- *
- * Opciones sueltas y no un contador: nadie mide esto con cronómetro, se dice "unos quince".
- * Los valores están elegidos para que el paso normal -entre 10 y 15 minutos- se conteste de
- * un toque, y para que la cifra que cambiaría el cuadro -45 o más- exista y se pueda marcar.
- */
-@Composable
-private fun FadeMinutes(value: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
-    // Lo que viene de la alarma son minutos EXACTOS -24- y no uno de los botones: sin decirlo
-    // aqui, ningun boton se encendia y parecia que no habia dato (24-sep, TD-156).
-    val exacto = value?.takeIf { it !in listOf(0, 5, 10, 15, 20, 30, 45, 60) }
-    Text(
-        if (exacto != null) "${t.painFadeMin}: $exacto min" else t.painFadeMin,
-        color = if (exacto != null) AppTheme.colors.textPrimary else AppTheme.colors.textDim,
-        fontSize = 13.sp,
-    )
-    Spacer(Modifier.height(6.dp))
-    listOf(listOf(0, 5, 10, 15), listOf(20, 30, 45, 60)).forEach { fila ->
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            fila.forEach { min ->
-                val activo = value == min
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .height(40.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (activo) accent else AppTheme.colors.track)
-                        .clickable { onPick(min) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        if (min == 60) "60+" else "$min",
-                        color = if (activo) AppTheme.colors.onAccent else AppTheme.colors.textDim,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.height(6.dp))
-    }
-}
-
 @Composable
 private fun PainScale(label: String, value: Int?, accent: Color, t: Strings, onPick: (Int) -> Unit) {
     val measurer = rememberTextMeasurer()

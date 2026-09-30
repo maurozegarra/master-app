@@ -189,4 +189,77 @@ class MorningTest {
         assertEquals(listOf(2, 1, 1), log.map { it.painOnWaking })
         assertEquals(listOf(15, 15, 24), log.map { it.fadeMinutes })
     }
+
+    @Test
+    fun `corregir los minutos mueve la hora de aflojar`() {
+        // 28-sep: contesto a las 5:00, la notificacion quedo a las 5:25, y fueron 10.
+        val cinco = at(2026, 9, 28, 5, 0).toInstant().toEpochMilli()
+        val e = MorningEntry("2026-09-28", painOnWaking = 1, answeredAt = cinco, easedAt = cinco + 25 * 60_000L)
+        assertEquals(25, e.fadeMinutes)
+        assertEquals(10, MorningLog.withFade(e, 10).fadeMinutes)
+        // Una mañana sin horas -venida de una sesion- guarda el numero.
+        assertEquals(20, MorningLog.withFade(MorningEntry("2026-09-10", painOnWaking = 2, fadeMin = 15), 20).fadeMinutes)
+    }
+
+    // ---------- El aviso para ir a dormir (TD-160) ----------
+
+    private val cama = BedtimeConfig(enabled = true, sleepMin = 450, leadMin = 30)
+
+    @Test
+    fun `el aviso sale de la alarma siguiente, 7 h 30 y media hora antes`() {
+        // Lunes 28-sep 20:00: el martes suena a las 7 -> acostarse 23:30, aviso 23:00.
+        val (aviso, ring) = Bedtime.next(DEFAULT, null, cama, at(2026, 9, 28, 20, 0))!!
+        assertEquals(at(2026, 9, 29, 7, 0), ring)
+        assertEquals(at(2026, 9, 28, 23, 0), aviso)
+        assertEquals(at(2026, 9, 28, 23, 30), Bedtime.bedBy(ring, cama))
+    }
+
+    @Test
+    fun `si el aviso ya paso, no avisa a destiempo`() {
+        // Martes 29 a las 22:00: el miercoles suena a las 5, su aviso era a las 21:00. El que
+        // toca es el del jueves: miercoles 21:00.
+        val (aviso, ring) = Bedtime.next(DEFAULT, null, cama, at(2026, 9, 29, 22, 0))!!
+        assertEquals(at(2026, 10, 1, 5, 0), ring)
+        assertEquals(at(2026, 9, 30, 21, 0), aviso)
+    }
+
+    @Test
+    fun `apagado, o sin alarmas, no hay aviso`() {
+        assertNull(Bedtime.next(DEFAULT, null, cama.copy(enabled = false), at(2026, 9, 28, 20, 0)))
+        assertNull(Bedtime.next(MorningSchedule.default(false), null, cama, at(2026, 9, 28, 20, 0)))
+    }
+
+    @Test
+    fun `acostarse de noche es para la manana siguiente, de madrugada para la misma`() {
+        assertEquals(LocalDate.of(2026, 9, 29), MorningLog.morningOf(at(2026, 9, 28, 21, 40).toInstant().toEpochMilli(), lima))
+        assertEquals(LocalDate.of(2026, 9, 29), MorningLog.morningOf(at(2026, 9, 29, 0, 30).toInstant().toEpochMilli(), lima))
+    }
+
+    @Test
+    fun `contestar la alarma conserva la hora de acostarse`() {
+        val bed = at(2026, 9, 28, 21, 40).toInstant().toEpochMilli()
+        val noche = MorningLog.withBed(emptyList(), bed, lima).single()
+        assertEquals("2026-09-29", noche.date)
+        val cinco = at(2026, 9, 29, 5, 0).toInstant().toEpochMilli()
+        val manana = MorningLog.answer(noche, noche.date, 1, cinco)
+        assertEquals(bed, manana.bedAt)
+        assertEquals(440, manana.inBedMinutes) // 7 h 20
+    }
+
+    @Test
+    fun `la hora de acostarse no tapa lo que dijo la sesion`() {
+        // Una mañana que solo tiene la hora de acostarse no es una mañana contestada.
+        val soloCama = MorningEntry("2026-09-10", bedAt = 1L)
+        val sesion = Triple(at(2026, 9, 10, 7, 0).toInstant().toEpochMilli(), 3 as Int?, 20 as Int?)
+        val r = MorningLog.fromSessions(listOf(soloCama), listOf(sesion), lima)
+        assertEquals(3, r.single { it.date == "2026-09-10" }.painOnWaking)
+    }
+
+    @Test
+    fun `cuanto falta para la alarma`() {
+        assertEquals("8 h 27 min", Countdown.text(507))
+        assertEquals("45 min", Countdown.text(45))
+        assertEquals("7 h", Countdown.text(420))
+        assertEquals("1 min", Countdown.text(0))
+    }
 }

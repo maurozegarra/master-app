@@ -35,6 +35,14 @@ object Dims {
      */
     val rowPadding = 16.dp
 
+    /**
+     * El margen derecho de una fila de lista ([rowPadding] menos 4): lo que va al final
+     * -iconos, un interruptor- ya trae su propio relleno de toque, y con 16 quedaba mas
+     * adentro que el texto de la izquierda. Un bloque que se apila con filas lo usa tambien
+     * para que sus interruptores caigan en la misma linea (TD-160).
+     */
+    val rowPaddingEnd = 12.dp
+
     val button = 28.dp
     val buttonSmall = 12.dp
     val field = 12.dp
