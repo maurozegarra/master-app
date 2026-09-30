@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **143 / 176** hechos, 33 pendientes.
+Progreso: **146 / 177** hechos, 31 pendientes.
 
 ## Pendientes
 
@@ -56,14 +56,6 @@ QUE: (1) un avatar por perfil -en el selector Me / NIKO y donde aparezca su nomb
 DE DONDE SALE EL DATO YA ESTA ESTABLECIDO, y el asistente lo pregunto por error: los dos se pesan LOS SABADOS AL DESPERTAR, peso y cintura a la altura del ombligo, se lo pasan al coach por el chat, y la serie se anota en docs/objetivos.md (el usuario) y docs/niko.md (NIKO), con cintura/estatura como indice. Hoy vive solo en esos documentos.
 
 A DECIDIR: solo como llega al app -sembrado desde el codigo con cada pesaje, como las rutinas, o anotado en el app y subido por Supabase como las sesiones-. Y el avatar: foto propia o iniciales con color.
-- [ ] **TD-164** Corregir el dolor de la manana desde la pantalla Morning
-  - LO PIDIO el usuario el 25-sep: contesto 1 en la alarma, le parecio "demasiado optimista", "y como no hay forma de editarlo, lo hice cuando tuve la oportunidad" -en la sesion, horas despues-, "pero tuve que hacer el esfuerzo de no olvidarlo".
-
-HECHO en codigo el mismo dia: en Morning, tocar el numero de hoy abre la escala en el sitio y corrige (MorningAlarm.edit), a cualquier hora y conservando la hora del despertar. La sesion de ese dia no se reescribe: la serie se lee de las mananas.
-- [ ] **TD-165** Dolor habitual y dolor de crisis, separados: la sesion ya no pregunta por la crisis
-  - LO EXPLICO el usuario el 25-sep, al preguntarle por que no contesto el dolor final ni la irradiacion: "entendia que eso tenia que ver con los dias que estuve en crisis, y eso es importante distinguirlo. El dolor al despertar es un dolor habitual, hasta diria normalizado, y es muy distinto al dolor de los dias que estuve en crisis. Si bien usamos la misma escala, estan separados por una razon. El dolor de la crisis ya se fue, lo que me queda es el dolor habitual y eso es lo que hay que ir mejorando. No marque porque ya no existe ese dolor ni al comienzo ni al final, y sin ese dolor, no hay irradiacion."
-
-HECHO en codigo el mismo dia: la pantalla previa ya no pregunta "How is your back right now?", y al final, el dolor antes/despues y la irradiacion van plegados detras de "Back crisis today" -abierto solo si se toca, o si ya tiene algo-. El habitual lo pregunta la alarma y la sesion lo toma de ahi. Anotado en docs/coach.md: un Pain before vacio ya no es un olvido.
 - [ ] **TD-159** Alarma: etiquetas de la noche, para cruzarlas con el dolor de la manana
   - PROPUESTO el 24-sep y registrado el 25 (salio de TD-158, donde solo quedaba mencionado).
 
@@ -74,41 +66,16 @@ QUE: tras contestar el dolor en la alarma, etiquetas OPCIONALES de un toque -alm
 A DECIDIR: la lista de etiquetas -la propone el coach, la ajusta el usuario-; si se contestan en la misma pantalla de la alarma o despues, en Morning, para no alargar el primer toque del dia.
 - [ ] **TD-160** Alarma: aviso para ir a dormir, calculado desde la hora de la alarma
   - PROPUESTO el 24-sep, registrado el 25. Un aviso a la noche -por ejemplo 7 h 30 antes de la alarma del dia siguiente- y, con la hora en que se apaga, cuanto se durmio. Da contexto a la serie del dolor: una manana mala tras cinco horas de sueno no dice lo mismo que tras ocho.
+
+HECHO el 28-sep. El usuario decidio: 7 h 30 de sueño, aviso 30 min antes, y con "Going to bed". El aviso sale de las mismas alarmas y se reprograma con ellas; si el de la proxima ya paso, apunta a la siguiente (no avisa a destiempo). Es una notificacion normal (setExactAndAllowWhileIdle), no un despertador. "Going to bed" anota la hora en la mañana que le toca (de mediodia en adelante, la siguiente) y la alarma la conserva al contestar; Morning enseña "In bed at 21:40 · 7 h 20", se corrige tocandola, y un tercer grafico "Hours in bed". Es tiempo en cama, no sueño medido. Configuracion en Morning con SwitchRow y SegmentedRow, los de Settings. Tests en MorningTest.
+
+AJUSTES del 28-sep, revisando la captura: la tarjeta pasa a SectionCard (es un bloque de ajustes, no un elemento de lista), sin el espacio de mas encima, y las horas de sueño dicen "7 h 30" y no "7:30", que se leia como reloj. Y, pedido por el usuario -"eso si extraño de mi vieja alarma"-, cuanto falta para la proxima: en la linea "Next: Tuesday 7:00 · in 8 h 27 min", al minuto, y un aviso "Alarm in ..." al poner o cambiar una alarma (Countdown, con test).
 - [ ] **TD-161** Alarma: sonido que sube de a poco
   - PROPUESTO el 24-sep, registrado el 25. Que el volumen empiece bajo y llegue al maximo en unos 30 s, en vez de arrancar al maximo. Es un despertador para alguien con dolor lumbar: un sobresalto al despertar no ayuda.
 - [ ] **TD-162** Alarma: control rapido en el panel de Android
   - PROPUESTO el 24-sep, registrado el 25. Un Quick Settings tile para encender, apagar o saltar la alarma de manana sin abrir el app.
 - [ ] **TD-163** Alarma: widget con la proxima alarma y las ultimas mananas
   - PROPUESTO el 24-sep, registrado el 25. En la pantalla de inicio: la hora de la proxima alarma y el dolor de las ultimas 7 mananas, con su color y su numero.
-- [ ] **TD-151** El dolor se anota cuando pasa, no al terminar el training
-  - LO PIDIO el usuario el 21-sep-2026: el dolor al despertar, los minutos que tarda en aflojar y el dolor de antes se contestan en la pantalla final, despues de una hora de ejercicio, y se vuelve un ejercicio de memoria. "Mientras mas pronto registre el dolor, mejor": el de la manana apenas se despierta, y el alivio apenas pasa.
-
-LO QUE HAY HOY: painOnWaking y painFadeMin (TD-125) viven en SessionLog y se preguntan al final. painBefore se pregunta en la pantalla previa al player ("How is your back right now?"), pero el boton de play de la tarjeta se salta esa pantalla -onPlay = openPlayer + onStart-, asi que en la practica tambien se contesta al final, como "Pain before". painAfter se pregunta al final, que es su momento.
-
-PLAN PROPUESTO:
-(1) La manana sale de la sesion. Un registro por dia -fecha, dolor al despertar, hora a la que lo anoto, hora a la que aflojo- en su propio almacen, con respaldo. Se anota desde la lista de trainings, en una tarjeta bajo el calendario que solo aparece si algun training lleva tracksPain. Al despertar: el numero, un toque. Cuando afloja: un boton "It eased", y los minutos los calcula el app con las dos horas -no hay nada que recordar ni que contar-. Hecho, la tarjeta se reduce a una linea editable.
-(2) Los dias sin sesion tambien cuentan. Hoy un dia de descanso no deja dolor de la manana; con el registro por dia, si.
-(3) La sesion sigue llevando painOnWaking y painFadeMin, copiados del registro del dia al guardarse, para que el historial y lo que lee el coach no cambien de forma. En la pantalla final se ven ya contestados.
-(4) El dolor de antes, al arrancar de verdad: si el training lleva tracksPain y no se contesto en la pantalla previa, se pregunta en el player durante el primer ejercicio -la caminata-, en una franja que desaparece al contestar. Sin bloquear nada.
-
-EDGE CASES: se despierta, anota, y no entrena ese dia; entrena dos veces el mismo dia; anota el alivio pero no el despertar; lo anota pasada la medianoche; importar un respaldo sin registros diarios; NIKO no tiene tracksPain y no ve nada de esto.
-
-PROPUESTA DEL USUARIO, el mismo 21-sep, y hacia donde se inclina: una ALARMA propia del app en vez de la tarjeta en la lista. Suena al despertar y la pantalla de la alarma es la pregunta del dolor, asi que se contesta apenas abre los ojos, antes de moverse, que es justo lo que mide painOnWaking. Queda como propuesta, sin decidir. A pensar antes de empezar: permisos de alarma exacta (SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM desde Android 12-14) y de pantalla completa sobre la de bloqueo (USE_FULL_SCREEN_INTENT, restringido desde Android 14); si reemplaza a la alarma que ya usa o convive con ella; que hacer si la apaga sin contestar; y como se enlaza con el "It eased", que seguiria necesitando un sitio -la misma notificacion, que se queda puesta hasta que afloja, es un candidato-.
-
-DECIDIDO el 22-sep con el usuario: la alarma, DENTRO de MASTER y no como app aparte, pero en su propio paquete (morning/) con solo tres puntos de contacto -la sesion toma el dolor del dia, el respaldo lo incluye, una entrada en Settings-, para poder sacarla si en una semana de prueba estorba al app de ejercicio. Sacarla seria mover el paquete y cambiar esos tres puntos por un puente entre apps.
-(1) REEMPLAZA a su despertador. La primera semana conviene su alarma de siempre dos minutos despues, de respaldo.
-(2) Una hora por dia: lunes, miercoles y jueves (presenciales) 5:00; los demas, 7:00. Cada dia se puede apagar.
-(3) Posponer 5 minutos, y la pregunta del dolor igual al apagarla de verdad.
-Apagarla ES contestar: la pantalla de la alarma es la escala 0-10, con un Dismiss pequeno para apagar sin contestar. Despues queda una notificacion fija "Tap when it eases" y los minutos los calcula el app. El dato es del DIA: los dias de descanso tambien cuentan.
-
-HECHO en codigo el 22-sep (v1.0.316-320), funcionando en su telefono; queda PENDIENTE la semana de prueba, desde el miercoles 23, para decidir si se queda en MASTER. Paquete morning/: Morning.kt (horario, entrada del dia, puro y con tests), MorningStore (su propio archivo de preferencias), MorningAlarm (setAlarmClock, posponer, apagar, "aflojo"), MorningReceiver (la hora, "It eased", y reprogramar al reiniciar, actualizar o cambiar la hora), MorningRingService (sonido en volumen de alarma, vibracion, se pospone sola a los 10 min hasta 3 veces), MorningActivity (0-10 grande sobre el bloqueo) y MorningSettings. Los tres puntos de contacto estan marcados en el codigo: applyMorning en el ViewModel, el campo morning del respaldo (formato 4) y la tarjeta de Settings.
-
-CUATRO FALLOS en la prueba, los cuatro del asistente:
-(1) El app se caia al encenderla: setAlarmClock SI pide permiso de alarma exacta desde Android 12, y se dio por hecho que no. USE_EXACT_ALARM, y reschedule ya no se cae si falta.
-(2) La pantalla no se encendia: canUseFullScreenIntent() decia que si y Samsung lo negaba igual, porque la operacion USE_FULL_SCREEN_INTENT estaba en su modo por defecto. Ahora se mira la operacion; se abrio por adb con permiso del usuario (appops set ... allow), y el app lleva al ajuste si vuelve a faltar.
-(3) La pantalla tardaba 10 s: Android difiere la notificacion de un servicio en primer plano salvo FOREGROUND_SERVICE_IMMEDIATE.
-(4) "Good morning" no se iba al contestar: cancelarla desde fuera no sirve mientras el servicio sigue en primer plano; ahora la quita el servicio en onDestroy.
-Y el texto de abajo quedaba bajo la barra de navegacion.
 - [ ] **TD-148** Estimar la duracion de un training que todavia nadie ha corrido
   - LO QUE QUEDO FLOJO de TD-040. La tarjeta usa la mediana de las sesiones reales, pero un training sin historial cae al calculo del motor, que se queda corto -unos 43 minutos frente a los 73 reales de LUMBAR-. Afecta a LUMBAR (short), a las rutinas de NIKO y a cualquiera nueva: dicen un numero bajo hasta que se entrenan una vez.
 
@@ -194,7 +161,7 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 Dos causas: (1) los minutos se anotan en DOS sitios -la notificacion de la alarma y la pregunta del final de la sesion- y cada uno guarda el suyo, sin que ninguno mande; (2) la pantalla Morning deja corregir el dolor (TD-164) pero no los minutos.
 
-PROPUESTA, sin tocar codigo: la mañana de la alarma es la fuente. En Morning, "Eased after N min" se toca y se corrige. Y la sesion deja de preguntar los minutos cuando la alarma ya tiene esa mañana, como ya dejo de preguntar el dolor de crisis (TD-165). Pendiente del OK.
+HECHO el 28-sep con el OK del usuario: la mañana de la alarma es la fuente. En Morning, "Eased after N min" se toca y se corrige. Y la sesion deja de preguntar los minutos cuando la alarma ya tiene esa mañana, como ya dejo de preguntar el dolor de crisis (TD-165). Corregir mueve la hora de "aflojo" (MorningLog.withFade), no guarda un numero aparte. El selector de minutos es el mismo de la sesion, movido a MasterComponents.
 - [ ] **TD-172** En un circuito, el ejercicio que pasa directo al siguiente nunca pregunta como fue
   - ENCONTRADO el 26-sep leyendo NIKO 6, la primera sesion en circuito (TD-137). Saco 4 x 3 min con descanso 0 y sprawl 4 x 30 s con 60 s, alternados. Del sprawl contesto los cuatro; del saco solo el primero.
 
@@ -233,6 +200,12 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 
 ### UI
 
+- [ ] **TD-177** El boton primario del app, con las seis decisiones de "Make any button look expensive"
+  - PEDIDO por el usuario el 28-sep, con un video de @motion_ui_interface: "el boton Start en la pantalla del Preview es rojo solido y se veria mejor si solo fuera borde y con el efecto exacto que menciona el video".
+
+Las seis decisiones del video: (1) tamano 48 de alto, 24 de relleno lateral; (2) etiqueta 17, semibold, verbo + objeto; (3) contraste: relleno satinado, borde de 1 px a 4:1 contra la pagina, etiqueta blanca a 14:1; (4) profundidad: riel hundido, borde de arriba iluminado, sombra y 8 / blur 24; (5) pildora, radio = alto / 2, un icono de 20 a 10 del texto; (6) movimiento: la luz recorre el borde en 200 ms, al presionar se hunde 1 px (120 ms, ease-out), y un spinner termina en check. Regla: respuesta en 100 ms, listo en 300.
+
+PROPUESTA, sin tocar codigo: cambiarlo en AppPrimaryButton, el unico boton primario (PrimaryButton lo delega), para que cambien los nueve a la vez y el app siga coherente. Pendiente del OK.
 - [ ] **TD-173** La pantalla previa del training muestra lo que de verdad se va a hacer
   - PEDIDO por el usuario el 26-sep: "casi no muestra detalle. Por ejemplo Curl-up 0:10, eso me dice que el ejercicio dura 10 segundos y no es cierto, no veo los pesos".
 
@@ -259,8 +232,11 @@ HECHO el 27-sep con el OK del usuario ("dale, haz las dos"): cada ejercicio con 
 - [x] **TD-175** La alarma como despertador: varias alarmas en tarjetas, y fuera del lanzador
 - [x] **TD-171** La voz de los pitidos, por telefono: cada uno suena distinto al entrenar juntos
 - [x] **TD-167** El training que sigue va primero en la lista, con un destello en el borde
+- [x] **TD-164** Corregir el dolor de la manana desde la pantalla Morning
+- [x] **TD-165** Dolor habitual y dolor de crisis, separados: la sesion ya no pregunta por la crisis
 - [x] **TD-158** La alarma sale de Settings: su propio icono "Morning", su pantalla y el dolor en el calendario
 - [x] **TD-152** Los ejercicios con el peso del cuerpo tampoco dicen si costaron
+- [x] **TD-151** El dolor se anota cuando pasa, no al terminar el training
 - [x] **TD-147** El ejercicio unilateral: el lado entra en el modelo
 - [x] **TD-145** El video es un campo mas del ejercicio: una sola tarjeta y sin carteles
 - [x] **TD-139** Las instrucciones dejan de viajar en el APK: una tabla por exerciseId

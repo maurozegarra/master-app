@@ -278,6 +278,26 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
 
+### 2026-09-29 — NIKO 2 · Muay Thai, la segunda vuelta
+
+**De 07:45 a 08:43, 58 minutos, completa.**
+
+| Ejercicio | Lo que marcó | Para la próxima NIKO 2 |
+|---|---|---|
+| Sombra, 3 × 3 min | bien · bien (el primero sin contestar) | igual |
+| Saco, 5 × 3 min | bien en los que contestó (1 y 3 sin contestar) | igual |
+| Llanta, 6 × 30 s | bien las seis | igual |
+| Giro ruso, 3 × 20, 5 kg | bien las tres | igual |
+| **Plancha lateral, 3 × 30 s por lado** | **fácil las seis** | **3 × 45 s** |
+| Cuello | bien las cuatro | — |
+
+- **La plancha le sobra:** fácil en los dos lados, las tres series. Sube a 45 s.
+- **Algunos rounds sin contestar:** no es el fallo del circuito -aquí no hay circuito-; la
+  tarjeta sale en el minuto de descanso y a veces no se toca. No se insiste: los que contestó
+  son todos "bien".
+- Sigue **NIKO 3 · Tren superior** el miércoles 30, con la **dominada asistida** nueva (revisión
+  17): banda de 3.2 cm, 3 × 5, instrucciones en español en el catálogo.
+
 ### 2026-09-28 — NIKO 1 · Glúteo pesado, la segunda vez y la primera con respuestas
 
 **De 08:14 a 09:18, 64 minutos, completa.**

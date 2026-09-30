@@ -5,6 +5,49 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-29 — decimosexta sesión: el primer hip thrust, y la mañana más lenta de la serie
+
+**LUMBAR** completo, de 07:29 a 08:52, **83 minutos**. Primera noche con el aviso de dormir
+(TD-160): **se acostó a las 23:34**, 7 h 26 en cama hasta la alarma de las 7:00. **Dolor 2 al
+contestar, aflojó en 56 minutos**: el más largo de la serie (10, 14, 16, 24, 39).
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| **Hip thrust en su banca**, pausa 2 s | 21 · 31 · 36 | bien · bien · bien — *"lo sentí ligero"* |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20, alternado | izquierda 15 **ligera**, el resto bien |
+| Box Squat | 17.5 · 20 · 22.5 | bien las tres |
+
+Su nota:
+
+> *"Hasta las 5 am el dolor estaba en 1. De 5 a 7 dormí con Niko y amanecí en 3 y tardó
+> mucho en irse. El hip thrust lo sentí ligero pero como el dolor seguía ahí, sólo marqué
+> como right."*
+
+- **El dato de la noche es lo más valioso de hoy:** a las 5 estaba en 1, y dos horas en otra
+  cama -o en otra postura- lo llevaron a 3 y a casi una hora para aflojar. Es exactamente lo
+  que TD-159 (etiquetas de la noche) serviría para cruzar. Preguntado qué cambió: la cama,
+  el colchón o la postura.
+- **La alarma registró 2 y él dice que amaneció en 3.** Lo corrige en Morning si fue 3.
+- **El hip thrust salió ligero, marcado "bien" por el dolor.** Son dos preguntas distintas:
+  la tarjeta pregunta por el PESO; el dolor va en la alarma y en la nota. Mezclarlas frena la
+  progresión sin motivo. El recorrido no dio problemas.
+- **El viernes se repite 21 · 31 · 36**, decisión suya: confirmar el peso en un día sin
+  dolor. Le dolió la espalda baja todo el día; el dolor ya estaba al despertar, ANTES del hip
+  thrust, así que no lo causó, pero pudo haberlo mantenido. Queda por ver con la mañana del
+  miércoles.
+- **A las 21:24 aparece otra cosa: un pinchazo en la NALGA IZQUIERDA**, distinto del dolor de
+  siempre, con casi cualquier movimiento. Arquear la espalda no lo aumenta y el glúteo no
+  duele como agujetas. Es nuevo, de un lado y el día del primer hip thrust. **Hasta que se
+  vaya: nada con carga de cadera.** Miércoles, LUMBAR (bad day) en vez del corto -movilidad,
+  caminata, McGill 3-2-1, sin carry-. El viernes, el hip thrust solo tras dos mañanas sin el
+  pinchazo. Si baja por la pierna, adormece o quita fuerza: médico, no rutina.
+  **No baja por la pierna, y empezó en la tarde**, horas después de entrenar: encaja con una
+  irritación que se despierta tarde, no con algo del nervio. El plan se mantiene.
+- **La sentadilla ya arranca sentado** (revisión 18): las tres bien, y sin comentario sobre
+  el montaje, que era el problema.
+
+---
+
 ## 2026-09-28 — decimoquinta sesión: la primera mañana con la alarma nueva
 
 **LUMBAR (short)**, de 05:15 a 05:55, **40 minutos**, completo. La alarma de las 5:00 -la
@@ -17,8 +60,9 @@ aflojó a las 05:25, **25 minutos** según la alarma.
 | Suitcase Carry, 36 m | 15 · 17.5 · 20, por mano, alternado | las seis bien |
 
 - **Los minutos no cuadran:** la mañana dice 25 (de 5:00 a 5:25) y la sesión guarda **10**,
-  justo lo que va del inicio de la sesión (5:15) a cuando aflojó. Preguntado si lo anotó él
-  al final; vale el de la alarma, que mide desde el despertar.
+  justo lo que va del inicio de la sesión (5:15) a cuando aflojó. **Vale el 10**: lo anotó
+  él, y trató de corregir la alarma sin encontrar cómo. Dos sitios guardando lo mismo sin
+  que ninguno mande: TD-176.
 - Mañana martes, el primer **hip thrust en su banca**: 21 · 31 · 36, pausa de 2 s.
 
 ---
