@@ -63,7 +63,8 @@ class EffortTest {
 
         val preguntan = StepEngine.buildSteps(niko.first { it.name.startsWith("NIKO 3") })
             .filter(Effort::asks).map { it.ownerExerciseId }.toSet()
-        assertEquals(setOf("ex_inverted_row", "ex_pushups", "ex_dead_hang", "ex_neck_iso"), preguntan)
+        // La dominada asistida entra en la revision 17 (29-sep): peso del cuerpo, pregunta.
+        assertEquals(setOf("ex_inverted_row", "ex_band_pull_up", "ex_pushups", "ex_dead_hang", "ex_neck_iso"), preguntan)
     }
 
     @Test

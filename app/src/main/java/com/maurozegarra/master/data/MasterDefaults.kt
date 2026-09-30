@@ -633,8 +633,10 @@ object MasterDefaults {
      * cambiar la rutina es editar la funcion y subir este numero.
      *
      * Revision 16 (27-sep): NIKO 1, su segunda vez. La hiperextension baja a 3 x 10.
+     *
+     * Revision 17 (29-sep): NIKO 3 suma la dominada asistida con la banda de 3.2 cm.
      */
-    const val NIKO_REVISION = 16
+    const val NIKO_REVISION = 17
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -858,6 +860,11 @@ object MasterDefaults {
                             "ex_dumbbell_row", "Hacia la cadera, codo pegado. El torso no gira", 10, rest = 60,
                             weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 7.5, 10.0, 10.0),
                         ).copy(sides = listOf("Izquierda", "Derecha")),
+                        // Revision 17 (29-sep): la dominada, con la banda de 3.2 cm comprada
+                        // para esto. La traccion vertical es lo que mas le falta para el clinch,
+                        // y colgarse 3 x 25 s ya le sale. 3 x 5 para empezar; si salen faciles,
+                        // la banda delgada. 15 s de preparacion: hay que subir al cajon.
+                        b.ex("ex_band_pull_up", "Banda gruesa. Pecho a la barra, baja en 3 s", 5, sets = 3, rest = 90, prep = 15),
                     ),
                 ),
                 Workout(
@@ -1179,7 +1186,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 11
+    const val CATALOG_INSTRUCTIONS_REVISION = 12
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -1512,6 +1519,17 @@ object MasterDefaults {
                 "Respira normal y aguanta.",
                 "Para bajar, vuelve a apoyar los pies en el cajón. No saltes al piso desde la barra.",
                 "Si no llegas al tiempo, apoya un poco los pies en el cajón y termina así.",
+            ),
+        ),
+        // Revision 12 (29-sep): la dominada asistida de NIKO 3.
+        "ex_band_pull_up" to ExerciseMedia(
+            listOf(
+                "Pasa la banda gruesa (3.2 cm) por la barra y ciérrala sobre sí misma, para que quede colgando.",
+                "Sube al cajón y toma la barra con las palmas al frente, las manos un poco más abiertas que los hombros.",
+                "Mete una rodilla en la banda y baja hasta quedar colgada, con los brazos estirados.",
+                "Sube llevando el pecho a la barra hasta que el mentón la pase. Hombros lejos de las orejas.",
+                "Baja lento, en unos 3 segundos, hasta estirar los brazos del todo.",
+                "Para salir, apoya los pies en el cajón y saca la rodilla de la banda. Si las 5 salen fáciles, la próxima con la banda delgada.",
             ),
         ),
     )
