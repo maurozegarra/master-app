@@ -688,6 +688,7 @@ data class MorningStrings(
     val bedNotifTitle: String = "Time to wind down",
     val bedNotifText: String = "Bed by %1${'$'}s · alarm at %2${'$'}s",
     val goingToBed: String = "Going to bed",
+    val addBedtime: String = "+ Bedtime",
     val inBedAt: String = "In bed at %1${'$'}s",
     val inBedFor: String = "In bed at %1${'$'}s · %2${'$'}s",
     val inBedChart: String = "Hours in bed",

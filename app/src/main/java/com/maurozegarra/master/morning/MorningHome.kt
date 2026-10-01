@@ -303,8 +303,23 @@ private fun horas(min: Int): String = if (min % 60 == 0) "${min / 60} h" else "$
  */
 @Composable
 private fun EnCama(entry: MorningEntry?, zone: ZoneId, t: Strings, onBed: (java.time.LocalTime) -> Unit) {
-    val bed = entry?.bedAt ?: return
     val ctx = LocalContext.current
+    val bed = entry?.bedAt
+    if (bed == null) {
+        // Sin la hora de anoche, se puede poner a mano (30-sep): si no se vio la notificacion
+        // de las 21:00, no quedaba ningun otro sitio donde anotarla.
+        Text(
+            t.morning.addBedtime,
+            color = AppTheme.colors.accent,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.clickable {
+                android.app.TimePickerDialog(ctx, { _, hh, mm -> onBed(java.time.LocalTime.of(hh, mm)) }, 22, 0, true).show()
+            },
+        )
+        Spacer(Modifier.height(12.dp))
+        return
+    }
     val hora = Instant.ofEpochMilli(bed).atZone(zone).toLocalTime()
     val texto = hora.format(DateTimeFormatter.ofPattern("H:mm"))
     Text(

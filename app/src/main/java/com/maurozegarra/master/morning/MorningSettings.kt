@@ -223,6 +223,32 @@ fun MorningSettings(t: Strings, accent: Color) {
                 onSelect = { aplicarCama(cama.copy(leadMin = it)) },
             )
         }
+        // "Going to bed" aqui tambien, sin depender de la notificacion (30-sep): se le paso
+        // la de las 21:00 y la hora de acostarse quedo sin anotar. Aunque el aviso este
+        // apagado, anotar la hora sigue sirviendo.
+        Spacer(Modifier.height(12.dp))
+        val estaNoche = remember(cambios) {
+            val zona = java.time.ZoneId.systemDefault()
+            val dia = MorningLog.morningOf(System.currentTimeMillis(), zona).toString()
+            store.entries().firstOrNull { it.date == dia }?.bedAt
+        }
+        estaNoche?.let {
+            Text(
+                t.morning.inBedAt.format(java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalTime().format(hm)),
+                color = AppTheme.colors.textDim,
+                fontSize = 13.sp,
+            )
+            Spacer(Modifier.height(6.dp))
+        }
+        com.maurozegarra.master.ui.AppOutlineButton(
+            label = t.morning.goingToBed,
+            accent = accent,
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                MorningAlarm.toBed(ctx)
+                cambios++
+            },
+        )
     }
 
     if (!schedule.anyOn) return
