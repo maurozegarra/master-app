@@ -72,4 +72,15 @@ class ArchiveTest {
         assertEquals(listOf("On Your Marks", "LUMBAR (bad day)"), Archive.archived(movida, archivados).map { it.name })
         assertEquals(listOf("LUMBAR", "LUMBAR (short)"), Archive.visible(movida, archivados).map { it.name })
     }
+
+    @Test
+    fun `archivado con una fecha asignada pendiente, se ve hasta que pasa`() {
+        // TD-178: el dia malo archivado, asignado al miercoles 30.
+        val malo = Training(id = 9L, uid = "malo", name = "LUMBAR (bad day)", scheduleDates = setOf(java.time.LocalDate.of(2026, 9, 30)))
+        val archivados = setOf("malo")
+        assertFalse(Archive.isArchived(malo, archivados, java.time.LocalDate.of(2026, 9, 29)))
+        assertFalse(Archive.isArchived(malo, archivados, java.time.LocalDate.of(2026, 9, 30)))
+        // El jueves vuelve solo al archivo.
+        assertTrue(Archive.isArchived(malo, archivados, java.time.LocalDate.of(2026, 10, 1)))
+    }
 }

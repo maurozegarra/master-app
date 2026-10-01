@@ -27,7 +27,7 @@ object NextTraining {
         porSemana(trainings, sessions, today, zone) ?: porNumero(trainings, sessions)
 
     private fun porSemana(trainings: List<Training>, sessions: List<SessionLog>, today: LocalDate, zone: ZoneId): Long? {
-        val programados = trainings.filter { it.scheduleDays.isNotEmpty() }
+        val programados = trainings.filter { it.scheduleDays.isNotEmpty() || it.scheduleDates.isNotEmpty() }
         if (programados.isEmpty()) return null
         val ids = programados.map { it.id }.toSet()
         // Entrenado hoy = una sesion COMPLETA de uno de sus trainings programados. Una a
@@ -38,7 +38,11 @@ object NextTraining {
         }
         val desde = if (entrenoHoy) 1 else 0
         for (i in desde..desde + 6) {
-            val dia: DayOfWeek = today.plusDays(i.toLong()).dayOfWeek
+            val fecha = today.plusDays(i.toLong())
+            // Una fecha puntual manda sobre el dia de la semana (TD-178): es lo que el coach
+            // asigno para ESE dia.
+            programados.firstOrNull { fecha in it.scheduleDates }?.let { return it.id }
+            val dia: DayOfWeek = fecha.dayOfWeek
             programados.firstOrNull { dia in it.scheduleDays }?.let { return it.id }
         }
         return null

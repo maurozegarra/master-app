@@ -81,4 +81,23 @@ class NextTrainingTest {
         assertEquals(t.scheduleDays, vuelta.scheduleDays)
         assertEquals(3, vuelta.cycleDay)
     }
+
+    @Test
+    fun `una fecha asignada manda sobre el dia de la semana`() {
+        // TD-178: martes 29 por la noche, ya entrenado. El miercoles toca el corto por dia de
+        // la semana, pero el coach asigno el dia malo para esa fecha.
+        val martes = LocalDate.of(2026, 9, 29)
+        val malo = diaMalo.copy(scheduleDates = setOf(martes.plusDays(1)))
+        val hoy = listOf(sesion(2L, martes))
+        assertEquals(3L, NextTraining.of(listOf(corto, completo, malo), hoy, martes, lima))
+        // Hecho el dia malo el miercoles, el jueves vuelve el corto.
+        val miercoles = martes.plusDays(1)
+        assertEquals(1L, NextTraining.of(listOf(corto, completo, malo), hoy + sesion(3L, miercoles), miercoles, lima))
+    }
+
+    @Test
+    fun `las fechas sobreviven al guardado`() {
+        val malo = diaMalo.copy(scheduleDates = setOf(LocalDate.of(2026, 9, 30)))
+        assertEquals(malo.scheduleDates, TrainingJson.fromJson(TrainingJson.toJson(malo)).scheduleDates)
+    }
 }

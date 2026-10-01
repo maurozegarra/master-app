@@ -15,9 +15,17 @@ package com.maurozegarra.master.model
  */
 object Archive {
 
-    /** Un training sin uid nunca está archivado: no hay con qué recordarlo entre revisiones. */
-    fun isArchived(training: Training, archived: Set<String>): Boolean =
-        training.uid.isNotBlank() && training.uid in archived
+    /**
+     * Un training sin uid nunca está archivado: no hay con qué recordarlo entre revisiones.
+     *
+     * Tampoco uno con una fecha asignada que todavía no pasó (TD-178): lo que el coach
+     * asignó para un día tiene que estar en la lista ese día. El 29-sep el día malo quedó
+     * asignado al miércoles y no se veía, porque estaba archivado. Pasada la fecha vuelve
+     * solo al archivo: la marca nunca se tocó.
+     */
+    fun isArchived(training: Training, archived: Set<String>, today: java.time.LocalDate = java.time.LocalDate.now()): Boolean =
+        training.uid.isNotBlank() && training.uid in archived &&
+            training.scheduleDates.none { !it.isBefore(today) }
 
     fun visible(trainings: List<Training>, archived: Set<String>): List<Training> =
         trainings.filterNot { isArchived(it, archived) }

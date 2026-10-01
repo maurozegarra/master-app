@@ -31,6 +31,7 @@ object TrainingJson {
             .put("assigned", tr.assigned)
             .put("tracksPain", tr.tracksPain)
             .put("scheduleDays", JSONArray(tr.scheduleDays.sortedBy { it.value }.map { it.name }))
+            .put("scheduleDates", JSONArray(tr.scheduleDates.sorted().map { it.toString() }))
             .also { o -> tr.cycleDay?.let { o.put("cycleDay", it) } }
             .put("name", tr.name)
             .put("createdAt", tr.createdAt)
@@ -52,6 +53,9 @@ object TrainingJson {
             tracksPain = o.optBoolean("tracksPain", false),
             scheduleDays = o.optJSONArray("scheduleDays")?.let { a ->
                 (0 until a.length()).mapNotNull { runCatching { java.time.DayOfWeek.valueOf(a.getString(it)) }.getOrNull() }.toSet()
+            }.orEmpty(),
+            scheduleDates = o.optJSONArray("scheduleDates")?.let { a ->
+                (0 until a.length()).mapNotNull { runCatching { java.time.LocalDate.parse(a.getString(it)) }.getOrNull() }.toSet()
             }.orEmpty(),
             cycleDay = if (o.has("cycleDay")) o.optInt("cycleDay") else null,
             name = o.optString("name", ""),

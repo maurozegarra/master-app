@@ -353,8 +353,14 @@ object MasterDefaults {
      * [LUMBAR_INSTRUCTIONS_SUPERSEDED].
      *
      * Revision 19 (26-sep): el puente pasa a hip thrust en su banca. Ver [LumbarBlocks.hipGlute].
+     *
+     * Revision 20 (29-sep): el dia malo, asignado al miercoles 30 (TD-178). El 29 aparecio un
+     * pinchazo en la nalga izquierda: nada con carga de cadera hasta que se vaya.
+     *
+     * Revision 21 (30-sep): y el jueves 1 tambien. El pinchazo "esta ahi pero apenas", con un
+     * relajante muscular de por medio, que lo tapa: el carry del corto espera.
      */
-    const val LUMBAR_REVISION = 19
+    const val LUMBAR_REVISION = 21
 
     /**
      * De quien es la rutina lumbar.
@@ -449,6 +455,8 @@ object MasterDefaults {
         return Training(
             id = LUMBAR_BAD_DAY_ID,
             name = "LUMBAR (bad day)",
+            // Revision 20: el miercoles 30, por el pinchazo en la nalga (ver coach-log 29-sep).
+            scheduleDates = setOf(java.time.LocalDate.of(2026, 9, 30), java.time.LocalDate.of(2026, 10, 1)),
             tracksPain = true,
             workouts = listOf(
                 b.mobility(),

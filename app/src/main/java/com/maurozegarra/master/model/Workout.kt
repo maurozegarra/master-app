@@ -276,6 +276,12 @@ data class Training(
      */
     val scheduleDays: Set<java.time.DayOfWeek> = emptySet(),
     /**
+     * Fechas puntuales en que toca este, por encima de [scheduleDays] (TD-178): lo que el
+     * coach asigna para un día concreto. El 29-sep, con un pinchazo en la nalga, el miércoles
+     * tocaba el día malo y no el corto, y la lista seguía resaltando el corto.
+     */
+    val scheduleDates: Set<java.time.LocalDate> = emptySet(),
+    /**
      * El número de este día en un ciclo que se corre si se pierde uno, como los de NIKO: 1
      * a 6 (TD-167). Null = no va en ciclo. Ver [NextTraining].
      */
