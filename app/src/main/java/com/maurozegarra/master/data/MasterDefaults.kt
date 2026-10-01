@@ -643,8 +643,10 @@ object MasterDefaults {
      * Revision 16 (27-sep): NIKO 1, su segunda vez. La hiperextension baja a 3 x 10.
      *
      * Revision 17 (29-sep): NIKO 3 suma la dominada asistida con la banda de 3.2 cm.
+     *
+     * Revision 18 (30-sep): NIKO 4, su segunda vez, con lo que marco el 24 (ver niko.md).
      */
-    const val NIKO_REVISION = 17
+    const val NIKO_REVISION = 18
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -956,13 +958,17 @@ object MasterDefaults {
                     exercises = listOf(
                         b.ex(
                             "ex_step_up", "Cajón de 51 cm. Empuja con el talón de arriba, sin impulso", 10, rest = 60,
-                            weightType = WeightType.DUMBBELL, weights = listOf(5.0, 5.0, 7.5),
+                            // Revision 18: la de 7.5 fue PESADA en los dos lados el 24-sep.
+                            weightType = WeightType.DUMBBELL, weights = listOf(5.0, 5.0, 5.0),
                         ).copy(sides = lados),
                         b.ex("ex_single_leg_hip_thrust", "Una pierna arriba. La cadera no se inclina", 10, sets = 3, rest = 60)
                             .copy(sides = lados),
                         b.ex(
                             "ex_single_leg_deadlift", "Una mancuerna en la mano contraria. Cadera atrás", 8, rest = 60,
-                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 7.5, 7.5),
+                            // Revision 18: la izquierda, facil las tres; la derecha, bien, bien,
+                            // facil. Sube a 10 en rampa, para no pasar de largo por el lado que
+                            // todavia marca "bien".
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 10.0, 10.0),
                         ).copy(sides = lados),
                     ),
                 ),
@@ -970,12 +976,15 @@ object MasterDefaults {
                     id = b.id(),
                     name = "Cadena posterior",
                     exercises = listOf(
-                        b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 12, sets = 3, rest = 60),
+                        // Revision 18: 3 x 10. Las tres de 12 fueron "Hard" el 24-sep; en NIKO 1
+                        // ya salieron bien a 10.
+                        b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 10, sets = 3, rest = 60),
                         // La pantorrillera es de discos y va en kilos TOTALES: no hay lados que
                         // calcular, la maquina dice lo que lleva.
                         b.ex(
                             "ex_seated_calf", "Sube lento y baja más lento. Rango completo", 12, rest = 45,
-                            weightType = WeightType.TOTAL, weights = listOf(5.0, 7.5, 7.5, 10.0),
+                            // Revision 18: 7.5, 7.5 y 10 fueron pesadas el 24-sep.
+                            weightType = WeightType.TOTAL, weights = listOf(5.0, 5.0, 7.5, 7.5),
                         ),
                     ),
                 ),
