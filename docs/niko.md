@@ -278,6 +278,29 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
 
+### 2026-09-30 — NIKO 3 · Tren superior, con la dominada asistida
+
+**De 08:29 a 09:34, 65 minutos, completa.**
+
+| Ejercicio | Carga | Lo que marcó | Para la próxima NIKO 3 |
+|---|---|---|---|
+| Remo invertido, 4 × 8 | su peso | **bien las cuatro** (el 22 le costó) | igual |
+| Remo con mancuerna | 7.5 · 7.5 · 10 · 10 por lado | bien · bien · **pesado · pesado, los dos lados** | 7.5 · 7.5 · 7.5 · 10 |
+| **Dominada asistida, banda 3.2 cm** | 3 × 5 | **bien las tres** | 3 × 6 |
+| **Flexiones, 3 × 15** | su peso | **dura las tres** | 3 × 12 |
+| Press de hombro | 4 · 5 · 5 por mano | bien | igual |
+| Paseo del granjero | 12.5 por mano | bien | igual |
+| Colgarse, 3 × 25 s | — | bien | igual |
+| Cuello | 4 × 20 s | bien | — |
+
+- **El remo invertido ya le sale**: de costarle el 22-sep a "bien" las cuatro.
+- **La dominada asistida entró bien** a la primera.
+- **Las flexiones le cuestan**, las tres series: bajan a 12.
+- **El remo con mancuerna a 10 pesa ya en los dos lados**, no solo en el izquierdo.
+- Sigue **NIKO 4** el jueves 1, con lo de *Para la próxima NIKO 4* (revisión 18): subida al
+  cajón 5 · 5 · 5, peso muerto a una pierna 7.5 · 10 · 10, hiperextensión 3 × 10, pantorrilla
+  5 · 5 · 7.5 · 7.5.
+
 ### 2026-09-29 — NIKO 2 · Muay Thai, la segunda vuelta
 
 **De 07:45 a 08:43, 58 minutos, completa.**

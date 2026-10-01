@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-178",
+      "title": "El coach asigna un training para una fecha, y la lista lo resalta",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PEDIDO por el usuario el 29-sep: \"en la lista sigue resaltado LUMBAR (short) pese a que mañana deberia ser LUMBAR (bad day), puedes hacer que se resalte el training que ya me asignaste?\".\n\nHECHO el mismo dia: Training.scheduleDates, fechas puntuales que mandan sobre scheduleDays en NextTraining. Se ponen desde el codigo, con la revision del lumbar (20: el dia malo el miercoles 30, por el pinchazo en la nalga). Se guardan en el JSON del training. Tests en NextTrainingTest."
+    },
+    {
       "id": "TD-177",
       "title": "El boton primario del app, con las seis decisiones de \"Make any button look expensive\"",
       "category": "UI",
@@ -111,7 +118,7 @@
       "title": "Alarma: aviso para ir a dormir, calculado desde la hora de la alarma",
       "category": "Feature",
       "status": "pending",
-      "manual": "PROPUESTO el 24-sep, registrado el 25. Un aviso a la noche -por ejemplo 7 h 30 antes de la alarma del dia siguiente- y, con la hora en que se apaga, cuanto se durmio. Da contexto a la serie del dolor: una manana mala tras cinco horas de sueno no dice lo mismo que tras ocho.\n\nHECHO el 28-sep. El usuario decidio: 7 h 30 de sueño, aviso 30 min antes, y con \"Going to bed\". El aviso sale de las mismas alarmas y se reprograma con ellas; si el de la proxima ya paso, apunta a la siguiente (no avisa a destiempo). Es una notificacion normal (setExactAndAllowWhileIdle), no un despertador. \"Going to bed\" anota la hora en la mañana que le toca (de mediodia en adelante, la siguiente) y la alarma la conserva al contestar; Morning enseña \"In bed at 21:40 · 7 h 20\", se corrige tocandola, y un tercer grafico \"Hours in bed\". Es tiempo en cama, no sueño medido. Configuracion en Morning con SwitchRow y SegmentedRow, los de Settings. Tests en MorningTest.\n\nAJUSTES del 28-sep, revisando la captura: la tarjeta pasa a SectionCard (es un bloque de ajustes, no un elemento de lista), sin el espacio de mas encima, y las horas de sueño dicen \"7 h 30\" y no \"7:30\", que se leia como reloj. Y, pedido por el usuario -\"eso si extraño de mi vieja alarma\"-, cuanto falta para la proxima: en la linea \"Next: Tuesday 7:00 · in 8 h 27 min\", al minuto, y un aviso \"Alarm in ...\" al poner o cambiar una alarma (Countdown, con test)."
+      "manual": "PROPUESTO el 24-sep, registrado el 25. Un aviso a la noche -por ejemplo 7 h 30 antes de la alarma del dia siguiente- y, con la hora en que se apaga, cuanto se durmio. Da contexto a la serie del dolor: una manana mala tras cinco horas de sueno no dice lo mismo que tras ocho.\n\nHECHO el 28-sep. El usuario decidio: 7 h 30 de sueño, aviso 30 min antes, y con \"Going to bed\". El aviso sale de las mismas alarmas y se reprograma con ellas; si el de la proxima ya paso, apunta a la siguiente (no avisa a destiempo). Es una notificacion normal (setExactAndAllowWhileIdle), no un despertador. \"Going to bed\" anota la hora en la mañana que le toca (de mediodia en adelante, la siguiente) y la alarma la conserva al contestar; Morning enseña \"In bed at 21:40 · 7 h 20\", se corrige tocandola, y un tercer grafico \"Hours in bed\". Es tiempo en cama, no sueño medido. Configuracion en Morning con SwitchRow y SegmentedRow, los de Settings. Tests en MorningTest.\n\nAJUSTES del 28-sep, revisando la captura: la tarjeta pasa a SectionCard (es un bloque de ajustes, no un elemento de lista), sin el espacio de mas encima, y las horas de sueño dicen \"7 h 30\" y no \"7:30\", que se leia como reloj. Y, pedido por el usuario -\"eso si extraño de mi vieja alarma\"-, cuanto falta para la proxima: en la linea \"Next: Tuesday 7:00 · in 8 h 27 min\", al minuto, y un aviso \"Alarm in ...\" al poner o cambiar una alarma (Countdown, con test).\n\nAJUSTE del 30-sep: \"si pierdo la notificacion ya no tengo donde registrar la hora que me acoste\" (se acosto a las 22:00 y no quedo). Dos entradas mas: \"+ Bedtime\" en Today cuando falta la de anoche (con el reloj), y \"Going to bed\" en el bloque del aviso, que funciona aunque el aviso este apagado."
     },
     {
       "id": "TD-161",

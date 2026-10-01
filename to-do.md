@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **146 / 177** hechos, 31 pendientes.
+Progreso: **146 / 178** hechos, 32 pendientes.
 
 ## Pendientes
 
@@ -42,6 +42,10 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
+- [ ] **TD-178** El coach asigna un training para una fecha, y la lista lo resalta
+  - PEDIDO por el usuario el 29-sep: "en la lista sigue resaltado LUMBAR (short) pese a que mañana deberia ser LUMBAR (bad day), puedes hacer que se resalte el training que ya me asignaste?".
+
+HECHO el mismo dia: Training.scheduleDates, fechas puntuales que mandan sobre scheduleDays en NextTraining. Se ponen desde el codigo, con la revision del lumbar (20: el dia malo el miercoles 30, por el pinchazo en la nalga). Se guardan en el JSON del training. Tests en NextTrainingTest.
 - [ ] **TD-174** Probar un training sin que quede registrado: modo prueba en el player
   - PEDIDO por el usuario el 26-sep: "cuando quiero revisar el comportamiento de un training, al final tengo que eliminarlo y en ocasiones son varios cambios por evaluar y termino con varios registros que no son trainings realmente".
 
@@ -70,6 +74,8 @@ A DECIDIR: la lista de etiquetas -la propone el coach, la ajusta el usuario-; si
 HECHO el 28-sep. El usuario decidio: 7 h 30 de sueño, aviso 30 min antes, y con "Going to bed". El aviso sale de las mismas alarmas y se reprograma con ellas; si el de la proxima ya paso, apunta a la siguiente (no avisa a destiempo). Es una notificacion normal (setExactAndAllowWhileIdle), no un despertador. "Going to bed" anota la hora en la mañana que le toca (de mediodia en adelante, la siguiente) y la alarma la conserva al contestar; Morning enseña "In bed at 21:40 · 7 h 20", se corrige tocandola, y un tercer grafico "Hours in bed". Es tiempo en cama, no sueño medido. Configuracion en Morning con SwitchRow y SegmentedRow, los de Settings. Tests en MorningTest.
 
 AJUSTES del 28-sep, revisando la captura: la tarjeta pasa a SectionCard (es un bloque de ajustes, no un elemento de lista), sin el espacio de mas encima, y las horas de sueño dicen "7 h 30" y no "7:30", que se leia como reloj. Y, pedido por el usuario -"eso si extraño de mi vieja alarma"-, cuanto falta para la proxima: en la linea "Next: Tuesday 7:00 · in 8 h 27 min", al minuto, y un aviso "Alarm in ..." al poner o cambiar una alarma (Countdown, con test).
+
+AJUSTE del 30-sep: "si pierdo la notificacion ya no tengo donde registrar la hora que me acoste" (se acosto a las 22:00 y no quedo). Dos entradas mas: "+ Bedtime" en Today cuando falta la de anoche (con el reloj), y "Going to bed" en el bloque del aviso, que funciona aunque el aviso este apagado.
 - [ ] **TD-161** Alarma: sonido que sube de a poco
   - PROPUESTO el 24-sep, registrado el 25. Que el volumen empiece bajo y llegue al maximo en unos 30 s, en vez de arrancar al maximo. Es un despertador para alguien con dolor lumbar: un sobresalto al despertar no ayuda.
 - [ ] **TD-162** Alarma: control rapido en el panel de Android

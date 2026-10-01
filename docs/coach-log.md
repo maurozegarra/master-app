@@ -5,6 +5,21 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-09-30 — decimoséptima sesión: el día malo, asignado
+
+**LUMBAR (bad day)**, de 05:22 a 05:54, **32 minutos**, completo -asignado para hoy desde el
+código (TD-178) por el pinchazo en la nalga-. Alarma de las 5:00: **dolor 2, aflojó en 16
+minutos**. Abrió "Back crisis today": **antes 3, después 2, no irradia**.
+
+- **Se acostó a las 22:00 y no quedó registrado**: no vio la notificación de las 21:00, y fuera
+  de ella no había dónde anotarlo. Es un hueco del aviso de dormir (TD-160).
+- Corrigió la mañana del 29 a **3** y 60 minutos: la serie ya dice lo que pasó.
+- **El pinchazo:** tomó un relajante muscular a las 9:00 y no volvió a molestar, *"siento que
+  está ahí pero apenas"*. El relajante lo tapa, así que no cuenta como mañana limpia: **el
+  jueves 1 también es día malo** (revisión 21). El viernes se decide sin relajante.
+
+---
+
 ## 2026-09-29 — decimosexta sesión: el primer hip thrust, y la mañana más lenta de la serie
 
 **LUMBAR** completo, de 07:29 a 08:52, **83 minutos**. Primera noche con el aviso de dormir
