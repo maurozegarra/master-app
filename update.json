@@ -1,7 +1,7 @@
 {
-  "versionCode": 348,
-  "minVersionCode": 1,
-  "changelog": "release: aviso para dormir, minutos corregibles, alarmas en tarjetas, dominada asistida",
-  "versionName": "1.0.348",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.348/master-1.0.348.apk"
+  "changelog": "release: boton Start, NEXT con duracion y velocidad, historial en tramos con descansos, reloj de 12 horas y + en Morning",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.360/master-1.0.360.apk",
+  "versionCode": 360,
+  "versionName": "1.0.360",
+  "minVersionCode": 1
 }
