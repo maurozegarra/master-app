@@ -320,8 +320,18 @@ private fun horas(min: Int): String = if (min % 60 == 0) "${min / 60} h" else "$
  */
 @Composable
 private fun EnCama(entry: MorningEntry?, zone: ZoneId, t: Strings, onBed: (java.time.LocalTime) -> Unit) {
-    val ctx = LocalContext.current
     val bed = entry?.bedAt
+    // El reloj de todo el app (TD-183), abierto en la hora que habia o en las 22:00.
+    var eligiendo by remember { mutableStateOf<java.time.LocalTime?>(null) }
+    eligiendo?.let { inicial ->
+        com.maurozegarra.master.ui.master.ClockTimeDialog(
+            initial = inicial,
+            accent = AppTheme.colors.accent,
+            t = t,
+            onDismiss = { eligiendo = null },
+            onConfirm = { h -> eligiendo = null; onBed(h) },
+        )
+    }
     if (bed == null) {
         // Sin la hora de anoche, se puede poner a mano (30-sep): si no se vio la notificacion
         // de las 21:00, no quedaba ningun otro sitio donde anotarla.
@@ -331,7 +341,7 @@ private fun EnCama(entry: MorningEntry?, zone: ZoneId, t: Strings, onBed: (java.
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable {
-                android.app.TimePickerDialog(ctx, { _, hh, mm -> onBed(java.time.LocalTime.of(hh, mm)) }, 22, 0, true).show()
+                eligiendo = java.time.LocalTime.of(22, 0)
             },
         )
         Spacer(Modifier.height(12.dp))
@@ -344,7 +354,7 @@ private fun EnCama(entry: MorningEntry?, zone: ZoneId, t: Strings, onBed: (java.
         color = AppTheme.colors.textPrimary,
         fontSize = 15.sp,
         modifier = Modifier.clickable {
-            android.app.TimePickerDialog(ctx, { _, hh, mm -> onBed(java.time.LocalTime.of(hh, mm)) }, hora.hour, hora.minute, true).show()
+            eligiendo = hora
         },
     )
     Spacer(Modifier.height(12.dp))

@@ -1,7 +1,6 @@
 package com.maurozegarra.master.morning
 
 import android.Manifest
-import android.app.TimePickerDialog
 import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -96,8 +95,20 @@ fun MorningSettings(t: Strings, accent: Color, addRequests: Int = 0) {
         cambios++
     }
 
+    // La hora que se esta eligiendo y que hacer con ella: el reloj es un dialogo de Compose
+    // (TD-183), que se pinta mientras esto no sea null.
+    var pidiendo by remember { mutableStateOf<Pair<LocalTime, (LocalTime) -> Unit>?>(null) }
     fun elegirHora(inicial: LocalTime, listo: (LocalTime) -> Unit) {
-        TimePickerDialog(ctx, { _, hh, mm -> listo(LocalTime.of(hh, mm)) }, inicial.hour, inicial.minute, true).show()
+        pidiendo = inicial to listo
+    }
+    pidiendo?.let { (inicial, listo) ->
+        com.maurozegarra.master.ui.master.ClockTimeDialog(
+            initial = inicial,
+            accent = accent,
+            t = t,
+            onDismiss = { pidiendo = null },
+            onConfirm = { h -> pidiendo = null; listo(h) },
+        )
     }
 
     // La próxima, tal como quedó programada -con el día saltado-. `cambios` la recalcula.

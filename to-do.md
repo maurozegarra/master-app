@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **148 / 181** hechos, 33 pendientes.
+Progreso: **148 / 183** hechos, 35 pendientes.
 
 ## Pendientes
 
@@ -206,6 +206,14 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 
 ### UI
 
+- [ ] **TD-183** El reloj para elegir una hora, en 12 horas y con los colores del app
+  - PEDIDO por el usuario el 1-oct, con la captura del reloj de otra app: "el reloj para seleccionar la hora, cambialo, no me gusta el formato 24 horas".
+
+HECHO el mismo dia: ClockTimeDialog en MasterComponents, un reloj de 12 horas con AM/PM y los colores de la paleta, HECHO A MANO con Canvas y gestos. El primer intento fue el TimePicker de material3 y tumbaba el app al abrirse (NoSuchMethodError, maybeCachedBoxMeasurePolicy): foundation clavada en 1.6.8 por el force de TD-030 contra Compose 1.10, lo mismo que PullToRefreshContainer en TD-068. No se toco el force: quitarlo trae de vuelta el crash de IndicationNodeFactory. Reemplaza al TimePickerDialog de Android en las alarmas y en la hora de acostarse. Las horas que se MUESTRAN (5:00, Bed by 23:30) siguen en 24 h: no lo pidio.
+- [ ] **TD-182** Morning: agregar una alarma con un + en la barra, no con un boton a todo lo ancho
+  - PEDIDO por el usuario el 1-oct: "en la pantalla Morning, 'Add alarm' ocupa demasiado, y si en el swipe le agregamos duplicar? o se te ocurre algo mejor?".
+
+HECHO el mismo dia con el OK del usuario: el boton a todo lo ancho sale; agregar pasa a un + en la barra de arriba, a la derecha de "Morning" (SettingsScaffold gana un hueco de acciones). Duplicar no: lo que define una alarma es la hora y duplicar obliga igual a cambiarla; solo ahorraria marcar los dias. En su lugar, la nueva nace con los dias que ninguna alarma cubre; si todas cubren todo, de lunes a viernes como hoy. Los dias libres se cuentan sobre las alarmas ENCENDIDAS: una apagada no despierta a nadie. MorningSchedule.newAlarmDays, test en MorningTest.
 - [ ] **TD-181** El detalle del historial dice al menos lo que dice la previa: series iguales en una fila, y los descansos
   - PEDIDO por el usuario el 1-oct, con captura: la previa dice "Curl-up 12 x 10 s · rest 3 s-30 s" y el historial lista doce filas de "10 s" que no dicen nada: "el preview tiene mas detalle que la pantalla del detalle".
 

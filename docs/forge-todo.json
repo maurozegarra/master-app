@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-183",
+      "title": "El reloj para elegir una hora, en 12 horas y con los colores del app",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO por el usuario el 1-oct, con la captura del reloj de otra app: \"el reloj para seleccionar la hora, cambialo, no me gusta el formato 24 horas\".\n\nHECHO el mismo dia: ClockTimeDialog en MasterComponents, un reloj de 12 horas con AM/PM y los colores de la paleta, HECHO A MANO con Canvas y gestos. El primer intento fue el TimePicker de material3 y tumbaba el app al abrirse (NoSuchMethodError, maybeCachedBoxMeasurePolicy): foundation clavada en 1.6.8 por el force de TD-030 contra Compose 1.10, lo mismo que PullToRefreshContainer en TD-068. No se toco el force: quitarlo trae de vuelta el crash de IndicationNodeFactory. Reemplaza al TimePickerDialog de Android en las alarmas y en la hora de acostarse. Las horas que se MUESTRAN (5:00, Bed by 23:30) siguen en 24 h, DECISION SUYA el mismo dia: \"solo no me gusta en el picker, como dato para visualizar me parece mas compacto 5:00 vs 5:00 am\". VALIDADO por el usuario el 1-oct en el telefono (v1.0.360)."
+    },
+    {
       "id": "TD-182",
       "title": "Morning: agregar una alarma con un + en la barra, no con un boton a todo lo ancho",
       "category": "UI",

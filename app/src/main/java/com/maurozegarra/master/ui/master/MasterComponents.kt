@@ -2,6 +2,11 @@ package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -279,6 +284,163 @@ private fun DurationWheelDialog(
             TextButton(onClick = onDismiss) { Text(t.cancel, color = AppTheme.colors.textDim) }
         },
     )
+}
+
+/**
+ * Elegir una hora del dia con un reloj de 12 horas y AM/PM (TD-183): la hora y los minutos
+ * arriba, y el dial para marcarlos.
+ *
+ * Era el TimePickerDialog de Android en 24 horas, con los colores del sistema. El usuario lo
+ * pidio el 1-oct con la captura de otra app: *"no me gusta el formato 24 horas"*.
+ *
+ * **Hecho a mano y no con el TimePicker de material3**, que fue lo primero y tumbaba el app al
+ * abrirse (NoSuchMethodError sobre maybeCachedBoxMeasurePolicy). Es lo mismo que paso con
+ * PullToRefreshContainer en TD-068: foundation esta clavada en 1.6.8 por el
+ * resolutionStrategy.force de TD-030 y el resto de Compose va en 1.10; un componente de
+ * material3 que no se ha usado nunca hay que probarlo en el telefono antes de darlo por
+ * bueno. Este usa solo Canvas, gestos y Text, que el app ya usa.
+ */
+@Composable
+internal fun ClockTimeDialog(
+    initial: java.time.LocalTime,
+    accent: Color,
+    t: Strings,
+    onDismiss: () -> Unit,
+    onConfirm: (java.time.LocalTime) -> Unit,
+) {
+    val c = AppTheme.colors
+    var hora by remember { mutableStateOf(initial.hour) }
+    var minuto by remember { mutableStateOf(initial.minute) }
+    // Primero la hora; al soltar el dial pasa solo a los minutos, como en el reloj de Android.
+    var enMinutos by remember { mutableStateOf(false) }
+    val pm = hora >= 12
+    val hora12 = (hora % 12).let { if (it == 0) 12 else it }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        // Mas ancho que el dialogo por defecto: el dial y la cabecera no caben en 280 dp.
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.padding(horizontal = 24.dp),
+        containerColor = c.surface,
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ClockField("%02d".format(hora12), !enMinutos, accent) { enMinutos = false }
+                    Text(":", color = c.textPrimary, fontSize = 44.sp, modifier = Modifier.padding(horizontal = 6.dp))
+                    ClockField("%02d".format(minuto), enMinutos, accent) { enMinutos = true }
+                    Spacer(Modifier.width(12.dp))
+                    Column(
+                        Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(1.dp, c.textFaded, RoundedCornerShape(10.dp)),
+                    ) {
+                        ClockPeriod("AM", !pm, accent) { if (pm) hora -= 12 }
+                        ClockPeriod("PM", pm, accent) { if (!pm) hora += 12 }
+                    }
+                }
+                Spacer(Modifier.height(24.dp))
+                ClockDial(
+                    value = if (enMinutos) minuto else hora12,
+                    minutes = enMinutos,
+                    accent = accent,
+                    onChange = { v -> if (enMinutos) minuto = v else hora = (v % 12) + if (pm) 12 else 0 },
+                    onRelease = { if (!enMinutos) enMinutos = true },
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(java.time.LocalTime.of(hora, minuto)) }) {
+                Text(t.save, color = accent, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(t.cancel, color = c.textDim) }
+        },
+    )
+}
+
+/** La hora o los minutos de la cabecera del reloj; tocarlo lo pone en el dial. */
+@Composable
+private fun ClockField(text: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
+    val c = AppTheme.colors
+    Box(
+        Modifier
+            .size(width = 88.dp, height = 72.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (selected) accent else c.track)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, color = if (selected) c.onAccent else c.textPrimary, fontSize = 44.sp)
+    }
+}
+
+@Composable
+private fun ClockPeriod(text: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
+    val c = AppTheme.colors
+    Box(
+        Modifier
+            .size(width = 52.dp, height = 36.dp)
+            .background(if (selected) accent else c.track)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, color = if (selected) c.onAccent else c.textDim, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+/**
+ * El dial: doce marcas -las horas, o los minutos de 5 en 5- y la aguja hasta lo elegido.
+ * Se toca o se arrastra; los minutos van de uno en uno aunque solo se rotulen de 5 en 5.
+ */
+@Composable
+private fun ClockDial(value: Int, minutes: Boolean, accent: Color, onChange: (Int) -> Unit, onRelease: () -> Unit) {
+    val c = AppTheme.colors
+    // Lo que marca un punto del dial: el angulo desde las 12, en el sentido del reloj.
+    fun valueAt(p: androidx.compose.ui.geometry.Offset, lado: Float): Int {
+        var grados = Math.toDegrees(kotlin.math.atan2((p.x - lado / 2).toDouble(), (lado / 2 - p.y).toDouble()))
+        if (grados < 0) grados += 360.0
+        return if (minutes) Math.round(grados / 6).toInt() % 60
+        else Math.round(grados / 30).toInt().let { if (it % 12 == 0) 12 else it % 12 }
+    }
+    Box(
+        Modifier
+            .size(256.dp)
+            .clip(CircleShape)
+            .background(c.track)
+            .pointerInput(minutes) {
+                detectTapGestures { onChange(valueAt(it, size.width.toFloat())); onRelease() }
+            }
+            .pointerInput(minutes) {
+                detectDragGestures(
+                    onDragStart = { onChange(valueAt(it, size.width.toFloat())) },
+                    onDragEnd = onRelease,
+                ) { cambio, _ -> onChange(valueAt(cambio.position, size.width.toFloat())) }
+            },
+    ) {
+        androidx.compose.foundation.Canvas(Modifier.fillMaxSize()) {
+            val r = 100.dp.toPx()
+            val a = Math.toRadians(value * if (minutes) 6.0 else 30.0)
+            val punta = androidx.compose.ui.geometry.Offset(
+                center.x + (r * kotlin.math.sin(a)).toFloat(),
+                center.y - (r * kotlin.math.cos(a)).toFloat(),
+            )
+            drawLine(accent, center, punta, strokeWidth = 2.dp.toPx())
+            drawCircle(accent, radius = 4.dp.toPx(), center = center)
+            drawCircle(accent, radius = 22.dp.toPx(), center = punta)
+        }
+        val marcas = if (minutes) (0 until 12).map { it * 5 } else listOf(12) + (1..11)
+        marcas.forEachIndexed { i, n ->
+            val a = Math.toRadians(i * 30.0)
+            Text(
+                n.toString(),
+                color = if (n == value) c.onAccent else c.textPrimary,
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(x = (100 * kotlin.math.sin(a)).dp, y = (-100 * kotlin.math.cos(a)).dp),
+            )
+        }
+    }
 }
 
 /** Conjunto de chips tipo segmented control. */
