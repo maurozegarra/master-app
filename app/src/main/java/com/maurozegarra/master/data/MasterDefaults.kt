@@ -360,10 +360,14 @@ object MasterDefaults {
      * Revision 21 (30-sep): y el jueves 1 tambien. El pinchazo "esta ahi pero apenas", con un
      * relajante muscular de por medio, que lo tapa: el carry del corto espera.
      *
+     * Revision 23 (1-oct): la caminata lateral con banda abre el bloque de cadera NORMAL, como
+     * activacion. No entra mientras siga aliviado ([LUMBAR_HIP_EASED]): la abduccion carga la
+     * misma zona del pinchazo, y el dia del puente sin peso es una prueba.
+     *
      * Revision 22 (1-oct): el jueves, sin pinchazo en todo el dia y sin relajante. El viernes
      * vuelve el completo con el bloque de cadera ALIVIADO ([LUMBAR_HIP_EASED]).
      */
-    const val LUMBAR_REVISION = 22
+    const val LUMBAR_REVISION = 23
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -664,8 +668,11 @@ object MasterDefaults {
      * Revision 18 (30-sep): NIKO 4, su segunda vez, con lo que marco el 24 (ver niko.md).
      *
      * Revision 19 (1-oct): NIKO 5, la cuerda con 90 s de descanso entre rounds.
+     *
+     * Revision 20 (1-oct): NIKO 1 y NIKO 4 con las bandas de tela: puente con banda y
+     * caminata lateral en vez de la abduccion con tobillera.
      */
-    const val NIKO_REVISION = 19
+    const val NIKO_REVISION = 20
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -729,8 +736,12 @@ object MasterDefaults {
                     id = b.id(),
                     name = "Despertar glúteos",
                     exercises = listOf(
-                        b.ex("ex_glute_bridge", "Aprieta 2 s arriba. En el glúteo, no en los muslos", 15, sets = 2, rest = 30),
-                        b.ex("ex_hip_abduction", "De lado, tobillera de 1 kg. Lento", 20, sets = 2, rest = 30),
+                        // Revision 20 (1-oct): con las bandas de tela. El puente lleva la media sobre
+                        // las rodillas -lo marco facil-, y la abduccion de lado con tobillera pasa a
+                        // caminata lateral con banda, que trabaja lo mismo de pie.
+                        b.ex("ex_glute_bridge", "Banda MEDIA sobre las rodillas, sin dejar que se junten. Aprieta 2 s arriba", 15, sets = 2, rest = 30),
+                        b.ex("ex_lateral_band_walk", "Banda MEDIA sobre las rodillas. 10 pasos a cada lado", 10, sets = 2, rest = 30)
+                            .copy(sides = listOf("Izquierda", "Derecha"), alternateSides = true),
                     ),
                 ),
                 Workout(
@@ -967,8 +978,12 @@ object MasterDefaults {
                     id = b.id(),
                     name = "Despertar glúteos",
                     exercises = listOf(
-                        b.ex("ex_glute_bridge", "Aprieta 2 s arriba. En el glúteo, no en los muslos", 15, sets = 2, rest = 30),
-                        b.ex("ex_hip_abduction", "De lado, tobillera de 1 kg. Lento", 20, sets = 2, rest = 30),
+                        // Revision 20 (1-oct): con las bandas de tela. El puente lleva la media sobre
+                        // las rodillas -lo marco facil-, y la abduccion de lado con tobillera pasa a
+                        // caminata lateral con banda, que trabaja lo mismo de pie.
+                        b.ex("ex_glute_bridge", "Banda MEDIA sobre las rodillas, sin dejar que se junten. Aprieta 2 s arriba", 15, sets = 2, rest = 30),
+                        b.ex("ex_lateral_band_walk", "Banda MEDIA sobre las rodillas. 10 pasos a cada lado", 10, sets = 2, rest = 30)
+                            .copy(sides = listOf("Izquierda", "Derecha"), alternateSides = true),
                     ),
                 ),
                 Workout(
@@ -1225,7 +1240,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 12
+    const val CATALOG_INSTRUCTIONS_REVISION = 13
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -1569,6 +1584,17 @@ object MasterDefaults {
                 "Sube llevando el pecho a la barra hasta que el mentón la pase. Hombros lejos de las orejas.",
                 "Baja lento, en unos 3 segundos, hasta estirar los brazos del todo.",
                 "Para salir, apoya los pies en el cajón y saca la rodilla de la banda. Si las 5 salen fáciles, la próxima con la banda delgada.",
+            ),
+        ),
+        // Revision 13 (1-oct): la caminata lateral, con las bandas de tela.
+        "ex_lateral_band_walk" to ExerciseMedia(
+            listOf(
+                "Ponte la banda de tela justo encima de las rodillas.",
+                "Pies separados al ancho de la cadera, rodillas un poco dobladas y la cadera un poco atrás, como si fueras a sentarte. El pecho arriba.",
+                "Da un paso de lado, corto, empujando la rodilla hacia afuera contra la banda. El otro pie lo sigue, pero sin juntar los pies: la banda siempre tensa.",
+                "Las rodillas no se meten hacia adentro y las puntas de los pies miran al frente.",
+                "No subas ni bajes al caminar: la misma altura todo el tiempo.",
+                "Tiene que arder el costado de la nalga. Si sale fácil, la banda fuerte; si se te juntan las rodillas, la ligera.",
             ),
         ),
     )
@@ -1934,7 +1960,12 @@ object MasterDefaults {
         fun hipGlute(eased: Boolean = false): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
-            exercises = listOf(
+            exercises = listOfNotNull(
+                // Revision 23: activacion con la banda de tela LIGERA, antes de cargar. Solo en
+                // el bloque normal: aliviado, la abduccion cargaria la zona del pinchazo.
+                if (eased) null
+                else reps("ex_lateral_band_walk", 10, "Light band above the knees. 10 steps each way", sets = 2, rest = 30, prep = 10)
+                    .copy(sides = listOf("Left", "Right"), alternateSides = true),
                 // La barra del puente pesa 6 kg, no los 20 que trae el app por defecto. Ese
                 // 20 no solo ensuciaba el registro: el 15-sep el player le enseno "40 kg"
                 // cuando iban a ser 26, le parecio mucho y bajo la carga. Un numero mal
@@ -2063,6 +2094,17 @@ object MasterDefaults {
                 "Lower under control. To finish, let the bar rest back on the supports.",
             ),
         ),
+        // Revision 23: la activacion del bloque de cadera, con la banda de tela ligera.
+        "ex_lateral_band_walk" to ExerciseMedia(
+            listOf(
+                "Light fabric band just above the knees.",
+                "Feet hip width, knees slightly bent, hips back a little. Chest up.",
+                "Short step to the side, pushing the knee out against the band. The other foot follows, but the feet never meet: the band stays tight.",
+                "Knees don't cave in, toes point forward.",
+                "Same height the whole time: no bobbing up and down.",
+                "If you feel it in the lower back or the left buttock jab comes back, stop.",
+            ),
+        ),
         "ex_suitcase_carry" to ExerciseMedia(
             listOf(
                 "Dumbbell or anything with a handle, on one side only.",
@@ -2093,6 +2135,7 @@ object MasterDefaults {
         // Revision 19: en su telefono el hip thrust tenia las del catalogo, en espanol y
         // escritas para NIKO, porque lo hizo en el training MASTER.
         "ex_hip_thrust" to listOf(catalogInstructions().getValue("ex_hip_thrust")),
+        "ex_lateral_band_walk" to listOf(catalogInstructions().getValue("ex_lateral_band_walk")),
         "ex_glute_bridge" to listOf(
             ExerciseMedia(
                 listOf(

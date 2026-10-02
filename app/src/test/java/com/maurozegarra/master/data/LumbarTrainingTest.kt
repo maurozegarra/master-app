@@ -139,6 +139,23 @@ class LumbarTrainingTest {
     }
 
     @Test
+    fun `la caminata lateral activa el bloque normal, y aliviado no esta`() {
+        // Revision 23: con las bandas de tela. Aliviado no entra: la abduccion carga la zona
+        // del pinchazo del 29-sep.
+        val banda = cadera(normal).getValue("ex_lateral_band_walk")
+        assertEquals(listOf("Left", "Right"), banda.sides)
+        assertTrue(banda.alternateSides)
+        assertEquals("ex_lateral_band_walk", normal.workouts.first { it.name == "Hip & Glute" }.exercises.first().exerciseId)
+        assertFalse(cadera(training).containsKey("ex_lateral_band_walk"))
+        // Sus instrucciones en ingles le llegan aunque el catalogo ya haya sembrado las de NIKO.
+        val catalogo = MasterDefaults.catalogInstructions().getValue("ex_lateral_band_walk")
+        assertEquals(
+            MasterDefaults.lumbarInstructions()["ex_lateral_band_walk"],
+            MasterDefaults.mergeLumbarInstructions(mapOf("ex_lateral_band_walk" to catalogo))["ex_lateral_band_walk"],
+        )
+    }
+
+    @Test
     fun `aliviado, el puente va sin peso y lo demas en lo mas bajo de su rampa`() {
         // Revision 22 (1-oct), por el pinchazo en la nalga del 29-sep: el hip thrust era lo
         // unico nuevo ese dia. El puente sin barra prueba el mismo patron sin carga.

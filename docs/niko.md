@@ -183,7 +183,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 **NIKO 1 · Gluteo pesado**
 | Ejercicio | Series | Carga |
 |---|---|---|
-| Puente de activacion · abduccion | 2×15 · 2×20 | tobillera 1 kg |
+| Puente de activacion · caminata lateral (desde el 1-oct, revision 20) | 2×15 · 2×10 por lado | banda de tela media sobre las rodillas |
 | Hip thrust, pausa 2 s | 4×8 | 46 · 56 · 66 · 71 (barra de 6) |
 | Peso muerto rumano | 4×10 | 26 · 31 · 36 · 36 (barra de 6) |
 | Bulgara, pecho adelante | 3×10 por pierna | 2 × 5 · 7.5 · 10 |
@@ -214,7 +214,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 **NIKO 4 · Gluteo a una pierna**
 | Ejercicio | Series | Carga |
 |---|---|---|
-| Puente de activacion · abduccion | 2×15 · 2×20 | tobillera 1 kg |
+| Puente de activacion · caminata lateral (desde el 1-oct, revision 20) | 2×15 · 2×10 por lado | banda de tela media sobre las rodillas |
 | Subida al cajon de 51 cm | 3 × 10 por pierna | 2 × 5 · 5 · 7.5 |
 | Hip thrust a una pierna | 3 × 10 por pierna | su peso |
 | Peso muerto a una pierna | 3 × 8 por pierna | 1 × 7.5 |

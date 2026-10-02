@@ -68,6 +68,8 @@ object ExerciseCatalog {
         Triple("ex_dead_hang", "Colgarse de la barra", "Dead Hang"),
         // Con la banda gruesa, comprada el 26-sep para esto (NIKO 3, revision 17).
         Triple("ex_band_pull_up", "Dominada asistida con banda", "Band-Assisted Pull-up"),
+        // Con las bandas de tela, en casa desde el 27-sep (NIKO revision 20, LUMBAR 23).
+        Triple("ex_lateral_band_walk", "Caminata lateral con banda", "Lateral Band Walk"),
         // Friki Niki extras
         Triple("ex_front_side_stretch", "Estiramiento frente/lateral", "Front/Side Stretch"),
         Triple("ex_bulgarian_split_squat", "Búlgaras", "Bulgarian Split Squat"),

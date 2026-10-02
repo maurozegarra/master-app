@@ -66,8 +66,11 @@ La de 22.5 no entro en el inventario del 18-sep; la agrego el 19.
 - **Power bands** (bucle de látex de 208 cm), compradas el 26-sep: una de **1.3 cm** de ancho
   (ligera: pallof press anclado al rack, pull-apart, face pull) y una de **3.2 cm** (media:
   dominada asistida para NIKO, pallof más pesado).
-- **Bandas de tela para glúteo, set de 3** (ligera, media, fuerte): **pedidas el 26-sep**,
-  llegan entre el 27 y el 28. Caminata lateral, abducción, clamshell, activación.
+- **Bandas de tela para glúteo, set de 3** (ligera, media, fuerte): pedidas el 26-sep y
+  **en casa desde el 27-28** (confirmado el 1-oct). Caminata lateral, abducción, clamshell,
+  activación. Entran el 1-oct: NIKO 1 y NIKO 4 (puente con la media y caminata lateral,
+  revisión 20 de NIKO), y él, la caminata lateral con la ligera cuando vuelva el bloque de
+  cadera normal (revisión 23 del lumbar).
 
 ### Soportes
 
@@ -148,7 +151,7 @@ sentadilla.
 - **El puente tiene recorrido largo por delante**: 41, 46 y más con la misma barra.
 - **El techo de las mancuernas es 25 kg**, con saltos de 2.5 hasta ahí.
 - **La caminadora no es el límite**: 18 km/h contra los 6 que camina hoy.
-- **Faltaban bandas** (resuelto el 26-sep: las dos power bands compradas, las de tela en camino). La que había es ligera y está en uso. Es la única compra que hace falta,
+- **Faltaban bandas** (resuelto: las dos power bands el 26-sep, las de tela en casa desde el 27-28). La que había es ligera y está en uso. Es la única compra que hace falta,
   y se hace el lunes 21-sep:
 
   | Qué | Detalle | Para qué |
