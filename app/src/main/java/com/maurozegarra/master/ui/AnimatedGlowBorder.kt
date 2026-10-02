@@ -62,6 +62,20 @@ fun BoxScope.AnimatedGlowBorder(
         animationSpec = infiniteRepeatable(tween(durationMillis, easing = LinearEasing)),
         label = "glowAngle",
     )
+    GlowRing(cornerRadius, colors, strokeWidth, angle)
+}
+
+/**
+ * El anillo de luz en un ángulo dado. [AnimatedGlowBorder] lo hace girar sin parar; el
+ * botón primario lo hace dar una sola vuelta al tocarlo (TD-177).
+ */
+@Composable
+fun BoxScope.GlowRing(
+    cornerRadius: Dp,
+    colors: List<Color>,
+    strokeWidth: Dp,
+    angle: Float,
+) {
     Box(
         modifier = Modifier
             .matchParentSize()

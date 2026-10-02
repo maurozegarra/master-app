@@ -1,6 +1,12 @@
 package com.maurozegarra.master.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,28 +36,102 @@ import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.Dims
 
+/**
+ * El botón primario del app (TD-177), con las seis decisiones de "Make any button look
+ * expensive" (@motion_ui_interface), que el usuario trajo el 28-sep: *"el botón Start [...]
+ * es rojo sólido y se vería mejor si sólo fuera borde y con el efecto exacto que menciona
+ * el video"*.
+ *
+ * 1. **Tamaño**: [Dims.buttonHeight] de alto, por encima de los 44 que pide un pulgar.
+ * 2. **Etiqueta**: 17 sp, semibold, en el texto principal de la paleta.
+ * 3. **Contraste**: relleno satinado -de [AppTheme] track a surface- y un borde de 1 dp
+ *    del acento, que es lo que lo separa de la página. Ya no es un bloque rojo.
+ * 4. **Profundidad**: el borde de arriba iluminado ([TOP_EDGE_LIGHT]) y una sombra que cae
+ *    hacia abajo: la luz viene de arriba.
+ * 5. **Detalle**: píldora -radio = alto / 2, en porcentaje para no escribir el número- y
+ *    un solo ícono, opcional, de 20 a 10 del texto.
+ * 6. **Movimiento**: al tocar, se hunde 1 dp y la luz da una vuelta al borde. En un teléfono
+ *    no hay "hover", así que ambas cosas van al toque: responde en 100 ms y termina en 300.
+ *
+ * Es el ÚNICO botón primario ([PrimaryButton] lo delega): cambiarlo aquí cambia los nueve
+ * a la vez, que es lo que mantiene el app coherente.
+ */
 @Composable
 internal fun AppPrimaryButton(
     label: String,
     accent: Color,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
     onClick: () -> Unit,
 ) {
     val c = AppTheme.colors
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.height(Dims.buttonHeight),
-        shape = RoundedCornerShape(Dims.button),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = accent,
-            contentColor = c.onAccent,
-            disabledContainerColor = c.track,
-            disabledContentColor = c.textDim,
-        ),
+    val forma = RoundedCornerShape(percent = 50)
+    val toque = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val presionado by toque.collectIsPressedAsState()
+    // Se hunde 1 dp: responde en 100 ms, frenando al final.
+    val hundido by androidx.compose.animation.core.animateDpAsState(
+        targetValue = if (presionado && enabled) 1.dp else 0.dp,
+        animationSpec = androidx.compose.animation.core.tween(100, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        label = "hundido",
+    )
+    // Una vuelta de luz por el borde en 200 ms, cada vez que se toca.
+    val vuelta = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(1f) }
+    androidx.compose.runtime.LaunchedEffect(presionado) {
+        if (presionado && enabled) {
+            vuelta.snapTo(0f)
+            vuelta.animateTo(1f, androidx.compose.animation.core.tween(200, easing = androidx.compose.animation.core.LinearOutSlowInEasing))
+        }
+    }
+    val borde = if (enabled) accent else c.textFaded
+    Box(
+        modifier
+            .height(Dims.buttonHeight)
+            .graphicsLayer { translationY = hundido.toPx() }
+            .shadow(if (enabled) 8.dp else 0.dp, forma, clip = false)
+            .clip(forma)
+            .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(c.track, c.surface)))
+            .border(1.dp, borde, forma)
+            .drawBehind {
+                // El borde de arriba iluminado: una línea fina dentro del contorno, solo en el
+                // tramo recto, que es donde la luz de arriba daría.
+                val r = size.height / 2f
+                drawLine(
+                    com.maurozegarra.master.ui.theme.TOP_EDGE_LIGHT,
+                    androidx.compose.ui.geometry.Offset(r, 1.5.dp.toPx()),
+                    androidx.compose.ui.geometry.Offset(size.width - r, 1.5.dp.toPx()),
+                    strokeWidth = 1.dp.toPx(),
+                )
+            }
+            .clickable(
+                interactionSource = toque,
+                indication = null,
+                enabled = enabled,
+                role = androidx.compose.ui.semantics.Role.Button,
+                onClick = onClick,
+            ),
+        contentAlignment = Alignment.Center,
     ) {
-        Text(label, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        if (vuelta.value < 1f) {
+            GlowRing(
+                cornerRadius = Dims.buttonHeight / 2,
+                colors = glowColors(accent),
+                strokeWidth = 2.dp,
+                angle = vuelta.value * 360f,
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) {
+                androidx.compose.material3.Icon(icon, contentDescription = null, tint = if (enabled) accent else c.textDim, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(10.dp))
+            }
+            Text(
+                label,
+                color = if (enabled) c.textPrimary else c.textDim,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 17.sp,
+            )
+        }
     }
 }
 

@@ -143,8 +143,9 @@ internal fun PrimaryButton(
     accent: Color,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
     onClick: () -> Unit,
-) = AppPrimaryButton(label = label, accent = accent, modifier = modifier, enabled = enabled, onClick = onClick)
+) = AppPrimaryButton(label = label, accent = accent, modifier = modifier, enabled = enabled, icon = icon, onClick = onClick)
 
 @Composable
 internal fun AddButton(

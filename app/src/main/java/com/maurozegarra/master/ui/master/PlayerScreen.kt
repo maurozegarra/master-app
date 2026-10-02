@@ -233,10 +233,12 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
                     modifier = Modifier.weight(1f),
                     onClick = { vm.playerTest = true; onStart() },
                 )
+                // Con su ícono: el video pide uno, y "play" dice lo que pasa antes de leer.
                 PrimaryButton(
                     label = t.start,
                     accent = accent,
                     modifier = Modifier.weight(2f),
+                    icon = androidx.compose.material.icons.Icons.Filled.PlayArrow,
                     onClick = { vm.playerTest = false; onStart() },
                 )
             }

@@ -23,6 +23,12 @@ val TEXT_DIM = Color(0xFF9AA0A3)
 val TEXT_FADED = Color(0xFF5A5D5F)
 val ON_ACCENT = Color(0xFF001316)
 
+/**
+ * El borde de arriba iluminado de un botón primario (TD-177): "la luz viene de arriba". Un
+ * blanco al 16 %, que se lee como brillo sobre el relleno oscuro sin pasar por un borde.
+ */
+val TOP_EDGE_LIGHT = Color(0x29FFFFFF)
+
 /** El pulgar de un interruptor apagado. Vivia escrito a mano en cada interruptor. */
 val SWITCH_THUMB_OFF = Color(0xFFCFD3D6)
 
