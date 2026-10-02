@@ -116,4 +116,39 @@ class MediaSyncTest {
         assertEquals("ex_plank", fila.getString("exercise_id"))
         assertEquals(2, fila.getJSONArray("instructions").length())
     }
+
+    @Test
+    fun `lo personal del lumbar no se publica, sale el catalogo en espanol`() {
+        // 1-oct: el servidor tenia el puente, el hip thrust y la caminata lateral de NIKO con
+        // las instrucciones de el, en ingles.
+        val personal = com.maurozegarra.master.data.MasterDefaults.lumbarInstructions()
+        val catalogo = com.maurozegarra.master.data.MasterDefaults.catalogInstructions()
+        val propia = ExerciseMedia(listOf("Escrita a mano en el telefono del coach"))
+        val local = mapOf(
+            "ex_glute_bridge" to personal.getValue("ex_glute_bridge"),
+            "ex_hip_thrust" to personal.getValue("ex_hip_thrust"),
+            "ex_lateral_band_walk" to personal.getValue("ex_lateral_band_walk"),
+            "ex_curl_up" to personal.getValue("ex_curl_up"),
+            "ex_teep" to propia,
+        )
+        val publico = MediaSync.publicVersion(local, personal, catalogo)
+        listOf("ex_glute_bridge", "ex_hip_thrust", "ex_lateral_band_walk").forEach {
+            assertEquals(it, catalogo.getValue(it), publico[it])
+        }
+        // Lo que escribio el coach a mano si sale, tal cual.
+        assertEquals(propia, publico["ex_teep"])
+        // Lo personal sin version de catalogo no sale.
+        if (!catalogo.containsKey("ex_curl_up")) assertNull(publico["ex_curl_up"])
+
+        // Y el telefono de NIKO cambia el ingles que bajo por el espanol: lo bajo del
+        // servidor, asi que esta en su ledger, y no lo escribio ella.
+        val ingles = personal.getValue("ex_glute_bridge")
+        val aplicar = MediaSync.toApply(
+            remote = mapOf("ex_glute_bridge" to catalogo.getValue("ex_glute_bridge")),
+            local = mapOf("ex_glute_bridge" to ingles),
+            ledger = mapOf("ex_glute_bridge" to MediaSync.fingerprintOf(ingles)),
+            seeded = emptyMap(),
+        )
+        assertEquals(catalogo.getValue("ex_glute_bridge"), aplicar["ex_glute_bridge"])
+    }
 }

@@ -40,6 +40,27 @@ object MediaSync {
             .map { it.key to it.value }
 
     /**
+     * Lo que el teléfono del coach publica de cada ejercicio: lo suyo, salvo lo que es
+     * PERSONAL del coach.
+     *
+     * Las instrucciones del lumbar ([personal]) están en inglés y hablan de SU espalda y SU
+     * banca, y en un teléfono hay una sola versión por ejercicio: el puente, el hip thrust y la
+     * caminata lateral de NIKO llegaron a su teléfono con las de él, en un idioma que ella no
+     * lee (encontrado el 1-oct). Donde lo local es la versión personal, se publica la del
+     * [catalog]; si el catálogo no tiene, no se publica nada.
+     */
+    fun publicVersion(
+        local: Map<String, ExerciseMedia>,
+        personal: Map<String, ExerciseMedia>,
+        catalog: Map<String, ExerciseMedia>,
+    ): Map<String, ExerciseMedia> = local.mapNotNull { (id, m) ->
+        when {
+            personal[id] != m -> id to m
+            else -> catalog[id]?.let { id to it }
+        }
+    }.toMap()
+
+    /**
      * Lo que el teléfono de un atleta tiene que aplicar de lo que bajó.
      *
      * Entra cuando no hay nada local, cuando lo local es exactamente lo que se aplicó la vez

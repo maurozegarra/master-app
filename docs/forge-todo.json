@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-184",
+      "title": "Fix: el telefono del coach publicaba sus instrucciones del lumbar, en ingles, y le llegaban a NIKO",
+      "category": "Fix",
+      "status": "done",
+      "manual": "VISTO de paso el 1-oct al sumar la caminata lateral: el servidor (exercise_media) tenia ex_glute_bridge, ex_hip_thrust y ex_lateral_band_walk con las instrucciones del lumbar, en ingles y sobre su espalda y su banca. NIKO usa los tres y no lee ingles. CAUSA: en un telefono hay una sola version por exerciseId; en el del coach, el merge del lumbar deja las suyas, y publishMediaChanges publicaba todo lo local. Pasaba desde la revision 19 del lumbar (26-sep) con el hip thrust, y antes con el puente.\n\nARREGLADO con el OK del usuario: MediaSync.publicVersion. Donde lo local es la version personal (lumbarInstructions), se publica la del catalogo; sin version de catalogo, no se publica. El ledger guarda la huella de lo publicado, asi que no se republica en cada pasada. El telefono de NIKO cambia el ingles por el espanol solo: lo bajo del servidor y esta en su ledger. Test en MediaSyncTest. VERIFICADO en el servidor el 1-oct (v1.0.362): las tres filas quedaron en espanol. Cerrado por el usuario."
+    },
+    {
       "id": "TD-183",
       "title": "El reloj para elegir una hora, en 12 horas y con los colores del app",
       "category": "UI",

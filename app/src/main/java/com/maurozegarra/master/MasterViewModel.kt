@@ -773,7 +773,9 @@ class MasterViewModel(
     }
 
     private fun publishMediaChanges() {
-        for ((id, media) in MediaSync.toPublish(mediaStore.load(), store.mediaLedger())) {
+        // Lo personal del lumbar no sale del telefono: se publica el catalogo (1-oct).
+        val publico = MediaSync.publicVersion(mediaStore.load(), MasterDefaults.lumbarInstructions(), MasterDefaults.catalogInstructions())
+        for ((id, media) in MediaSync.toPublish(publico, store.mediaLedger())) {
             // Al primer fallo se corta: sin red o sin sesion, seguir es gastar intentos.
             if (assignments.publishMedia(id, media) != null) return
             store.markMediaSynced(id, MediaSync.fingerprintOf(media))
