@@ -56,8 +56,9 @@ class EffortTest {
     fun `McGill y el calentamiento no preguntan, el resto de NIKO si`() {
         // Del lumbar normal solo pregunta la caminata lateral (revision 23): es la unica sin
         // peso fuera de McGill, y es lo que dira si la banda le va.
-        val lumbar = MasterDefaults.lumbarTraining("en", easedHip = false)
+        val lumbar = MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = true)
         assertEquals(setOf("ex_lateral_band_walk"), StepEngine.buildSteps(lumbar).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
+        assertTrue(StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = false)).none(Effort::asks))
         // Aliviado (revision 22), el puente va sin peso y SI pregunta: es lo que dira si el
         // patron todavia molesta.
         val aliviado = MasterDefaults.lumbarTraining("en", easedHip = true)

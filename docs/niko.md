@@ -175,7 +175,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 | 2 | NIKO 2 · Muay Thai | **hecho el lunes 21-sep**, completo (ver *Sus sesiones*) |
 | 3 | NIKO 3 · Tren superior | **hecho el martes 22-sep**, completo (ver *Sus sesiones*). El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
 | 4 | NIKO 4 · Glúteo a una pierna | **hecho el jueves 24-sep**, corrido un día por el corte de luz del 23 (ver *Sus sesiones*). **Segunda vez el jueves 1-oct** (revisión 18) |
-| 5 | NIKO 5 · Muay Thai y potencia | **hecho el viernes 25-sep** (ver *Sus sesiones*). Las patadas van como dos ejercicios, teep y patada baja |
+| 5 | NIKO 5 · Muay Thai y potencia | **hecho el viernes 25-sep** (ver *Sus sesiones*). Las patadas van como dos ejercicios, teep y patada baja. **Segunda vez el viernes 2-oct** (revisión 19) |
 | 6 | NIKO 6 · Mixto y movilidad | **hecho el sábado 26-sep**, completo, con el saco y el sprawl **en circuito** (TD-137) (ver *Sus sesiones*) |
 
 ### Los seis dias
@@ -277,6 +277,26 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 ## Sus sesiones
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
+
+### 2026-10-02 — NIKO 5 · Muay Thai y potencia, la cuerda con más descanso
+
+**De 07:36 a 08:31, 55 minutos, completa.**
+
+| Ejercicio | Lo que marcó | Para la próxima NIKO 5 |
+|---|---|---|
+| **Cuerda, 3 × 3 min con 90 s** | **bien los tres** (el 25-sep, "Hard" los tres con 60 s) | igual |
+| **Salto al cajón, 4 × 5** | **fácil las cuatro, por segunda vez** | 4 × 6, o el cajón por su lado alto |
+| Rodillas largas, 5 × 30 s | bien, una fácil | igual |
+| **Rodillas profundas, 4 × 30 s** | **fácil las cuatro** | 4 × 40 s |
+| **Teep, 2 × 10 por lado** | **fácil los dos lados**, por segunda vez | 3 × 10 por lado |
+| Patada baja, 2 × 10 por lado | bien, una fácil | igual |
+| Elevación de piernas, 3 × 12 | bien | igual |
+| Cuello | bien las cuatro, la última incluida | — |
+
+- **Los 90 s de descanso resolvieron la cuerda:** el mismo trabajo y de "Hard" pasó a "bien".
+- **Tres cosas le sobran por segunda vez** -el salto, las rodillas profundas y el teep-: suben
+  en la próxima NIKO 5.
+- Sigue **NIKO 6** el sábado 3 (revisión 21): la cosaca con una mancuerna de 5 kg al pecho.
 
 ### 2026-10-01 — NIKO 4 · Glúteo a una pierna, la segunda vez
 

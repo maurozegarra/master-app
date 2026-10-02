@@ -360,6 +360,12 @@ object MasterDefaults {
      * Revision 21 (30-sep): y el jueves 1 tambien. El pinchazo "esta ahi pero apenas", con un
      * relajante muscular de por medio, que lo tapa: el carry del corto espera.
      *
+     * Revision 24 (2-oct): vuelve el bloque normal. Jueves y viernes sin el pinchazo, y el
+     * puente sin peso salio facil las tres. El box squat cambia de MONTAJE y no de peso: el
+     * 2-oct le dolio la espalda baja desde que recogio la mancuerna del piso, sentado, y mas en
+     * la mitad de abajo al pararse. La caminata lateral espera una sesion mas
+     * ([LUMBAR_BAND_WALK]): el mismo dia que vuelve el hip thrust, nada nuevo.
+     *
      * Revision 23 (1-oct): la caminata lateral con banda abre el bloque de cadera NORMAL, como
      * activacion. No entra mientras siga aliviado ([LUMBAR_HIP_EASED]): la abduccion carga la
      * misma zona del pinchazo, y el dia del puente sin peso es una prueba.
@@ -367,7 +373,7 @@ object MasterDefaults {
      * Revision 22 (1-oct): el jueves, sin pinchazo en todo el dia y sin relajante. El viernes
      * vuelve el completo con el bloque de cadera ALIVIADO ([LUMBAR_HIP_EASED]).
      */
-    const val LUMBAR_REVISION = 23
+    const val LUMBAR_REVISION = 24
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -381,7 +387,13 @@ object MasterDefaults {
      * Volver al bloque normal es poner esto en false y subir la revision: el hip thrust
      * vuelve a 21 · 31 · 36, tras dos mananas seguidas sin el pinchazo.
      */
-    const val LUMBAR_HIP_EASED = true
+    const val LUMBAR_HIP_EASED = false
+
+    /**
+     * La caminata lateral con banda en el bloque de cadera normal (revision 23). Apagada en la
+     * 24: entra la sesion siguiente a la vuelta del hip thrust, si esa sale limpia.
+     */
+    const val LUMBAR_BAND_WALK = false
 
     /**
      * De quien es la rutina lumbar.
@@ -426,7 +438,7 @@ object MasterDefaults {
      * serie (TD-085). Antes hacian falta tres ejercicios por movimiento y el historial los
      * contaba como tres.
      */
-    fun lumbarTraining(lang: String, easedHip: Boolean = LUMBAR_HIP_EASED): Training {
+    fun lumbarTraining(lang: String, easedHip: Boolean = LUMBAR_HIP_EASED, bandWalk: Boolean = LUMBAR_BAND_WALK): Training {
         val b = LumbarBlocks(lang, seqStart = 950000L)
         val now = System.currentTimeMillis()
         return Training(
@@ -439,7 +451,7 @@ object MasterDefaults {
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
                 b.mobility(),
                 b.mcgill(),
-                b.hipGlute(eased = easedHip),
+                b.hipGlute(eased = easedHip, bandWalk = bandWalk),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
             ),
             createdAt = now,
@@ -671,8 +683,10 @@ object MasterDefaults {
      *
      * Revision 20 (1-oct): NIKO 1 y NIKO 4 con las bandas de tela: puente con banda y
      * caminata lateral en vez de la abduccion con tobillera.
+     *
+     * Revision 21 (2-oct): NIKO 6, la cosaca con una mancuerna de 5 kg al pecho.
      */
-    const val NIKO_REVISION = 20
+    const val NIKO_REVISION = 21
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1164,8 +1178,12 @@ object MasterDefaults {
                     name = "Movilidad",
                     exercises = listOf(
                         b.ex("ex_90_90", "Lento. Llega hasta donde llegues y respira", 10, sets = 2, rest = 20),
-                        b.ex("ex_cossack_squat", "Talón apoyado, pecho arriba. Baja solo hasta donde controles", 8, sets = 2, rest = 30)
-                            .copy(sides = listOf("Izquierda", "Derecha")),
+                        // Revision 21 (2-oct): con una mancuerna de 5 kg al pecho. El 26-sep
+                        // marco facil las cuatro sin peso.
+                        b.ex(
+                            "ex_cossack_squat", "Mancuerna de 5 kg al pecho. Talón apoyado, baja solo hasta donde controles", 8, rest = 30,
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(5.0, 5.0),
+                        ).copy(sides = listOf("Izquierda", "Derecha")),
                         b.ex("ex_hip_rotation", "Círculos grandes y lentos", 10, sets = 1, rest = 0),
                         b.ex("ex_front_side_stretch", "Sin rebotes. Respira hondo en cada posición", 60, sets = 1, rest = 0, mode = WorkMode.TIME),
                     ).map { if (it.exerciseId == "ex_cossack_squat") it else it.copy(progression = Progression.NONE) },
@@ -1957,13 +1975,13 @@ object MasterDefaults {
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
                 .copy(dumbbellCount = 1, workMode = WorkMode.DISTANCE, sides = listOf("Left", "Right"), alternateSides = true)
 
-        fun hipGlute(eased: Boolean = false): Workout = Workout(
+        fun hipGlute(eased: Boolean = false, bandWalk: Boolean = false): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
             exercises = listOfNotNull(
                 // Revision 23: activacion con la banda de tela LIGERA, antes de cargar. Solo en
                 // el bloque normal: aliviado, la abduccion cargaria la zona del pinchazo.
-                if (eased) null
+                if (eased || !bandWalk) null
                 else reps("ex_lateral_band_walk", 10, "Light band above the knees. 10 steps each way", sets = 2, rest = 30, prep = 10)
                     .copy(sides = listOf("Left", "Right"), alternateSides = true),
                 // La barra del puente pesa 6 kg, no los 20 que trae el app por defecto. Ese
@@ -2018,7 +2036,10 @@ object MasterDefaults {
                 // Revision 18: se empieza SENTADO, con la mancuerna sobre los muslos. Subir 22.5
                 // kg del piso al pecho era flexion con carga fuera del ejercicio, y "ponerse en
                 // posicion cuesta" mas que la sentadilla.
-                loaded("ex_box_squat", 8, "Start seated, dumbbell on the thighs. Chest up", if (eased) listOf(17.5, 17.5, 17.5) else listOf(17.5, 20.0, 22.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                // Revision 24 (2-oct): a la plyobox de 51 cm, que quita 6 cm de la mitad de
+                // abajo -la que le dolio-, y la mancuerna esperando sobre el step, nunca en el
+                // piso: recogerla del suelo sentado era flexion con carga. Se queda en 17.5.
+                loaded("ex_box_squat", 8, "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor", listOf(17.5, 17.5, 17.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
             ),
         )
     }
@@ -2112,12 +2133,14 @@ object MasterDefaults {
                 "One of the best there is for the core with minimal load on the spine.",
             ),
         ),
+        // Revision 24: la plyobox y la mancuerna en el step.
         "ex_box_squat" to ExerciseMedia(
             listOf(
-                "Start seated on the bench, dumbbell standing on your thighs. Bring it to your chest while seated, back straight, then stand up.",
+                "Box: the plyobox on its 51 cm side, not the 45 cm bench.",
+                "Before sitting, put the dumbbell on the step (20 cm) right next to the box. It never goes to or comes from the floor.",
+                "Sit, pick it up from the step with your back straight and bring it to your chest. Then stand up.",
                 "Controlled on the way down until you touch, then stand up. Chest up.",
-                "To finish, sit and lower the dumbbell to your thighs. It never goes to or comes from the floor.",
-                "Without weight, the same: to a box or a chair.",
+                "To finish, sit and put the dumbbell back on the step.",
             ),
         ),
     )
@@ -2149,6 +2172,15 @@ object MasterDefaults {
                 listOf(
                     "To a box or a chair, no weight.",
                     "Controlled on the way down until you touch, then stand up. Chest up.",
+                ),
+            ),
+            // Revision 18 a 23: la mancuerna desde los muslos, sentado en la banca.
+            ExerciseMedia(
+                listOf(
+                    "Start seated on the bench, dumbbell standing on your thighs. Bring it to your chest while seated, back straight, then stand up.",
+                    "Controlled on the way down until you touch, then stand up. Chest up.",
+                    "To finish, sit and lower the dumbbell to your thighs. It never goes to or comes from the floor.",
+                    "Without weight, the same: to a box or a chair.",
                 ),
             ),
         ),

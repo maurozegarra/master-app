@@ -142,11 +142,14 @@ class LumbarTrainingTest {
     fun `la caminata lateral activa el bloque normal, y aliviado no esta`() {
         // Revision 23: con las bandas de tela. Aliviado no entra: la abduccion carga la zona
         // del pinchazo del 29-sep.
-        val banda = cadera(normal).getValue("ex_lateral_band_walk")
+        // Revision 24: apagada hasta la sesion siguiente a la vuelta del hip thrust.
+        assertFalse(cadera(normal).containsKey("ex_lateral_band_walk"))
+        val conBanda = MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = true)
+        val banda = cadera(conBanda).getValue("ex_lateral_band_walk")
         assertEquals(listOf("Left", "Right"), banda.sides)
         assertTrue(banda.alternateSides)
-        assertEquals("ex_lateral_band_walk", normal.workouts.first { it.name == "Hip & Glute" }.exercises.first().exerciseId)
-        assertFalse(cadera(training).containsKey("ex_lateral_band_walk"))
+        assertEquals("ex_lateral_band_walk", conBanda.workouts.first { it.name == "Hip & Glute" }.exercises.first().exerciseId)
+        assertFalse(cadera(MasterDefaults.lumbarTraining("en", easedHip = true, bandWalk = true)).containsKey("ex_lateral_band_walk"))
         // Sus instrucciones en ingles le llegan aunque el catalogo ya haya sembrado las de NIKO.
         val catalogo = MasterDefaults.catalogInstructions().getValue("ex_lateral_band_walk")
         assertEquals(
@@ -178,7 +181,11 @@ class LumbarTrainingTest {
         // marco ligeras ocho de las nueve series, y la unica "bien" fue el tercer viaje del
         // carry, que por eso pasa a ser el primer peldano de la rampa nueva.
         assertEquals(listOf(15.0, 17.5, 20.0), cadera(normal).getValue("ex_suitcase_carry").setList.map { it.weight })
-        assertEquals(listOf(17.5, 20.0, 22.5), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
+        // Revision 24 (2-oct): la sentadilla se queda en 17.5 mientras cambia el montaje -la
+        // plyobox de 51 cm y la mancuerna en el step-: le dolio la espalda baja recogiendo la
+        // mancuerna del piso y en la mitad de abajo.
+        assertEquals(listOf(17.5, 17.5, 17.5), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
+        assertTrue(cadera(normal).getValue("ex_box_squat").note.contains("51 cm"))
         // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
         // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el
         // mismo -una mancuerna de 10 pesa 10-, asi que el historial no se parte.

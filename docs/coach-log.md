@@ -5,6 +5,42 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-02 — decimonovena sesión: vuelve el completo, y el box squat cambia de montaje
+
+**LUMBAR** completo, de 07:20 a 08:30, **70 minutos**. Alarma de las 7:00, contestada a las
+7:05: **dolor 1, aflojó en 15 minutos**. **Se acostó a las 00:07**: unas 7 horas.
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| Glute bridge, sin barra, pausa 2 s | 3 × 10 | **fácil las tres** |
+| Suitcase Carry, 36 m | 15 · 15 · 15, alternado | **ligero las seis** |
+| Box Squat | 17.5 · 17.5 · 17.5 | bien las tres, pero con dolor de espalda (ver la nota) |
+
+Su nota:
+
+> *"En box squat se siente el dolor en la espalda, las piernas están fresh pero la espalda
+> baja no opina lo mismo."*
+
+- **El pinchazo en la nalga no apareció**, ni hoy ni ayer, y sin relajante: dos mañanas
+  limpias. El puente sin carga, el mismo patrón del hip thrust, salió fácil.
+- **El box squat, preguntado:** se sienta en la banca y **jala la mancuerna del piso al
+  muslo**; desde ahí ya duele, y más **en la mitad de abajo al pararse**. De la mitad para
+  arriba, no. Es el dolor de siempre, central, y seguía después de entrenar. Las dos cosas
+  tienen explicación: recoger 17.5 kg del suelo sentado es flexión con carga, y la mitad de
+  abajo es donde la cadera más se cierra y la espalda baja tiende a redondearse.
+- **Primera sesión con los descansos registrados** (TD-181): McGill 3 s y 30 s, 20 s entre
+  lados de la plancha, 60 s en el bloque de cadera. Todo como estaba planeado.
+- **El sábado 3, revisión 24:**
+
+  | | Sábado | Por qué |
+  |---|---|---|
+  | Hip thrust | vuelve a 21 · 31 · 36 | dos mañanas sin el pinchazo y el puente fácil |
+  | Carry | 15 · 17.5 · 20 | las seis de hoy, ligeras |
+  | Box squat | 17.5, **sobre la plyobox de 51 cm** y con la mancuerna **sobre el step**, nunca en el piso | quita 6 cm de la mitad de abajo y la flexión al recogerla |
+  | Caminata lateral con banda | todavía no | el día que vuelve el hip thrust, nada nuevo |
+
+---
+
 ## 2026-10-01 — decimoctava sesión: el primer día limpio
 
 **LUMBAR (bad day)**, de 05:17 a 05:50, **33 minutos**, completo, el segundo día malo
