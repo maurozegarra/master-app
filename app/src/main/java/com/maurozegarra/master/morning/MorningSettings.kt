@@ -1,8 +1,8 @@
 package com.maurozegarra.master.morning
 
 import android.Manifest
-import android.app.NotificationManager
 import android.app.TimePickerDialog
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -43,14 +43,15 @@ import java.time.format.TextStyle
 
 /**
  * Las alarmas, una tarjeta cada una (TD-175): la hora grande -tocarla la cambia-, su
- * interruptor, y los siete días para marcar en cuáles suena. Debajo, agregar otra.
+ * interruptor, y los siete días para marcar en cuáles suena. Agregar otra va en el "+" de
+ * la barra (TD-182): cada vez que [addRequests] sube, se pide la hora.
  *
  * Antes era una lista de los siete días con su hora y un interruptor general; el usuario
  * lo pidió como un despertador cuando dejó el suyo. Cualquier cambio reprograma en el
  * momento: la próxima que se ve abajo es la que está en AlarmManager, no una cuenta aparte.
  */
 @Composable
-fun MorningSettings(t: Strings, accent: Color) {
+fun MorningSettings(t: Strings, accent: Color, addRequests: Int = 0) {
     val ctx = LocalContext.current
     val store = remember { MorningStore(ctx) }
     var schedule by remember { mutableStateOf(store.schedule()) }
@@ -113,6 +114,12 @@ fun MorningSettings(t: Strings, accent: Color) {
     val saltado = remember(cambios) { store.skipDate == manana }
     val swipe = com.maurozegarra.master.ui.rememberSwipeRowsController()
 
+    // Una nueva se pide con la hora primero -es lo que la define- y nace encendida en los
+    // dias que ninguna otra cubre (TD-182). El 0 inicial no pide nada.
+    androidx.compose.runtime.LaunchedEffect(addRequests) {
+        if (addRequests > 0) elegirHora(LocalTime.of(6, 0)) { h -> aplicar(schedule.add(h, schedule.newAlarmDays())) }
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         // La cabecera lleva la proxima y el salto de mañana en su misma linea: sueltos
         // debajo de la lista, cada uno con su espacio, dejaban la pantalla llena de aire.
@@ -167,18 +174,6 @@ fun MorningSettings(t: Strings, accent: Color) {
                 )
             }
         }
-        // Una nueva se pide con la hora primero -es lo que la define-, y nace encendida
-        // de lunes a viernes: lo mas comun, y se ajusta con un toque por dia.
-        com.maurozegarra.master.ui.AppOutlineButton(
-            label = t.morning.addAlarm,
-            accent = accent,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                elegirHora(LocalTime.of(6, 0)) { h ->
-                    aplicar(schedule.add(h, DayOfWeek.entries.toSet() - DayOfWeek.SATURDAY - DayOfWeek.SUNDAY))
-                }
-            },
-        )
     }
 
     // El aviso para ir a dormir (TD-160). Es un bloque de AJUSTES, no un elemento de lista:

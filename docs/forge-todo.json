@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-182",
+      "title": "Morning: agregar una alarma con un + en la barra, no con un boton a todo lo ancho",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO por el usuario el 1-oct: \"en la pantalla Morning, 'Add alarm' ocupa demasiado, y si en el swipe le agregamos duplicar? o se te ocurre algo mejor?\".\n\nHECHO el mismo dia con el OK del usuario: el boton a todo lo ancho sale; agregar pasa a un + en la barra de arriba, a la derecha de \"Morning\" (SettingsScaffold gana un hueco de acciones). Duplicar no: lo que define una alarma es la hora y duplicar obliga igual a cambiarla; solo ahorraria marcar los dias. En su lugar, la nueva nace con los dias que ninguna alarma cubre; si todas cubren todo, de lunes a viernes como hoy. Los dias libres se cuentan sobre las alarmas ENCENDIDAS: una apagada no despierta a nadie. MorningSchedule.newAlarmDays, test en MorningTest. VALIDADO por el usuario el 1-oct en el telefono (v1.0.360)."
+    },
+    {
       "id": "TD-181",
       "title": "El detalle del historial dice al menos lo que dice la previa: series iguales en una fila, y los descansos",
       "category": "UI",

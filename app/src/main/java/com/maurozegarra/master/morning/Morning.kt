@@ -48,6 +48,16 @@ data class MorningSchedule(val alarms: List<MorningAlarmSpec>) {
 
     fun remove(id: Long): MorningSchedule = copy(alarms = alarms.filter { it.id != id })
 
+    /**
+     * Los días con los que nace una alarma nueva (TD-182): los que ninguna encendida cubre,
+     * que es para lo que casi siempre se agrega una. Si todos tienen ya la suya, de lunes a
+     * viernes, como antes.
+     */
+    fun newAlarmDays(): Set<DayOfWeek> {
+        val libres = DayOfWeek.entries.filter { !ringsOn(it) }.toSet()
+        return libres.ifEmpty { DayOfWeek.entries.toSet() - DayOfWeek.SATURDAY - DayOfWeek.SUNDAY }
+    }
+
     /** Una alarma nueva, ordenada por hora con las demás. */
     fun add(time: LocalTime, days: Set<DayOfWeek>): MorningSchedule =
         copy(alarms = (alarms + MorningAlarmSpec((alarms.maxOfOrNull { it.id } ?: 0L) + 1, time, days)).sortedBy { it.time })

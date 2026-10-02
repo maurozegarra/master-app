@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -125,7 +126,23 @@ private fun MorningHome(onBack: () -> Unit) {
 
     // La barra de las demas pantallas de MASTER, con su flecha atras (TD-175): desde que no
     // esta en el lanzador, se entra desde MASTER y tiene que verse como una pantalla suya.
-    com.maurozegarra.master.SettingsScaffold(title = t.morning.home, onBack = onBack) {
+    // Agregar una alarma va en la barra (TD-182): el boton a todo lo ancho ocupaba lo mismo
+    // que una alarma, para algo que se hace una vez al mes. Cada toque sube el contador y
+    // MorningSettings, que tiene las alarmas, abre el selector de la hora.
+    var pedirAlarma by remember { mutableIntStateOf(0) }
+    com.maurozegarra.master.SettingsScaffold(
+        title = t.morning.home,
+        onBack = onBack,
+        actions = {
+            androidx.compose.material3.IconButton(onClick = { pedirAlarma++ }) {
+                androidx.compose.material3.Icon(
+                    androidx.compose.material.icons.Icons.Filled.Add,
+                    contentDescription = t.morning.addAlarm,
+                    tint = AppTheme.colors.accent,
+                )
+            }
+        },
+    ) {
     Column(
         Modifier
             .fillMaxSize()
@@ -136,7 +153,7 @@ private fun MorningHome(onBack: () -> Unit) {
 
         // Las alarmas primero, pedido por el usuario el 25-sep: es lo que se viene a tocar.
         // Cada una en su tarjeta (TD-175).
-        MorningSettings(t, AppTheme.colors.accent)
+        MorningSettings(t, AppTheme.colors.accent, addRequests = pedirAlarma)
 
         SectionCard {
             Hoy(deHoy, zone, t, onEdit = { n ->

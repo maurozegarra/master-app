@@ -356,7 +356,13 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 // Interna y no privada: la usa tambien la pantalla Morning (TD-175), que es otra actividad.
-internal fun SettingsScaffold(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
+internal fun SettingsScaffold(
+    title: String,
+    onBack: () -> Unit,
+    /** Lo de la derecha de la barra, como el "+" de Morning (TD-182). */
+    actions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
+    content: @Composable () -> Unit,
+) {
     Scaffold(
         containerColor = AppTheme.colors.bg,
         topBar = {
@@ -373,6 +379,7 @@ internal fun SettingsScaffold(title: String, onBack: () -> Unit, content: @Compo
                         )
                     }
                 },
+                actions = actions,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = AppTheme.colors.bg,
                     titleContentColor = AppTheme.colors.textPrimary,

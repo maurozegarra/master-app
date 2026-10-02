@@ -262,4 +262,17 @@ class MorningTest {
         assertEquals("7 h", Countdown.text(420))
         assertEquals("1 min", Countdown.text(0))
     }
+
+    @Test
+    fun `la alarma nueva nace en los dias que ninguna cubre`() {
+        val lunAJue = setOf(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.TUESDAY, java.time.DayOfWeek.WEDNESDAY, java.time.DayOfWeek.THURSDAY)
+        val una = MorningSchedule(listOf(MorningAlarmSpec(1, java.time.LocalTime.of(5, 0), lunAJue)))
+        assertEquals(java.time.DayOfWeek.entries.toSet() - lunAJue, una.newAlarmDays())
+        // Una apagada no despierta a nadie: sus dias cuentan como libres.
+        val apagada = MorningSchedule(listOf(MorningAlarmSpec(1, java.time.LocalTime.of(5, 0), lunAJue, enabled = false)))
+        assertEquals(java.time.DayOfWeek.entries.toSet(), apagada.newAlarmDays())
+        // Con todos cubiertos, de lunes a viernes, como antes.
+        val semana = java.time.DayOfWeek.entries.toSet() - java.time.DayOfWeek.SATURDAY - java.time.DayOfWeek.SUNDAY
+        assertEquals(semana, MorningSchedule.default(true).newAlarmDays())
+    }
 }
