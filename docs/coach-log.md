@@ -5,6 +5,33 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-01 — decimoctava sesión: el primer día limpio
+
+**LUMBAR (bad day)**, de 05:17 a 05:50, **33 minutos**, completo, el segundo día malo
+asignado. Alarma de las 5:00: **dolor 1, aflojó en 14 minutos**, la mañana más baja desde
+el 28. **Se acostó a las 22:24**, y quedó registrado: 6 h 36 hasta la alarma. Caminatas a 6
+y 5.5 km/h.
+
+- **Sin el pinchazo en todo el día, y sin relajante**: el último fue el 30 a las 9:00. Es
+  la primera mañana limpia que cuenta.
+- **El viernes 2, LUMBAR completo con el bloque de cadera aliviado** (revisión 22). Lo
+  propuso él -puente sin peso, carry y sentadilla a 10 kg- y preguntó si era muy
+  conservador. El puente sin peso, acertado: el hip thrust fue lo único nuevo del 29 y el
+  pinchazo salió esa tarde, así que el mismo patrón sin carga es la mejor prueba. En el carry
+  y la sentadilla, sí: también se hicieron el 29, pero llevaban dos semanas a esos pesos sin
+  problema. Quedan en lo más bajo de su rampa, las tres series iguales:
+
+  | | Viernes | Lo de siempre |
+  |---|---|---|
+  | Glute bridge, sin barra, pausa 2 s | 3 × 10, pregunta cómo fue cada serie | hip thrust 21 · 31 · 36 |
+  | Suitcase Carry, 36 m | 15 · 15 · 15 | 15 · 17.5 · 20 |
+  | Box Squat | 17.5 · 17.5 · 17.5 | 17.5 · 20 · 22.5 |
+
+- **El sábado se decide con la mañana del viernes**, que sería la segunda limpia: si no
+  aparece el pinchazo, vuelve el hip thrust a 21 · 31 · 36.
+
+---
+
 ## 2026-09-30 — decimoséptima sesión: el día malo, asignado
 
 **LUMBAR (bad day)**, de 05:22 a 05:54, **32 minutos**, completo -asignado para hoy desde el

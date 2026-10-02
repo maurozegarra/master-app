@@ -359,8 +359,25 @@ object MasterDefaults {
      *
      * Revision 21 (30-sep): y el jueves 1 tambien. El pinchazo "esta ahi pero apenas", con un
      * relajante muscular de por medio, que lo tapa: el carry del corto espera.
+     *
+     * Revision 22 (1-oct): el jueves, sin pinchazo en todo el dia y sin relajante. El viernes
+     * vuelve el completo con el bloque de cadera ALIVIADO ([LUMBAR_HIP_EASED]).
      */
-    const val LUMBAR_REVISION = 21
+    const val LUMBAR_REVISION = 22
+
+    /**
+     * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
+     *
+     * El hip thrust fue lo UNICO nuevo ese dia y el pinchazo salio esa tarde: el puente sin
+     * peso es el mismo patron sin carga, la mejor prueba de si molesta. El carry y la
+     * sentadilla tambien se hicieron el 29, pero llevaban dos semanas a esos pesos sin
+     * problema: se quedan en el peso mas bajo de su rampa, las tres series iguales. Decision
+     * del usuario, que proponia 10 kg en los dos.
+     *
+     * Volver al bloque normal es poner esto en false y subir la revision: el hip thrust
+     * vuelve a 21 · 31 · 36, tras dos mananas seguidas sin el pinchazo.
+     */
+    const val LUMBAR_HIP_EASED = true
 
     /**
      * De quien es la rutina lumbar.
@@ -405,7 +422,7 @@ object MasterDefaults {
      * serie (TD-085). Antes hacian falta tres ejercicios por movimiento y el historial los
      * contaba como tres.
      */
-    fun lumbarTraining(lang: String): Training {
+    fun lumbarTraining(lang: String, easedHip: Boolean = LUMBAR_HIP_EASED): Training {
         val b = LumbarBlocks(lang, seqStart = 950000L)
         val now = System.currentTimeMillis()
         return Training(
@@ -418,7 +435,7 @@ object MasterDefaults {
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
                 b.mobility(),
                 b.mcgill(),
-                b.hipGlute(),
+                b.hipGlute(eased = easedHip),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
             ),
             createdAt = now,
@@ -645,8 +662,10 @@ object MasterDefaults {
      * Revision 17 (29-sep): NIKO 3 suma la dominada asistida con la banda de 3.2 cm.
      *
      * Revision 18 (30-sep): NIKO 4, su segunda vez, con lo que marco el 24 (ver niko.md).
+     *
+     * Revision 19 (1-oct): NIKO 5, la cuerda con 90 s de descanso entre rounds.
      */
-    const val NIKO_REVISION = 18
+    const val NIKO_REVISION = 19
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1058,7 +1077,10 @@ object MasterDefaults {
                         // Por rounds, como el saco: aqui la cuerda es acondicionamiento, no el
                         // calentamiento de dos minutos. Declarado, porque por defecto seria un
                         // aguante y preguntaria solo por tiempo.
-                        b.ex("ex_rope_jumping", "Ritmo de pelea: cambia de pie, acelera los últimos 30 s", 180, sets = 3, rest = 60, mode = WorkMode.TIME)
+                        // Revision 19: 90 s de descanso. El 25-sep marco "Hard" los tres rounds y
+                        // perdia el aire entre uno y otro; el usuario prefirio mas descanso a
+                        // rounds mas cortos, para no salir del formato de pelea.
+                        b.ex("ex_rope_jumping", "Ritmo de pelea: cambia de pie, acelera los últimos 30 s", 180, sets = 3, rest = 90, mode = WorkMode.TIME)
                             .copy(progression = Progression.ROUNDS),
                     ),
                 ),
@@ -1903,13 +1925,13 @@ object MasterDefaults {
          * serie a serie. Todas las series de una mano y despues las de la otra, como la
          * plancha; los pesos van en rampa en cada lado.
          */
-        private fun carry(): Exercise =
-            loaded("ex_suitcase_carry", 36, "3 laps of the hallway: 36 m. Walk tall, don't lean", listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL)
+        private fun carry(weights: List<Double> = listOf(15.0, 17.5, 20.0)): Exercise =
+            loaded("ex_suitcase_carry", 36, "3 laps of the hallway: 36 m. Walk tall, don't lean", weights, WeightType.DUMBBELL)
                 // Alternando (TD-156, revision 16): izquierda y derecha seguidas, y el descanso
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
                 .copy(dumbbellCount = 1, workMode = WorkMode.DISTANCE, sides = listOf("Left", "Right"), alternateSides = true)
 
-        fun hipGlute(): Workout = Workout(
+        fun hipGlute(eased: Boolean = false): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
             exercises = listOf(
@@ -1947,21 +1969,25 @@ object MasterDefaults {
                 // 10 kg-, y el recorrido es mas largo: 21 · 31 · 36 lo pidio el mismo, "el mayor
                 // recorrido es lo que prefiero evaluar bien antes de subirle el peso". 10 reps
                 // con pausa de 2 s arriba. El historial del puente se queda en el suyo.
-                loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
+                //
+                // Revision 22 (1-oct): aliviado, ver [LUMBAR_HIP_EASED]. El puente va sin barra
+                // y pregunta como fue cada serie (TD-152), que es lo que dira si molesta.
+                if (eased) reps("ex_glute_bridge", 10, "No bar. 2 s pause at the top. Ribs down, don't arch", sets = 3, rest = 60, prep = 10)
+                else loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
                 // y el player no podia decir "1 de 10". El numero por serie es el mismo, asi
                 // que el historial no se parte.
                 // Revision 13: los dos primeros viajes ligeros el 22-sep y el tercero "bien"
                 // por segunda vez, asi que la rampa sube entera y 20 pasa a ser la cima.
-                carry(),
+                if (eased) carry(listOf(15.0, 15.0, 15.0)) else carry(),
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
                 // Despues de 20 viene la de 22.5 -no estaba en el inventario del 18-sep; la
                 // agrego el usuario el 19- y despues 25. El salto de 22.5 a 25 es de 11%.
                 // Revision 18: se empieza SENTADO, con la mancuerna sobre los muslos. Subir 22.5
                 // kg del piso al pecho era flexion con carga fuera del ejercicio, y "ponerse en
                 // posicion cuesta" mas que la sentadilla.
-                loaded("ex_box_squat", 8, "Start seated, dumbbell on the thighs. Chest up", listOf(17.5, 20.0, 22.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                loaded("ex_box_squat", 8, "Start seated, dumbbell on the thighs. Chest up", if (eased) listOf(17.5, 17.5, 17.5) else listOf(17.5, 20.0, 22.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
             ),
         )
     }

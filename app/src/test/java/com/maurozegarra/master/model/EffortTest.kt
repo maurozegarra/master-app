@@ -54,8 +54,12 @@ class EffortTest {
 
     @Test
     fun `McGill y el calentamiento no preguntan, el resto de NIKO si`() {
-        val lumbar = MasterDefaults.lumbarTraining("en")
+        val lumbar = MasterDefaults.lumbarTraining("en", easedHip = false)
         assertTrue(StepEngine.buildSteps(lumbar).none(Effort::asks))
+        // Aliviado (revision 22), el puente va sin peso y SI pregunta: es lo que dira si el
+        // patron todavia molesta.
+        val aliviado = MasterDefaults.lumbarTraining("en", easedHip = true)
+        assertEquals(setOf("ex_glute_bridge"), StepEngine.buildSteps(aliviado).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
 
         val niko = MasterDefaults.nikoTrainings("es")
         val calentamiento = niko.flatMap { StepEngine.buildSteps(it) }.filter { it.workoutName == "Calentamiento" }

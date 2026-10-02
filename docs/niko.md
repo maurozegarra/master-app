@@ -174,7 +174,7 @@ punto de partida y cada dia se ajusta con lo que paso en el anterior.
 | 1 | NIKO 1 · Glúteo pesado | **hecho el sábado 19-sep** como "NIKO - Glute Day", completo: hip thrust 45·55·65·70 (así registrado; 71 real), rumano, búlgara 5·7.5·10 por mano. Sin respuestas: el app aún no preguntaba. **Segunda vez el lunes 28** (revisión 16): igual, la hiperextensión a 3 × 10 |
 | 2 | NIKO 2 · Muay Thai | **hecho el lunes 21-sep**, completo (ver *Sus sesiones*) |
 | 3 | NIKO 3 · Tren superior | **hecho el martes 22-sep**, completo (ver *Sus sesiones*). El paseo del granjero va por vueltas (3 del pasillo, 36 m) y no por tiempo: así guarda el peso |
-| 4 | NIKO 4 · Glúteo a una pierna | **hecho el jueves 24-sep**, corrido un día por el corte de luz del 23 (ver *Sus sesiones*) |
+| 4 | NIKO 4 · Glúteo a una pierna | **hecho el jueves 24-sep**, corrido un día por el corte de luz del 23 (ver *Sus sesiones*). **Segunda vez el jueves 1-oct** (revisión 18) |
 | 5 | NIKO 5 · Muay Thai y potencia | **hecho el viernes 25-sep** (ver *Sus sesiones*). Las patadas van como dos ejercicios, teep y patada baja |
 | 6 | NIKO 6 · Mixto y movilidad | **hecho el sábado 26-sep**, completo, con el saco y el sprawl **en circuito** (TD-137) (ver *Sus sesiones*) |
 
@@ -277,6 +277,28 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 ## Sus sesiones
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
+
+### 2026-10-01 — NIKO 4 · Glúteo a una pierna, la segunda vez
+
+**De 08:22 a 09:42, 79 minutos, completa.**
+
+| Ejercicio | Carga | Lo que marcó | Para la próxima NIKO 4 |
+|---|---|---|---|
+| Subida al cajón | 2×5 las tres, por pierna | **bien las seis** | 5 · 5 · 7.5 |
+| Hip thrust a una pierna, 3 × 10 | su peso | bien las seis | igual |
+| Peso muerto a una pierna | 7.5 · 10 · 10 por lado | **7.5 ligera** en los dos lados; las de 10, bien | 10 · 10 · 10 |
+| Hiperextensión | su peso | bien las tres, **haciendo 12** (la pauta era 10) | 3 × 12 |
+| Pantorrilla sentada | 5 · 5 · 7.5 · 7.5 | 5 bien · **7.5 pesadas las dos** | 5 · 5 · 5 · 7.5 |
+| Puente · abducción | su peso · tobillera | bien las cuatro | igual |
+| Cuello | 4 × 20 s | bien las cuatro, la última incluida (TD-156) | — |
+
+- **El peso muerto a una pierna a 10 ya le sale bien** en los dos lados: la asimetría del 24
+  no apareció.
+- **La hiperextensión vuelve a 12**: las hizo y salieron bien, cuando el 24 las doce fueron
+  "Hard".
+- **La pantorrilla a 7.5 sigue pesada**, igual que el 24: un solo escalón de 7.5.
+- Sigue **NIKO 5** el viernes 2 (revisión 19): la cuerda con **90 s de descanso** entre
+  rounds, decisión del usuario, en vez de rounds de 2 minutos.
 
 ### 2026-09-30 — NIKO 3 · Tren superior, con la dominada asistida
 

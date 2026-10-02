@@ -10,7 +10,7 @@ import org.junit.Test
 class TrainingPreviewTest {
 
     // Con el respiro para contestar, como la arma el player.
-    private val lumbar = TrainingPreview.of(StepEngine.buildSteps(MasterDefaults.lumbarTraining("en"), answerWindow = true))
+    private val lumbar = TrainingPreview.of(StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedHip = false), answerWindow = true))
 
     private fun item(blocks: List<PreviewBlock>, id: String) = blocks.flatMap { it.items }.first { it.exerciseId == id }
 

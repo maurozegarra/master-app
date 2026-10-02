@@ -20,6 +20,8 @@ import org.junit.Test
 class LumbarTrainingTest {
 
     private val training = MasterDefaults.lumbarTraining("en")
+    // El bloque de cadera de siempre, sin el alivio de la revision 22.
+    private val normal = MasterDefaults.lumbarTraining("en", easedHip = false)
     private val short = MasterDefaults.lumbarShortTraining("en")
     private val steps = StepEngine.buildSteps(training.copy(workouts = training.workouts))
 
@@ -109,7 +111,7 @@ class LumbarTrainingTest {
     @Test
     fun `el hip thrust usa la barra de 6 kilos, no la de 20 por defecto`() {
         // Hasta la revision 18 era el puente de gluteos; la barra y su historia son las mismas.
-        val e = cadera(training).getValue("ex_hip_thrust")
+        val e = cadera(normal).getValue("ex_hip_thrust")
 
         assertEquals(WeightType.BARBELL, e.weightType)
         // 20 era el defecto del app y el 15-sep le enseno "40 kg" cuando iban a ser 26:
@@ -133,7 +135,23 @@ class LumbarTrainingTest {
         // 41 del puente, a pedido suyo, para evaluar el recorrido antes de cargar.
         assertEquals(listOf(21.0, 31.0, 36.0), e.setList.map { e.weightTotal(it) })
         assertTrue(e.setList.all { it.reps == 10 })
-        assertFalse(cadera(training).containsKey("ex_glute_bridge"))
+        assertFalse(cadera(normal).containsKey("ex_glute_bridge"))
+    }
+
+    @Test
+    fun `aliviado, el puente va sin peso y lo demas en lo mas bajo de su rampa`() {
+        // Revision 22 (1-oct), por el pinchazo en la nalga del 29-sep: el hip thrust era lo
+        // unico nuevo ese dia. El puente sin barra prueba el mismo patron sin carga.
+        val c = cadera(MasterDefaults.lumbarTraining("en", easedHip = true))
+        assertFalse(c.containsKey("ex_hip_thrust"))
+        val puente = c.getValue("ex_glute_bridge")
+        assertEquals(WeightType.NONE, puente.weightType)
+        assertEquals(3, puente.sets)
+        assertEquals(10, puente.workValue)
+        assertEquals(listOf(15.0, 15.0, 15.0), c.getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertEquals(listOf(17.5, 17.5, 17.5), c.getValue("ex_box_squat").setList.map { it.weight })
+        // El corto no se toca: el alivio es del bloque de cadera, no del carry.
+        assertEquals(listOf(15.0, 17.5, 20.0), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
     }
 
     @Test
@@ -142,13 +160,13 @@ class LumbarTrainingTest {
         // series del bloque marcadas ligeras el 19-sep). En la 13 suben las dos: el 22-sep
         // marco ligeras ocho de las nueve series, y la unica "bien" fue el tercer viaje del
         // carry, que por eso pasa a ser el primer peldano de la rampa nueva.
-        assertEquals(listOf(15.0, 17.5, 20.0), cadera(training).getValue("ex_suitcase_carry").setList.map { it.weight })
-        assertEquals(listOf(17.5, 20.0, 22.5), cadera(training).getValue("ex_box_squat").setList.map { it.weight })
+        assertEquals(listOf(15.0, 17.5, 20.0), cadera(normal).getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertEquals(listOf(17.5, 20.0, 22.5), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
         // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
         // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el
         // mismo -una mancuerna de 10 pesa 10-, asi que el historial no se parte.
         listOf("ex_box_squat", "ex_suitcase_carry").forEach {
-            val e = cadera(training).getValue(it)
+            val e = cadera(normal).getValue(it)
             assertEquals(WeightType.DUMBBELL, e.weightType)
             assertEquals(1, e.dumbbellCount)
         }
@@ -176,7 +194,7 @@ class LumbarTrainingTest {
         // Lo que se comparte es el peso, no el bloque entero: el corto lleva solo el carry
         // (revision 11). Si el completo sube, el corto sube con el; llevar dos numeros para
         // el mismo ejercicio seria dos historiales que no se pueden comparar.
-        val enCompleto = cadera(training).getValue("ex_suitcase_carry")
+        val enCompleto = cadera(normal).getValue("ex_suitcase_carry")
         val enCorto = short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }
 
         assertEquals(enCompleto.weightType, enCorto.weightType)
