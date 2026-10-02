@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.i18n.exerciseCount
 import com.maurozegarra.master.model.SessionLog
 import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.model.Training
@@ -693,7 +694,7 @@ private fun TrainingCard(
                 // Cuantos ejercicios y cuanto dura. El numero de workouts se fue: es como
                 // esta ORGANIZADO el training, no lo que vas a hacer con el.
                 listOfNotNull(
-                    "$exercises ${if (exercises == 1) t.exercise else t.exercises}",
+                    t.exerciseCount(exercises),
                     "~$minutos ${t.minShort}".takeIf { minutos > 0 },
                 ).joinToString(" · "),
                 color = AppTheme.colors.textDim,

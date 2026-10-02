@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.i18n.exerciseCount
 import com.maurozegarra.master.model.Workout
 import com.maurozegarra.master.ui.DraggableItem
 import com.maurozegarra.master.ui.SwipeAction
@@ -177,7 +178,7 @@ private fun WorkoutRow(
         workout.variants.joinToString(" / ") { it.name.ifBlank { t.variant } }
             .ifBlank { "${workout.variants.size} ${t.variant}" }
     } else {
-        "${workout.exercises.size} ${t.exercise}"
+        t.exerciseCount(workout.exercises.size)
     }
     SwipeActionsRow(actions = actions, controller = swipeController) {
         Row(

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.i18n.exerciseCount
 import com.maurozegarra.master.model.Training
 import com.maurozegarra.master.model.Workout
 import com.maurozegarra.master.ui.theme.Dims
@@ -135,7 +136,7 @@ private fun WorkoutPickRow(workout: Workout, t: Strings, onClick: () -> Unit) {
         workout.variants.joinToString(" / ") { it.name.ifBlank { t.variant } }
             .ifBlank { "${workout.variants.size} ${t.variant}" }
     } else {
-        "${workout.exercises.size} ${t.exercise}"
+        t.exerciseCount(workout.exercises.size)
     }
     Row(
         modifier = Modifier

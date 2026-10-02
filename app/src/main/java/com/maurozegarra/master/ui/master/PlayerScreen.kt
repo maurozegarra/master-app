@@ -103,6 +103,8 @@ import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.data.VideoState
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.i18n.exerciseCount
+import com.maurozegarra.master.i18n.workoutCount
 import com.maurozegarra.master.ui.AnimatedGlowBorder
 import com.maurozegarra.master.ui.ExerciseThumb
 import com.maurozegarra.master.ui.ExerciseVideo
@@ -187,7 +189,7 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
                 Text(vm.playerName, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 Text(
                     buildString {
-                        append("$totalExercises ${t.exercise} · ${groups.size} ${t.workout}")
+                        append("${t.exerciseCount(totalExercises)} · ${t.workoutCount(groups.size)}")
                         if (totalSec > 0) append(" · ~${formatRemaining(totalSec * 1000L)}")
                     },
                     color = AppTheme.colors.textDim,
@@ -298,7 +300,7 @@ private fun WorkoutGroupCard(
                     if (g.rotating && g.variant.isNotBlank()) {
                         append("${t.activeVariantLabel}: ${g.variant}")
                     } else {
-                        append("${g.items.size} ${t.exercise}")
+                        append(t.exerciseCount(g.items.size))
                     }
                     if (g.circuit) append(" · ${g.rounds} ${t.more.preview.rounds}")
                     if (g.estimatedSec > 0) append(" · ~${formatRemaining(g.estimatedSec * 1000L)}")

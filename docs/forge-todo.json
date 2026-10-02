@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-179",
+      "title": "Los conteos de ejercicios y workouts, en singular o plural",
+      "category": "UI",
+      "status": "done",
+      "manual": "VISTO de paso el 30-sep en la pantalla previa: decia \"7 Exercise · 4 Workout\". Cada sitio armaba el conteo a mano con la palabra en singular. Arreglado con el OK del usuario: Strings.exerciseCount / workoutCount (\"Workouts\" va en MoreStrings, Strings esta al tope), usadas en la pantalla previa, la lista de trainings, el editor, el selector de workouts y las variantes. Test en CountTest. VALIDADO el 1-oct (v1.0.354)."
+    },
+    {
       "id": "TD-178",
       "title": "El coach asigna un training para una fecha, y la lista lo resalta",
       "category": "Feature",

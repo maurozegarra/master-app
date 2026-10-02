@@ -729,7 +729,16 @@ data class MoreStrings(
     val voice: VoiceStrings,
     val preview: PreviewStrings,
     val testRun: TestRunStrings,
+    val workouts: String = "Workouts",
 )
+
+/**
+ * "1 Exercise", "7 Exercises": un conteo con su palabra en singular o plural. La pantalla
+ * previa decía "7 Exercise · 4 Workout" porque cada sitio armaba el texto a mano.
+ */
+fun Strings.exerciseCount(n: Int): String = "$n ${if (n == 1) exercise else exercises}"
+
+fun Strings.workoutCount(n: Int): String = "$n ${if (n == 1) workout else more.workouts}"
 
 /** La receta de cada ejercicio en la pantalla previa (TD-173). */
 data class PreviewStrings(

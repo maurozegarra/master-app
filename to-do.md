@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **146 / 178** hechos, 32 pendientes.
+Progreso: **148 / 179** hechos, 31 pendientes.
 
 ## Pendientes
 
@@ -206,12 +206,6 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 
 ### UI
 
-- [ ] **TD-177** El boton primario del app, con las seis decisiones de "Make any button look expensive"
-  - PEDIDO por el usuario el 28-sep, con un video de @motion_ui_interface: "el boton Start en la pantalla del Preview es rojo solido y se veria mejor si solo fuera borde y con el efecto exacto que menciona el video".
-
-Las seis decisiones del video: (1) tamano 48 de alto, 24 de relleno lateral; (2) etiqueta 17, semibold, verbo + objeto; (3) contraste: relleno satinado, borde de 1 px a 4:1 contra la pagina, etiqueta blanca a 14:1; (4) profundidad: riel hundido, borde de arriba iluminado, sombra y 8 / blur 24; (5) pildora, radio = alto / 2, un icono de 20 a 10 del texto; (6) movimiento: la luz recorre el borde en 200 ms, al presionar se hunde 1 px (120 ms, ease-out), y un spinner termina en check. Regla: respuesta en 100 ms, listo en 300.
-
-PROPUESTA, sin tocar codigo: cambiarlo en AppPrimaryButton, el unico boton primario (PrimaryButton lo delega), para que cambien los nueve a la vez y el app siga coherente. Pendiente del OK.
 - [ ] **TD-173** La pantalla previa del training muestra lo que de verdad se va a hacer
   - PEDIDO por el usuario el 26-sep: "casi no muestra detalle. Por ejemplo Curl-up 0:10, eso me dice que el ejercicio dura 10 segundos y no es cierto, no veo los pesos".
 
@@ -387,6 +381,8 @@ HECHO el 27-sep con el OK del usuario ("dale, haz las dos"): cada ejercicio con 
 
 ### UI
 
+- [x] **TD-179** Los conteos de ejercicios y workouts, en singular o plural
+- [x] **TD-177** El boton primario del app, con las seis decisiones de "Make any button look expensive"
 - [x] **TD-168** Tres ajustes de pantalla: la hora de la alarma en JetBrains Mono, el historial de NIKO en History, y menos hueco bajo el wordmark
 - [x] **TD-157** La alarma confirma lo que se toco: vibracion, el numero en grande y "Change"
 - [x] **TD-150** Los trainings archivados tambien se ordenan arrastrando

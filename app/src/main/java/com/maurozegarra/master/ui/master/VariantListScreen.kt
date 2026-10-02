@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
+import com.maurozegarra.master.i18n.exerciseCount
 import com.maurozegarra.master.model.WorkoutVariant
 import com.maurozegarra.master.ui.DraggableItem
 import com.maurozegarra.master.ui.SwipeAction
@@ -169,7 +170,7 @@ private fun VariantRow(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
                 )
-                Text("${variant.exercises.size} ${t.exercise}", color = AppTheme.colors.textDim, fontSize = 13.sp)
+                Text(t.exerciseCount(variant.exercises.size), color = AppTheme.colors.textDim, fontSize = 13.sp)
             }
         }
     }
