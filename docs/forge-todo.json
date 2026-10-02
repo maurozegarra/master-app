@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-180",
+      "title": "El NEXT dice cuanto dura y a que ritmo, y una duracion se escribe igual en todo el app",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO por el usuario el 1-oct: \"agrega el tiempo y velocidad al mostrar NEXT: WALK 12 min · 6 km/h, y homologa porque veo que en el preview pones '5 min' y en el historial pones '5:00 · 5.5 km/h'\".\n\nHECHO el mismo dia: TrainingPreview.duration es EL formato de una duracion (\"45 s\", \"5 min\", \"1:30\") y fmtSec delega en el, asi que el historial y los editores lo siguen. La previa suma la velocidad (PreviewItem.speedKmh): \"12 min · 6 km/h\". El NEXT del player agrega la duracion de lo que viene, si va por tiempo, y la velocidad elegida (vm.speedOf). El historial separa con \" · \", como la previa. Tests en TrainingPreviewTest y SetSummaryTest."
+    },
+    {
       "id": "TD-179",
       "title": "Los conteos de ejercicios y workouts, en singular o plural",
       "category": "UI",

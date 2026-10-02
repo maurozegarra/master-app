@@ -21,6 +21,8 @@ data class PreviewItem(
     val sides: Int,
     val alternate: Boolean,
     val rests: List<Int>,
+    /** La velocidad de una caminata (TD-124): la receta dice a qué ritmo, no solo cuánto. */
+    val speedKmh: Double? = null,
 ) {
     enum class Kind { TIME, REPS, DISTANCE }
 }
@@ -44,6 +46,7 @@ data class PreviewWords(
     val alternating: String = "sides alternating",
     val reps: String = "reps",
     val kg: String = "kg",
+    val kmh: String = "km/h",
 )
 
 object TrainingPreview {
@@ -83,6 +86,7 @@ object TrainingPreview {
                     rests = list.filter {
                         it.kind == StepKind.REST && it.exerciseIndex == ei && it.setIndex < it.totalSets - 1 && it.durationSec > 0
                     }.map { it.durationSec }.distinct().sorted(),
+                    speedKmh = s0.speedKmh,
                 )
             }
             PreviewBlock(
@@ -97,15 +101,22 @@ object TrainingPreview {
             )
         }
 
-    /** "3 × 10 · 21/31/36 kg · rest 90 s". */
+    /** "3 × 10 · 21/31/36 kg · rest 90 s", "12 min · 6 km/h". */
     fun describe(item: PreviewItem, w: PreviewWords = PreviewWords()): String = listOfNotNull(
         work(item, w),
+        item.speedKmh?.let { speed(it, w) },
         if (item.sides > 1) (if (item.alternate) w.alternating else w.eachSide) else null,
         weights(item, w),
         rest(item, w),
     ).joinToString(" · ")
 
-    /** 45 -> "45 s", 180 -> "3 min", 90 -> "1:30". */
+    /**
+     * 45 -> "45 s", 180 -> "3 min", 90 -> "1:30".
+     *
+     * Es EL formato de una duración en todo el app: la previa, el NEXT del player, el
+     * historial y los editores. El 1-oct la previa decía "5 min" y el historial "5:00" para
+     * la misma caminata.
+     */
     fun duration(sec: Int): String = when {
         sec < 60 -> "$sec s"
         sec % 60 == 0 -> "${sec / 60} min"
@@ -150,6 +161,9 @@ object TrainingPreview {
             else -> "${w.rest} ${duration(r.first())}–${duration(r.last())}"
         }
     }
+
+    /** "6 km/h", "5.5 km/h". */
+    fun speed(kmh: Double, w: PreviewWords = PreviewWords()): String = "${kg(kmh)} ${w.kmh}"
 
     private fun kg(d: Double): String {
         val r = Math.round(d * 10)

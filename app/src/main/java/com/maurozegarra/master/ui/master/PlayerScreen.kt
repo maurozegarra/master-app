@@ -157,6 +157,7 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
         alternating = t.more.preview.alternating,
         reps = t.more.preview.reps,
         kg = t.kg,
+        kmh = t.kmh,
     )
     // Tocar un ejercicio abre sus instrucciones: repasarlas es parte de revisar el training.
     var sheetTarget by remember { mutableStateOf<InstructionsTarget?>(null) }
@@ -1223,6 +1224,11 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
         )
         withStyle(SpanStyle(color = Color.White.copy(alpha = 0.72f))) {
             append("${t.nextLabel}: $nextName".uppercase())
+            // Lo que dura y a qué ritmo, para saber qué viene sin esperar a que empiece:
+            // "NEXT: WALK · 12 MIN · 6 KM/H". Con el formato de la previa.
+            if (nextWork.timeBased) append("  ·  ${fmtSec(nextWork.durationSec)}".uppercase())
+            val kmh = vm.speedOf(nextWork)
+            if (kmh != null) append("  ·  ${fmtNum(kmh)} ${t.kmh}".uppercase())
         }
         if (nextWork.weightTotal > 0.0) {
             withStyle(SpanStyle(color = Color.White.copy(alpha = 0.72f))) { append("  ·  ") }

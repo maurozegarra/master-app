@@ -24,19 +24,19 @@ class SetSummaryTest {
     @Test
     fun `por tiempo, solo el tiempo y sin las reps que ahi no miden nada`() {
         // En McGill decia "10 reps · 10s" en cada uno de los doce aguantes.
-        assertEquals("10s", setSummary(SetRecord(reps = 10, durationSec = 10), timeBased = true, t))
-        assertEquals("6:00", setSummary(SetRecord(reps = 12, durationSec = 360), timeBased = true, t))
+        assertEquals("10 s", setSummary(SetRecord(reps = 10, durationSec = 10), timeBased = true, t))
+        assertEquals("6 min", setSummary(SetRecord(reps = 12, durationSec = 360), timeBased = true, t))
     }
 
     @Test
     fun `por tiempo con peso, el tiempo y el peso`() {
-        assertEquals("30s  ·  10 kg", setSummary(SetRecord(durationSec = 30, weightKg = 10.0), timeBased = true, t))
+        assertEquals("30 s · 10 kg", setSummary(SetRecord(durationSec = 30, weightKg = 10.0), timeBased = true, t))
     }
 
     @Test
     fun `lo que salio contra lo planeado, cuando no fue igual`() {
         // TD-152: el historial decia 8 aunque salieran 6, y 25 s aunque se soltara a los 18.
         assertEquals("6/8 ${t.repLabel}", setSummary(SetRecord(reps = 8, repsDone = 6), timeBased = false, t))
-        assertEquals("18s/25s", setSummary(SetRecord(durationSec = 18, plannedSec = 25), timeBased = true, t))
+        assertEquals("18 s/25 s", setSummary(SetRecord(durationSec = 18, plannedSec = 25), timeBased = true, t))
     }
 }

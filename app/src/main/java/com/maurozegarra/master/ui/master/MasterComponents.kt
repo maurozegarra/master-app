@@ -49,7 +49,6 @@ import com.maurozegarra.master.ui.theme.FEEL_STEADY
 import com.maurozegarra.master.ui.theme.FEEL_UP
 import com.maurozegarra.master.ui.theme.STATUS_SKIPPED
 import com.maurozegarra.master.ui.theme.Dims
-import com.maurozegarra.master.util.pad2
 
 /** Paleta de colores para etapas (ARGB Long), igual orden que en los mocks. */
 internal val STAGE_COLORS: List<Long> = listOf(
@@ -58,7 +57,8 @@ internal val STAGE_COLORS: List<Long> = listOf(
     0xFF455A64L, 0xFF6D4C41L,
 )
 
-internal fun fmtSec(s: Int): String = if (s < 60) "${s}s" else "${s / 60}:${pad2(s % 60)}"
+/** Una duración, con el formato único de [TrainingPreview.duration]: "45 s", "5 min", "1:30". */
+internal fun fmtSec(s: Int): String = com.maurozegarra.master.model.TrainingPreview.duration(s)
 
 /** Un decimal solo cuando hace falta: 6.0 -> "6", 6.5 -> "6.5". Vale para kilos y km/h. */
 internal fun fmtNum(d: Double): String {
@@ -85,7 +85,7 @@ internal fun setSummary(sr: SetRecord, timeBased: Boolean, t: Strings): String {
     val reps = sr.repsDone?.let { "$it/${sr.reps}" } ?: "${sr.reps}"
     val tiempo = sr.plannedSec?.let { "${fmtSec(sr.durationSec)}/${fmtSec(it)}" } ?: fmtSec(sr.durationSec)
     return when {
-        timeBased -> listOfNotNull(tiempo, kmh, kg).joinToString("  \u00b7  ")
+        timeBased -> listOfNotNull(tiempo, kmh, kg).joinToString(" \u00b7 ")
         kg != null -> "$reps \u00d7 $kg"
         else -> "$reps ${t.repLabel}"
     }
