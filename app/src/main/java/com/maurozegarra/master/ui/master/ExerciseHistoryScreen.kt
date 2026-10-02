@@ -113,7 +113,7 @@ private fun ExerciseSessionCard(
                     fontSize = 16.sp,
                 )
                 Text(
-                    "${session.trainingName}  ·  ${zdt.format(timeFmt)}",
+                    listOfNotNull(session.trainingName, zdt.format(timeFmt), restLabel(er, t)).joinToString("  ·  "),
                     color = AppTheme.colors.textDim,
                     fontSize = 13.sp,
                 )
@@ -123,7 +123,7 @@ private fun ExerciseSessionCard(
             }
         }
         Spacer(Modifier.height(8.dp))
-        er.sets.forEachIndexed { i, sr -> SetLine(i, sr, er.timeBased, t, 13.sp) }
+        SetLines(er, t, 13.sp)
         // Solo para registros de antes de TD-117 (uno por ejercicio); los de ahora van por serie.
         if (er.sets.none { it.feedbackDeltaKg != null } && er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {
             Spacer(Modifier.height(4.dp))

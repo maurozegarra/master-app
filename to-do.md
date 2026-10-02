@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **148 / 179** hechos, 31 pendientes.
+Progreso: **148 / 181** hechos, 33 pendientes.
 
 ## Pendientes
 
@@ -206,6 +206,14 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 
 ### UI
 
+- [ ] **TD-181** El detalle del historial dice al menos lo que dice la previa: series iguales en una fila, y los descansos
+  - PEDIDO por el usuario el 1-oct, con captura: la previa dice "Curl-up 12 x 10 s · rest 3 s-30 s" y el historial lista doce filas de "10 s" que no dicen nada: "el preview tiene mas detalle que la pantalla del detalle".
+
+HECHO el mismo dia con el OK del usuario: (1) las series seguidas que dicen lo mismo -mismo valor y misma respuesta- van en una fila, "1-12  10 s"; una serie distinta o con otra respuesta rompe el tramo y se sigue viendo. (2) El registro guarda el descanso que vino despues de cada serie (SetRecord.restSec, el que de verdad paso: si lo salto, 0), y la cabecera del ejercicio lo resume como la previa: "rest 3 s-30 s". Solo desde ahora: las sesiones viejas no lo tienen y no se inventa. Al final quedo el descanso que paso de verdad, no 0: saltarlo a los 10 s guarda 10. Los tramos en SetRuns.of, los descansos en SetRuns.rests y el texto en TrainingPreview.rest, el mismo de la previa. Alternando lados, el descanso cierra la serie despues del ultimo lado y el primero toma ese. Tests en SetRunsTest.
+- [ ] **TD-180** El NEXT dice cuanto dura y a que ritmo, y una duracion se escribe igual en todo el app
+  - PEDIDO por el usuario el 1-oct: "agrega el tiempo y velocidad al mostrar NEXT: WALK 12 min · 6 km/h, y homologa porque veo que en el preview pones '5 min' y en el historial pones '5:00 · 5.5 km/h'".
+
+HECHO el mismo dia: TrainingPreview.duration es EL formato de una duracion ("45 s", "5 min", "1:30") y fmtSec delega en el, asi que el historial y los editores lo siguen. La previa suma la velocidad (PreviewItem.speedKmh): "12 min · 6 km/h". El NEXT del player agrega la duracion de lo que viene, si va por tiempo, y la velocidad elegida (vm.speedOf). El historial separa con " · ", como la previa. Tests en TrainingPreviewTest y SetSummaryTest.
 - [ ] **TD-173** La pantalla previa del training muestra lo que de verdad se va a hacer
   - PEDIDO por el usuario el 26-sep: "casi no muestra detalle. Por ejemplo Curl-up 0:10, eso me dice que el ejercicio dura 10 segundos y no es cierto, no veo los pesos".
 

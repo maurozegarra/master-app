@@ -458,6 +458,12 @@ data class SetRecord(
      * a los 18.
      */
     val plannedSec: Int? = null,
+    /**
+     * Los segundos de descanso que vinieron DESPUES de esta serie, los que pasaron de verdad
+     * (TD-181): si se salto a los 10 s, 10. Null es que no hubo descanso o que la sesion es
+     * de antes de que se guardara; no se reconstruye desde el training, que pudo cambiar.
+     */
+    val restSec: Int? = null,
 )
 
 enum class ExerciseStatus {

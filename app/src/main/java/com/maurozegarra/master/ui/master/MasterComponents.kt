@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -102,9 +103,16 @@ internal fun setSummary(sr: SetRecord, timeBased: Boolean, t: Strings): String {
  * no es "justo".
  */
 @Composable
-internal fun SetLine(index: Int, sr: SetRecord, timeBased: Boolean, t: Strings, fontSize: TextUnit) {
+internal fun SetLine(index: Int, sr: SetRecord, timeBased: Boolean, t: Strings, fontSize: TextUnit, lastIndex: Int = index) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("${index + 1}", color = AppTheme.colors.textFaded, fontSize = fontSize, modifier = Modifier.width(20.dp))
+        // Un tramo de series iguales lleva su rango, "1–12" (TD-181); por eso el ancho es un
+        // minimo y no fijo, con el respiro detras.
+        Text(
+            if (lastIndex > index) "${index + 1}–${lastIndex + 1}" else "${index + 1}",
+            color = AppTheme.colors.textFaded,
+            fontSize = fontSize,
+            modifier = Modifier.widthIn(min = 20.dp).padding(end = 6.dp),
+        )
         Text(setSummary(sr, timeBased, t), color = AppTheme.colors.textDim, fontSize = fontSize)
         // El peso (TD-117) o, en lo que no lo lleva, como fue (TD-152): mismas flechas y mismos
         // colores. Un solo icono por serie, porque una serie tiene una de las dos cosas.
@@ -136,6 +144,21 @@ internal fun SetLine(index: Int, sr: SetRecord, timeBased: Boolean, t: Strings, 
         }
     }
 }
+
+/** Las series de un ejercicio del historial, en tramos de series iguales (TD-181). */
+@Composable
+internal fun SetLines(er: com.maurozegarra.master.model.ExerciseRecord, t: Strings, fontSize: TextUnit) {
+    com.maurozegarra.master.model.SetRuns.of(er.sets).forEach { r ->
+        SetLine(r.first, r.set, er.timeBased, t, fontSize, lastIndex = r.last)
+    }
+}
+
+/** "rest 3 s–30 s": los descansos que pasaron entre series, como los dice la previa (TD-181). */
+internal fun restLabel(er: com.maurozegarra.master.model.ExerciseRecord, t: Strings): String? =
+    com.maurozegarra.master.model.TrainingPreview.rest(
+        com.maurozegarra.master.model.SetRuns.rests(er.sets),
+        com.maurozegarra.master.model.PreviewWords(rest = t.more.preview.rest),
+    )
 
 @Composable
 internal fun PrimaryButton(

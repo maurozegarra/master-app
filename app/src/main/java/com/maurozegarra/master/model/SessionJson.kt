@@ -27,6 +27,7 @@ object SessionJson {
                     sr.repsDone?.let { setObj.put("repsDone", it) }
                     sr.distanceM?.let { setObj.put("distanceM", it) }
                     sr.plannedSec?.let { setObj.put("plannedSec", it) }
+                    sr.restSec?.let { setObj.put("restSec", it) }
                     setsArr.put(setObj)
                 }
                 val erObj = JSONObject()
@@ -93,6 +94,7 @@ object SessionJson {
                                 repsDone = if (so.has("repsDone")) so.optInt("repsDone") else null,
                                 distanceM = if (so.has("distanceM")) so.optInt("distanceM") else null,
                                 plannedSec = if (so.has("plannedSec")) so.optInt("plannedSec") else null,
+                                restSec = if (so.has("restSec")) so.optInt("restSec") else null,
                             ))
                         }
                     }

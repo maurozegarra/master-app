@@ -197,7 +197,10 @@ class WorkoutPlayerService : Service() {
 
     private fun advance() {
         if (finished) return
-        steps.getOrNull(index)?.let { if (it.kind == StepKind.WORK) recorder.onWorkStepCompleted(it, actualSec(it)) }
+        steps.getOrNull(index)?.let {
+            if (it.kind == StepKind.WORK) recorder.onWorkStepCompleted(it, actualSec(it))
+            closeRest(it)
+        }
         val next = index + 1
         if (next >= steps.size) {
             finishPlayer()
@@ -217,6 +220,16 @@ class WorkoutPlayerService : Service() {
         return ((hecho + 500) / 1000).toInt().coerceIn(0, step.durationSec)
     }
 
+    /**
+     * Si [step] es un descanso, anota lo que duro de verdad (TD-181): saltarlo a los 10 s es
+     * haber descansado 10, no los 30 del plan.
+     */
+    private fun closeRest(step: PlayerStep) {
+        if (step.kind != StepKind.REST || step.durationSec <= 0) return
+        val pasado = step.durationSec * 1000L - currentRemaining()
+        recorder.onRestEnded(step, ((pasado + 500) / 1000).toInt().coerceIn(0, step.durationSec))
+    }
+
     private fun goBack() {
         if (finished) return
         val prev = index - 1
@@ -226,7 +239,10 @@ class WorkoutPlayerService : Service() {
 
     private fun skipStep() {
         if (finished) return
-        steps.getOrNull(index)?.let { if (it.kind == StepKind.WORK) recorder.onWorkStepSkipped(it) }
+        steps.getOrNull(index)?.let {
+            if (it.kind == StepKind.WORK) recorder.onWorkStepSkipped(it)
+            closeRest(it)
+        }
         val next = index + 1
         if (next >= steps.size) {
             finishPlayer()
@@ -239,6 +255,7 @@ class WorkoutPlayerService : Service() {
     private fun skipExercise() {
         if (finished) return
         val current = steps.getOrNull(index) ?: return
+        closeRest(current)
         val remainingWorkSteps = steps.filter {
             it.ownerExerciseId == current.ownerExerciseId && it.workoutIndex == current.workoutIndex &&
                 it.kind == StepKind.WORK && it.setIndex >= current.setIndex
@@ -654,6 +671,7 @@ class WorkoutPlayerService : Service() {
         if (sr.skipped) recorder.onWorkStepSkipped(step) else recorder.onWorkStepCompleted(step, sr.durationSec)
         sr.feedbackDeltaKg?.let { recorder.setFeedback(er.exerciseId, er.workoutIndex, setIdx, it, er.side) }
         sr.effort?.let { recorder.setEffort(er.exerciseId, er.workoutIndex, setIdx, it, sr.repsDone, er.side) }
+        sr.restSec?.let { recorder.setRest(er.exerciseId, er.workoutIndex, setIdx, it, er.side) }
     }
 
     private fun clearPersist() {

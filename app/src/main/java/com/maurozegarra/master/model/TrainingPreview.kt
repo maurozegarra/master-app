@@ -153,8 +153,13 @@ object TrainingPreview {
         return if (p.distinct().size == 1) "${kg(p[0])} ${w.kg}" else "${p.joinToString("/") { kg(it) }} ${w.kg}"
     }
 
-    private fun rest(item: PreviewItem, w: PreviewWords): String? {
-        val r = item.rests
+    private fun rest(item: PreviewItem, w: PreviewWords): String? = rest(item.rests, w)
+
+    /**
+     * "rest 30 s", "rest 3 s–30 s". Lo usa tambien el historial (TD-181), con los descansos
+     * que pasaron de verdad: las dos pantallas lo dicen igual.
+     */
+    fun rest(r: List<Int>, w: PreviewWords = PreviewWords()): String? {
         return when {
             r.isEmpty() -> null
             r.size == 1 -> "${w.rest} ${duration(r[0])}"

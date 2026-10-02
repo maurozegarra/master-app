@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -516,7 +517,13 @@ private fun ExerciseDetailRow(er: ExerciseRecord, accent: Color, t: Strings, onC
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                er.name,
+                androidx.compose.ui.text.buildAnnotatedString {
+                    append(er.name)
+                    // El descanso, apagado: es contexto de la serie, no el ejercicio (TD-181).
+                    restLabel(er, t)?.let { r ->
+                        withStyle(androidx.compose.ui.text.SpanStyle(color = AppTheme.colors.textDim, fontWeight = FontWeight.Normal)) { append(" · $r") }
+                    }
+                },
                 color = AppTheme.colors.textPrimary,
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
@@ -529,7 +536,7 @@ private fun ExerciseDetailRow(er: ExerciseRecord, accent: Color, t: Strings, onC
             )
         }
         Spacer(Modifier.height(4.dp))
-        er.sets.forEachIndexed { i, sr -> SetLine(i, sr, er.timeBased, t, 12.sp) }
+        SetLines(er, t, 12.sp)
         // Solo para registros de antes de TD-117, que guardaban uno por ejercicio. Los de
         // ahora ya lo dicen serie a serie arriba, y repetirlo aqui seria contarlo dos veces.
         if (er.sets.none { it.feedbackDeltaKg != null } && er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {

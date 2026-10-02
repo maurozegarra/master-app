@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-181",
+      "title": "El detalle del historial dice al menos lo que dice la previa: series iguales en una fila, y los descansos",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO por el usuario el 1-oct, con captura: la previa dice \"Curl-up 12 x 10 s · rest 3 s-30 s\" y el historial lista doce filas de \"10 s\" que no dicen nada: \"el preview tiene mas detalle que la pantalla del detalle\".\n\nHECHO el mismo dia con el OK del usuario: (1) las series seguidas que dicen lo mismo -mismo valor y misma respuesta- van en una fila, \"1-12  10 s\"; una serie distinta o con otra respuesta rompe el tramo y se sigue viendo. (2) El registro guarda el descanso que vino despues de cada serie (SetRecord.restSec, el que de verdad paso: si lo salto, 0), y la cabecera del ejercicio lo resume como la previa: \"rest 3 s-30 s\". Solo desde ahora: las sesiones viejas no lo tienen y no se inventa. Al final quedo el descanso que paso de verdad, no 0: saltarlo a los 10 s guarda 10. Los tramos en SetRuns.of, los descansos en SetRuns.rests y el texto en TrainingPreview.rest, el mismo de la previa. Alternando lados, el descanso cierra la serie despues del ultimo lado y el primero toma ese. Tests en SetRunsTest."
+    },
+    {
       "id": "TD-180",
       "title": "El NEXT dice cuanto dura y a que ritmo, y una duracion se escribe igual en todo el app",
       "category": "UI",

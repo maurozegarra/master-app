@@ -38,6 +38,12 @@ class SessionRecorder {
      * de repeticiones antes de terminarla, cuando todavía no existe.
      */
     private val effort = mutableMapOf<ExerciseKey, MutableMap<Int, Pair<Int, Int?>>>()
+
+    /**
+     * El descanso que vino despues de cada serie (TD-181). Aparte porque el descanso termina
+     * DESPUES de que su serie se registro.
+     */
+    private val rest = mutableMapOf<ExerciseKey, MutableMap<Int, Int>>()
     private var totalExercisesByWorkout = mutableMapOf<Int, Int>()
 
     /**
@@ -168,6 +174,29 @@ class SessionRecorder {
         effort.getOrPut(ExerciseKey(exerciseId, workoutIndex, side)) { mutableMapOf() }[setIndex] = value to repsDone
     }
 
+    /**
+     * Termino el descanso [step], tras [actualSec] segundos: se le pega a la serie que lo
+     * precede. Si se vuelve a pasar por el, gana la ultima vez.
+     */
+    fun onRestEnded(step: PlayerStep, actualSec: Int) {
+        if (step.kind != StepKind.REST) return
+        setRest(step.ownerExerciseId, step.workoutIndex, step.setIndex, actualSec, step.side)
+    }
+
+    fun setRest(exerciseId: String, workoutIndex: Int, setIndex: Int, sec: Int, side: String = "") {
+        rest.getOrPut(ExerciseKey(exerciseId, workoutIndex, side)) { mutableMapOf() }[setIndex] = sec
+    }
+
+    /**
+     * El descanso de la serie [i] de [key]. Alternando lados, el descanso cierra la serie
+     * despues del ULTIMO lado y lleva su nombre: el primer lado no tiene ninguno propio, y
+     * descanso lo mismo que el otro. Uno por lados en fila tiene los suyos y no mira al otro.
+     */
+    private fun restOf(key: ExerciseKey, i: Int): Int? {
+        rest[key]?.let { return it[i] }
+        return rest.entries.firstOrNull { (k, _) -> k.exerciseId == key.exerciseId && k.workoutIndex == key.workoutIndex }?.value?.get(i)
+    }
+
     /** La velocidad que se puso en la serie [setIndex]; gana sobre la prescrita. */
     fun setSpeed(exerciseId: String, workoutIndex: Int, setIndex: Int, kmh: Double, side: String = "") {
         speed.getOrPut(ExerciseKey(exerciseId, workoutIndex, side)) { mutableMapOf() }[setIndex] = kmh
@@ -183,6 +212,7 @@ class SessionRecorder {
                 marked[i]?.let { r = r.copy(feedbackDeltaKg = it) }
                 puesta[i]?.let { r = r.copy(speedKmh = it) }
                 como[i]?.let { (e, hechas) -> r = r.copy(effort = e, repsDone = hechas) }
+                restOf(key, i)?.let { r = r.copy(restSec = it) }
                 r
             },
             totalSets,
@@ -244,5 +274,6 @@ class SessionRecorder {
         feedback.clear()
         speed.clear()
         effort.clear()
+        rest.clear()
     }
 }
