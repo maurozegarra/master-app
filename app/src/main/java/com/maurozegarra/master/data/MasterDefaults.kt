@@ -372,8 +372,19 @@ object MasterDefaults {
      *
      * Revision 22 (1-oct): el jueves, sin pinchazo en todo el dia y sin relajante. El viernes
      * vuelve el completo con el bloque de cadera ALIVIADO ([LUMBAR_HIP_EASED]).
+     *
+     * Revision 25 (3-oct): el dia malo, asignado al domingo 4. El sabado volvio el hip thrust
+     * a 21 · 31 · 36 y la parte alta le cargo la espalda baja aunque no arqueara: empezo en 1 y
+     * termino casi en 4, sin pinchazo ni irradiacion. El hip thrust sale; que va el martes en su
+     * lugar se decide el lunes con las mananas (probable: el bloque aliviado).
+     *
+     * Revision 26 (3-oct): el dia malo con McGill completo (6-4-2), pedido suyo: lo alivia, y
+     * 6 aguantes por ejercicio le quedaban cortos.
+     *
+     * Revision 27 (3-oct): y el corto tambien, a prueba esta semana. La mitad era por el tiempo
+     * de los dias presenciales; son unos 6 minutos mas. Si no le entra, se vuelve a 3-2-1.
      */
-    const val LUMBAR_REVISION = 24
+    const val LUMBAR_REVISION = 27
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -475,9 +486,9 @@ object MasterDefaults {
      * donde lo que sobra es carga y lo que falta es movimiento. Lo escribio el asistente y lo
      * encontro el 20-sep-2026 comparando las dos rutinas.
      *
-     * Ahora: la caminata sube a 10 minutos y gana una de cierre, McGill baja a la mitad
-     * (3-2-1 en vez de 6-4-2) y el bloque con carga NO va. No se salta con el skip del
-     * player: no esta.
+     * Ahora: la caminata sube a 10 minutos y gana una de cierre, y el bloque con carga NO va.
+     * No se salta con el skip del player: no esta. McGill iba a la mitad (3-2-1); desde la
+     * revision 26 va completo, porque es lo que lo alivia.
      *
      * Es un training aparte y no una edicion del otro: el normal ya esta validado para un
      * dia normal, y tener los dos permite comparar en la bitacora que paso con cada orden.
@@ -489,7 +500,8 @@ object MasterDefaults {
             id = LUMBAR_BAD_DAY_ID,
             name = "LUMBAR (bad day)",
             // Revision 20: el miercoles 30, por el pinchazo en la nalga (ver coach-log 29-sep).
-            scheduleDates = setOf(java.time.LocalDate.of(2026, 9, 30), java.time.LocalDate.of(2026, 10, 1)),
+            // Revision 25: el domingo 4, tras terminar el sabado casi en 4 (coach-log 3-oct).
+            scheduleDates = setOf(java.time.LocalDate.of(2026, 9, 30), java.time.LocalDate.of(2026, 10, 1), java.time.LocalDate.of(2026, 10, 4)),
             tracksPain = true,
             workouts = listOf(
                 b.mobility(),
@@ -497,7 +509,10 @@ object MasterDefaults {
                 // se lee en el player. "Paso vivo" costo tres sesiones: a 3 km/h no hacia
                 // nada, a 5 le solto las caderas. Un adjetivo no dosifica.
                 b.walk(if (lang == "es") "Caminata" else "Walk", sec = 600, note = "After the mobility, not before", kmh = 6.0),
-                b.mcgill(blocks = listOf(3, 2, 1)),
+                // Revision 26 (3-oct): McGill COMPLETO, pedido suyo: "siento que me alivia
+                // demasiado, asi que solo 6 me queda corto". Iba a la mitad (3-2-1) para no
+                // cargar un dia malo, pero McGill es lo que lo alivia, no lo que lo carga.
+                b.mcgill(),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
             ),
             createdAt = now,
@@ -515,8 +530,8 @@ object MasterDefaults {
      *  1. **Caminar.** Es lo que movio la aguja. Su dolor de la manana es por quedarse
      *     quieto, no por esfuerzo: a las 4:30, tras cinco horas en cama, marca 0, y vuelve
      *     tras dos horas y media sin moverse. Lo primero que se protege.
-     *  2. **McGill**, a la mitad de aguantes. Resistencia a baja carga: le ensena a la
-     *     espalda a aguantar sin cargarla.
+     *  2. **McGill**. Resistencia a baja carga: le ensena a la espalda a aguantar sin
+     *     cargarla. Iba a la mitad de aguantes; completo desde la revision 27, a prueba.
      *  3. **Movilidad**, que son dos minutos y es el patron con el que se agacha todo el dia.
      *  4. **La carga**, que es lo primero que se cae cuando no hay tiempo. Se queda solo el
      *     carry (ver [LumbarBlocks.carryOnly]); el puente y la sentadilla los hace igual
@@ -538,7 +553,10 @@ object MasterDefaults {
             workouts = listOf(
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = 6.0),
                 b.mobility(),
-                b.mcgill(blocks = listOf(3, 2, 1)),
+                // Revision 27 (3-oct): McGill COMPLETO, como en el dia malo (revision 26). Iba a la
+                // mitad por el tiempo de los dias presenciales; el lo pidio completo porque lo
+                // alivia, a prueba esta semana: son unos 6 minutos mas.
+                b.mcgill(),
                 b.carryOnly(),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
             ),
@@ -1870,7 +1888,8 @@ object MasterDefaults {
             note: String,
             /**
              * Los bloques de la piramide descendente. 6-4-2 es la dosis completa; 3-2-1 es
-             * la mitad, para el dia con prisa y para el dia malo (revision 11).
+             * la mitad, que usaron el corto y el dia malo de la revision 11 a la 25. Desde la
+             * 27 los tres van completos, a pedido suyo.
              */
             blocks: List<Int> = listOf(6, 4, 2),
             /** Lados, si el movimiento se hace a los dos (TD-147). */

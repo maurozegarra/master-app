@@ -229,12 +229,13 @@ class LumbarTrainingTest {
     // ---------- El corto, para los dias con trabajo presencial (revision 11) ----------
 
     @Test
-    fun `el corto camina, hace McGill a la mitad y solo carga el carry`() {
+    fun `el corto camina, hace McGill completo y solo carga el carry`() {
         assertEquals(
             listOf("Warm Walk", "Mobility", "McGill Big 3", "Carry", "Cool Walk"),
             short.workouts.map { it.name },
         )
-        assertEquals(listOf(6, 6, 6), short.workouts.first { it.name == "McGill Big 3" }.exercises.map { it.sets })
+        // Revision 27 (3-oct): completo, a pedido suyo (iba a la mitad por el tiempo).
+        assertEquals(listOf(12, 12, 12), short.workouts.first { it.name == "McGill Big 3" }.exercises.map { it.sets })
         // De los tres con carga se queda el que mas da por minuto y que ademas es caminar
         // cargado. El puente y la sentadilla los hace igual cuatro dias por semana.
         assertEquals(
@@ -355,13 +356,15 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `el dia malo baja McGill a la mitad`() {
+    fun `el dia malo hace McGill completo`() {
         fun aguantes(t: com.maurozegarra.master.model.Training) =
             t.workouts.first { it.name == "McGill Big 3" }.exercises.map { it.sets }
 
+        // Revision 26 (3-oct): iba a la mitad; el usuario lo pidio completo porque es lo que
+        // lo alivia ("solo 6 me queda corto"). Igual que el normal: doce aguantes.
         assertEquals(listOf(12, 12, 12), aguantes(training))
-        assertEquals(listOf(6, 6, 6), aguantes(badDay))
-        // Y los 10 s de cada aguante no se tocan: lo que baja es cuantos, no cuanto dura.
+        assertEquals(listOf(12, 12, 12), aguantes(badDay))
+        // Y los 10 s de cada aguante no se tocan.
         assertTrue(badDay.workouts.first { it.name == "McGill Big 3" }.exercises.all { it.workValue == 10 })
     }
 

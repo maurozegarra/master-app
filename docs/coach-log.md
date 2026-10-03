@@ -5,6 +5,66 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-03 — vigésima sesión: vuelve el hip thrust y algo no anda bien
+
+**LUMBAR** completo, de 09:53 a 11:30, **96 minutos**. Alarma de las 7:00, contestada a la
+hora: **dolor 1, aflojó en 15 minutos**, la tercera mañana seguida en 1. **Se acostó a las
+22:40**: unas 8 h 20 en cama, la noche más larga de la serie.
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| Hip thrust en su banca, pausa 2 s | 21 · 31 · 36 × 10 | "bien" las tres, pero ver la nota |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20, alternado | "bien" las seis |
+| Box squat **sobre la plyobox de 51**, mancuerna en el step | 17.5 · 17.5 · 17.5 × 8 | "bien" las tres, con dolor (nota) |
+
+Su nota:
+
+> *"Hip Thrust se siente que algo anda mal y en Box squat ha bajado el dolor pero es
+> suficiente para quedarme con malestar. Ahorita estoy adolorido. Empecé con dolor en 1 y
+> termino en mínimo 3."*
+
+- **Abrió "Back crisis today" y marcó 3 en *antes*: se confundió.** Lo real es lo de la
+  nota: **antes 1, al terminar casi 4**, y a las 18:30 había bajado a 2. El 3 del app no es
+  un dato.
+- **Es la segunda vez del hip thrust y la segunda con problemas.** El 29 de septiembre salió
+  ligero, pero esa tarde apareció el pinchazo en la nalga. Hoy, "algo anda mal" durante el
+  ejercicio. El puente sin carga del 2 de octubre salió fácil.
+- **El box squat sobre la plyobox duele menos** que en la banca: el cambio de montaje sirvió,
+  pero no alcanza.
+- **Al terminar está en 3, y adolorido.** Es el dolor de crisis, el de antes y después de
+  entrenar, que no aparecía desde el 30 de septiembre.
+- **Qué anduvo mal, en sus palabras:**
+
+  > *"El movimiento en la parte alta, pese a que tuve extra cuidado de no arquear mi
+  > espalda, igual sentía que la lastimaba y eso ya la dejó resentida para el box squat."*
+
+  Es la espalda baja, al centro. **El pinchazo de la nalga no apareció.** El dolor no baja a
+  la pierna.
+- **Lectura:** lo que molesta es el **final del recorrido con carga**: la cadera extendida
+  del todo bajo 36 kg, aunque no arquee. El puente sin peso llega al mismo arriba y salió
+  fácil; la diferencia es la carga. El box squat ya entró con la espalda resentida, así que
+  hoy no dice nada limpio sobre la plyobox.
+- **NIKO:** entrenó toda la semana, del 28 de septiembre al 2 de octubre; la última fue NIKO 5
+  (Muay Thai y potencia). Hoy no entrenó por trabajo y retoma mañana. *Primero escribí que no
+  había sesiones desde el 22: leí las tres últimas en el orden del archivo, no por fecha.*
+- **Decidido con él (revisión 25, v1.0.364):**
+  - **Domingo 4: LUMBAR (bad day)** en vez del corto (caminata, movilidad y McGill, sin
+    carry), asignado por fecha como el 30 de septiembre.
+  - **El hip thrust sale hasta nuevo aviso.** Qué va el martes en su lugar se decide el lunes
+    con las mañanas del domingo y el lunes. Lo probable es el bloque aliviado del 2 de
+    octubre: puente sin peso, carry 15 · 15 · 15 y box squat en la plyobox.
+  - El lunes va el corto, como siempre.
+- **Revisión 26 (v1.0.366): el día malo con McGill completo** (6-4-2, doce aguantes), pedido
+  suyo: *"siento que me alivia demasiado, así que sólo 6 me queda corto"*. Iba a la mitad para
+  no cargar un día malo, pero McGill es lo que lo alivia.
+- **Revisión 27 (v1.0.367): el corto también con McGill completo**, a prueba esta semana.
+  La mitad era por el tiempo de los días presenciales (lunes, miércoles y jueves), y él lo
+  tiene presente: *"la razón era el tiempo... probemos"*. Son unos 6 minutos más. **A
+  revisar el fin de semana:** si le entró en los días presenciales o si se recortó otra
+  cosa para que entre.
+
+---
+
 ## 2026-10-02 — decimonovena sesión: vuelve el completo, y el box squat cambia de montaje
 
 **LUMBAR** completo, de 07:20 a 08:30, **70 minutos**. Alarma de las 7:00, contestada a las
