@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **151 / 184** hechos, 33 pendientes.
+Progreso: **159 / 184** hechos, 25 pendientes.
 
 ## Pendientes
 
@@ -42,16 +42,6 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
-- [ ] **TD-178** El coach asigna un training para una fecha, y la lista lo resalta
-  - PEDIDO por el usuario el 29-sep: "en la lista sigue resaltado LUMBAR (short) pese a que mañana deberia ser LUMBAR (bad day), puedes hacer que se resalte el training que ya me asignaste?".
-
-HECHO el mismo dia: Training.scheduleDates, fechas puntuales que mandan sobre scheduleDays en NextTraining. Se ponen desde el codigo, con la revision del lumbar (20: el dia malo el miercoles 30, por el pinchazo en la nalga). Se guardan en el JSON del training. Tests en NextTrainingTest.
-- [ ] **TD-174** Probar un training sin que quede registrado: modo prueba en el player
-  - PEDIDO por el usuario el 26-sep: "cuando quiero revisar el comportamiento de un training, al final tengo que eliminarlo y en ocasiones son varios cambios por evaluar y termino con varios registros que no son trainings realmente".
-
-HECHO el 27-sep con el OK del usuario: un boton "Test run" en la pantalla previa, al lado de Start. El player corre igual, con una marca TEST visible, y al terminar o al salir NO deja nada: ni sesion en History, ni subida al servidor, ni feedback que mueva la progresion, ni cuenta para cual training va primero. Se sabe que es prueba aunque el proceso muera y se restaure. Tampoco avanza la rotacion de un workout rotativo, que es un cambio en el training. El final de una prueba no ofrece contestar nada: esas tarjetas escriben en la ultima sesion guardada, que en una prueba es la anterior, la de verdad.
-
-AJUSTE del 27-sep, pedido por el usuario: el boton y la marca dicen "PREVIEW", en mayusculas, y no "Test run". Y en la pantalla previa (TD-173) se quito el riel de puntos a la izquierda de cada ejercicio: "solo quita espacio innecesariamente".
 - [ ] **TD-169** Historial de un atleta: su avatar y el detalle de su peso semanal
   - PEDIDO por el usuario el 26-sep, al pedir el selector de History (TD-168): "dejemos para despues un avatar y ver detalles de su peso semanal". Quedo mencionado dentro de TD-168 y sin registrar; se registra aparte para que no se pierda.
 
@@ -68,14 +58,6 @@ POR QUE, y es la de mas valor de las cinco: el 19-sep su mejor dato vino de la N
 QUE: tras contestar el dolor en la alarma, etiquetas OPCIONALES de un toque -almohada en las rodillas, dormi de lado, cena tarde, entrene tarde, otra cama, dormi poco-, guardadas en la manana del dia. En la pantalla Morning, con unas semanas de datos: el dolor medio con y sin cada etiqueta ("con almohada 1.2, sin ella 2.8").
 
 A DECIDIR: la lista de etiquetas -la propone el coach, la ajusta el usuario-; si se contestan en la misma pantalla de la alarma o despues, en Morning, para no alargar el primer toque del dia.
-- [ ] **TD-160** Alarma: aviso para ir a dormir, calculado desde la hora de la alarma
-  - PROPUESTO el 24-sep, registrado el 25. Un aviso a la noche -por ejemplo 7 h 30 antes de la alarma del dia siguiente- y, con la hora en que se apaga, cuanto se durmio. Da contexto a la serie del dolor: una manana mala tras cinco horas de sueno no dice lo mismo que tras ocho.
-
-HECHO el 28-sep. El usuario decidio: 7 h 30 de sueño, aviso 30 min antes, y con "Going to bed". El aviso sale de las mismas alarmas y se reprograma con ellas; si el de la proxima ya paso, apunta a la siguiente (no avisa a destiempo). Es una notificacion normal (setExactAndAllowWhileIdle), no un despertador. "Going to bed" anota la hora en la mañana que le toca (de mediodia en adelante, la siguiente) y la alarma la conserva al contestar; Morning enseña "In bed at 21:40 · 7 h 20", se corrige tocandola, y un tercer grafico "Hours in bed". Es tiempo en cama, no sueño medido. Configuracion en Morning con SwitchRow y SegmentedRow, los de Settings. Tests en MorningTest.
-
-AJUSTES del 28-sep, revisando la captura: la tarjeta pasa a SectionCard (es un bloque de ajustes, no un elemento de lista), sin el espacio de mas encima, y las horas de sueño dicen "7 h 30" y no "7:30", que se leia como reloj. Y, pedido por el usuario -"eso si extraño de mi vieja alarma"-, cuanto falta para la proxima: en la linea "Next: Tuesday 7:00 · in 8 h 27 min", al minuto, y un aviso "Alarm in ..." al poner o cambiar una alarma (Countdown, con test).
-
-AJUSTE del 30-sep: "si pierdo la notificacion ya no tengo donde registrar la hora que me acoste" (se acosto a las 22:00 y no quedo). Dos entradas mas: "+ Bedtime" en Today cuando falta la de anoche (con el reloj), y "Going to bed" en el bloque del aviso, que funciona aunque el aviso este apagado.
 - [ ] **TD-161** Alarma: sonido que sube de a poco
   - PROPUESTO el 24-sep, registrado el 25. Que el volumen empiece bajo y llegue al maximo en unos 30 s, en vez de arrancar al maximo. Es un despertador para alguien con dolor lumbar: un sobresalto al despertar no ayuda.
 - [ ] **TD-162** Alarma: control rapido en el panel de Android
@@ -162,20 +144,6 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 ### Fix
 
-- [ ] **TD-176** Los minutos hasta aflojar: una sola fuente, y que se puedan corregir
-  - ENCONTRADO el 28-sep leyendo su sesion. La alarma guardo 25 minutos (contesto a las 5:00, "It eased" a las 5:25) y la sesion 10. El usuario: "no entendi por que dice 25 si yo lo marque a los 10 minutos y trate de editarlo pero no hay opcion para ello".
-
-Dos causas: (1) los minutos se anotan en DOS sitios -la notificacion de la alarma y la pregunta del final de la sesion- y cada uno guarda el suyo, sin que ninguno mande; (2) la pantalla Morning deja corregir el dolor (TD-164) pero no los minutos.
-
-HECHO el 28-sep con el OK del usuario: la mañana de la alarma es la fuente. En Morning, "Eased after N min" se toca y se corrige. Y la sesion deja de preguntar los minutos cuando la alarma ya tiene esa mañana, como ya dejo de preguntar el dolor de crisis (TD-165). Corregir mueve la hora de "aflojo" (MorningLog.withFade), no guarda un numero aparte. El selector de minutos es el mismo de la sesion, movido a MasterComponents.
-- [ ] **TD-172** En un circuito, el ejercicio que pasa directo al siguiente nunca pregunta como fue
-  - ENCONTRADO el 26-sep leyendo NIKO 6, la primera sesion en circuito (TD-137). Saco 4 x 3 min con descanso 0 y sprawl 4 x 30 s con 60 s, alternados. Del sprawl contesto los cuatro; del saco solo el primero.
-
-La causa: la tarjeta de un round sale en el descanso de DESPUES, y el saco no tiene descanso porque pasa directo al sprawl. El primero lo alcanzo en la preparacion del sprawl, que en un circuito solo va la primera vez (enCircuito). Los rounds 2 a 4 no tuvieron ningun momento para contestar. El respiro de TD-156 no lo cubre: solo va al final del training.
-
-HECHO el 26-sep con el OK del usuario: en el descanso que cierra un round, UNA tarjeta con cada ejercicio del round y sus tres respuestas (Effort.roundAt). El ultimo round no tiene descanso, asi que se pregunta en la preparacion de lo que sigue, si algo quedo sin contestar. Un descanso a mitad de round solo pregunta por lo ya hecho. Tests en CircuitTest.
-
-VA JUNTO, por pedido del mismo dia, el MONTAJE del lumbar (revision 18): el puente rodando la barra desde los pies y la sentadilla empezando sentado con la mancuerna sobre los muslos, en la nota y en las instrucciones. Las instrucciones del lumbar se sembraban sin pisar; ahora reemplazan las viejas que siguen tal cual se sembraron (mergeLumbarInstructions), y lo escrito a mano se queda.
 - [ ] **TD-156** Lo que salio de la primera semana con metros y feedback: carry alternado, respiro para contestar, preparacion de la caminata
   - REPORTADO el 24-sep, cuatro cosas de una vez:
 (1) El usuario: "Carry demoro el doble, no me gusto". Con la revision 15 el carry iba por lados uno tras otro -tres viajes con la izquierda y despues tres con la derecha- con un minuto entre cada uno: cinco descansos en vez de los dos de antes.
@@ -204,23 +172,6 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
 
-### UI
-
-- [ ] **TD-181** El detalle del historial dice al menos lo que dice la previa: series iguales en una fila, y los descansos
-  - PEDIDO por el usuario el 1-oct, con captura: la previa dice "Curl-up 12 x 10 s · rest 3 s-30 s" y el historial lista doce filas de "10 s" que no dicen nada: "el preview tiene mas detalle que la pantalla del detalle".
-
-HECHO el mismo dia con el OK del usuario: (1) las series seguidas que dicen lo mismo -mismo valor y misma respuesta- van en una fila, "1-12  10 s"; una serie distinta o con otra respuesta rompe el tramo y se sigue viendo. (2) El registro guarda el descanso que vino despues de cada serie (SetRecord.restSec, el que de verdad paso: si lo salto, 0), y la cabecera del ejercicio lo resume como la previa: "rest 3 s-30 s". Solo desde ahora: las sesiones viejas no lo tienen y no se inventa. Al final quedo el descanso que paso de verdad, no 0: saltarlo a los 10 s guarda 10. Los tramos en SetRuns.of, los descansos en SetRuns.rests y el texto en TrainingPreview.rest, el mismo de la previa. Alternando lados, el descanso cierra la serie despues del ultimo lado y el primero toma ese. Tests en SetRunsTest.
-- [ ] **TD-180** El NEXT dice cuanto dura y a que ritmo, y una duracion se escribe igual en todo el app
-  - PEDIDO por el usuario el 1-oct: "agrega el tiempo y velocidad al mostrar NEXT: WALK 12 min · 6 km/h, y homologa porque veo que en el preview pones '5 min' y en el historial pones '5:00 · 5.5 km/h'".
-
-HECHO el mismo dia: TrainingPreview.duration es EL formato de una duracion ("45 s", "5 min", "1:30") y fmtSec delega en el, asi que el historial y los editores lo siguen. La previa suma la velocidad (PreviewItem.speedKmh): "12 min · 6 km/h". El NEXT del player agrega la duracion de lo que viene, si va por tiempo, y la velocidad elegida (vm.speedOf). El historial separa con " · ", como la previa. Tests en TrainingPreviewTest y SetSummaryTest.
-- [ ] **TD-173** La pantalla previa del training muestra lo que de verdad se va a hacer
-  - PEDIDO por el usuario el 26-sep: "casi no muestra detalle. Por ejemplo Curl-up 0:10, eso me dice que el ejercicio dura 10 segundos y no es cierto, no veo los pesos".
-
-La causa: cada fila muestra el primer paso de trabajo del ejercicio -un aguante de 10 s de doce-, y el bloque suma solo los pasos con reloj, sin las repeticiones.
-
-HECHO el 27-sep con el OK del usuario ("dale, haz las dos"): cada ejercicio con su receta completa -series x trabajo, los pesos serie por serie, metros, lados (uno y despues otro, o alternados), descanso-, el circuito marcado con sus rounds, y el tiempo de cada bloque y del total con el mismo estimado del player. Tocar un ejercicio abre sus instrucciones. Modelo puro en TrainingPreview, con TrainingPreviewTest.
-
 ## Hechos
 
 ### Branding
@@ -237,11 +188,14 @@ HECHO el 27-sep con el OK del usuario ("dale, haz las dos"): cada ejercicio con 
 
 ### Feature
 
+- [x] **TD-178** El coach asigna un training para una fecha, y la lista lo resalta
 - [x] **TD-175** La alarma como despertador: varias alarmas en tarjetas, y fuera del lanzador
+- [x] **TD-174** Probar un training sin que quede registrado: modo prueba en el player
 - [x] **TD-171** La voz de los pitidos, por telefono: cada uno suena distinto al entrenar juntos
 - [x] **TD-167** El training que sigue va primero en la lista, con un destello en el borde
 - [x] **TD-164** Corregir el dolor de la manana desde la pantalla Morning
 - [x] **TD-165** Dolor habitual y dolor de crisis, separados: la sesion ya no pregunta por la crisis
+- [x] **TD-160** Alarma: aviso para ir a dormir, calculado desde la hora de la alarma
 - [x] **TD-158** La alarma sale de Settings: su propio icono "Morning", su pantalla y el dolor en el calendario
 - [x] **TD-152** Los ejercicios con el peso del cuerpo tampoco dicen si costaron
 - [x] **TD-151** El dolor se anota cuando pasa, no al terminar el training
@@ -312,6 +266,8 @@ HECHO el 27-sep con el OK del usuario ("dale, haz las dos"): cada ejercicio con 
 ### Fix
 
 - [x] **TD-184** Fix: el telefono del coach publicaba sus instrucciones del lumbar, en ingles, y le llegaban a NIKO
+- [x] **TD-176** Los minutos hasta aflojar: una sola fuente, y que se puedan corregir
+- [x] **TD-172** En un circuito, el ejercicio que pasa directo al siguiente nunca pregunta como fue
 - [x] **TD-146** Apagar el video desde el player, y que lo editado en caliente se vea ya
 - [x] **TD-142** Fix: republicar desde el arranque leia isCoach antes de que existiera
 - [x] **TD-134** Fix: borrar un training dejaba su asignacion viva, y no habia donde quitarla
@@ -392,8 +348,11 @@ HECHO el 27-sep con el OK del usuario ("dale, haz las dos"): cada ejercicio con 
 
 - [x] **TD-183** El reloj para elegir una hora, en 12 horas y con los colores del app
 - [x] **TD-182** Morning: agregar una alarma con un + en la barra, no con un boton a todo lo ancho
+- [x] **TD-181** El detalle del historial dice al menos lo que dice la previa: series iguales en una fila, y los descansos
+- [x] **TD-180** El NEXT dice cuanto dura y a que ritmo, y una duracion se escribe igual en todo el app
 - [x] **TD-179** Los conteos de ejercicios y workouts, en singular o plural
 - [x] **TD-177** El boton primario del app, con las seis decisiones de "Make any button look expensive"
+- [x] **TD-173** La pantalla previa del training muestra lo que de verdad se va a hacer
 - [x] **TD-168** Tres ajustes de pantalla: la hora de la alarma en JetBrains Mono, el historial de NIKO en History, y menos hueco bajo el wordmark
 - [x] **TD-157** La alarma confirma lo que se toco: vibracion, el numero en grande y "Change"
 - [x] **TD-150** Los trainings archivados tambien se ordenan arrastrando
