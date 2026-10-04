@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.ui.Alignment
@@ -88,6 +89,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         pendingWorkoutId.value = intent?.getLongExtra("workoutId", -1L)?.takeIf { it >= 0 }
+        openWeighInIfAsked(intent)
         setContent {
             val settingsVm: SettingsViewModel = koinViewModel()
             val cfg = settingsVm.config
@@ -119,6 +121,21 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         pendingWorkoutId.value = intent.getLongExtra("workoutId", -1L).takeIf { it >= 0 }
+        openWeighInIfAsked(intent)
+    }
+
+    /**
+     * La notificacion del sabado (TD-169) abre el historial en Body, con el pesaje de hoy.
+     * Se borra el extra al usarlo: si no, girar la pantalla lo volveria a abrir.
+     */
+    private fun openWeighInIfAsked(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_WEIGH_IN, false) != true) return
+        intent.removeExtra(EXTRA_WEIGH_IN)
+        master.openWeighInFromNotification()
+    }
+
+    companion object {
+        const val EXTRA_WEIGH_IN = "weigh_in"
     }
 }
 
@@ -276,7 +293,13 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                     }
                     // Borrar todo el historial es solo del propio: el de un atleta no se
                     // toca desde aqui (TD-168).
-                    if (vm.showingHistory && vm.historyAthlete == null) {
+                    // En Body, un + para anotar el pesaje (TD-169), como el + de Morning
+                    // (TD-182): en la barra y no con un boton a todo lo ancho. Solo el propio.
+                    if (vm.showingHistory && vm.historyAthlete == null && vm.historyTab == MasterViewModel.HistoryTab.BODY) {
+                        IconButton(onClick = { vm.openWeighIn() }) {
+                            Icon(Icons.Filled.Add, contentDescription = t.more.body.add, tint = AppTheme.colors.textPrimary)
+                        }
+                    } else if (vm.showingHistory && vm.historyAthlete == null) {
                         Box {
                             IconButton(onClick = { showClearMenu = true }) {
                                 Icon(

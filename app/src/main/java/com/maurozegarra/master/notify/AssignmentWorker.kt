@@ -49,6 +49,9 @@ class AssignmentWorker(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val profileId = assignments.profileId ?: return@withContext Result.success()
 
+        // El pesaje del sabado (TD-169), antes de ir a la red: no depende de ella.
+        remindWeighIn()
+
         // Null es "no se pudo leer". Se reintenta, y sobre todo no se avisa de nada: no
         // haber podido preguntar no es lo mismo que no tener nada nuevo.
         val incoming = assignments.assignedTrainings(profileId)
@@ -73,6 +76,40 @@ class AssignmentWorker(
 
         if (fresh.isNotEmpty()) notify(fresh.map { it.name })
         Result.success()
+    }
+
+    /**
+     * Recuerda el pesaje los sabados desde las 8 si todavia no hay, una vez por sabado (TD-169).
+     *
+     * Existe porque el 3-oct el coach se olvido de pedirlo y el usuario tuvo que recordarselo.
+     * Va en este trabajo, que ya corre cada quince minutos, y no en una alarma propia: un
+     * recordatorio que llega a las 8:10 en vez de a las 8:00 no le hace dano a nadie.
+     */
+    private fun remindWeighIn() {
+        val body = com.maurozegarra.master.data.BodyStore(applicationContext)
+        val ahora = java.time.LocalDateTime.now()
+        if (!com.maurozegarra.master.model.BodyLog.needsReminder(body.mine(), ahora, body.remindedOn)) return
+        body.remindedOn = ahora.toLocalDate().toString()
+        val b = I18n.EN.more.body
+        val manager = NotificationManagerCompat.from(applicationContext)
+        manager.createNotificationChannel(
+            NotificationChannel(CHANNEL_BODY, b.reminderChannel, NotificationManager.IMPORTANCE_DEFAULT)
+        )
+        val intent = Intent(applicationContext, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .putExtra(MainActivity.EXTRA_WEIGH_IN, true)
+        val pending = PendingIntent.getActivity(
+            applicationContext, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val n = NotificationCompat.Builder(applicationContext, CHANNEL_BODY)
+            .setSmallIcon(R.drawable.ic_stat_timer)
+            .setContentTitle(b.reminderTitle)
+            .setContentText(b.reminderText)
+            .setAutoCancel(true)
+            .setContentIntent(pending)
+            .build()
+        runCatching { manager.notify(NOTIF_BODY, n) }
+            .onFailure { Log.w(TAG, "no se pudo recordar el pesaje", it) }
     }
 
     private fun notify(names: List<String>) {
@@ -103,6 +140,8 @@ class AssignmentWorker(
         private const val TAG = "AssignmentWorker"
         private const val CHANNEL_ID = "master_assignments"
         private const val NOTIF_ID = 44
+        private const val CHANNEL_BODY = "master_weigh_in"
+        private const val NOTIF_BODY = 45
         private const val PREFS = "master_assign_notify"
         private const val KEY_ANNOUNCED = "announced_uids"
         private const val WORK_NAME = "assignments_watch"

@@ -48,6 +48,7 @@ dia. La medicion de verdad es la cinta.
 | 12-sep | 49.7 | - | - | 18.0 |
 | 19-sep | 49.9 | **67** | **0.43** | 18.4 |
 | 26-sep | 49.5 | **66** | **0.43** | 18.2 |
+| 3-oct | 49.7 | **67.5** | **0.44** | 18.3 |
 
 Cintura entre estatura de 0.43: muy bien, lejos del 0.5.
 
@@ -55,6 +56,10 @@ Cintura entre estatura de 0.43: muy bien, lejos del 0.5.
 pero es la direccion contraria a la que se busca: ella tiene que construir, y con seis dias
 de entreno perder peso apunta a que come menos de lo que gasta. La cinta baja 1 cm. Si el
 sabado 3 vuelve a bajar, el tema es la comida, no la rutina.
+
+3-oct (06:36, al despertar): **+0.2 kg y el musculo esqueletico +0.1**: no volvio a bajar,
+asi que la comida no es tema por ahora. La cinta sube 1.5 cm (66 → 67.5), a 0.44, todavia
+muy lejos del 0.5. La balanza: grasa 26.7% (+0.1), visceral 6.
 
 ### Su equipo
 

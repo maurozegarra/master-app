@@ -256,6 +256,58 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
         return SessionSync.parseRows(res.body)
     }
 
+    // ---------- Pesajes (TD-169) ----------
+
+    /**
+     * Sube un pesaje de este telefono. true si se guardo, null si fallo la red o la funcion
+     * todavia no existe (docs/supabase/td-169-body.sql): se queda pendiente y sale solo en
+     * cuanto el SQL este corrido.
+     *
+     * Como [uploadSession], va por una funcion y con la clave publica: el telefono del atleta
+     * no tiene cuenta, y la tabla no le deja leer ni escribir directo.
+     */
+    fun uploadBody(profileId: String, entry: com.maurozegarra.master.model.BodyEntry): Boolean? {
+        val body = JSONObject()
+            .put("p_profile_id", profileId)
+            .put("p_date", entry.date)
+            .put("p_payload", JSONObject(com.maurozegarra.master.model.BodyLog.payloadOf(entry)))
+            .toString()
+        val res = runCatching {
+            Http.request("POST", "${Supabase.REST}rpc/upload_body", Supabase.headers(), body)
+        }.onFailure { Log.w(TAG, "no se pudo subir el pesaje ${entry.date}", it) }.getOrNull() ?: return null
+        if (!res.ok) {
+            Log.w(TAG, "upload_body rechazo: HTTP ${res.code} ${res.body}")
+            return null
+        }
+        return res.body.trim() == "true"
+    }
+
+    /** Borra en el servidor un pesaje que este telefono ya borro. Null si fallo la red. */
+    fun deleteBody(profileId: String, date: String): Boolean? {
+        val body = JSONObject().put("p_profile_id", profileId).put("p_date", date).toString()
+        val res = runCatching {
+            Http.request("POST", "${Supabase.REST}rpc/delete_body", Supabase.headers(), body)
+        }.onFailure { Log.w(TAG, "no se pudo borrar el pesaje $date", it) }.getOrNull() ?: return null
+        if (!res.ok) {
+            Log.w(TAG, "delete_body rechazo: HTTP ${res.code} ${res.body}")
+            return null
+        }
+        return res.body.trim() == "true"
+    }
+
+    /** Los pesajes de todos los perfiles, para el coach. Null sin sesion de entrenador o sin red. */
+    fun athleteBody(): List<com.maurozegarra.master.model.AthleteBody>? {
+        val token = auth.accessToken() ?: return null
+        val res = runCatching {
+            Http.request("GET", "${Supabase.REST}body_logs?select=profile_id,payload&order=date.asc", Supabase.headers(token))
+        }.onFailure { Log.w(TAG, "no se pudieron bajar los pesajes", it) }.getOrNull() ?: return null
+        if (!res.ok) {
+            Log.w(TAG, "bajar pesajes: HTTP ${res.code} ${res.body}")
+            return null
+        }
+        return com.maurozegarra.master.model.BodyLog.parseRows(res.body)
+    }
+
     // ---------- Escritura (solo entrenador) ----------
 
     /**

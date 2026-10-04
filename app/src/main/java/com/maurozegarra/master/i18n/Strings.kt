@@ -730,6 +730,32 @@ data class MoreStrings(
     val preview: PreviewStrings,
     val testRun: TestRunStrings,
     val workouts: String = "Workouts",
+    val body: BodyStrings = BodyStrings(),
+)
+
+/** Los pesajes de los sábados (TD-169): la pestaña Body del historial y su diálogo. */
+data class BodyStrings(
+    val tabSessions: String = "Sessions",
+    val tabBody: String = "Body",
+    val weight: String = "Weight",
+    val waist: String = "Waist",
+    val waistHeight: String = "Waist / height",
+    val skeletal: String = "Skeletal muscle",
+    val height: String = "Height",
+    val goal: String = "goal",
+    val add: String = "Weigh-in",
+    val editTitle: String = "Weigh-in",
+    val save: String = "Save",
+    val delete: String = "Delete",
+    val cancel: String = "Cancel",
+    val optional: String = "optional",
+    val empty: String = "No weigh-ins yet",
+    val emptyHint: String = "Saturdays on waking: weight and waist at the navel",
+    val emptyAthlete: String = "No weigh-ins from this athlete yet",
+    val reminderTitle: String = "Saturday weigh-in",
+    val reminderText: String = "Weight and waist at the navel, before breakfast",
+    val reminderChannel: String = "Weigh-in",
+    val vsPrevious: String = "vs previous",
 )
 
 /**

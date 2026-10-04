@@ -164,6 +164,7 @@ dos ejercicios y hacer cuentas entre series. Su resumen: *"no le pusiste cariño
 | Lo que entrenó | `SessionLog` → snapshots en `Documents/MASTER/` |
 | Cómo se sintió | `docs/coach-log.md` |
 | Lo que busca a largo plazo, y su pesaje | `docs/objetivos.md` |
+| Los pesajes de los sábados, de los dos | en el app (History → **Body**, TD-169) y en el respaldo (`body` y `athleteBody`); la serie se sigue copiando a `objetivos.md` y `niko.md` |
 | Todo lo de NIKO | `docs/niko.md` |
 
 Su historial se lee del respaldo de su teléfono. **El de NIKO también, desde TD-126:** su

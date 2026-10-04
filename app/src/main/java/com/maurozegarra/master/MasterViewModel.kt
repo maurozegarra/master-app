@@ -23,6 +23,9 @@ import com.maurozegarra.master.data.VideoRepository
 import com.maurozegarra.master.data.VideoState
 import com.maurozegarra.master.data.WorkoutStore
 import com.maurozegarra.master.model.AlarmSound
+import com.maurozegarra.master.model.AthleteBody
+import com.maurozegarra.master.model.BodyEntry
+import com.maurozegarra.master.model.BodyLog
 import com.maurozegarra.master.model.Exercise
 import com.maurozegarra.master.model.ExerciseDef
 import com.maurozegarra.master.model.ExerciseMedia
@@ -256,6 +259,15 @@ class MasterViewModel(
      */
     val athleteSessions = mutableStateListOf<AthleteSession>().apply { addAll(store.loadAthleteSessions()) }
 
+    /**
+     * Los pesajes (TD-169): los propios y los de los atletas que bajo este telefono. Antes del
+     * `init` por la regla de siempre: el `init` siembra la serie y la sincronizacion que lanza
+     * escribe aqui.
+     */
+    private val bodyStore = com.maurozegarra.master.data.BodyStore(app)
+    val bodyMine = mutableStateListOf<BodyEntry>().apply { addAll(bodyStore.mine()) }
+    val bodyAthletes = mutableStateListOf<AthleteBody>().apply { addAll(bodyStore.athletes()) }
+
     /** El training como se ve en ESTE telefono: con sus videos apagados aplicados. */
     private fun asSeen(t: Training): Training = VideoPrefs.apply(t, hiddenVideos)
 
@@ -265,6 +277,7 @@ class MasterViewModel(
         val firstRun = store.isFirstRun()
         trainings.addAll(store.loadTrainings())
         customExercises.addAll(store.loadCustomExercises())
+        seedBody()
         // Lo guardado ANTES de las correcciones del arranque, para saber al final si alguna
         // cambio algo (TD-121). Se compara el resultado y no se avisa desde cada correccion:
         // una lista de llamadas escrita a mano se queda atras en cuanto se agrega otra.
@@ -1512,7 +1525,8 @@ class MasterViewModel(
         private set
 
     fun loadHistoryOwners() {
-        val ids = athleteSessions.map { it.profileId }.distinct()
+        // Con sesiones o con pesajes (TD-169): un atleta que solo se peso tambien se elige.
+        val ids = (athleteSessions.map { it.profileId } + bodyAthletes.map { it.profileId }).distinct()
         historyOwners = ids.map { Profile(it, it.replaceFirstChar { c -> c.uppercase() }) }
         if (!isCoach || ids.isEmpty()) return
         loadProfiles { perfiles ->
@@ -1579,6 +1593,8 @@ class MasterViewModel(
                         store.markUploaded(p.session.id, p.fingerprint)
                     }
                 }
+                // Los pesajes (TD-169), en la misma pasada y con el mismo candado.
+                syncBodyLocked()
                 if (auth.isCoach) {
                     assignments.athleteSessions()?.let { bajadas ->
                         if (bajadas != store.loadAthleteSessions()) {
@@ -1630,6 +1646,128 @@ class MasterViewModel(
         if (borrar.isEmpty()) return
         store.queueSessionDeletes(borrar)
         syncSessions()
+    }
+
+    // ---------- Pesajes (TD-169) ----------
+
+    /** Sesiones o pesajes, en el historial. */
+    enum class HistoryTab { SESSIONS, BODY }
+
+    var historyTab by mutableStateOf(HistoryTab.SESSIONS)
+
+    /** El pesaje que se esta anotando o corrigiendo; null si no hay dialogo abierto. */
+    var weighIn by mutableStateOf<BodyEntry?>(null)
+        private set
+
+    /** Los pesajes del historial abierto -el propio o el del atleta elegido-, del mas viejo al mas nuevo. */
+    val historyBody: List<BodyEntry>
+        get() = historyAthlete?.let { BodyLog.of(bodyAthletes, it.id) } ?: bodyMine.sortedBy { it.date }
+
+    /**
+     * Abre el pesaje de hoy, nuevo o para corregir. Lo llama la notificacion del sabado y el
+     * boton de Body. La estatura se copia del ultimo: se pide una vez y no se vuelve a escribir.
+     */
+    fun openWeighIn(date: java.time.LocalDate = java.time.LocalDate.now()) {
+        val dia = date.toString()
+        weighIn = bodyMine.firstOrNull { it.date == dia } ?: BodyEntry(dia, heightCm = BodyLog.heightOf(bodyMine))
+    }
+
+    /** Desde la notificacion del sabado: el historial, en Body, con el pesaje de hoy abierto. */
+    fun openWeighInFromNotification() {
+        openHistory()
+        historyTab = HistoryTab.BODY
+        openWeighIn()
+    }
+
+    fun editWeighIn(entry: BodyEntry) {
+        weighIn = entry
+    }
+
+    fun closeWeighIn() {
+        weighIn = null
+    }
+
+    fun saveWeighIn(entry: BodyEntry) {
+        val lista = BodyLog.upsert(bodyMine.toList(), entry)
+        bodyStore.saveMine(lista)
+        bodyMine.clear()
+        bodyMine.addAll(lista)
+        weighIn = null
+        snapshot()
+        syncSessions()
+    }
+
+    /** Borra un pesaje propio, y en el servidor si ya habia subido. */
+    fun deleteWeighIn(date: String) {
+        val lista = BodyLog.remove(bodyMine.toList(), date)
+        bodyStore.saveMine(lista)
+        bodyMine.clear()
+        bodyMine.addAll(lista)
+        weighIn = null
+        snapshot()
+        if (BodyLog.toDelete(listOf(date), bodyStore.ledger()).isNotEmpty()) {
+            bodyStore.queueDelete(date)
+            bodyStore.forgetUploaded(date)
+        }
+        syncSessions()
+    }
+
+    /**
+     * Sube los pesajes pendientes y, en el telefono del coach, baja los de sus atletas. Corre
+     * dentro de [syncSessions], con su candado ya tomado.
+     *
+     * Sin la tabla en el servidor (falta correr td-169-body.sql) todo da null y se corta: los
+     * pesajes siguen en el telefono y suben en cuanto exista.
+     */
+    private suspend fun syncBodyLocked() {
+        val perfil = assignments.profileId
+        if (perfil != null) {
+            for (d in bodyStore.pendingDeletes()) {
+                assignments.deleteBody(perfil, d) ?: break
+                bodyStore.deleted(d)
+            }
+            for (e in BodyLog.pending(bodyStore.mine(), bodyStore.ledger())) {
+                assignments.uploadBody(perfil, e) ?: break
+                bodyStore.markUploaded(e.date, BodyLog.payloadOf(e).hashCode())
+            }
+        }
+        if (!auth.isCoach) return
+        val bajados = assignments.athleteBody() ?: return
+        // Los propios tambien estan en la tabla: no son de un atleta.
+        val unidos = BodyLog.merge(bodyStore.athletes(), bajados.filter { it.profileId != perfil })
+        if (unidos == bodyStore.athletes()) return
+        bodyStore.saveAthletes(unidos)
+        withContext(Dispatchers.Main) {
+            bodyAthletes.clear()
+            bodyAthletes.addAll(unidos)
+            snapshot()
+        }
+    }
+
+    /**
+     * La serie que ya estaba en los documentos, una vez por telefono: la del propio perfil y,
+     * en el del coach, la de sus atletas. Sin perfil todavia no se marca: se siembra en el
+     * arranque en que lo tenga.
+     */
+    private fun seedBody() {
+        if (bodyStore.seeded) return
+        val perfil = assignments.profileId ?: return
+        BodyLog.SEED[perfil]?.let { serie ->
+            var lista = bodyStore.mine()
+            serie.forEach { e -> if (lista.none { it.date == e.date }) lista = BodyLog.upsert(lista, e) }
+            bodyStore.saveMine(lista)
+            bodyMine.clear()
+            bodyMine.addAll(lista)
+        }
+        if (auth.isCoach) {
+            val otros = BodyLog.SEED.filterKeys { it != perfil }.flatMap { (p, serie) -> serie.map { AthleteBody(p, it) } }
+            // Lo que ya hubiera bajado manda sobre lo sembrado.
+            val unidos = BodyLog.merge(otros, bodyStore.athletes())
+            bodyStore.saveAthletes(unidos)
+            bodyAthletes.clear()
+            bodyAthletes.addAll(unidos)
+        }
+        bodyStore.seeded = true
     }
 
     // ---------- Lista de Trainings ----------

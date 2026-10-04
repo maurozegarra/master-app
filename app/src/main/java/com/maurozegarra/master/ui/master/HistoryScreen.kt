@@ -83,15 +83,17 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val ajeno = vm.historyAthlete != null
 
     // De quien es, arriba, antes que nada (TD-168): el historial de NIKO se elige aqui y ya
-    // no se busca en Settings. Sin atletas no hay nada que elegir y no se dibuja.
-    if (vm.historyOwners.isNotEmpty()) {
-        Column(Modifier.fillMaxSize()) {
-            HistoryOwnerPicker(vm, accent, t)
-            Box(Modifier.weight(1f)) { HistoryBody(vm, sessions, ajeno, accent, t) }
+    // no se busca en Settings. Sin atletas no hay nada que elegir y no se dibuja. Debajo,
+    // sesiones o pesajes (TD-169), de quien este elegido.
+    Column(Modifier.fillMaxSize()) {
+        if (vm.historyOwners.isNotEmpty()) HistoryOwnerPicker(vm, accent, t)
+        HistoryTabs(vm, accent, t)
+        Box(Modifier.weight(1f)) {
+            if (vm.historyTab == MasterViewModel.HistoryTab.BODY) BodyTab(vm, accent, t)
+            else HistoryBody(vm, sessions, ajeno, accent, t)
         }
-        return
     }
-    HistoryBody(vm, sessions, ajeno, accent, t)
+    WeighInDialog(vm, t)
 }
 
 /**

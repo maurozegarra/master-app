@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **160 / 184** hechos, 24 pendientes.
+Progreso: **160 / 185** hechos, 25 pendientes.
 
 ## Pendientes
 
@@ -42,7 +42,9 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
-- [ ] **TD-169** Historial de un atleta: su avatar y el detalle de su peso semanal
+- [ ] **TD-185** Avatar por perfil: en el selector Me / NIKO y donde aparezca su nombre
+  - SEPARADO de TD-169 el 3-oct-2026, a pedido del usuario: "el avatar después". A DECIDIR: foto propia o iniciales con color.
+- [ ] **TD-169** Historial del peso y la cintura, el propio y el de NIKO, con el pesaje del sábado en el app
   - PEDIDO por el usuario el 26-sep, al pedir el selector de History (TD-168): "dejemos para despues un avatar y ver detalles de su peso semanal". Quedo mencionado dentro de TD-168 y sin registrar; se registra aparte para que no se pierda.
 
 QUE: (1) un avatar por perfil -en el selector Me / NIKO y donde aparezca su nombre-; (2) el peso semanal del atleta, en el app.
@@ -50,6 +52,10 @@ QUE: (1) un avatar por perfil -en el selector Me / NIKO y donde aparezca su nomb
 DE DONDE SALE EL DATO YA ESTA ESTABLECIDO, y el asistente lo pregunto por error: los dos se pesan LOS SABADOS AL DESPERTAR, peso y cintura a la altura del ombligo, se lo pasan al coach por el chat, y la serie se anota en docs/objetivos.md (el usuario) y docs/niko.md (NIKO), con cintura/estatura como indice. Hoy vive solo en esos documentos.
 
 A DECIDIR: solo como llega al app -sembrado desde el codigo con cada pesaje, como las rutinas, o anotado en el app y subido por Supabase como las sesiones-. Y el avatar: foto propia o iniciales con color.
+
+DECIDIDO el 3-oct-2026 (sábado; el coach se olvidó de pedir el pesaje y el usuario lo pidió: "necesito un lugar donde pueda ver el historial de mi peso y el de Niko, así como la medida de la cintura"). El avatar se separa y va después (TD-185).
+
+HECHO con su OK: (1) Pestañas Sessions / Body en History, debajo del selector Me / NIKO. Body muestra lo último con su cambio contra el pesaje anterior (en gris: para él bajar es bueno, para NIKO no), cintura / estatura con la meta 0.5 en verde si está por debajo, las curvas de peso, cintura (con la meta en cm punteada) y músculo esquelético, y la tabla. (2) Se anota con el + de la barra (solo el propio) en un diálogo: peso, cintura, músculo opcional y estatura, que se copia del pesaje anterior; tocar una fila la corrige o la borra. (3) Recordatorio los sábados desde las 8 si no hay pesaje, una vez, desde AssignmentWorker; la notificación abre Body con el pesaje de hoy. (4) Cada teléfono con perfil sube sus pesajes por la función upload_body (docs/supabase/td-169-body.sql, HAY QUE CORRERLO en Supabase) y el coach los baja de body_logs; se une con lo local por día, sin reemplazar. (5) La serie de los documentos (12, 19, 26-sep y 3-oct de los dos) se siembra una vez por perfil; en el del coach, también la de NIKO. (6) Van en el respaldo (formato 5: body y athleteBody). Modelo en model/Body.kt, almacén en data/BodyStore.kt, pantalla en ui/master/BodyScreen.kt. Tests en BodyLogTest.
 - [ ] **TD-159** Alarma: etiquetas de la noche, para cruzarlas con el dolor de la manana
   - PROPUESTO el 24-sep y registrado el 25 (salio de TD-158, donde solo quedaba mencionado).
 

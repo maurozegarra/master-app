@@ -25,6 +25,12 @@ data class BackupData(
      * se saca, esto se queda como un campo que ya nadie escribe.
      */
     val morning: String = "[]",
+    /**
+     * Los pesajes propios y los de los atletas (formato 5, TD-169). Crudos como la alarma:
+     * así el respaldo no depende de cómo se guarden.
+     */
+    val body: String = "[]",
+    val athleteBody: String = "[]",
 )
 
 /**
@@ -35,10 +41,11 @@ data class BackupData(
 object BackupJson {
 
     /**
-     * Versión del formato. La 2 añadió `exerciseMedia`, la 3 `athleteSessions`, la 4 `morning`; [decode]
-     * acepta desde la 1, así que los respaldos viejos se siguen importando sin perder nada.
+     * Versión del formato. La 2 añadió `exerciseMedia`, la 3 `athleteSessions`, la 4 `morning`, la 5
+     * `body` y `athleteBody`; [decode] acepta desde la 1, así que los respaldos viejos se siguen
+     * importando sin perder nada.
      */
-    const val FORMAT = 4
+    const val FORMAT = 5
 
     fun encode(data: BackupData, exportedAt: Long): String {
         val custom = JSONArray()
@@ -54,6 +61,8 @@ object BackupJson {
             .put("exerciseMedia", JSONObject(ExerciseMediaJson.encode(data.exerciseMedia)))
             .put("athleteSessions", JSONArray(SessionSync.encodeAthleteSessions(data.athleteSessions)))
             .put("morning", runCatching { JSONArray(data.morning) }.getOrDefault(JSONArray()))
+            .put("body", runCatching { JSONArray(data.body) }.getOrDefault(JSONArray()))
+            .put("athleteBody", runCatching { JSONArray(data.athleteBody) }.getOrDefault(JSONArray()))
             .toString(2)
     }
 
@@ -100,6 +109,10 @@ object BackupJson {
         // Ausente antes del formato 4.
         val morning = root.optJSONArray("morning")?.toString() ?: "[]"
 
+        // Ausentes antes del formato 5.
+        val body = root.optJSONArray("body")?.toString() ?: "[]"
+        val athleteBody = root.optJSONArray("athleteBody")?.toString() ?: "[]"
+
         return BackupData(
             trainings = trainings,
             customExercises = custom,
@@ -107,6 +120,8 @@ object BackupJson {
             exerciseMedia = media,
             athleteSessions = athletes,
             morning = morning,
+            body = body,
+            athleteBody = athleteBody,
         )
     }
 }

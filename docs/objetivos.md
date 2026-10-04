@@ -87,6 +87,7 @@ kilos de grasa, no a trece de peso.
 | 12-sep | 83.5 | - | - | punto de partida de la balanza |
 | 19-sep | 84.4 | **93.5** | **0.52** | justo por debajo de 94 |
 | 26-sep | 84.7 | **93** | **0.51** | la cinta baja medio centimetro; la balanza sube 0.3 kg |
+| 3-oct | 84.6 | **94** | **0.52** | la balanza baja 0.1; la cinta sube 1 cm |
 
 La balanza del 19-sep ya ensenio por que no se le cree la grasa visceral: de 10 a 13 en una
 semana y cintura-cadera de 0.9 a 1.4, imposible. Bajo el agua corporal 3.1 puntos. Se lee la
@@ -96,6 +97,13 @@ El 26-sep, lo mismo al reves: la balanza dice grasa 24.2% (-0.1), visceral 11 (-
 cintura-cadera 1.1, y el agua corporal sube 1.8 puntos. Lo que se anota es que **el peso
 sube 0.3 y la cintura baja 0.5**: dos semanas de datos, ninguna tendencia todavia. A 0.51,
 la meta de 0.5 (90.5 cm) esta a 2.5 cm.
+
+El 3-oct, **84.6 kg y 94 cm**: la cinta vuelve a donde estaba antes del 19 (93.5 → 93 → 94),
+justo en el borde de "elevada". Tres semanas de cinta y se mueve medio centimetro arriba o
+abajo: es el ruido de la medicion, todavia no una tendencia. La balanza del dia: grasa 24.1%
+(-0.1), musculo esqueletico 33.5 (+0.9), visceral 10 (-1). La balanza marca las 9:28 porque
+ese dia desperto tarde: fue al despertar y en ayunas, como siempre (nunca come ni toma agua
+antes de pesarse).
 
 ### La sinergia
 
