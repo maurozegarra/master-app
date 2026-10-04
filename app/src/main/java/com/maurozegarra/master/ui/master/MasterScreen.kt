@@ -269,9 +269,10 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize().dragContainer(dragDropState),
-                // 4 dp arriba y no 16: la barra de arriba ya separa, y los 16 dejaban un
-                // hueco entre el wordmark y la semana (26-sep).
-                contentPadding = PaddingValues(16.dp, 4.dp, 16.dp, 96.dp),
+                // 0 arriba: la barra de arriba (64 dp, con el wordmark centrado) ya separa. Con
+                // 16 quedaba un hueco (26-sep) y con 4 todavia ~35 dp hasta la semana, contra
+                // los ~28 de TickTick, que el usuario tomo de referencia (4-oct).
+                contentPadding = PaddingValues(16.dp, 0.dp, 16.dp, 96.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item(key = "week_calendar") {

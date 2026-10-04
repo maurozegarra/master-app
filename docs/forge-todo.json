@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-188",
+      "title": "La barra de arriba a 56 dp, para igualar el aire bajo el wordmark al de TickTick (sine die)",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO el 4-oct, comparando con TickTick: entre el wordmark y los días de la semana había ~35 dp contra ~28 de \"October\" a \"Mon\" en TickTick. Se quitaron los 4 dp de arriba de la lista (v1.0.379): quedan ~31 dp.\n\nLO QUE FALTA: el resto es el aire de adentro de la TopAppBar de Material, que en material3 1.2.1 (BOM 2024.06) mide 64 dp fijos y centra el título, sin parámetro para cambiarlo. Las versiones nuevas aceptan expandedHeight: actualizar el BOM de Compose y poner 56 dp lo dejaría en ~27 dp. Es una línea, pero la actualización afecta a todo el app y hay que revisar las pantallas principales con capturas. Desplazar la semana hacia arriba la recorta (la lista recorta su borde), y una barra propia sería dibujar un control a mano: descartados.\n\nSINE DIE, decisión del usuario el 4-oct: \"mucho trabajo para hoy\"."
+    },
+    {
       "id": "TD-187",
       "title": "Un solo campo de texto en todo el app (AppTextField), en vez de once copiados a mano",
       "category": "UI",

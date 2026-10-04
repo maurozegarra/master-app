@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **163 / 187** hechos, 24 pendientes.
+Progreso: **163 / 188** hechos, 25 pendientes.
 
 ## Pendientes
 
@@ -163,6 +163,15 @@ UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mit
 A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el ajuste es fijar un comportamiento, no borrar una casilla: hay que preguntar cual. Y limpiar lo que lo usa -SettingsViewModel.setPadPlayerClock, el parametro padded de formatPlayerClock y del player- sin dejar un campo huerfano en la configuracion guardada.
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
+
+### UI
+
+- [ ] **TD-188** La barra de arriba a 56 dp, para igualar el aire bajo el wordmark al de TickTick (sine die)
+  - PEDIDO el 4-oct, comparando con TickTick: entre el wordmark y los días de la semana había ~35 dp contra ~28 de "October" a "Mon" en TickTick. Se quitaron los 4 dp de arriba de la lista (v1.0.379): quedan ~31 dp.
+
+LO QUE FALTA: el resto es el aire de adentro de la TopAppBar de Material, que en material3 1.2.1 (BOM 2024.06) mide 64 dp fijos y centra el título, sin parámetro para cambiarlo. Las versiones nuevas aceptan expandedHeight: actualizar el BOM de Compose y poner 56 dp lo dejaría en ~27 dp. Es una línea, pero la actualización afecta a todo el app y hay que revisar las pantallas principales con capturas. Desplazar la semana hacia arriba la recorta (la lista recorta su borde), y una barra propia sería dibujar un control a mano: descartados.
+
+SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 
 ## Hechos
 
