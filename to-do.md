@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **160 / 187** hechos, 27 pendientes.
+Progreso: **162 / 187** hechos, 25 pendientes.
 
 ## Pendientes
 
@@ -44,18 +44,6 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 - [ ] **TD-185** Avatar por perfil: en el selector Me / NIKO y donde aparezca su nombre
   - SEPARADO de TD-169 el 3-oct-2026, a pedido del usuario: "el avatar después". A DECIDIR: foto propia o iniciales con color.
-- [ ] **TD-169** Historial del peso y la cintura, el propio y el de NIKO, con el pesaje del sábado en el app
-  - PEDIDO por el usuario el 26-sep, al pedir el selector de History (TD-168): "dejemos para despues un avatar y ver detalles de su peso semanal". Quedo mencionado dentro de TD-168 y sin registrar; se registra aparte para que no se pierda.
-
-QUE: (1) un avatar por perfil -en el selector Me / NIKO y donde aparezca su nombre-; (2) el peso semanal del atleta, en el app.
-
-DE DONDE SALE EL DATO YA ESTA ESTABLECIDO, y el asistente lo pregunto por error: los dos se pesan LOS SABADOS AL DESPERTAR, peso y cintura a la altura del ombligo, se lo pasan al coach por el chat, y la serie se anota en docs/objetivos.md (el usuario) y docs/niko.md (NIKO), con cintura/estatura como indice. Hoy vive solo en esos documentos.
-
-A DECIDIR: solo como llega al app -sembrado desde el codigo con cada pesaje, como las rutinas, o anotado en el app y subido por Supabase como las sesiones-. Y el avatar: foto propia o iniciales con color.
-
-DECIDIDO el 3-oct-2026 (sábado; el coach se olvidó de pedir el pesaje y el usuario lo pidió: "necesito un lugar donde pueda ver el historial de mi peso y el de Niko, así como la medida de la cintura"). El avatar se separa y va después (TD-185).
-
-HECHO con su OK: (1) Pestañas Sessions / Body en History, debajo del selector Me / NIKO. Body muestra lo último con su cambio contra el pesaje anterior (en gris: para él bajar es bueno, para NIKO no), cintura / estatura con la meta 0.5 en verde si está por debajo, las curvas de peso, cintura (con la meta en cm punteada) y músculo esquelético, y la tabla. (2) Se anota con el + de la barra (solo el propio) en un diálogo: peso, cintura, músculo opcional y estatura, que se copia del pesaje anterior; tocar una fila la corrige o la borra. (3) Recordatorio los sábados desde las 8 si no hay pesaje, una vez, desde AssignmentWorker; la notificación abre Body con el pesaje de hoy. (4) Cada teléfono con perfil sube sus pesajes por la función upload_body (docs/supabase/td-169-body.sql, HAY QUE CORRERLO en Supabase) y el coach los baja de body_logs; se une con lo local por día, sin reemplazar. (5) La serie de los documentos (12, 19, 26-sep y 3-oct de los dos) se siembra una vez por perfil; en el del coach, también la de NIKO. (6) Van en el respaldo (formato 5: body y athleteBody). Modelo en model/Body.kt, almacén en data/BodyStore.kt, pantalla en ui/master/BodyScreen.kt. Tests en BodyLogTest.
 - [ ] **TD-159** Alarma: etiquetas de la noche, para cruzarlas con el dolor de la manana
   - PROPUESTO el 24-sep y registrado el 25 (salio de TD-158, donde solo quedaba mencionado).
 
@@ -182,13 +170,6 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
 
-### UI
-
-- [ ] **TD-187** Un solo campo de texto en todo el app (AppTextField), en vez de once copiados a mano
-  - VISTO el 3-oct al revisar, a pedido del usuario, si el historial del peso (TD-169) reutilizaba los componentes del app: "la idea es no tener objetos personalizados por cada control que vaya surgiendo". No los reutilizaba, y al buscar el campo de texto aparecieron once OutlinedTextField escritos a mano: siete con la misma receta de colores del tema (los dos buscadores, la nota del ejercicio, el paso de las instrucciones y los nombres del training, el workout y la variante), la nota de la sesión del player con otro gris, y tres en diálogos (el nombre de un perfil, y el correo y la clave del coach) con los colores por defecto de Material, distintos del resto.
-
-HECHO con su OK ("haz los cinco y registra el pendiente aparte pero también hazlo"): AppTextField en ui/CommonComponents.kt -borde y cursor en el acento al escribir, borde track en reposo, etiqueta tenue- y los once pasan a usarlo, más el del pesaje. La nota del player queda en varias líneas como estaba; su borde en reposo pasa del gris textFaded al track de los demás. En la misma pasada (TD-169): las pestañas Sessions / Body con SegmentToggle, las tarjetas y las curvas sobre SectionCard como componentes compartidos (StatTile y LineChartCard en ui/master/StatComponents.kt), las filas con listCard, fmtNum para los números y el diálogo con los colores de los demás.
-
 ## Hechos
 
 ### Branding
@@ -209,6 +190,7 @@ HECHO con su OK ("haz los cinco y registra el pendiente aparte pero también haz
 - [x] **TD-175** La alarma como despertador: varias alarmas en tarjetas, y fuera del lanzador
 - [x] **TD-174** Probar un training sin que quede registrado: modo prueba en el player
 - [x] **TD-171** La voz de los pitidos, por telefono: cada uno suena distinto al entrenar juntos
+- [x] **TD-169** Historial del peso y la cintura, el propio y el de NIKO, con el pesaje del sábado en el app
 - [x] **TD-167** El training que sigue va primero en la lista, con un destello en el borde
 - [x] **TD-164** Corregir el dolor de la manana desde la pantalla Morning
 - [x] **TD-165** Dolor habitual y dolor de crisis, separados: la sesion ya no pregunta por la crisis
@@ -364,6 +346,7 @@ HECHO con su OK ("haz los cinco y registra el pendiente aparte pero también haz
 
 ### UI
 
+- [x] **TD-187** Un solo campo de texto en todo el app (AppTextField), en vez de once copiados a mano
 - [x] **TD-183** El reloj para elegir una hora, en 12 horas y con los colores del app
 - [x] **TD-182** Morning: agregar una alarma con un + en la barra, no con un boton a todo lo ancho
 - [x] **TD-181** El detalle del historial dice al menos lo que dice la previa: series iguales en una fila, y los descansos
