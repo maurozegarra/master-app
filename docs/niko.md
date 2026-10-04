@@ -61,6 +61,32 @@ sabado 3 vuelve a bajar, el tema es la comida, no la rutina.
 asi que la comida no es tema por ahora. La cinta sube 1.5 cm (66 → 67.5), a 0.44, todavia
 muy lejos del 0.5. La balanza: grasa 26.7% (+0.1), visceral 6.
 
+### Lo que come (contado el 4-oct)
+
+El 4-oct el usuario contó lo que come hoy, porque el peso y el músculo están planos desde el
+12-sep (49.7 → 49.7 kg; 18.0 → 18.3 kg de músculo) y ella dice tener hambre a las 4 pm.
+
+| Comida | Calorías aprox. | Proteína |
+|---|---|---|
+| Desayuno: 5 huevos sancochados y ½ taza de arroz cocido | 450 | 33 g |
+| Almuerzo: 150 g de pechuga de pollo (peso crudo) y 1 taza de arroz cocido; gotas de aceite | ~400 | 38 g |
+| Cena: igual que el almuerzo | ~400 | 38 g |
+| 4 pm: una manzana | 95 | 0 g |
+| **Total** | **~1,350** | **~109 g (2.2 g/kg)** |
+
+- **La proteína le alcanza:** 2.2 g/kg, en el techo de lo recomendado para ganar músculo.
+- **La energía no:** la balanza le da 1,156 kcal en reposo, y con seis días de entreno gasta
+  del orden de 1,850 a 1,950. Le faltan unas 500 a 600 kcal por día. Es coherente con el peso
+  plano y con el hambre de la tarde.
+- **El usuario pensaba cambiar la manzana por 2 huevos.** Se le desaconsejó: suma proteína que
+  ya tiene y casi nada de energía (~140 kcal contra ~95).
+- **Sugerido:** +400 a 500 kcal al día, sobre todo de carbohidratos y algo de grasa. A las 4
+  pm, la manzana más un puñado de maní o pan con mantequilla de maní. Desayuno con una taza de
+  arroz, o un plátano o pan con palta. Almuerzo y cena con taza y media de arroz o camote o
+  papa, y palta o una cucharada de aceite de oliva.
+- **Cómo se mide:** con el pesaje de los sábados. Para ganar músculo y no grasa, unos 0.25 kg
+  por semana. Se revisa la tendencia el 17-oct. Es una estimación de coach, no de nutricionista.
+
 ### Su equipo
 
 **Para hip thrust y peso muerto rumano usa la barra EZ de 6 kg.** Se pregunto el 19-sep,
