@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-189",
+      "title": "Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO el 4-oct, con capturas, comparando con el play de la lista y con Telegram.\n\nHECHO con su OK (v1.0.380 a 1.0.384): (1) Dims.buttonHeight de 52 a 40 dp, el estándar de Material 3 (cambian juntos todos los botones grandes). (2) AppPrimaryButton solo con el borde de 1 dp del acento, como el play: sin relleno satinado, sin sombra y sin la línea de luz de arriba, que hacían ver el borde más grueso (medido: los dos bordes 3 px). Se quedan el hundimiento y la vuelta de luz. (3) La pantalla previa del training con SettingsScaffold, como Morning: flecha atrás, el título, y la prueba sin registrar (TD-174) como ojo en el acento a la derecha; PREVIEW en mayúsculas y en rojo al lado de Start desentonaba. Start queda solo, a todo lo ancho. (4) SettingsScaffold acepta un subtítulo, como el \"last seen\" de Telegram: el resumen del training va en la barra, con alto de línea ajustado (24/16 sp, sin relleno de fuente) para caber centrado en los 64 dp sin tocar la hora.\n\nA VALIDAR en el uso: si 40 dp queda chico al tocarlo con las manos cansadas."
+    },
+    {
       "id": "TD-188",
       "title": "La barra de arriba a 56 dp, para igualar el aire bajo el wordmark al de TickTick (sine die)",
       "category": "UI",
