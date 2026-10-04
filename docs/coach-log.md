@@ -5,6 +5,29 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-04 — vigesimoprimera sesión: el día malo, ya con el McGill completo
+
+**LUMBAR (bad day)** completo, de 07:38 a 08:28, **49 minutos**, asignado por fecha desde la
+revisión 25. Alarma de las 7:00: **dolor 2, aflojó en 28 minutos**, el día después de
+terminar casi en 4 (las tres mañanas anteriores fueron 1 y 15 minutos). **Se acostó a las
+22:33**: unas 8 h 30 en cama.
+
+- **McGill completo por primera vez en un día malo** (revisión 26): 12 aguantes en cada uno,
+  los cuatro bloques enteros. Caminata a 6 km/h y la de cierre a 4.5.
+- Su nota:
+
+  > *"Todo tranquilo, ningún dolor presente."*
+
+- **Lectura:** la mañana pagó lo del sábado (2 y 28 minutos), pero la sesión no dolió nada y
+  el McGill completo no molestó: es lo que lo alivia, como dijo.
+- **NIKO** retomó hoy, como dijo: NIKO 6 (Mixto y movilidad), completo.
+- **El lunes va el corto, como siempre** (McGill completo desde la revisión 27, y el carry).
+  No hay crisis: la sesión de hoy fue sin dolor, y el carry no carga la cadera al final del
+  recorrido, que es lo que molestó en el hip thrust. Qué va el martes en lugar del hip
+  thrust se decide con la mañana del lunes.
+
+---
+
 ## 2026-10-03 — vigésima sesión: vuelve el hip thrust y algo no anda bien
 
 **LUMBAR** completo, de 09:53 a 11:30, **96 minutos**. Alarma de las 7:00, contestada a la

@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **162 / 187** hechos, 25 pendientes.
+Progreso: **163 / 187** hechos, 24 pendientes.
 
 ## Pendientes
 
@@ -136,12 +136,6 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 ### Fix
 
-- [ ] **TD-186** Fix: el aviso para ir a dormir salía aunque ya se hubiera tocado "Going to bed"
-  - LO REPORTÓ el usuario el 3-oct: el viernes 2 se acostó antes del aviso, tocó "Going to bed" (quedó 22:40 en la mañana del 3), y al despertar vio que el aviso de las 23:00 había salido igual.
-
-CAUSA: anotar la hora de acostarse no tocaba el aviso ya programado (MorningAlarm.toBed solo guardaba la hora y cancelaba la notificación si estaba a la vista), y Bedtime.next no sabía qué mañanas ya tenían hora de acostarse.
-
-ARREGLO con su pedido: Bedtime.next salta la noche cuya mañana ya tiene bedAt (Bedtime.bedRecorded); toBed y editBed reprograman al anotar, así el aviso pasa a la noche siguiente; y showBedtime no avisa si esa mañana ya tiene hora, por si el aviso ya estaba en camino. Test en MorningTest.
 - [ ] **TD-156** Lo que salio de la primera semana con metros y feedback: carry alternado, respiro para contestar, preparacion de la caminata
   - REPORTADO el 24-sep, cuatro cosas de una vez:
 (1) El usuario: "Carry demoro el doble, no me gusto". Con la revision 15 el carry iba por lados uno tras otro -tres viajes con la izquierda y despues tres con la derecha- con un minuto entre cada uno: cinco descansos en vez de los dos de antes.
@@ -265,6 +259,7 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 
 ### Fix
 
+- [x] **TD-186** Fix: el aviso para ir a dormir salía aunque ya se hubiera tocado "Going to bed"
 - [x] **TD-184** Fix: el telefono del coach publicaba sus instrucciones del lumbar, en ingles, y le llegaban a NIKO
 - [x] **TD-176** Los minutos hasta aflojar: una sola fuente, y que se puedan corregir
 - [x] **TD-172** En un circuito, el ejercicio que pasa directo al siguiente nunca pregunta como fue

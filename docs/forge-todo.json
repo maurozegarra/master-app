@@ -12,8 +12,8 @@
       "id": "TD-186",
       "title": "Fix: el aviso para ir a dormir salía aunque ya se hubiera tocado \"Going to bed\"",
       "category": "Fix",
-      "status": "pending",
-      "manual": "LO REPORTÓ el usuario el 3-oct: el viernes 2 se acostó antes del aviso, tocó \"Going to bed\" (quedó 22:40 en la mañana del 3), y al despertar vio que el aviso de las 23:00 había salido igual.\n\nCAUSA: anotar la hora de acostarse no tocaba el aviso ya programado (MorningAlarm.toBed solo guardaba la hora y cancelaba la notificación si estaba a la vista), y Bedtime.next no sabía qué mañanas ya tenían hora de acostarse.\n\nARREGLO con su pedido: Bedtime.next salta la noche cuya mañana ya tiene bedAt (Bedtime.bedRecorded); toBed y editBed reprograman al anotar, así el aviso pasa a la noche siguiente; y showBedtime no avisa si esa mañana ya tiene hora, por si el aviso ya estaba en camino. Test en MorningTest."
+      "status": "done",
+      "manual": "LO REPORTÓ el usuario el 3-oct: el viernes 2 se acostó antes del aviso, tocó \"Going to bed\" (quedó 22:40 en la mañana del 3), y al despertar vio que el aviso de las 23:00 había salido igual.\n\nCAUSA: anotar la hora de acostarse no tocaba el aviso ya programado (MorningAlarm.toBed solo guardaba la hora y cancelaba la notificación si estaba a la vista), y Bedtime.next no sabía qué mañanas ya tenían hora de acostarse.\n\nARREGLO con su pedido: Bedtime.next salta la noche cuya mañana ya tiene bedAt (Bedtime.bedRecorded); toBed y editBed reprograman al anotar, así el aviso pasa a la noche siguiente; y showBedtime no avisa si esa mañana ya tiene hora, por si el aviso ya estaba en camino. Test en MorningTest.\n\nVALIDADO por el usuario el 4-oct-2026: tocó \"Going to bed\" a las 22:33 y el aviso de las 23:00 no salió. Cerrado por el usuario."
     },
     {
       "id": "TD-185",
