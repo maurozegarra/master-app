@@ -1,7 +1,7 @@
 {
-  "changelog": "release: boton Start, NEXT con duracion y velocidad, historial en tramos con descansos, reloj de 12 horas y + en Morning",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.360/master-1.0.360.apk",
-  "versionCode": 360,
-  "versionName": "1.0.360",
-  "minVersionCode": 1
+  "versionName": "1.0.378",
+  "changelog": "release: historial del peso y la cintura con el pesaje del sabado, aviso para dormir corregido, un solo campo de texto y la nota que sigue al cursor",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.378/master-1.0.378.apk",
+  "minVersionCode": 1,
+  "versionCode": 378
 }
