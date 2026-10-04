@@ -98,6 +98,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.outlined.Visibility
 import com.maurozegarra.master.ui.AppTextField
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
@@ -180,23 +181,33 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
     var bottomPx by remember { mutableStateOf(0) }
     val bottomHeight = with(LocalDensity.current) { bottomPx.toDp() }
 
-    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp, 16.dp, 16.dp, bottomHeight + 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                Text(vm.playerName, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                Text(
-                    buildString {
-                        append("${t.exerciseCount(totalExercises)} · ${t.workoutCount(groups.size)}")
-                        if (totalSec > 0) append(" · ~${formatRemaining(totalSec * 1000L)}")
-                    },
-                    color = AppTheme.colors.textDim,
-                    fontSize = 14.sp,
+    // Con la barra de las demas pantallas (4-oct): el titulo, la flecha atras y, a la derecha,
+    // la prueba sin registrar (TD-174), como el + de Morning (TD-182). Antes la prueba era un
+    // boton PREVIEW al lado de Start, en mayusculas y en rojo, y competia con el.
+    com.maurozegarra.master.SettingsScaffold(
+        title = vm.playerName,
+        // El resumen va en la barra, como subtitulo (4-oct): debajo de ella dejaba un hueco.
+        subtitle = buildString {
+            append("${t.exerciseCount(totalExercises)} · ${t.workoutCount(groups.size)}")
+            if (totalSec > 0) append(" · ~${formatRemaining(totalSec * 1000L)}")
+        },
+        onBack = { vm.minimizePlayer() },
+        actions = {
+            androidx.compose.material3.IconButton(onClick = { vm.playerTest = true; onStart() }) {
+                Icon(
+                    androidx.compose.material.icons.Icons.Outlined.Visibility,
+                    contentDescription = t.more.testRun.button,
+                    tint = accent,
                 )
             }
+        },
+    ) {
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp, 0.dp, 16.dp, bottomHeight + 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             items(groups, key = { it.index }) { g ->
                 val open = expanded[g.index] ?: false
                 WorkoutGroupCard(
@@ -226,27 +237,18 @@ private fun PreviewView(vm: MasterViewModel, accent: Color, t: Strings, onStart:
             // CRISIS, y la crisis paso. El habitual lo pregunta la alarma al despertar; el de
             // una crisis, si vuelve, se anota al final, detras de "Back crisis today".
             //
-            // La prueba va al lado de Start y mas chica (TD-174): es para revisar como se
-            // comporta un training sin que quede registrado, y no debe poder confundirse
-            // con empezar de verdad.
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                com.maurozegarra.master.ui.AppOutlineButton(
-                    label = t.more.testRun.button,
-                    accent = accent,
-                    modifier = Modifier.weight(1f),
-                    onClick = { vm.playerTest = true; onStart() },
-                )
-                // Con su ícono: el video pide uno, y "play" dice lo que pasa antes de leer.
-                PrimaryButton(
-                    label = t.start,
-                    accent = accent,
-                    modifier = Modifier.weight(2f),
-                    icon = androidx.compose.material.icons.Icons.Filled.PlayArrow,
-                    onClick = { vm.playerTest = false; onStart() },
-                )
-            }
+            // Solo Start, a todo lo ancho: la prueba sin registrar paso a la barra (4-oct).
+            // Con su ícono: el video pide uno, y "play" dice lo que pasa antes de leer.
+            PrimaryButton(
+                label = t.start,
+                accent = accent,
+                modifier = Modifier.fillMaxWidth(),
+                icon = androidx.compose.material.icons.Icons.Filled.PlayArrow,
+                onClick = { vm.playerTest = false; onStart() },
+            )
         }
         sheetTarget?.let { InstructionsSheet(it) { sheetTarget = null } }
+    }
     }
 }
 

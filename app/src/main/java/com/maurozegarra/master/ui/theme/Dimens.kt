@@ -46,5 +46,9 @@ object Dims {
     val button = 28.dp
     val buttonSmall = 12.dp
     val field = 12.dp
-    val buttonHeight = 52.dp
+    /**
+     * El alto de los botones grandes (primario y de contorno). 40 dp, el estandar de Material 3,
+     * pedido por el usuario el 4-oct: con 52 el Start se veia demasiado grande. A prueba.
+     */
+    val buttonHeight = 40.dp
 }

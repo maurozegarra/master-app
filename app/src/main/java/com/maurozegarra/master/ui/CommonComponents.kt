@@ -48,12 +48,13 @@ import com.maurozegarra.master.ui.theme.Dims
  * es rojo sólido y se vería mejor si sólo fuera borde y con el efecto exacto que menciona
  * el video"*.
  *
- * 1. **Tamaño**: [Dims.buttonHeight] de alto, por encima de los 44 que pide un pulgar.
+ * 1. **Tamaño**: [Dims.buttonHeight] de alto. Eran 52; desde el 4-oct, 40, el estándar de
+ *    Material 3, a pedido suyo.
  * 2. **Etiqueta**: 17 sp, semibold, en el texto principal de la paleta.
- * 3. **Contraste**: relleno satinado -de [AppTheme] track a surface- y un borde de 1 dp
- *    del acento, que es lo que lo separa de la página. Ya no es un bloque rojo.
- * 4. **Profundidad**: el borde de arriba iluminado ([TOP_EDGE_LIGHT]) y una sombra que cae
- *    hacia abajo: la luz viene de arriba.
+ * 3. **Contraste**: solo un borde de 1 dp del acento, sin relleno, igual que el play de la
+ *    lista de trainings. El relleno satinado del principio desentonaba (4-oct).
+ * 4. **Profundidad**: se quitaron la sombra y la línea de luz de arriba (4-oct): hacían ver el
+ *    borde más grueso que el del play.
  * 5. **Detalle**: píldora -radio = alto / 2, en porcentaje para no escribir el número- y
  *    un solo ícono, opcional, de 20 a 10 del texto.
  * 6. **Movimiento**: al tocar, se hunde 1 dp y la luz da una vuelta al borde. En un teléfono
@@ -94,21 +95,11 @@ internal fun AppPrimaryButton(
         modifier
             .height(Dims.buttonHeight)
             .graphicsLayer { translationY = hundido.toPx() }
-            .shadow(if (enabled) 8.dp else 0.dp, forma, clip = false)
+            // Solo el borde, como el play de la lista (4-oct): sin relleno, sin sombra y sin la
+            // linea de luz de arriba. La sombra y esa linea hacian ver el borde mas grueso que
+            // el del play, aunque los dos son de 1 dp.
             .clip(forma)
-            .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(c.track, c.surface)))
             .border(1.dp, borde, forma)
-            .drawBehind {
-                // El borde de arriba iluminado: una línea fina dentro del contorno, solo en el
-                // tramo recto, que es donde la luz de arriba daría.
-                val r = size.height / 2f
-                drawLine(
-                    com.maurozegarra.master.ui.theme.TOP_EDGE_LIGHT,
-                    androidx.compose.ui.geometry.Offset(r, 1.5.dp.toPx()),
-                    androidx.compose.ui.geometry.Offset(size.width - r, 1.5.dp.toPx()),
-                    strokeWidth = 1.dp.toPx(),
-                )
-            }
             .clickable(
                 interactionSource = toque,
                 indication = null,

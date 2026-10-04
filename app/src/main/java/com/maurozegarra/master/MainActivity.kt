@@ -383,6 +383,11 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
 internal fun SettingsScaffold(
     title: String,
     onBack: () -> Unit,
+    /**
+     * Una linea chica debajo del titulo, dentro de la barra, como el "last seen" de un chat de
+     * Telegram (4-oct). La barra mide 64 dp fijos: un subtitulo fuera de ella dejaba un hueco.
+     */
+    subtitle: String? = null,
     /** Lo de la derecha de la barra, como el "+" de Morning (TD-182). */
     actions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
     content: @Composable () -> Unit,
@@ -392,7 +397,25 @@ internal fun SettingsScaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    if (subtitle == null) {
+                        Text(title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    } else {
+                        // Con subtitulo, cada linea con un alto ajustado a su letra y sin el
+                        // relleno de la fuente: con el alto de linea por defecto las dos no
+                        // cabian centradas en los 64 dp de la barra, el titulo subia hasta la
+                        // hora del telefono y quedaba aire entre las dos (4-oct).
+                        val ajustado = androidx.compose.ui.text.TextStyle(
+                            platformStyle = androidx.compose.ui.text.PlatformTextStyle(includeFontPadding = false),
+                            lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(
+                                alignment = androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center,
+                                trim = androidx.compose.ui.text.style.LineHeightStyle.Trim.Both,
+                            ),
+                        )
+                        Column {
+                            Text(title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 24.sp, style = ajustado, maxLines = 1)
+                            Text(subtitle, color = AppTheme.colors.textDim, fontSize = 13.sp, lineHeight = 16.sp, style = ajustado, maxLines = 1)
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
