@@ -161,7 +161,7 @@ object MorningAlarm {
     /** El próximo aviso para ir a dormir y la alarma a la que apunta (TD-160). */
     fun nextBedtime(context: Context): Pair<ZonedDateTime, ZonedDateTime>? {
         val store = MorningStore(context)
-        return Bedtime.next(store.schedule(), store.skipDate, store.bedtime(), ZonedDateTime.now(ZoneId.systemDefault()))
+        return Bedtime.next(store.schedule(), store.skipDate, store.bedtime(), ZonedDateTime.now(ZoneId.systemDefault()), Bedtime.bedRecorded(store.entries()))
     }
 
     /**
@@ -187,6 +187,9 @@ object MorningAlarm {
         val t = com.maurozegarra.master.i18n.I18n.EN
         // La alarma a la que apunta es la próxima: el aviso sonó justo antes de su hora.
         val ring = nextRing(context) ?: return
+        // Si esa mañana ya tiene hora de acostarse, ya se acostó: no se avisa. Cubre el aviso
+        // que ya estaba programado cuando se tocó "Going to bed".
+        if (ring.toLocalDate() in Bedtime.bedRecorded(MorningStore(context).entries())) return
         val cfg = MorningStore(context).bedtime()
         val fmt = java.time.format.DateTimeFormatter.ofPattern("H:mm")
         val toBed = PendingIntent.getBroadcast(
@@ -210,6 +213,9 @@ object MorningAlarm {
         val store = MorningStore(context)
         store.saveEntries(MorningLog.withBed(store.entries(), System.currentTimeMillis(), ZoneId.systemDefault()))
         context.getSystemService(NotificationManager::class.java).cancel(NOTIF_BED)
+        // El aviso de esta noche, si todavía no salió, ya no hace falta: se pasa al de la
+        // noche siguiente.
+        reschedule(context)
     }
 
     /**
@@ -222,6 +228,7 @@ object MorningAlarm {
         val at = noche.atTime(time).atZone(zone).toInstant().toEpochMilli()
         val store = MorningStore(context)
         store.saveEntries(MorningLog.withBed(store.entries(), at, zone))
+        reschedule(context)
     }
 
     /** "Aflojó": anota la hora. Los minutos salen solos de [MorningEntry.fadeMinutes]. */

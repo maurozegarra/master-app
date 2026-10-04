@@ -61,6 +61,15 @@ class BodyStore(context: Context) {
         get() = prefs.getBoolean(KEY_SEEDED, false)
         set(v) = prefs.edit().putBoolean(KEY_SEEDED, v).apply()
 
+    /**
+     * Si ya se restauró la serie borrada el 3-oct: un "Delete" sin confirmación borró los
+     * cuatro pesajes del usuario. Una vez, y no más: lo que se borre después, con su
+     * confirmación, no vuelve.
+     */
+    var restored: Boolean
+        get() = prefs.getBoolean(KEY_RESTORED, false)
+        set(v) = prefs.edit().putBoolean(KEY_RESTORED, v).apply()
+
     /** El sábado en que ya se recordó el pesaje (ISO), para no avisar cada quince minutos. */
     var remindedOn: String?
         get() = prefs.getString(KEY_REMINDED, null)
@@ -85,5 +94,6 @@ class BodyStore(context: Context) {
         const val KEY_DELETES = "pending_deletes"
         const val KEY_SEEDED = "seeded_v1"
         const val KEY_REMINDED = "reminded_on"
+        const val KEY_RESTORED = "restored_v1"
     }
 }

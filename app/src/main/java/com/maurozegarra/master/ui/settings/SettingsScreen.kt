@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -453,20 +452,20 @@ private fun SignInDialog(
         title = { Text(t.coachSignIn) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
+                com.maurozegarra.master.ui.AppTextField(
                     value = email,
                     onValueChange = { email = it },
-                    singleLine = true,
-                    label = { Text(t.coachEmail) },
+                    label = t.coachEmail,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    accent = accent,
                 )
-                OutlinedTextField(
+                com.maurozegarra.master.ui.AppTextField(
                     value = password,
                     onValueChange = { password = it },
-                    singleLine = true,
-                    label = { Text(t.coachPassword) },
+                    label = t.coachPassword,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    accent = accent,
                 )
             }
         },

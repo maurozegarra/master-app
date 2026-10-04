@@ -224,6 +224,20 @@ class MorningTest {
     }
 
     @Test
+    fun `si ya se acosto, esa noche no hay aviso`() {
+        // 2-oct: toco "Going to bed" a las 22:40 y el aviso de las 23:00 (alarma del sabado a
+        // las 7) salio igual. Con la hora anotada, el que toca es el de la noche siguiente.
+        val bed = at(2026, 10, 2, 22, 40).toInstant().toEpochMilli()
+        val acostado = Bedtime.bedRecorded(MorningLog.withBed(emptyList(), bed, lima))
+        assertEquals(setOf(LocalDate.of(2026, 10, 3)), acostado)
+        val sinAnotar = Bedtime.next(DEFAULT, null, cama, at(2026, 10, 2, 22, 40))!!
+        assertEquals(at(2026, 10, 2, 23, 0), sinAnotar.first)
+        val (aviso, ring) = Bedtime.next(DEFAULT, null, cama, at(2026, 10, 2, 22, 40), acostado)!!
+        assertEquals(at(2026, 10, 4, 7, 0), ring)
+        assertEquals(at(2026, 10, 3, 23, 0), aviso)
+    }
+
+    @Test
     fun `apagado, o sin alarmas, no hay aviso`() {
         assertNull(Bedtime.next(DEFAULT, null, cama.copy(enabled = false), at(2026, 9, 28, 20, 0)))
         assertNull(Bedtime.next(MorningSchedule.default(false), null, cama, at(2026, 9, 28, 20, 0)))

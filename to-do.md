@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **160 / 185** hechos, 25 pendientes.
+Progreso: **160 / 187** hechos, 27 pendientes.
 
 ## Pendientes
 
@@ -148,6 +148,12 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 ### Fix
 
+- [ ] **TD-186** Fix: el aviso para ir a dormir salía aunque ya se hubiera tocado "Going to bed"
+  - LO REPORTÓ el usuario el 3-oct: el viernes 2 se acostó antes del aviso, tocó "Going to bed" (quedó 22:40 en la mañana del 3), y al despertar vio que el aviso de las 23:00 había salido igual.
+
+CAUSA: anotar la hora de acostarse no tocaba el aviso ya programado (MorningAlarm.toBed solo guardaba la hora y cancelaba la notificación si estaba a la vista), y Bedtime.next no sabía qué mañanas ya tenían hora de acostarse.
+
+ARREGLO con su pedido: Bedtime.next salta la noche cuya mañana ya tiene bedAt (Bedtime.bedRecorded); toBed y editBed reprograman al anotar, así el aviso pasa a la noche siguiente; y showBedtime no avisa si esa mañana ya tiene hora, por si el aviso ya estaba en camino. Test en MorningTest.
 - [ ] **TD-156** Lo que salio de la primera semana con metros y feedback: carry alternado, respiro para contestar, preparacion de la caminata
   - REPORTADO el 24-sep, cuatro cosas de una vez:
 (1) El usuario: "Carry demoro el doble, no me gusto". Con la revision 15 el carry iba por lados uno tras otro -tres viajes con la izquierda y despues tres con la derecha- con un minuto entre cada uno: cinco descansos en vez de los dos de antes.
@@ -175,6 +181,13 @@ UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mit
 A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el ajuste es fijar un comportamiento, no borrar una casilla: hay que preguntar cual. Y limpiar lo que lo usa -SettingsViewModel.setPadPlayerClock, el parametro padded de formatPlayerClock y del player- sin dejar un campo huerfano en la configuracion guardada.
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
+
+### UI
+
+- [ ] **TD-187** Un solo campo de texto en todo el app (AppTextField), en vez de once copiados a mano
+  - VISTO el 3-oct al revisar, a pedido del usuario, si el historial del peso (TD-169) reutilizaba los componentes del app: "la idea es no tener objetos personalizados por cada control que vaya surgiendo". No los reutilizaba, y al buscar el campo de texto aparecieron once OutlinedTextField escritos a mano: siete con la misma receta de colores del tema (los dos buscadores, la nota del ejercicio, el paso de las instrucciones y los nombres del training, el workout y la variante), la nota de la sesión del player con otro gris, y tres en diálogos (el nombre de un perfil, y el correo y la clave del coach) con los colores por defecto de Material, distintos del resto.
+
+HECHO con su OK ("haz los cinco y registra el pendiente aparte pero también hazlo"): AppTextField en ui/CommonComponents.kt -borde y cursor en el acento al escribir, borde track en reposo, etiqueta tenue- y los once pasan a usarlo, más el del pesaje. La nota del player queda en varias líneas como estaba; su borde en reposo pasa del gris textFaded al track de los demás. En la misma pasada (TD-169): las pestañas Sessions / Body con SegmentToggle, las tarjetas y las curvas sobre SectionCard como componentes compartidos (StatTile y LineChartCard en ui/master/StatComponents.kt), las filas con listCard, fmtNum para los números y el diálogo con los colores de los demás.
 
 ## Hechos
 

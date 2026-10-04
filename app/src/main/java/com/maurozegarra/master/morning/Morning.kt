@@ -306,17 +306,29 @@ object Bedtime {
      * avisa a destiempo: se busca el de la alarma siguiente. Avisar "acuéstate a las 21:30"
      * a las 22:00 no sirve de nada.
      */
-    fun next(schedule: MorningSchedule, skip: LocalDate?, cfg: BedtimeConfig, now: ZonedDateTime): Pair<ZonedDateTime, ZonedDateTime>? {
+    fun next(
+        schedule: MorningSchedule,
+        skip: LocalDate?,
+        cfg: BedtimeConfig,
+        now: ZonedDateTime,
+        // Las mañanas que ya tienen hora de acostarse. Si ya se acostó, avisarle que se acueste
+        // no sirve: el 2-oct tocó "Going to bed" a las 22:40 y el aviso de las 23:00 salió igual.
+        bedRecorded: Set<LocalDate> = emptySet(),
+    ): Pair<ZonedDateTime, ZonedDateTime>? {
         if (!cfg.enabled) return null
         var desde = now
         repeat(4) {
             val ring = schedule.next(desde, skip) ?: return null
             val aviso = bedBy(ring, cfg).minusMinutes(cfg.leadMin.toLong())
-            if (aviso.isAfter(now)) return aviso to ring
+            if (aviso.isAfter(now) && ring.toLocalDate() !in bedRecorded) return aviso to ring
             desde = ring
         }
         return null
     }
+
+    /** Las mañanas que ya tienen hora de acostarse, para [next]. */
+    fun bedRecorded(entries: List<MorningEntry>): Set<LocalDate> =
+        entries.filter { it.bedAt != null }.mapNotNull { runCatching { LocalDate.parse(it.date) }.getOrNull() }.toSet()
 }
 
 /** Cuánto falta para la próxima alarma, como lo decía su despertador (28-sep). */

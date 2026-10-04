@@ -22,8 +22,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maurozegarra.master.ui.AppTextField
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.data.VideoState
@@ -309,19 +308,12 @@ private fun InstructionsEditor(
         modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        OutlinedTextField(
+        AppTextField(
             value = draft,
             onValueChange = { draft = it },
-            placeholder = { Text(t.addStepHint, color = AppTheme.colors.textFaded) },
-            singleLine = true,
+            placeholder = t.addStepHint,
             modifier = Modifier.weight(1f),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = accent,
-                unfocusedBorderColor = AppTheme.colors.track,
-                focusedTextColor = AppTheme.colors.textPrimary,
-                unfocusedTextColor = AppTheme.colors.textPrimary,
-                cursorColor = accent,
-            ),
+            accent = accent,
         )
         Box(
             modifier = Modifier

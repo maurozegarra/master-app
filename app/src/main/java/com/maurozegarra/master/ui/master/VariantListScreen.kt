@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +29,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maurozegarra.master.ui.AppTextField
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.i18n.exerciseCount
@@ -84,19 +83,12 @@ fun VariantListScreen(vm: MasterViewModel, accent: Color, t: Strings) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                OutlinedTextField(
+                AppTextField(
                     value = vm.editorName(),
                     onValueChange = { vm.setEditorName(it) },
-                    placeholder = { Text(t.workoutNameHint, color = AppTheme.colors.textFaded) },
-                    singleLine = true,
+                    placeholder = t.workoutNameHint,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = accent,
-                        unfocusedBorderColor = AppTheme.colors.track,
-                        focusedTextColor = AppTheme.colors.textPrimary,
-                        unfocusedTextColor = AppTheme.colors.textPrimary,
-                        cursorColor = accent,
-                    ),
+                    accent = accent,
                 )
             }
 

@@ -18,8 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maurozegarra.master.ui.AppTextField
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ExerciseDef
@@ -49,20 +48,13 @@ fun ChooseExerciseScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val exactMatch = all.any { it.name.equals(query.trim(), ignoreCase = true) }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        OutlinedTextField(
+        AppTextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = { Text(t.searchHint, color = AppTheme.colors.textFaded) },
+            placeholder = t.searchHint,
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = AppTheme.colors.textDim) },
-            singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = accent,
-                unfocusedBorderColor = AppTheme.colors.track,
-                focusedTextColor = AppTheme.colors.textPrimary,
-                unfocusedTextColor = AppTheme.colors.textPrimary,
-                cursorColor = accent,
-            ),
+            accent = accent,
         )
 
         Spacer(Modifier.width(12.dp))

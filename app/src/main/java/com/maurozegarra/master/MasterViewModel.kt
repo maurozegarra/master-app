@@ -1750,8 +1750,21 @@ class MasterViewModel(
      * arranque en que lo tenga.
      */
     private fun seedBody() {
-        if (bodyStore.seeded) return
         val perfil = assignments.profileId ?: return
+        // 3-oct: un "Delete" sin confirmacion (ya corregido) borro sus cuatro pesajes. Vuelven
+        // los de la serie que falten, una sola vez, y suben otra vez al servidor.
+        if (bodyStore.seeded && !bodyStore.restored) {
+            BodyLog.SEED[perfil]?.let { serie ->
+                var lista = bodyStore.mine()
+                serie.forEach { e -> if (lista.none { it.date == e.date }) lista = BodyLog.upsert(lista, e) }
+                bodyStore.saveMine(lista)
+                bodyMine.clear()
+                bodyMine.addAll(lista)
+            }
+            bodyStore.restored = true
+        }
+        if (bodyStore.seeded) return
+        bodyStore.restored = true
         BodyLog.SEED[perfil]?.let { serie ->
             var lista = bodyStore.mine()
             serie.forEach { e -> if (lista.none { it.date == e.date }) lista = BodyLog.upsert(lista, e) }

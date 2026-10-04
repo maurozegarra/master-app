@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.BorderStroke
@@ -50,8 +51,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -99,6 +98,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maurozegarra.master.ui.AppTextField
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
 import com.maurozegarra.master.data.VideoState
@@ -1978,20 +1978,16 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
         Spacer(Modifier.height(12.dp))
         }
 
-        OutlinedTextField(
+        // Varias lineas: la nota de la sesion es un parrafo, no un nombre.
+        AppTextField(
             value = note,
             onValueChange = { note = it },
-            label = { Text(t.sessionNote, fontSize = 13.sp) },
+            label = t.sessionNote,
+            singleLine = false,
+            // Seis lineas como mucho, como Telegram: pasado eso el texto se desplaza dentro.
+            maxLines = 6,
             modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = accent,
-                unfocusedBorderColor = AppTheme.colors.textFaded,
-                focusedTextColor = AppTheme.colors.textPrimary,
-                unfocusedTextColor = AppTheme.colors.textPrimary,
-                cursorColor = accent,
-                focusedLabelColor = accent,
-                unfocusedLabelColor = AppTheme.colors.textDim,
-            ),
+            accent = accent,
         )
         // La nota se guarda al salir del campo: escribir letra a letra en disco no aporta
         // nada, pero perderla por cerrar la pantalla si quita.
@@ -2083,30 +2079,40 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
     if (vm.playerTest) return TestFinishedView(vm, accent, t)
     val suggestions = vm.weightSuggestions()
     Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp, 32.dp, 16.dp, 96.dp),
+        // Una columna con scroll y no una LazyColumn, con imePadding en ella y no en la caja
+        // (3-oct). El app dibuja de borde a borde y Android no achica la pantalla con el
+        // teclado: sin imePadding, lo que se escribia en la nota quedaba detras del teclado; en
+        // la caja, el boton Close subia con el teclado y tapaba la nota; y en una LazyColumn la
+        // lista no seguia al cursor mientras la nota crecia linea a linea. Con scroll normal el
+        // campo lleva la linea que se escribe a la vista, y Close se queda abajo, tras el
+        // teclado. Son pocos bloques: la lista perezosa no ahorraba nada aqui.
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 16.dp, top = 32.dp, end = 16.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            item {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("🎉", fontSize = 56.sp)
                 Text(t.workoutComplete, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
                 Spacer(Modifier.height(8.dp))
             }
             if (vm.asksHowItWent()) {
-                item { HowItWent(vm, accent, t) }
+                HowItWent(vm, accent, t)
             }
             // Las series con peso que se quedaron sin marcar, para cerrarlas de un toque
             // mientras se toma el agua (TD-122). La ultima serie de un ejercicio no tiene
             // descanso detras, asi que sin esto no hay ningun momento para contestarla.
             val pendientes = vm.unmarkedWeightSets()
             if (pendientes.isNotEmpty()) {
-                item {
+                Column(Modifier.fillMaxWidth()) {
                     Text(t.effort.pendingFeedback, color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(4.dp))
                 }
-                items(pendientes, key = { "${it.ownerExerciseId}:${it.workoutIndex}:${it.setIndex}:${it.side}" }) { paso ->
+                pendientes.forEach { paso ->
                     val marcado = vm.weightFeedback[vm.feedbackKey(paso.ownerExerciseId, paso.workoutIndex, paso.setIndex, paso.side)]?.deltaKg
                     Column(
                         Modifier
@@ -2135,14 +2141,12 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
             val sinContestar = vm.unmarkedEffortSets()
             if (sinContestar.isNotEmpty()) {
                 if (pendientes.isEmpty()) {
-                    item {
+                    Column(Modifier.fillMaxWidth()) {
                         Text(t.effort.pendingFeedback, color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         Spacer(Modifier.height(4.dp))
                     }
                 }
-                // Con el lado en la clave: sin el, izquierda y derecha de la misma serie
-                // chocaban y la lista se caia.
-                items(sinContestar, key = { "effort:${it.ownerExerciseId}:${it.workoutIndex}:${it.setIndex}:${it.side}" }) { paso ->
+                sinContestar.forEach { paso ->
                     val marca = vm.effortOf(paso)
                     Column(
                         Modifier
@@ -2174,7 +2178,7 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
             // se corto antes.
             val registro = vm.lastSessionFeedback()?.let { EffortRecord.lines(it) }.orEmpty()
             if (registro.isNotEmpty()) {
-                item {
+                run {
                     Column(
                         Modifier
                             .fillMaxWidth()
@@ -2192,11 +2196,11 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
                 }
             }
             if (suggestions.isNotEmpty()) {
-                item {
+                Column(Modifier.fillMaxWidth()) {
                     Text(t.nextSuggestions, color = AppTheme.colors.textDim, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(4.dp))
                 }
-                items(suggestions) { (name, _, next) ->
+                suggestions.forEach { (name, _, next) ->
                     Row(
                         Modifier
                             .fillMaxWidth()

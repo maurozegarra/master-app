@@ -297,7 +297,8 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                     // (TD-182): en la barra y no con un boton a todo lo ancho. Solo el propio.
                     if (vm.showingHistory && vm.historyAthlete == null && vm.historyTab == MasterViewModel.HistoryTab.BODY) {
                         IconButton(onClick = { vm.openWeighIn() }) {
-                            Icon(Icons.Filled.Add, contentDescription = t.more.body.add, tint = AppTheme.colors.textPrimary)
+                            // En el acento, como el + de Morning: es la accion de la pantalla.
+                            Icon(Icons.Filled.Add, contentDescription = t.more.body.add, tint = AppTheme.colors.accent)
                         }
                     } else if (vm.showingHistory && vm.historyAthlete == null) {
                         Box {

@@ -189,14 +189,8 @@ private fun HistoryBody(vm: MasterViewModel, sessions: List<SessionLog>, ajeno: 
             contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 96.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item(key = "count") {
-                Text(
-                    "${sessions.size} ${t.sessionsCount}",
-                    color = AppTheme.colors.textDim,
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(bottom = 4.dp),
-                )
-            }
+            // El conteo va en la pestaña ("Sessions · 37"), no en una fila antes de la lista:
+            // pedido del usuario el 3-oct, para que la lista empiece por la sesion, como Body.
             groups.forEach { (date, items) ->
                 item(key = "hdr-$date") {
                     Text(

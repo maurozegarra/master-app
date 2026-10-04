@@ -14,7 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -379,11 +378,10 @@ private fun NameDialog(
         titleContentColor = AppTheme.colors.textPrimary,
         title = { Text(title) },
         text = {
-            OutlinedTextField(
+            com.maurozegarra.master.ui.AppTextField(
                 value = name,
                 onValueChange = { name = it },
-                singleLine = true,
-                label = { Text(t.profileName) },
+                label = t.profileName,
             )
         },
         confirmButton = {

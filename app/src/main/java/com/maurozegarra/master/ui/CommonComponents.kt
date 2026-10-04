@@ -4,6 +4,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
@@ -249,6 +255,71 @@ internal fun AppSwitch(checked: Boolean, accent: Color, onCheckedChange: (Boolea
             checkedTrackColor = accent,
             uncheckedThumbColor = com.maurozegarra.master.ui.theme.SWITCH_THUMB_OFF,
             uncheckedTrackColor = c.track,
+        ),
+    )
+}
+
+/**
+ * El campo de texto del app (TD-187), con los colores de la paleta: borde y cursor en el
+ * acento al escribir, borde [AppTheme] track en reposo, texto principal, etiqueta tenue.
+ *
+ * Existe porque la misma receta estaba copiada a mano en siete pantallas, una octava la
+ * tenía con otro gris, y tres diálogos -y el del pesaje (TD-169)- ni la tenían: salían con
+ * los colores por defecto de Material, distintos del resto del app.
+ */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+internal fun AppTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String? = null,
+    placeholder: String? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    singleLine: Boolean = true,
+    /**
+     * Con varias lineas, hasta cuantas crece antes de desplazar el texto por dentro. Como la
+     * caja de mensajes de Telegram (ChatActivityEnterView: setMaxLines(6)): asi nunca es mas
+     * alto que el sitio libre y la linea que se escribe siempre se ve.
+     */
+    maxLines: Int = Int.MAX_VALUE,
+    keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default,
+    visualTransformation: androidx.compose.ui.text.input.VisualTransformation = androidx.compose.ui.text.input.VisualTransformation.None,
+    accent: Color = AppTheme.colors.accent,
+) {
+    val c = AppTheme.colors
+    // Un campo de varias lineas pide verse entero cada vez que cambia el texto. El de Compose
+    // solo lo pide al ganar el foco: al ir agregando lineas, la ultima quedaba detras del
+    // teclado aunque la pantalla le dejara sitio (3-oct, la nota al terminar una sesion; el
+    // registro de esa pantalla confirmo que el teclado si llegaba, 859 px).
+    val verse = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+    var enFoco by remember { mutableStateOf(false) }
+    if (!singleLine) {
+        LaunchedEffect(value, enFoco) {
+            if (enFoco) verse.bringIntoView()
+        }
+    }
+    androidx.compose.material3.OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier
+            .bringIntoViewRequester(verse)
+            .onFocusChanged { enFoco = it.isFocused },
+        label = label?.let { { Text(it) } },
+        placeholder = placeholder?.let { { Text(it, color = c.textFaded) } },
+        leadingIcon = leadingIcon,
+        singleLine = singleLine,
+        maxLines = if (singleLine) 1 else maxLines,
+        keyboardOptions = keyboardOptions,
+        visualTransformation = visualTransformation,
+        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = accent,
+            unfocusedBorderColor = c.track,
+            focusedTextColor = c.textPrimary,
+            unfocusedTextColor = c.textPrimary,
+            cursorColor = accent,
+            focusedLabelColor = accent,
+            unfocusedLabelColor = c.textDim,
         ),
     )
 }

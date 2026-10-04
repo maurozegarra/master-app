@@ -36,8 +36,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -57,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maurozegarra.master.ui.AppTextField
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.i18n.Strings
 import com.maurozegarra.master.model.ConfirmMode
@@ -692,19 +691,12 @@ private fun StageAdvanced(
 
 @Composable
 private fun ExerciseNoteField(ex: Exercise, accent: Color, t: Strings, onChange: (Exercise) -> Unit) {
-    OutlinedTextField(
+    AppTextField(
         value = ex.note,
         onValueChange = { onChange(ex.copy(note = it)) },
-        label = { Text(t.noteLabel, color = AppTheme.colors.textDim) },
-        singleLine = true,
+        label = t.noteLabel,
         modifier = Modifier.fillMaxWidth(),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = accent,
-            unfocusedBorderColor = AppTheme.colors.track,
-            focusedTextColor = AppTheme.colors.textPrimary,
-            unfocusedTextColor = AppTheme.colors.textPrimary,
-            cursorColor = accent,
-        ),
+        accent = accent,
     )
 }
 
