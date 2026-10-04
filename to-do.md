@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **163 / 188** hechos, 25 pendientes.
+Progreso: **163 / 189** hechos, 26 pendientes.
 
 ## Pendientes
 
@@ -166,6 +166,12 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 
 ### UI
 
+- [ ] **TD-189** Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo
+  - PEDIDO el 4-oct, con capturas, comparando con el play de la lista y con Telegram.
+
+HECHO con su OK (v1.0.380 a 1.0.384): (1) Dims.buttonHeight de 52 a 40 dp, el estándar de Material 3 (cambian juntos todos los botones grandes). (2) AppPrimaryButton solo con el borde de 1 dp del acento, como el play: sin relleno satinado, sin sombra y sin la línea de luz de arriba, que hacían ver el borde más grueso (medido: los dos bordes 3 px). Se quedan el hundimiento y la vuelta de luz. (3) La pantalla previa del training con SettingsScaffold, como Morning: flecha atrás, el título, y la prueba sin registrar (TD-174) como ojo en el acento a la derecha; PREVIEW en mayúsculas y en rojo al lado de Start desentonaba. Start queda solo, a todo lo ancho. (4) SettingsScaffold acepta un subtítulo, como el "last seen" de Telegram: el resumen del training va en la barra, con alto de línea ajustado (24/16 sp, sin relleno de fuente) para caber centrado en los 64 dp sin tocar la hora.
+
+A VALIDAR en el uso: si 40 dp queda chico al tocarlo con las manos cansadas.
 - [ ] **TD-188** La barra de arriba a 56 dp, para igualar el aire bajo el wordmark al de TickTick (sine die)
   - PEDIDO el 4-oct, comparando con TickTick: entre el wordmark y los días de la semana había ~35 dp contra ~28 de "October" a "Mon" en TickTick. Se quitaron los 4 dp de arriba de la lista (v1.0.379): quedan ~31 dp.
 
