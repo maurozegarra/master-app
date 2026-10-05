@@ -25,6 +25,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
 
     private val morning = com.maurozegarra.master.morning.MorningStore(context)
     private val body = BodyStore(context)
+    private val water = com.maurozegarra.master.water.WaterStore(context)
 
     private val appCtx = context.applicationContext
     private val prefs = appCtx
@@ -323,6 +324,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
             // Los pesajes (TD-169): por el respaldo los lee el coach, como las sesiones.
             body = body.encodedMine(),
             athleteBody = body.encodedAthletes(),
+            water = water.encoded(),
         ),
         exportedAt = System.currentTimeMillis(),
     )
@@ -345,6 +347,7 @@ class WorkoutStore(context: Context, private val media: ExerciseMediaStore) {
         saveAthleteSessions(data.athleteSessions)
         morning.restore(data.morning)
         body.restore(data.body, data.athleteBody)
+        water.restore(data.water)
         return ImportSummary(trainings = data.trainings.size, sessions = data.sessions.size)
     }
 

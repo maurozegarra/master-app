@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.ui.Alignment
@@ -275,6 +276,14 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                                 // puntos (14 KB en vez de 270).
                                 Text(proxima, color = AppTheme.colors.textPrimary, fontSize = 13.sp, fontFamily = MonoDigits)
                             }
+                        }
+                        // El agua (TD-190): como el despertador, abre su propia pantalla.
+                        IconButton(onClick = { com.maurozegarra.master.water.WaterHomeActivity.open(context) }) {
+                            Icon(
+                                Icons.Outlined.WaterDrop,
+                                contentDescription = t.more.water.title,
+                                tint = AppTheme.colors.textPrimary,
+                            )
                         }
                         IconButton(onClick = { vm.openHistory() }) {
                             Icon(

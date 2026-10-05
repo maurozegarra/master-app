@@ -31,6 +31,8 @@ data class BackupData(
      */
     val body: String = "[]",
     val athleteBody: String = "[]",
+    /** Las tomas de agua (formato 6, TD-190), crudas como la alarma. */
+    val water: String = "[]",
 )
 
 /**
@@ -42,10 +44,10 @@ object BackupJson {
 
     /**
      * Versión del formato. La 2 añadió `exerciseMedia`, la 3 `athleteSessions`, la 4 `morning`, la 5
-     * `body` y `athleteBody`; [decode] acepta desde la 1, así que los respaldos viejos se siguen
+     * `body` y `athleteBody`, la 6 `water`; [decode] acepta desde la 1, así que los respaldos viejos se siguen
      * importando sin perder nada.
      */
-    const val FORMAT = 5
+    const val FORMAT = 6
 
     fun encode(data: BackupData, exportedAt: Long): String {
         val custom = JSONArray()
@@ -63,6 +65,7 @@ object BackupJson {
             .put("morning", runCatching { JSONArray(data.morning) }.getOrDefault(JSONArray()))
             .put("body", runCatching { JSONArray(data.body) }.getOrDefault(JSONArray()))
             .put("athleteBody", runCatching { JSONArray(data.athleteBody) }.getOrDefault(JSONArray()))
+            .put("water", runCatching { JSONArray(data.water) }.getOrDefault(JSONArray()))
             .toString(2)
     }
 
@@ -112,6 +115,8 @@ object BackupJson {
         // Ausentes antes del formato 5.
         val body = root.optJSONArray("body")?.toString() ?: "[]"
         val athleteBody = root.optJSONArray("athleteBody")?.toString() ?: "[]"
+        // Ausente antes del formato 6.
+        val water = root.optJSONArray("water")?.toString() ?: "[]"
 
         return BackupData(
             trainings = trainings,
@@ -122,6 +127,7 @@ object BackupJson {
             morning = morning,
             body = body,
             athleteBody = athleteBody,
+            water = water,
         )
     }
 }

@@ -89,6 +89,23 @@
                 android:value="Wake-up alarm that plays until the user answers" />
         </service>
 
+        <!-- El agua (TD-190): su pantalla, abierta desde la gota de la barra de MASTER. -->
+        <activity
+            android:name=".water.WaterHomeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Master" />
+
+        <receiver
+            android:name=".water.WaterReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
         <receiver
             android:name=".morning.MorningReceiver"
             android:exported="false">

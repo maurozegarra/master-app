@@ -115,6 +115,8 @@ object MorningAlarm {
                 val entry = MorningLog.answer(existente, MorningLog.dateOf(now, zone), pain, now)
                 store.saveEntries(MorningLog.upsert(store.entries(), entry, LocalDate.now(zone)))
                 showEaseNotification(context)
+                // Despertar empieza el dia del agua (TD-190): sin dia empezado no recuerda.
+                com.maurozegarra.master.water.WaterAlarm.reschedule(context)
             }
         }
         reschedule(context)

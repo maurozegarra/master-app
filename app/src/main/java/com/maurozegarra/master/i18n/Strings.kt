@@ -731,6 +731,51 @@ data class MoreStrings(
     val testRun: TestRunStrings,
     val workouts: String = "Workouts",
     val body: BodyStrings = BodyStrings(),
+    val water: WaterStrings = WaterStrings(),
+)
+
+/** "1 glass", "8 glasses": la palabra en singular o plural, como [exerciseCount]. */
+fun WaterStrings.glassesWord(n: Int): String = if (n == 1) glassOne else glassMany
+
+/** El agua del día (TD-190): su pantalla y su recordatorio. */
+data class WaterStrings(
+    val title: String = "Water",
+    val subtitle: String = "%1\$d of %2\$d ml",
+    val today: String = "Today",
+    val pace: String = "Pace",
+    val next: String = "Next",
+    val behind: String = "behind",
+    val ahead: String = "ahead",
+    val onTrack: String = "on track",
+    val none: String = "none",
+    val goalMet: String = "goal met",
+    val glass: String = "Glass",
+    val glassOne: String = "glass",
+    val glassMany: String = "glasses",
+    val bottle: String = "Bottle",
+    val add: String = "Add a glass",
+    val log: String = "Today's water",
+    val empty: String = "Nothing yet today",
+    val emptyHint: String = "The + logs a 200 ml glass",
+    val notStarted: String = "Starts when you answer the alarm, or with your first glass",
+    val deleteWhat: String = "%1\$d ml at %2\$s",
+    val remindTitle: String = "Time for water",
+    val remindText: String = "%1\$d of %2\$d ml · %3\$s behind",
+    val channel: String = "Water",
+    val other: String = "Other",
+    val addTitle: String = "Add a drink",
+    val editTitle: String = "Edit drink",
+    val otherAmount: String = "Other amount (ml)",
+    val time: String = "Time",
+    val save: String = "Save",
+    val water: String = "Water",
+    val creatine: String = "Creatine",
+    val quinoa: String = "Quinoa",
+    val soup: String = "Soup",
+    val soda: String = "Soda",
+    val coffee: String = "Coffee",
+    val maca: String = "Maca",
+    val lemonade: String = "Lemonade",
 )
 
 /** Los pesajes de los sábados (TD-169): la pestaña Body del historial y su diálogo. */

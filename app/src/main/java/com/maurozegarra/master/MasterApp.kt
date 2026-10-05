@@ -29,6 +29,10 @@ class MasterApp : Application() {
         // Va despues de startKoin: el worker resuelve sus dependencias de Koin, y aunque
         // aqui solo se programe, el sistema puede lanzarlo en cuanto se encole.
         AssignmentWorker.schedule(this)
+        // El recordatorio del agua (TD-190) se recalcula al abrir: puede haber cambiado la
+        // alarma o el aviso para dormir, de los que sale la hora de cortar.
+        com.maurozegarra.master.water.WaterStore(this).seedOnce(java.time.ZoneId.systemDefault())
+        com.maurozegarra.master.water.WaterAlarm.reschedule(this)
     }
 }
 
