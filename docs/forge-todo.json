@@ -16,6 +16,13 @@
       "manual": "PEDIDO el 5-oct. En la mañana tocó Sign out sin querer -sale al primer toque- y en la noche la sesión de NIKO de las 9:24 no llegaba. Se buscó media hora: el servidor tenía sus asignaciones, la sesión de su teléfono apuntaba al training correcto, y el log de los dos teléfonos estaba limpio, porque sin sesión de entrenador el app deja de bajar las sesiones de los atletas EN SILENCIO (athleteSessions devuelve null sin registrar nada). Los chips de NIKO seguían con lo último bajado. Al volver a entrar, apareció.\n\nQUÉ SE HACE: (1) Sign out pide confirmación, con el mismo diálogo que borrar: dice que deja de recibir las sesiones de sus atletas. (2) En el historial, si hay atletas y no hay sesión de entrenador, una línea bajo los chips lo dice, y tocarla abre Settings."
     },
     {
+      "id": "TD-192",
+      "title": "La semana de la pantalla principal marca qué training toca cada día",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO el 5-oct, mirando la pantalla principal. Los días futuros de la semana son círculos vacíos: el martes no dice que va LUMBAR, ni el miércoles que va el short. El puntito de abajo solo marca lo ya entrenado. La información ya existe: scheduleDays y scheduleDates de cada training (TD-167, TD-178), que es lo que decide el orden de la lista.\n\nA DEFINIR con él antes de tocar: cómo se marca (inicial, color del training, ícono) sin quitarle protagonismo al puntito de hecho, y qué se ve cuando dos trainings caen el mismo día."
+    },
+    {
       "id": "TD-189",
       "title": "Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo",
       "category": "UI",

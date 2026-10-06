@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **164 / 191** hechos, 27 pendientes.
+Progreso: **164 / 192** hechos, 28 pendientes.
 
 ## Pendientes
 
@@ -180,6 +180,10 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 
 ### UI
 
+- [ ] **TD-192** La semana de la pantalla principal marca qué training toca cada día
+  - PEDIDO el 5-oct, mirando la pantalla principal. Los días futuros de la semana son círculos vacíos: el martes no dice que va LUMBAR, ni el miércoles que va el short. El puntito de abajo solo marca lo ya entrenado. La información ya existe: scheduleDays y scheduleDates de cada training (TD-167, TD-178), que es lo que decide el orden de la lista.
+
+A DEFINIR con él antes de tocar: cómo se marca (inicial, color del training, ícono) sin quitarle protagonismo al puntito de hecho, y qué se ve cuando dos trainings caen el mismo día.
 - [ ] **TD-189** Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo
   - PEDIDO el 4-oct, con capturas, comparando con el play de la lista y con Telegram.
 
