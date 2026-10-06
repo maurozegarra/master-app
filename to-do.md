@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **163 / 190** hechos, 27 pendientes.
+Progreso: **164 / 191** hechos, 27 pendientes.
 
 ## Pendientes
 
@@ -288,6 +288,7 @@ SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 
 ### Fix
 
+- [x] **TD-191** Sign out del coach con confirmación, y el historial avisa cuando está fuera de sesión
 - [x] **TD-186** Fix: el aviso para ir a dormir salía aunque ya se hubiera tocado "Going to bed"
 - [x] **TD-184** Fix: el telefono del coach publicaba sus instrucciones del lumbar, en ingles, y le llegaban a NIKO
 - [x] **TD-176** Los minutos hasta aflojar: una sola fuente, y que se puedan corregir
