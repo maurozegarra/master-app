@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -104,7 +105,8 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
 private fun HistoryOwnerPicker(vm: MasterViewModel, accent: Color, t: Strings) {
     val actual = vm.historyAthlete?.id
     Row(
-        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+        // Sin margen arriba y 8 dp hasta la pestaña (4 aquí y 4 suyos): el aire que sobraba (5-oct).
+        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         OwnerChip(t.more.historyOf.me, actual == null, accent) { vm.closeAthleteHistory() }
@@ -116,17 +118,22 @@ private fun HistoryOwnerPicker(vm: MasterViewModel, accent: Color, t: Strings) {
 
 @Composable
 private fun OwnerChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
+    // Chip de 32 dp y solo borde (5-oct): mas chico que la pestaña de abajo, que es lo que
+    // marca la jerarquia ahora que ninguno de los dos va relleno.
+    val forma = RoundedCornerShape(percent = 50)
     Box(
         Modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (selected) accent else AppTheme.colors.surface)
+            .height(32.dp)
+            .clip(forma)
+            .border(1.dp, if (selected) accent else AppTheme.colors.track, forma)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 14.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             label,
-            color = if (selected) AppTheme.colors.onAccent else AppTheme.colors.textPrimary,
-            fontSize = 14.sp,
+            color = if (selected) accent else AppTheme.colors.textDim,
+            fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
         )
     }
@@ -186,7 +193,8 @@ private fun HistoryBody(vm: MasterViewModel, sessions: List<SessionLog>, ajeno: 
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 96.dp),
+            // Sin relleno arriba: el primer día ya trae su margen (5-oct).
+            contentPadding = PaddingValues(16.dp, 0.dp, 16.dp, 96.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // El conteo va en la pestaña ("Sessions · 37"), no en una fila antes de la lista:

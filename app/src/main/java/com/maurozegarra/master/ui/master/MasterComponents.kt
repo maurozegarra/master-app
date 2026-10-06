@@ -460,20 +460,24 @@ internal fun SegmentToggle(
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
+        // La opción elegida, solo con borde, como el Start y el play (5-oct): relleno de acento
+        // competía con lo demás de la pantalla. El riel gris se queda para que se lea como un
+        // solo control.
         options.forEach { (key, text) ->
             val active = key == selected
+            val forma = RoundedCornerShape(10.dp)
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .height(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (active) accent else Color.Transparent)
+                    .clip(forma)
+                    .then(if (active) Modifier.border(1.dp, accent, forma) else Modifier)
                     .clickable { onSelect(key) },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text,
-                    color = if (active) AppTheme.colors.onAccent else AppTheme.colors.textDim,
+                    color = if (active) accent else AppTheme.colors.textDim,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
                     fontSize = 14.sp,
                 )
