@@ -29,6 +29,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -385,6 +386,28 @@ private fun CoachSection(
 ) {
     val ctx = LocalContext.current
     var signingIn by remember { mutableStateOf(false) }
+    var confirmSignOut by remember { mutableStateOf(false) }
+    if (confirmSignOut) {
+        val c = t.more.coach
+        AlertDialog(
+            onDismissRequest = { confirmSignOut = false },
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.textPrimary,
+            textContentColor = AppTheme.colors.textDim,
+            title = { Text(c.signOutTitle) },
+            text = { Text(c.signOutText) },
+            confirmButton = {
+                TextButton(onClick = { confirmSignOut = false; masterVm.coachSignOut() }) {
+                    Text(c.signOutConfirm, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmSignOut = false }) {
+                    Text(t.cancel, color = AppTheme.colors.textDim)
+                }
+            },
+        )
+    }
 
     if (masterVm.isCoach) {
         Text(
@@ -403,7 +426,9 @@ private fun CoachSection(
         ActionRow(
             label = t.coachSignOut,
             accent = accent,
-            onClick = { masterVm.coachSignOut() },
+            // Con confirmación (TD-191): salía al primer toque, y fuera de sesión el app deja
+            // de bajar las sesiones de los atletas sin avisar. El 5-oct se salió sin querer.
+            onClick = { confirmSignOut = true },
         )
     } else {
         Text(t.coachDesc, color = AppTheme.colors.textDim, fontSize = 13.sp)

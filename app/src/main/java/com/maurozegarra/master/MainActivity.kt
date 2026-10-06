@@ -151,6 +151,13 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
     val accent = AppTheme.colors.accent
 
     var showSettings by remember { mutableStateOf(false) }
+    // Settings pedido desde otra pantalla, como el aviso de fuera de sesión del historial (TD-191).
+    LaunchedEffect(vm.settingsRequested) {
+        if (vm.settingsRequested) {
+            showSettings = true
+            vm.settingsRequested = false
+        }
+    }
     var showPeople by remember { mutableStateOf(false) }
     var showClearMenu by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }

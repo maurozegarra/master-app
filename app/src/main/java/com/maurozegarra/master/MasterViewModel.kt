@@ -1521,6 +1521,9 @@ class MasterViewModel(
      * con sesiones en este telefono, con su nombre. El nombre sale del directorio de
      * perfiles; mientras no llega -o sin red- se usa el id, que ya se entiende.
      */
+    /** Pedido de abrir Settings desde otra pantalla (TD-191); MainActivity lo atiende y lo baja. */
+    var settingsRequested by mutableStateOf(false)
+
     var historyOwners by mutableStateOf<List<Profile>>(emptyList())
         private set
 

@@ -732,6 +732,19 @@ data class MoreStrings(
     val workouts: String = "Workouts",
     val body: BodyStrings = BodyStrings(),
     val water: WaterStrings = WaterStrings(),
+    val coach: CoachStrings = CoachStrings(),
+)
+
+/**
+ * La sesión de entrenador (TD-191): confirmar antes de salir, y avisar en el historial cuando
+ * no hay sesión. Bloque aparte porque [Strings] está al tope de la JVM.
+ */
+data class CoachStrings(
+    val signOutTitle: String = "Sign out?",
+    val signOutText: String = "You'll stop receiving your athletes' sessions until you sign in again.",
+    val signOutConfirm: String = "Sign out",
+    val signedOut: String = "Signed out: athletes' sessions aren't updating.",
+    val signIn: String = "Sign in",
 )
 
 /** "1 glass", "8 glasses": la palabra en singular o plural, como [exerciseCount]. */

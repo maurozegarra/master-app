@@ -114,6 +114,26 @@ private fun HistoryOwnerPicker(vm: MasterViewModel, accent: Color, t: Strings) {
             OwnerChip(p.name, actual == p.id, accent) { vm.openAthleteHistory(p) }
         }
     }
+    // Fuera de sesión de entrenador, lo de los atletas se queda con lo último que bajó y no
+    // se actualiza, sin ningún error (TD-191): el 5-oct se buscó media hora una sesión de
+    // NIKO que no llegaba por eso. Tocar la línea abre Settings, donde se vuelve a entrar.
+    if (!vm.isCoach) {
+        val c = t.more.coach
+        Text(
+            androidx.compose.ui.text.buildAnnotatedString {
+                append(c.signedOut + " ")
+                pushStyle(androidx.compose.ui.text.SpanStyle(color = accent, fontWeight = FontWeight.SemiBold))
+                append(c.signIn)
+                pop()
+            },
+            color = AppTheme.colors.textDim,
+            fontSize = 12.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { vm.settingsRequested = true }
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+        )
+    }
 }
 
 @Composable
