@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **164 / 192** hechos, 28 pendientes.
+Progreso: **164 / 193** hechos, 29 pendientes.
 
 ## Pendientes
 
@@ -184,6 +184,8 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
   - PEDIDO el 5-oct, mirando la pantalla principal. Los días futuros de la semana son círculos vacíos: el martes no dice que va LUMBAR, ni el miércoles que va el short. El puntito de abajo solo marca lo ya entrenado. La información ya existe: scheduleDays y scheduleDates de cada training (TD-167, TD-178), que es lo que decide el orden de la lista.
 
 A DEFINIR con él antes de tocar: cómo se marca (inicial, color del training, ícono) sin quitarle protagonismo al puntito de hecho, y qué se ve cuando dos trainings caen el mismo día.
+- [ ] **TD-193** Un solo formato de hora en todo el app (24 h o AM/PM)
+  - VISTO el 5-oct en la pantalla Morning. El app mezcla formatos: Morning va en 24 h ("23:30", "5:00"), el agua en 12 h ("5:23 PM", puesto el 4-oct) y el historial dice "8:29 AM". A DEFINIR con él cuál va en todo el app; después, un formateador compartido en util/Format.kt en vez de un DateTimeFormatter en cada pantalla.
 - [ ] **TD-189** Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo
   - PEDIDO el 4-oct, con capturas, comparando con el play de la lista y con Telegram.
 
