@@ -465,9 +465,13 @@ private fun BarChart(
     }
 }
 
-/** La hora de la próxima alarma para la barra de MASTER, o null si está apagada. */
+/**
+ * La hora (1-12) de la alarma de mañana, para el contador de la barra de MASTER, o null si en
+ * las próximas 24 h no suena. Solo las 24 h: él la revisa antes de dormir, y un "7" de una
+ * alarma de dentro de tres días le haría creer que mañana suena (4-oct).
+ */
 @Composable
-fun rememberNextRing(): String? {
+fun rememberNextRingHour(): Int? {
     val ctx = LocalContext.current
     var vuelta by remember { mutableIntStateOf(0) }
     val ciclo = LocalLifecycleOwner.current
@@ -476,5 +480,9 @@ fun rememberNextRing(): String? {
         ciclo.lifecycle.addObserver(obs)
         onDispose { ciclo.lifecycle.removeObserver(obs) }
     }
-    return remember(vuelta) { MorningAlarm.nextRing(ctx)?.toLocalTime()?.format(DateTimeFormatter.ofPattern("H:mm")) }
+    return remember(vuelta) {
+        MorningAlarm.nextRing(ctx)
+            ?.takeIf { java.time.Duration.between(java.time.ZonedDateTime.now(it.zone), it).toHours() < 24 }
+            ?.get(java.time.temporal.ChronoField.CLOCK_HOUR_OF_AMPM)
+    }
 }

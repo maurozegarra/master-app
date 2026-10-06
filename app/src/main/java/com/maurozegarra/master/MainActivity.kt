@@ -14,6 +14,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +34,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.AlarmOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -254,27 +257,36 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                 actions = {
                     // Historial y engranaje solo se muestran en la raíz (lista de trainings).
                     if (!canGoBack) {
-                        // La alarma, con la hora de la próxima (TD-158). Abre su propia
-                        // pantalla, la misma que el ícono "Morning" del lanzador.
-                        val proxima = com.maurozegarra.master.morning.rememberNextRing()
-                        Row(
-                            Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .clickable { com.maurozegarra.master.morning.MorningHomeActivity.open(context) }
-                                .padding(horizontal = 8.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                Icons.Outlined.Alarm,
-                                contentDescription = t.morning.home,
-                                tint = if (proxima != null) AppTheme.colors.textPrimary else AppTheme.colors.textDim,
-                            )
-                            if (proxima != null) {
-                                Spacer(Modifier.width(4.dp))
-                                // En JetBrains Mono, pedido por el usuario: una hora se lee mejor
-                                // con cifras de ancho fijo. La fuente va recortada a digitos y dos
-                                // puntos (14 KB en vez de 270).
-                                Text(proxima, color = AppTheme.colors.textPrimary, fontSize = 13.sp, fontFamily = MonoDigits)
+                        // La alarma (TD-158), del mismo ancho que los demás íconos: la hora entera
+                        // ("5:00") ocupaba demasiado en la fila (4-oct). Lo que él mira antes de
+                        // dormir es si mañana suena y a qué hora, así que queda la hora sola,
+                        // como contador estilo Telegram, en el acento y en JetBrains Mono. Sin
+                        // alarma mañana, el reloj tachado: que se note sin leer.
+                        val hora = com.maurozegarra.master.morning.rememberNextRingHour()
+                        IconButton(onClick = { com.maurozegarra.master.morning.MorningHomeActivity.open(context) }) {
+                            Box {
+                                Icon(
+                                    if (hora != null) Icons.Outlined.Alarm else Icons.Outlined.AlarmOff,
+                                    contentDescription = t.morning.home,
+                                    tint = if (hora != null) AppTheme.colors.textPrimary else AppTheme.colors.textDim,
+                                )
+                                if (hora != null) {
+                                    // El fondo de la barra detrás de la cifra corta el contorno
+                                    // del reloj, como el contador de Telegram sobre el avatar.
+                                    Text(
+                                        "$hora",
+                                        color = accent,
+                                        fontSize = 11.sp,
+                                        lineHeight = 11.sp,
+                                        fontFamily = MonoDigits,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .offset(x = 6.dp, y = (-5).dp)
+                                            .background(AppTheme.colors.bg, RoundedCornerShape(50))
+                                            .padding(horizontal = 2.dp),
+                                    )
+                                }
                             }
                         }
                         // El agua (TD-190): como el despertador, abre su propia pantalla.
