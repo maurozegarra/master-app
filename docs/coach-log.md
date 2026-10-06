@@ -5,6 +5,32 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-05 — vigesimosegunda sesión: el corto con el McGill completo entra
+
+**LUMBAR (short)** completo, de 05:14 a 05:58, **44 minutos**. Alarma de las 5:00: **dolor 2,
+aflojó en 13 minutos**, mejor que el domingo (2 y 28). **Se acostó a las 23:12**: unas 5 h 50
+en cama, la noche más corta de la semana.
+
+- **McGill completo en un día presencial** (revisión 27): los 12 aguantes de cada uno, sin
+  recortar nada y a tiempo para el trabajo. Faltan el miércoles y el jueves para darlo por
+  bueno.
+- **Carry** 15 · 17.5 · 20, alternado: "bien" las seis.
+- Su nota:
+
+  > *"Todo bien por suerte. Ningún dolor."*
+
+- **NIKO** entrenó y terminó a las 9:24 según su teléfono, pero la sesión **no llegó al del
+  coach**: ni al respaldo de las 5:59, que es anterior, ni al historial después. Se revisa
+  aparte.
+- **Decidido con él (revisión 28): el martes sin hip thrust.** Bloque aliviado: **puente sin
+  peso** 3 × 10 con pausa de 2 s en su lugar (el 2-oct salió fácil; lo que molestó el sábado
+  fue la carga arriba), **carry con la rampa entera** 15 · 17.5 · 20 (hoy salió limpio, no
+  hace falta bajarlo a 15 · 15 · 15) y **box squat en la plyobox a 17.5**, que el martes tiene
+  su primera prueba con la espalda fresca: el sábado entró ya resentida. Si vuelve a dejar
+  malestar así, el viernes también cambia.
+
+---
+
 ## 2026-10-04 — vigesimoprimera sesión: el día malo, ya con el McGill completo
 
 **LUMBAR (bad day)** completo, de 07:38 a 08:28, **49 minutos**, asignado por fecha desde la

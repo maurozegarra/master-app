@@ -159,16 +159,18 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `aliviado, el puente va sin peso y lo demas en lo mas bajo de su rampa`() {
+    fun `aliviado, el puente va sin peso y el carry con su rampa entera`() {
         // Revision 22 (1-oct), por el pinchazo en la nalga del 29-sep: el hip thrust era lo
         // unico nuevo ese dia. El puente sin barra prueba el mismo patron sin carga.
+        // Revision 28 (5-oct): el carry ya no baja a 15 · 15 · 15 aliviado. No fue lo que
+        // molesto el 3-oct, y el 5-oct salio limpio con la rampa entera en el corto.
         val c = cadera(MasterDefaults.lumbarTraining("en", easedHip = true))
         assertFalse(c.containsKey("ex_hip_thrust"))
         val puente = c.getValue("ex_glute_bridge")
         assertEquals(WeightType.NONE, puente.weightType)
         assertEquals(3, puente.sets)
         assertEquals(10, puente.workValue)
-        assertEquals(listOf(15.0, 15.0, 15.0), c.getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertEquals(listOf(15.0, 17.5, 20.0), c.getValue("ex_suitcase_carry").setList.map { it.weight })
         assertEquals(listOf(17.5, 17.5, 17.5), c.getValue("ex_box_squat").setList.map { it.weight })
         // El corto no se toca: el alivio es del bloque de cadera, no del carry.
         assertEquals(listOf(15.0, 17.5, 20.0), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })

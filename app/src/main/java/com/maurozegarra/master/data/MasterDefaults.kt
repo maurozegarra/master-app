@@ -383,8 +383,13 @@ object MasterDefaults {
      *
      * Revision 27 (3-oct): y el corto tambien, a prueba esta semana. La mitad era por el tiempo
      * de los dias presenciales; son unos 6 minutos mas. Si no le entra, se vuelve a 3-2-1.
+     *
+     * Revision 28 (5-oct): el martes sin hip thrust. Bloque aliviado ([LUMBAR_HIP_EASED]): el
+     * puente sin peso en su lugar, el carry con su rampa entera -el lunes salio limpio en el
+     * corto- y el box squat en la plyobox a 17.5, su primera prueba con la espalda fresca: el
+     * sabado entro ya resentida por el hip thrust y no dijo nada limpio.
      */
-    const val LUMBAR_REVISION = 27
+    const val LUMBAR_REVISION = 28
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -397,8 +402,12 @@ object MasterDefaults {
      *
      * Volver al bloque normal es poner esto en false y subir la revision: el hip thrust
      * vuelve a 21 · 31 · 36, tras dos mananas seguidas sin el pinchazo.
+     *
+     * Revision 28 (5-oct): aliviado otra vez, ahora por el hip thrust del 3-oct (la carga arriba
+     * le cargo la espalda baja). Y desde aqui el alivio es SOLO el puente: el carry ya no baja a
+     * 15 · 15 · 15, porque no es lo que molesto y el 5-oct salio limpio con la rampa entera.
      */
-    const val LUMBAR_HIP_EASED = false
+    const val LUMBAR_HIP_EASED = true
 
     /**
      * La caminata lateral con banda en el bloque de cadera normal (revision 23). Apagada en la
@@ -2048,7 +2057,8 @@ object MasterDefaults {
                 // que el historial no se parte.
                 // Revision 13: los dos primeros viajes ligeros el 22-sep y el tercero "bien"
                 // por segunda vez, asi que la rampa sube entera y 20 pasa a ser la cima.
-                if (eased) carry(listOf(15.0, 15.0, 15.0)) else carry(),
+                // Revision 28: la rampa entera tambien aliviado (ver [LUMBAR_HIP_EASED]).
+                carry(),
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
                 // Despues de 20 viene la de 22.5 -no estaba en el inventario del 18-sep; la
                 // agrego el usuario el 19- y despues 25. El salto de 22.5 a 25 es de 11%.
