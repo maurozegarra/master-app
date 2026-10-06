@@ -1,7 +1,7 @@
 {
-  "versionName": "1.0.378",
-  "changelog": "release: historial del peso y la cintura con el pesaje del sabado, aviso para dormir corregido, un solo campo de texto y la nota que sigue al cursor",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.378/master-1.0.378.apk",
   "minVersionCode": 1,
-  "versionCode": 378
+  "versionCode": 402,
+  "changelog": "release: TD-190 agua, alarma en la barra, switch como Samsung y sign out con confirmacion",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.402/master-1.0.402.apk",
+  "versionName": "1.0.402"
 }
