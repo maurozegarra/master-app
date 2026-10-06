@@ -16,6 +16,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -238,16 +241,40 @@ internal fun SwitchRow(
 @Composable
 internal fun AppSwitch(checked: Boolean, accent: Color, onCheckedChange: (Boolean) -> Unit) {
     val c = AppTheme.colors
-    Switch(
-        checked = checked,
-        onCheckedChange = onCheckedChange,
-        colors = SwitchDefaults.colors(
-            checkedThumbColor = c.onAccent,
-            checkedTrackColor = accent,
-            uncheckedThumbColor = com.maurozegarra.master.ui.theme.SWITCH_THUMB_OFF,
-            uncheckedTrackColor = c.track,
-        ),
+    // A la medida del switch de Samsung, medido en su pantalla de alarmas el 5-oct (90 x 56 px
+    // el riel y 45 px el botón, a 450 dpi): 32 x 20 dp, botón de 16 y 2 dp de margen. El de
+    // Material (52 x 32) le parecía exagerado. Los colores son los de siempre; la zona de
+    // toque sigue siendo de 48 dp aunque se vea chico.
+    val x by androidx.compose.animation.core.animateDpAsState(
+        targetValue = if (checked) 14.dp else 2.dp,
+        animationSpec = androidx.compose.animation.core.tween(150),
+        label = "switch",
     )
+    Box(
+        Modifier
+            .minimumInteractiveComponentSize()
+            .toggleable(
+                value = checked,
+                role = androidx.compose.ui.semantics.Role.Switch,
+                onValueChange = onCheckedChange,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier
+                .size(width = 32.dp, height = 20.dp)
+                .clip(RoundedCornerShape(percent = 50))
+                .background(if (checked) accent else c.track),
+        ) {
+            Box(
+                Modifier
+                    .offset(x = x, y = 2.dp)
+                    .size(16.dp)
+                    .clip(CircleShape)
+                    .background(if (checked) c.onAccent else com.maurozegarra.master.ui.theme.SWITCH_THUMB_OFF),
+            )
+        }
+    }
 }
 
 /**
