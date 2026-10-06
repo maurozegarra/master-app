@@ -668,31 +668,13 @@ internal fun SegmentedRow(
     enabled: Boolean = true,
     onSelect: (Int) -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(Dims.button))
-            .background(AppTheme.colors.track)
-            .alpha(if (enabled) 1f else 0.4f),
-    ) {
-        options.forEach { (value, label) ->
-            val isSel = value == selected
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(Dims.button))
-                    .background(if (isSel) accent else Color.Transparent)
-                    .clickable(enabled = enabled) { onSelect(value) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    label,
-                    color = if (isSel) AppTheme.colors.onAccent else AppTheme.colors.textDim,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
-        }
-    }
+    // Era un selector propio, duplicado de SegmentToggle: más alto, en píldora y relleno.
+    // Ahora es solo su versión con claves Int, para que todos los selectores del app sean
+    // el mismo (5-oct).
+    com.maurozegarra.master.ui.master.SegmentToggle(
+        options = options.map { (v, label) -> v.toString() to label },
+        selected = selected.toString(),
+        accent = accent,
+        enabled = enabled,
+    ) { onSelect(it.toInt()) }
 }

@@ -2,6 +2,7 @@ package com.maurozegarra.master.ui.master
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxSize
@@ -450,11 +451,14 @@ internal fun SegmentToggle(
     selected: String,
     accent: Color,
     modifier: Modifier = Modifier,
+    /** Apagado se ve tenue y no responde: el tema cuando el acento lo fija (TD-160). */
+    enabled: Boolean = true,
     onSelect: (String) -> Unit,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .alpha(if (enabled) 1f else 0.4f)
             .clip(RoundedCornerShape(14.dp))
             .background(AppTheme.colors.track)
             .padding(4.dp),
@@ -472,7 +476,7 @@ internal fun SegmentToggle(
                     .height(40.dp)
                     .clip(forma)
                     .then(if (active) Modifier.border(1.dp, accent, forma) else Modifier)
-                    .clickable { onSelect(key) },
+                    .clickable(enabled = enabled) { onSelect(key) },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -505,18 +509,35 @@ internal fun Modifier.listCard(): Modifier = this
  * (TD-175). Marcado, lleno del acento; si no, solo el contorno.
  */
 @Composable
-internal fun DayCircle(text: String, selected: Boolean, accent: Color, modifier: Modifier = Modifier) {
+internal fun DayCircle(
+    text: String,
+    selected: Boolean,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    /**
+     * Solo borde al elegirlo, como el chip y la pestaña (5-oct): es lo que pide un día que se
+     * prende y se apaga, como los de una alarma. El "hoy" de la semana no es una opción sino
+     * una marca, y sigue relleno.
+     */
+    outlined: Boolean = false,
+) {
+    val relleno = selected && !outlined
     Box(
         modifier = modifier
             .size(32.dp)
             .clip(CircleShape)
-            .background(if (selected) accent else Color.Transparent)
+            .background(if (relleno) accent else Color.Transparent)
             .border(1.dp, if (selected) accent else AppTheme.colors.track, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
-            color = if (selected) AppTheme.colors.onAccent else AppTheme.colors.textPrimary,
+            color = when {
+                relleno -> AppTheme.colors.onAccent
+                selected -> accent
+                outlined -> AppTheme.colors.textDim
+                else -> AppTheme.colors.textPrimary
+            },
             fontSize = 14.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
         )

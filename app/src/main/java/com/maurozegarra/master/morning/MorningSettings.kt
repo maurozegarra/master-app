@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -246,7 +247,8 @@ fun MorningSettings(t: Strings, accent: Color, addRequests: Int = 0) {
             )
             Spacer(Modifier.height(6.dp))
         }
-        com.maurozegarra.master.ui.AppOutlineButton(
+        // Principal, con el borde del acento como Start (5-oct): es lo que se toca cada noche.
+        com.maurozegarra.master.ui.AppPrimaryButton(
             label = t.morning.goingToBed,
             accent = accent,
             modifier = Modifier.fillMaxWidth(),
@@ -328,13 +330,19 @@ private fun AlarmCard(
             com.maurozegarra.master.ui.AppSwitch(a.enabled, accent, onToggle)
         }
         Spacer(Modifier.height(8.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        // Apagada, los días se atenúan como la hora (5-oct): seguían en rojo vivo y parecía
+        // que la alarma iba a sonar. Se pueden seguir tocando para dejarla lista.
+        Row(
+            Modifier.fillMaxWidth().alpha(if (a.enabled) 1f else 0.4f),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
             DayOfWeek.entries.forEach { d ->
                 DayCircle(
                     d.getDisplayName(TextStyle.NARROW, t.locale),
                     selected = d in a.days,
                     accent = accent,
                     modifier = Modifier.clickable { onDay(d) },
+                    outlined = true,
                 )
             }
         }
