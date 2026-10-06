@@ -266,32 +266,33 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                     if (!canGoBack) {
                         // La alarma (TD-158), del mismo ancho que los demás íconos: la hora entera
                         // ("5:00") ocupaba demasiado en la fila (4-oct). Lo que él mira antes de
-                        // dormir es si mañana suena y a qué hora, así que queda la hora sola,
-                        // como contador estilo Telegram, en el acento y en JetBrains Mono. Sin
-                        // alarma mañana, el reloj tachado: que se note sin leer.
+                        // dormir es si mañana suena y a qué hora, así que va la hora sola DENTRO
+                        // del reloj, en lugar de las manecillas (5-oct), en el acento y en
+                        // JetBrains Mono. Sin alarma mañana, el reloj tachado: que se note sin leer.
                         val hora = com.maurozegarra.master.morning.rememberNextRingHour()
                         IconButton(onClick = { com.maurozegarra.master.morning.MorningHomeActivity.open(context) }) {
-                            Box {
-                                Icon(
-                                    if (hora != null) Icons.Outlined.Alarm else Icons.Outlined.AlarmOff,
-                                    contentDescription = t.morning.home,
-                                    tint = if (hora != null) AppTheme.colors.textPrimary else AppTheme.colors.textDim,
-                                )
-                                if (hora != null) {
-                                    // El fondo de la barra detrás de la cifra corta el contorno
-                                    // del reloj, como el contador de Telegram sobre el avatar.
+                            if (hora == null) {
+                                Icon(Icons.Outlined.AlarmOff, contentDescription = t.morning.home, tint = AppTheme.colors.textDim)
+                            } else {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(AlarmFace, contentDescription = t.morning.home, tint = AppTheme.colors.textPrimary)
+                                    // La esfera está centrada en y = 13 de las 24 unidades, no en
+                                    // 12: la cifra baja 1 dp para quedar al centro del aro.
                                     Text(
                                         "$hora",
                                         color = accent,
-                                        fontSize = 11.sp,
+                                        fontSize = if (hora >= 10) 9.sp else 11.sp,
                                         lineHeight = 11.sp,
                                         fontFamily = MonoDigits,
                                         fontWeight = FontWeight.Bold,
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                            .offset(x = 6.dp, y = (-5).dp)
-                                            .background(AppTheme.colors.bg, RoundedCornerShape(50))
-                                            .padding(horizontal = 2.dp),
+                                        style = androidx.compose.ui.text.TextStyle(
+                                            platformStyle = androidx.compose.ui.text.PlatformTextStyle(includeFontPadding = false),
+                                            lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(
+                                                androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center,
+                                                androidx.compose.ui.text.style.LineHeightStyle.Trim.Both,
+                                            ),
+                                        ),
+                                        modifier = Modifier.offset(y = 1.dp),
                                     )
                                 }
                             }
@@ -496,4 +497,25 @@ private fun goBack(vm: MasterViewModel) {
 }
 
 /** JetBrains Mono SemiBold, solo cifras y dos puntos: para horas que se leen de un vistazo. */
+/**
+ * El despertador de Material (outlined "alarm") sin las manecillas: el aro y las dos campanas.
+ * Adentro va la hora de mañana (5-oct). Es el trazo de Material con el subtrazo de las
+ * manecillas quitado, no un dibujo nuevo, para que siga siendo de la misma familia que el
+ * resto de los íconos de la barra.
+ */
+private val AlarmFace: androidx.compose.ui.graphics.vector.ImageVector by lazy {
+    androidx.compose.ui.graphics.vector.ImageVector.Builder(
+        name = "AlarmFace", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f,
+    ).addPath(
+        pathData = androidx.compose.ui.graphics.vector.addPathNodes(
+            "M22,5.72l-4.6,-3.86 -1.29,1.53 4.6,3.86L22,5.72z" +
+                "M7.88,3.39L6.6,1.86 2,5.71l1.29,1.53 4.59,-3.85z" +
+                "M12,4c-4.97,0 -9,4.03 -9,9s4.02,9 9,9c4.97,0 9,-4.03 9,-9s-4.03,-9 -9,-9z" +
+                "M12,20c-3.87,0 -7,-3.13 -7,-7s3.13,-7 7,-7 7,3.13 7,7 -3.13,7 -7,7z",
+        ),
+        fill = androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.Black),
+        pathFillType = androidx.compose.ui.graphics.PathFillType.EvenOdd,
+    ).build()
+}
+
 private val MonoDigits = androidx.compose.ui.text.font.FontFamily(androidx.compose.ui.text.font.Font(R.font.jetbrains_mono_digits))
