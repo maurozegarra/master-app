@@ -84,6 +84,27 @@ class WaterPlanTest {
     }
 
     @Test
+    fun `su caso del 5-oct, 500 ml a las 2 02 cubren las 2, las 3 y algo de las 4, avisa a las 5`() {
+        // Dia presencial real del 5-oct. La botella va en vasos por hora: lo que falta (100 ml)
+        // se pide a la hora siguiente del horario, no cada media hora.
+        fun lu(h: Int, m: Int) = lun.atTime(h, m).atZone(lima).toInstant().toEpochMilli()
+        val logs = listOf(
+            WaterLog(lu(5, 9), 200, Drinks.CREATINE), WaterLog(lu(6, 50), 200, Drinks.MACA),
+            WaterLog(lu(9, 9), 600), WaterLog(lu(12, 39), 200, Drinks.SOUP),
+            WaterLog(lu(13, 15), 200, Drinks.LEMONADE), WaterLog(lu(14, 2), 500),
+        )
+        assertEquals("17:00", hm(WaterPlan.nextReminder(lu(14, 5), logs, lu(5, 0), lu(21, 30), oficina)!!))
+    }
+
+    @Test
+    fun `pasado el horario con menos de un vaso, avisa a la hora siguiente y no a la media hora`() {
+        // Dia en casa: 1,900 a las 17:10. A las 17:15 faltan 100, menos de un vaso: no insiste
+        // a las 17:30 ni a las 17:40, pide el vaso de las 18:00, como si el horario siguiera.
+        val logs = listOf(WaterLog(at(10, 0), 1700), WaterLog(at(17, 10), 200))
+        assertEquals("18:00", hm(WaterPlan.nextReminder(at(17, 15), logs, at(7, 0), cut, casa)!!))
+    }
+
+    @Test
     fun `no recuerda con la meta cumplida, sin dia empezado, ni despues de cortar`() {
         assertNull(WaterPlan.nextReminder(at(15, 0), listOf(WaterLog(at(14, 0), 2000)), at(7, 0), cut, casa))
         assertNull(WaterPlan.nextReminder(at(6, 0), emptyList(), null, cut, casa))

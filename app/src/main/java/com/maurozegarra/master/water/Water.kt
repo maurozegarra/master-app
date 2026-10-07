@@ -103,14 +103,18 @@ object WaterPlan {
      * Su horario de un día presencial, cuando la alarma suena a las 5 (4-oct): creatina al
      * despertar, la bebida del desayuno a las 6:30, la botella a las 9, sopa y limonada en el
      * almuerzo de las 12:30, y la segunda botella, que compra a las 1:50 y empieza a las 2.
+     *
+     * Cada botella va repartida en vasos por hora (6-oct): no la toma de golpe, la va tomando.
+     * Así lo cuenta él: 500 ml a las 2:02 cubren las 2, las 3 y 100 de las 4, y el aviso toca a
+     * las 5. Con la botella entera a las 2, el horario se acababa ahí y la regla insistía cada
+     * media hora por 100 ml.
      */
     val OFFICE: List<Slot> = listOf(
         Slot(LocalTime.of(5, 0), GLASS_ML),
         Slot(LocalTime.of(6, 30), GLASS_ML),
-        Slot(LocalTime.of(9, 0), BOTTLE_ML),
-        Slot(LocalTime.of(12, 30), 2 * GLASS_ML),
-        Slot(LocalTime.of(14, 0), BOTTLE_ML),
-    )
+    ) + (9..11).map { Slot(LocalTime.of(it, 0), GLASS_ML) } +
+        Slot(LocalTime.of(12, 30), 2 * GLASS_ML) +
+        (14..16).map { Slot(LocalTime.of(it, 0), GLASS_ML) }
 
     /** Si la alarma del día suena antes de esta hora, es un día presencial (decidido con él). */
     val OFFICE_BEFORE: LocalTime = LocalTime.of(6, 0)
@@ -134,7 +138,10 @@ object WaterPlan {
      * 2. Atrasado un vaso o más: cada media hora -30 min tras el último trago, llevado a :00
      *    o :30-, también a la 1, hasta alcanzar al horario. Despertar a las 9:50 ya es déficit
      *    (el horario pedía 7, 8 y 9): 10:30, 11:00, 11:30…
-     * 3. Pasada la última hora del horario sin la meta: igual, cada media hora.
+     * 3. Pasada la última hora del horario sin la meta, la cadencia sigue: un vaso por hora
+     *    (6-oct). Así lo que falta se pide a la hora siguiente y no cada media hora: el 5-oct,
+     *    con 1,900 a las 2:02, insistía toda la tarde por 100 ml. Si va atrasado un vaso o más,
+     *    vale el punto 2.
      * 4. Si ya no cabe antes de cortar y falta la meta, un último aviso media hora antes.
      *
      * Las versiones anteriores repartían la meta en una curva desde el despertar: despertar
@@ -146,17 +153,27 @@ object WaterPlan {
         if (tomado >= goal) return null
         val ultimo = today.maxOfOrNull { it.at } ?: start
         val media = halfHourUp(ultimo + MIN_GAP_MIN * 60_000)
-        val t = if (expected(now, slots) - tomado >= GLASS_ML) {
+        // Pasado el horario, un vaso por hora hasta cortar (punto 3).
+        val horas = slots + extraHours(slots, cut)
+        val t = if (expected(now, horas) - tomado >= GLASS_ML) {
             maxOf(media, now)
         } else {
-            // La próxima hora del horario en la que quedaría un vaso atrás.
-            val proxima = slots.filter { it.first > now }
-                .firstOrNull { (hora, _) -> expected(hora, slots) - tomado >= GLASS_ML }?.first
-            if (proxima != null) maxOf(proxima, ultimo + MIN_GAP_MIN * 60_000) else maxOf(media, now)
+            // La próxima hora en la que quedaría un vaso atrás. Si no hay ninguna antes de
+            // cortar, lo que falta es menos de un vaso: solo el último aviso (punto 4).
+            val proxima = horas.filter { it.first > now }
+                .firstOrNull { (hora, _) -> expected(hora, horas) - tomado >= GLASS_ML }?.first
+            if (proxima != null) maxOf(proxima, ultimo + MIN_GAP_MIN * 60_000) else cut
         }
         if (t < cut) return t
         val ultimoAviso = cut - MIN_GAP_MIN * 60_000
         return if (ultimoAviso > now && ultimoAviso >= ultimo + MIN_GAP_MIN * 60_000) ultimoAviso else null
+    }
+
+    /** Las horas en punto después de la última del horario y antes de [cut], de un vaso cada una. */
+    private fun extraHours(slots: List<Pair<Long, Int>>, cut: Long): List<Pair<Long, Int>> {
+        val ultima = slots.maxOfOrNull { it.first } ?: return emptyList()
+        val hora = 60 * 60_000L
+        return generateSequence(ultima + hora) { it + hora }.takeWhile { it < cut }.map { it to GLASS_ML }.toList()
     }
 
     /**
