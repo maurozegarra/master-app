@@ -6,6 +6,8 @@
 #   - status "done":           respeta (marcado manualmente).
 #   - status "pending":        respeta (pendiente).
 #   - status "blocked":        respeta; se lista aparte, arriba del todo.
+#   - status "wontdo":         descartado por el usuario; se lista aparte, al final, y no
+#                              cuenta como pendiente (6-oct-2026).
 #
 # Cualquier otro status cuenta como pendiente: un item nunca debe desaparecer del
 # listado por no encajar en una categoria.
@@ -92,13 +94,14 @@ foreach ($item in $items) {
 
 $done = $derived | Where-Object { $_.state -eq 'done' }
 $blocked = $derived | Where-Object { $_.state -eq 'blocked' }
+$wontdo = $derived | Where-Object { $_.state -eq 'wontdo' }
 # Todo lo que no esta hecho ni bloqueado va a pendientes, aunque su status sea uno
 # que este script no conozca. Con la particion anterior -done o pending, y nada mas-
 # un item en cualquier otro estado se contaba en el total pero no se listaba en
 # ninguna seccion: TD-058 estuvo en "blocked" y desaparecio de to-do.md sin aviso.
-$pending = $derived | Where-Object { $_.state -ne 'done' -and $_.state -ne 'blocked' }
+$pending = $derived | Where-Object { $_.state -notin @('done', 'blocked', 'wontdo') }
 
-$unknown = $derived | Where-Object { $_.state -notin @('done', 'pending', 'blocked') }
+$unknown = $derived | Where-Object { $_.state -notin @('done', 'pending', 'blocked', 'wontdo') }
 if ($unknown) {
     $detail = ($unknown | ForEach-Object { "$($_.id)=$($_.state)" }) -join ', '
     Write-Host "WARN -> status no reconocido, se listan como pendientes: $detail" -ForegroundColor Yellow
@@ -117,16 +120,18 @@ $lines += ""
 $doneCount = $done.Count
 $pendingCount = $pending.Count
 $blockedCount = $blocked.Count
+$wontdoCount = @($wontdo).Count
 $total = $derived.Count
 
 # La suma tiene que cuadrar: si no, algun item se esta perdiendo por el camino y
 # el contador mentiria, que es exactamente como TD-058 paso desapercibido.
-if ($doneCount + $pendingCount + $blockedCount -ne $total) {
-    throw "Items descuadrados: $doneCount done + $pendingCount pending + $blockedCount blocked != $total"
+if ($doneCount + $pendingCount + $blockedCount + $wontdoCount -ne $total) {
+    throw "Items descuadrados: $doneCount done + $pendingCount pending + $blockedCount blocked + $wontdoCount wontdo != $total"
 }
 
 $progress = "Progreso: **$doneCount / $total** hechos, $pendingCount pendientes"
 if ($blockedCount -gt 0) { $progress += ", $blockedCount bloqueados" }
+if ($wontdoCount -gt 0) { $progress += ", $wontdoCount descartados" }
 $lines += "$progress."
 $lines += ""
 
@@ -159,6 +164,19 @@ if ($pending.Count -gt 0) {
         }
         $lines += ""
     }
+}
+
+if ($wontdoCount -gt 0) {
+    # Aparte y no en pendientes: no se van a hacer, pero se ve por que se descartaron.
+    $lines += "## Descartados"
+    $lines += ""
+    foreach ($item in $wontdo) {
+        $lines += "- [-] **$($item.id)** $($item.title)"
+        if ($item.manual) {
+            $lines += "  - $($item.manual)"
+        }
+    }
+    $lines += ""
 }
 
 if ($done.Count -gt 0) {
