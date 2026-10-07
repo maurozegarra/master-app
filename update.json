@@ -1,7 +1,7 @@
 {
+  "changelog": "release: animaciones del player, borde de dos segmentos, solo vertical y agua por vasos",
+  "versionName": "1.0.411",
   "minVersionCode": 1,
-  "versionCode": 402,
-  "changelog": "release: TD-190 agua, alarma en la barra, switch como Samsung y sign out con confirmacion",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.402/master-1.0.402.apk",
-  "versionName": "1.0.402"
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.411/master-1.0.411.apk",
+  "versionCode": 411
 }
