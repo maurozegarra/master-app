@@ -28,6 +28,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
+    <!-- Solo vertical (6-oct): el app se usa con el teléfono en el piso o en la mano,
+         y girar a horizontal descolocaba el player sin que nadie lo pidiera. -->
     <application
         android:name=".MasterApp"
         android:allowBackup="true"
@@ -42,6 +44,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true"
             android:launchMode="singleTop"
             android:configChanges="orientation|screenSize|keyboardHidden"
@@ -67,12 +70,14 @@
              atras vuelve a la lista. -->
         <activity
             android:name=".morning.MorningHomeActivity"
+            android:screenOrientation="portrait"
             android:exported="false"
             android:label="@string/morning_name"
             android:theme="@style/Theme.Master" />
 
         <activity
             android:name=".morning.MorningActivity"
+            android:screenOrientation="portrait"
             android:exported="false"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
@@ -92,6 +97,7 @@
         <!-- El agua (TD-190): su pantalla, abierta desde la gota de la barra de MASTER. -->
         <activity
             android:name=".water.WaterHomeActivity"
+            android:screenOrientation="portrait"
             android:exported="false"
             android:theme="@style/Theme.Master" />
 
