@@ -43,6 +43,22 @@ fun glowColors(c: Color): List<Color> = listOf(
 )
 
 /**
+ * Dos segmentos cortos y opuestos, como en su referencia (6-oct): cuando uno va arriba el
+ * otro va abajo. Cada uno ocupa unos 25 grados de la vuelta -un trazo, no un punto- y entre
+ * ellos el borde queda apagado. 72 pasos de 5 grados: el sweepGradient los reparte parejo.
+ */
+fun twinGlowColors(c: Color): List<Color> = List(72) { i ->
+    // Distancia en pasos al centro del segmento más cercano: hay uno cada 36 pasos (180°),
+    // centrados en el paso 18 y en el 54.
+    val k = Math.floorMod(i - 18, 36)
+    when (minOf(k, 36 - k)) {
+        0, 1 -> c
+        2 -> c.copy(alpha = 0.35f)
+        else -> c.copy(alpha = 0f)
+    }
+}
+
+/**
  * Borde con gradiente animado: un destello recorre el contorno de un rectángulo
  * redondeado. Pensado como overlay dentro de un Box: dibuja solo el anillo del borde
  * (usa una capa offscreen + BlendMode.Clear para recortar el interior) sin tapar el

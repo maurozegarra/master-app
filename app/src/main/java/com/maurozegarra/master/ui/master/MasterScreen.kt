@@ -87,6 +87,7 @@ import com.maurozegarra.master.ui.settings.syncMessage
 import com.maurozegarra.master.ui.ReorderableContentType
 import com.maurozegarra.master.ui.glowColors
 import com.maurozegarra.master.ui.AnimatedGlowBorder
+import com.maurozegarra.master.ui.twinGlowColors
 import com.maurozegarra.master.ui.reorderableGroup
 import com.maurozegarra.master.ui.dragContainer
 import com.maurozegarra.master.ui.rememberDragDropState
@@ -726,7 +727,8 @@ private fun TrainingCard(
     // El destello del que sigue (TD-167): el mismo del player, mas fino -1 dp- y mas lento, para
     // que se note sin llamar la atencion. Encima de la tarjeta y siguiendo sus esquinas.
     if (isNext) {
-        AnimatedGlowBorder(cornerRadius = Dims.row, colors = glowColors(accent), strokeWidth = 1.dp, durationMillis = 5500)
+        // Dos segmentos opuestos y más lento (6-oct): con dos trazos, a 5.5 s parecía ir al doble.
+        AnimatedGlowBorder(cornerRadius = Dims.row, colors = twinGlowColors(accent), strokeWidth = 1.dp, durationMillis = 10000)
     }
     }
     }
