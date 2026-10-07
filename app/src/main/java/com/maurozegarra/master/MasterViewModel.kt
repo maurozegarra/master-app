@@ -1392,9 +1392,6 @@ class MasterViewModel(
     // los defaults es siempre inglés, sin depender de ajustes.
     private fun lang(): String = "en"
 
-    /** Preferencia de reloj del player: ceros a la izquierda ("00:30" vs "30"). */
-    fun padPlayerClock(): Boolean =
-        SettingsStore(getApplication()).loadConfig().masterConfig.padPlayerClock
 
     // ---------- Catálogo de ejercicios ----------
 

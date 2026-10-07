@@ -39,7 +39,6 @@ class SettingsStore(context: Context) {
         .put(
             "masterConfig",
             JSONObject()
-                .put("padPlayerClock", cfg.masterConfig.padPlayerClock)
                 .put("beepVolume", cfg.masterConfig.beepVolume)
                 .put("beepVoice", cfg.masterConfig.beepVoice),
         )
@@ -60,8 +59,6 @@ class SettingsStore(context: Context) {
                 themeMode = g?.optInt("themeMode", def.general.themeMode) ?: def.general.themeMode,
             ),
             masterConfig = MasterConfig(
-                padPlayerClock = a?.optBoolean("padPlayerClock", def.masterConfig.padPlayerClock)
-                    ?: def.masterConfig.padPlayerClock,
                 // Un ajuste guardado antes de que existiera este campo cae a 100: sonaban así.
                 beepVolume = (a?.optInt("beepVolume", def.masterConfig.beepVolume) ?: def.masterConfig.beepVolume)
                     .coerceIn(0, 100),

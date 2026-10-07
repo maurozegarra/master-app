@@ -123,14 +123,6 @@ fun SettingsScreen(
         }
 
         SettingsCard(t.groupPlayer) {
-            SwitchRow(
-                label = t.padPlayerClock,
-                desc = t.padPlayerClockDesc,
-                checked = cfg.masterConfig.padPlayerClock,
-                accent = accent,
-                onCheckedChange = { vm.setPadPlayerClock(it) },
-            )
-            Spacer(Modifier.height(16.dp))
             Text(t.beepVolume, color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(2.dp))
             Text(t.beepVolumeDesc, color = AppTheme.colors.textDim, fontSize = 13.sp)

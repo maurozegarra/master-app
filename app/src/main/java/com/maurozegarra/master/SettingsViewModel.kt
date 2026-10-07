@@ -27,9 +27,6 @@ class SettingsViewModel(private val store: SettingsStore) : ViewModel() {
     fun setThemeMode(mode: Int) = update(config.copy(general = config.general.copy(themeMode = mode)))
 
     // ---------- Player ----------
-    fun setPadPlayerClock(v: Boolean) =
-        update(config.copy(masterConfig = config.masterConfig.copy(padPlayerClock = v)))
-
     fun setBeepVolume(percent: Int) =
         update(config.copy(masterConfig = config.masterConfig.copy(beepVolume = percent.coerceIn(0, 100))))
 

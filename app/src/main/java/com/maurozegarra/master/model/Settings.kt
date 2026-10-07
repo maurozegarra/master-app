@@ -20,8 +20,6 @@ data class GeneralConfig(
 
 /** Ajustes específicos del player. */
 data class MasterConfig(
-    /** Reloj del player con ceros a la izquierda: "00:30" en vez de "30". */
-    val padPlayerClock: Boolean = false,
     /**
      * Volumen de los pitidos, en %, sobre la curva perceptual de `AlarmPlayer`: 100 no
      * atenúa y cada escalón hacia abajo se oye como un paso parejo. Uno solo para todos los

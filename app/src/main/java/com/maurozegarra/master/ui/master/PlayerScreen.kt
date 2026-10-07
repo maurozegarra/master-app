@@ -503,7 +503,6 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
             ?.let { vm.requestVideoNow(it.ownerExerciseId) }
     }
 
-    val padClock = remember { vm.padPlayerClock() }
     // El sheet de instrucciones se compone fuera del chrome, así que sobrevive a que las
     // franjas se vayan. Guarda el contenido, no el id: se captura al abrirlo, y si el
     // training avanza de ejercicio mientras lees no se te cambia el texto por debajo.
@@ -794,7 +793,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // leerse a distancia, con el telefono en el piso y ella en la plancha.
         val lead = "${step.setIndex + 1}/${step.totalSets}".takeIf { showSeries }
         val side = SideMark.of(step.side, step.sideIndex, step.sideCount)
-        ClockOrReps(vm, step, repByRep, padClock, t, lead = lead, side = side)
+        ClockOrReps(vm, step, repByRep, t, lead = lead, side = side)
         Spacer(Modifier.height(16.dp))
 
         // Siempre visibles, en toda etapa y en cualquier modo: son el mando de la corrida.
@@ -842,7 +841,6 @@ private fun ClockOrReps(
     vm: MasterViewModel,
     step: PlayerStep,
     repByRep: Boolean,
-    padClock: Boolean,
     t: Strings,
     lead: String? = null,
     side: String? = null,
@@ -850,7 +848,7 @@ private fun ClockOrReps(
     if (step.kind == StepKind.WORK && !step.timeBased) {
         RepsDisplay(step, repByRep, t, lead, side)
     } else {
-        ClockDisplay(step, vm.playerRemainingMs, padClock, lead, side)
+        ClockDisplay(step, vm.playerRemainingMs, lead, side)
     }
 }
 
@@ -1359,11 +1357,11 @@ private fun BigReadout(value: String, mark: String? = null, lead: String? = null
 }
 
 @Composable
-private fun ClockDisplay(step: PlayerStep, remainingMs: Long, padded: Boolean, lead: String? = null, side: String? = null) {
+private fun ClockDisplay(step: PlayerStep, remainingMs: Long, lead: String? = null, side: String? = null) {
     val shown = if (step.display == DisplayMode.COUNTUP) {
         (step.durationSec * 1000L - remainingMs).coerceAtLeast(0L)
     } else remainingMs
-    BigReadout(formatPlayerClock(shown, padded), lead = lead, side = side)
+    BigReadout(formatPlayerClock(shown), lead = lead, side = side)
 }
 
 @Composable
