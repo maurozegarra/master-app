@@ -388,8 +388,14 @@ object MasterDefaults {
      * puente sin peso en su lugar, el carry con su rampa entera -el lunes salio limpio en el
      * corto- y el box squat en la plyobox a 17.5, su primera prueba con la espalda fresca: el
      * sabado entro ya resentida por el hip thrust y no dijo nada limpio.
+     *
+     * Revision 29 (6-oct): el puente CON BARRA, 6 · 11 · 16. El martes salio facil sin peso y el
+     * pidio cargarlo ("en el bridge me siento seguro, hay que meterle peso progresivamente");
+     * el hip thrust, "evitarlo por varios meses". Y el jueves 8 es feriado: va el completo y
+     * el viernes 9 el corto, para que la carga de cadera quede dia por medio (martes, jueves,
+     * sabado) en vez de jueves, viernes y sabado seguidos.
      */
-    const val LUMBAR_REVISION = 28
+    const val LUMBAR_REVISION = 29
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -467,6 +473,8 @@ object MasterDefaults {
             tracksPain = true,
             // Su semana (ver docs/coach.md, La semana): lo que decide cual va primero (TD-167).
             scheduleDays = setOf(java.time.DayOfWeek.TUESDAY, java.time.DayOfWeek.FRIDAY, java.time.DayOfWeek.SATURDAY),
+            // Revision 29: el jueves 8, feriado, cambiado con el viernes (ver LUMBAR_REVISION).
+            scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 8)),
             workouts = listOf(
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
                 b.mobility(),
@@ -559,6 +567,8 @@ object MasterDefaults {
             tracksPain = true,
             // Su semana (ver docs/coach.md, La semana): lo que decide cual va primero (TD-167).
             scheduleDays = setOf(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.WEDNESDAY, java.time.DayOfWeek.THURSDAY, java.time.DayOfWeek.SUNDAY),
+            // Revision 29: el viernes 9, cambiado con el jueves feriado (ver LUMBAR_REVISION).
+            scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 9)),
             workouts = listOf(
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = 6.0),
                 b.mobility(),
@@ -2049,7 +2059,10 @@ object MasterDefaults {
                 //
                 // Revision 22 (1-oct): aliviado, ver [LUMBAR_HIP_EASED]. El puente va sin barra
                 // y pregunta como fue cada serie (TD-152), que es lo que dira si molesta.
-                if (eased) reps("ex_glute_bridge", 10, "No bar. 2 s pause at the top. Ribs down, don't arch", sets = 3, rest = 60, prep = 10)
+                // Revision 29 (6-oct): con la barra EZ, 6 · 11 · 16 (discos 0, 5 y 10). Sube 5 kg
+                // la de arriba cada vez que las tres salgan faciles y sin malestar: lo que
+                // molesto el 3-oct fue la carga arriba, asi que el peso lo pide el cuerpo.
+                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(0.0, 5.0, 10.0), WeightType.BARBELL, barWeight = 6.0)
                 else loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,

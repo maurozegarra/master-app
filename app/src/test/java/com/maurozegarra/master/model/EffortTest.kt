@@ -59,10 +59,10 @@ class EffortTest {
         val lumbar = MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = true)
         assertEquals(setOf("ex_lateral_band_walk"), StepEngine.buildSteps(lumbar).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
         assertTrue(StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = false)).none(Effort::asks))
-        // Aliviado (revision 22), el puente va sin peso y SI pregunta: es lo que dira si el
-        // patron todavia molesta.
+        // Aliviado, el puente iba sin peso y preguntaba como fue (revision 22). Desde la 29 lleva
+        // barra, y lo que dice si molesta es el feedback de peso de cada serie, como el carry.
         val aliviado = MasterDefaults.lumbarTraining("en", easedHip = true)
-        assertEquals(setOf("ex_glute_bridge"), StepEngine.buildSteps(aliviado).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
+        assertTrue(StepEngine.buildSteps(aliviado).none(Effort::asks))
 
         val niko = MasterDefaults.nikoTrainings("es")
         val calentamiento = niko.flatMap { StepEngine.buildSteps(it) }.filter { it.workoutName == "Calentamiento" }

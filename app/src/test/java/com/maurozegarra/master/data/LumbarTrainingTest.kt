@@ -166,8 +166,12 @@ class LumbarTrainingTest {
         // molesto el 3-oct, y el 5-oct salio limpio con la rampa entera en el corto.
         val c = cadera(MasterDefaults.lumbarTraining("en", easedHip = true))
         assertFalse(c.containsKey("ex_hip_thrust"))
+        // Revision 29 (6-oct): el puente ya lleva la barra EZ, 6 · 11 · 16. Sin peso salio facil
+        // y el pidio cargarlo progresivamente.
         val puente = c.getValue("ex_glute_bridge")
-        assertEquals(WeightType.NONE, puente.weightType)
+        assertEquals(WeightType.BARBELL, puente.weightType)
+        assertEquals(6.0, puente.barWeight, 0.0)
+        assertEquals(listOf(0.0, 5.0, 10.0), puente.setList.map { it.weight })
         assertEquals(3, puente.sets)
         assertEquals(10, puente.workValue)
         assertEquals(listOf(15.0, 17.5, 20.0), c.getValue("ex_suitcase_carry").setList.map { it.weight })

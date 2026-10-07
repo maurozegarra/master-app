@@ -5,6 +5,43 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-06 — vigesimotercera sesión: el box squat por fin sin malestar
+
+**LUMBAR** completo, de 07:34 a 08:43, **69 minutos**, el primero sin hip thrust (revisión
+28). Alarma de las 7:00, contestada a las 7:16: **dolor 2, aflojó en 32 minutos**, la mañana
+más lenta de la semana (28, 13 y ahora 32) y el tercer 2 seguido tras la racha de 1. **Se
+acostó a las 23:40**: unas 7 h 35 en cama.
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| Puente sin peso, pausa 2 s | 3 × 10 | **fácil** las tres |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20, alternado | "bien" las seis |
+| Box squat en la plyobox | 17.5 · 17.5 · 17.5 × 8 | "bien" las tres |
+
+Su nota:
+
+> *"El box squat por fin se sintió bien, sin malestar al estar en la parte baja del
+> movimiento. Por alguna razón en el bridge me siento seguro, hay que meterle peso
+> progresivamente. Y el hip thrust prefiero evitarlo por varios meses."*
+
+- **El montaje de la plyobox funcionó:** primera prueba con la espalda fresca y primera vez
+  sin malestar abajo.
+- **El hip thrust sale por meses**, decisión suya. No se vuelve a proponer hasta que lo pida.
+- **NIKO:** NIKO 1 el lunes (llegó tarde por el sign out del coach, ver TD-191) y NIKO 2 hoy,
+  completos y todo "bien": hip thrust hasta 71, peso muerto rumano hasta 36, búlgara hasta 20.
+- **Agua del lunes, primer día presencial:** 2,100 ml, casi exacto al horario de oficina.
+  Por la tarde se portó raro: con 1,900 a las 14:02 avisó cada 30 minutos por 100 ml (anotado
+  en TD-190).
+- **Decidido con él (revisión 29, v1.0.403):**
+  - **Jueves 8 feriado: LUMBAR completo**, y el **viernes 9 el corto**. Cambiados para que la
+    carga de cadera quede día por medio (martes, jueves, sábado) en vez de tres días seguidos.
+  - **Puente con barra: 6 · 11 · 16**, 3 × 10 con pausa de 2 s. Sube 5 kg la de arriba cada vez
+    que las tres salgan fáciles y sin malestar.
+  - **Box squat y carry igual:** el puente cargado es lo único nuevo del jueves.
+  - La alarma de las 5:00 tiene marcado el jueves: el miércoles en la noche, *Skip tomorrow*.
+
+---
+
 ## 2026-10-05 — vigesimosegunda sesión: el corto con el McGill completo entra
 
 **LUMBAR (short)** completo, de 05:14 a 05:58, **44 minutos**. Alarma de las 5:00: **dolor 2,
