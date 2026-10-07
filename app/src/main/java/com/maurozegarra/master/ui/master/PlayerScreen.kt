@@ -120,6 +120,7 @@ import com.maurozegarra.master.model.SPEED_STEP
 import com.maurozegarra.master.model.Plates
 import com.maurozegarra.master.model.WeightType
 import com.maurozegarra.master.model.SideMark
+import com.maurozegarra.master.R
 import com.maurozegarra.master.model.Progression
 import com.maurozegarra.master.model.EffortRecord
 import com.maurozegarra.master.model.Effort
@@ -762,20 +763,38 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         } else {
             vm.playerSteps.drop(vm.playerIndex + 1).firstOrNull { it.kind == StepKind.WORK }?.takeIf { it.weighted }
         }
+        val side = SideMark.of(step.side, step.sideIndex, step.sideCount)
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            Box(Modifier.align(Alignment.BottomCenter)) {
-                when {
-                    step.kind == StepKind.WORK && step.weighted -> WeightFeedback(vm, step, accent, t)
-                    ronda != null -> EffortRoundFeedback(vm, ronda, accent, t)
-                    // Lo que no lleva peso tambien dice como fue (TD-152), y tambien en el
-                    // descanso: durante un aguante o un round no se puede tocar la pantalla.
-                    Effort.cardFor(step) -> EffortFeedback(vm, step, accent, t)
-                    // Lo que quedo sin contestar del aguante anterior, en la preparacion del
-                    // siguiente (TD-156): la ultima serie de un aguante no tiene descanso, y
-                    // en el cuello de NIKO la ultima direccion se quedaba sin respuesta.
-                    pendienteAnterior != null -> EffortFeedback(vm, pendienteAnterior, accent, t)
-                    step.kind == StepKind.WORK && step.speedKmh != null -> SpeedCard(vm, step, t)
-                    proximaCarga != null -> LoadCard(proximaCarga, t)
+            // La tarjeta pegada encima del reloj, como siempre; el espacio que deja libre arriba
+            // es el del direccional.
+            Column(Modifier.fillMaxSize()) {
+                // El lado como direccional de carro (6-oct): grande, animado y en el hueco, cada
+                // uno en su punto como un joystick -arriba, abajo, a un lado o al otro-. Solo
+                // mientras se hace el ejercicio y nunca con vídeo, que es dueño del hueco. Con
+                // tarjeta, se acomoda en el espacio libre encima de ella: en el cuello de NIKO
+                // "How was it?" sale durante el aguante, y quitarlo ahí lo dejaba sin chevrón.
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    if (step.kind == StepKind.WORK && videoFile == null && side != null && side in CHEVRONS) {
+                        SideChevron(side)
+                    } else if (videoFile == null && cambiaDeLado(vm.playerSteps, vm.playerIndex)) {
+                        // En el descanso entre un lado y el otro (6-oct): "date la vuelta".
+                        RotateSide()
+                    }
+                }
+                Box(Modifier.align(Alignment.CenterHorizontally)) {
+                    when {
+                        step.kind == StepKind.WORK && step.weighted -> WeightFeedback(vm, step, accent, t)
+                        ronda != null -> EffortRoundFeedback(vm, ronda, accent, t)
+                        // Lo que no lleva peso tambien dice como fue (TD-152), y tambien en el
+                        // descanso: durante un aguante o un round no se puede tocar la pantalla.
+                        Effort.cardFor(step) -> EffortFeedback(vm, step, accent, t)
+                        // Lo que quedo sin contestar del aguante anterior, en la preparacion del
+                        // siguiente (TD-156): la ultima serie de un aguante no tiene descanso, y
+                        // en el cuello de NIKO la ultima direccion se quedaba sin respuesta.
+                        pendienteAnterior != null -> EffortFeedback(vm, pendienteAnterior, accent, t)
+                        step.kind == StepKind.WORK && step.speedKmh != null -> SpeedCard(vm, step, t)
+                        proximaCarga != null -> LoadCard(proximaCarga, t)
+                    }
                 }
             }
         }
@@ -792,8 +811,9 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // se salia por el borde y NIKO leia "HA". Va aparte del contador y GRANDE: tiene que
         // leerse a distancia, con el telefono en el piso y ella en la plancha.
         val lead = "${step.setIndex + 1}/${step.totalSets}".takeIf { showSeries }
-        val side = SideMark.of(step.side, step.sideIndex, step.sideCount)
-        ClockOrReps(vm, step, repByRep, t, lead = lead, side = side)
+        // Las flechas ya no van junto al número: las dice el chevrón del hueco (6-oct). Lo
+        // que no es una dirección -los puntos de posición- se queda aquí.
+        ClockOrReps(vm, step, repByRep, t, lead = lead, side = side?.takeUnless { it in CHEVRONS })
         Spacer(Modifier.height(16.dp))
 
         // Siempre visibles, en toda etapa y en cualquier modo: son el mando de la corrida.
@@ -996,6 +1016,73 @@ private val READOUT_SIDE_ICON = 60.dp
 private val READOUT_SIDE_DOTS = 30.sp
 
 /** La flecha que dibuja cada marca de [SideMark]; null si la marca son puntos. */
+/** Las marcas de [SideMark] que tienen chevrón animado, y su archivo. */
+private val CHEVRONS = mapOf(
+    "→" to R.raw.chevron_right,
+    "←" to R.raw.chevron_left,
+    "↑" to R.raw.chevron_up,
+    "↓" to R.raw.chevron_down,
+)
+
+/**
+ * El direccional, en su punto del hueco: ↑ arriba al centro, ↓ abajo, ← y → a cada lado a
+ * media altura. Del paquete AttractiveEmoji de Telegram (069 a 072), recoloreado a blanco
+ * como el reloj; tres chevrones que se encienden en cascada, en bucle.
+ */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.SideChevron(mark: String) {
+    val res = CHEVRONS.getValue(mark)
+    val composition by com.airbnb.lottie.compose.rememberLottieComposition(
+        com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(res),
+    )
+    val donde = when (mark) {
+        "↑" -> Alignment.TopCenter
+        "↓" -> Alignment.BottomCenter
+        "←" -> Alignment.CenterStart
+        else -> Alignment.CenterEnd
+    }
+    com.airbnb.lottie.compose.LottieAnimation(
+        composition = composition,
+        iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever,
+        modifier = Modifier.align(donde).size(CHEVRON_SIZE),
+    )
+}
+
+private val CHEVRON_SIZE = 140.dp
+
+/**
+ * Si el paso [index] es el descanso entre un lado y el otro: lo último hecho fue a la
+ * izquierda y lo que viene a la derecha, o al revés. Es el descanso de la serie 12/12 del
+ * Side Plank Left antes del Right. Entre series del mismo lado no, y tampoco entre adelante
+ * y atrás del cuello: eso no es darse la vuelta.
+ */
+private fun cambiaDeLado(steps: List<PlayerStep>, index: Int): Boolean {
+    val paso = steps.getOrNull(index) ?: return false
+    if (paso.kind != StepKind.REST) return false
+    fun marca(s: PlayerStep?) = s?.let { SideMark.of(it.side, it.sideIndex, it.sideCount) }
+    val antes = marca(steps.take(index).lastOrNull { it.kind == StepKind.WORK })
+    val despues = marca(steps.drop(index + 1).firstOrNull { it.kind == StepKind.WORK })
+    val lados = setOf("←", "→")
+    return antes in lados && despues in lados && antes != despues
+}
+
+/**
+ * "Cambia de lado", al centro del hueco: el 081 del mismo paquete de Telegram, cuatro arcos
+ * que dan la vuelta, en blanco. Se eligió entre los que giran porque es el único que se lee
+ * como "girar" y no como "cargando", y en un descanso el app sí está esperando.
+ */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.RotateSide() {
+    val composition by com.airbnb.lottie.compose.rememberLottieComposition(
+        com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(R.raw.rotate_side),
+    )
+    com.airbnb.lottie.compose.LottieAnimation(
+        composition = composition,
+        iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever,
+        modifier = Modifier.align(Alignment.Center).size(CHEVRON_SIZE),
+    )
+}
+
 private fun arrowIcon(mark: String) = when (mark) {
     "←" -> Icons.AutoMirrored.Filled.ArrowBack
     "→" -> Icons.AutoMirrored.Filled.ArrowForward

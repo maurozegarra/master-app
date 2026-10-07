@@ -18,3 +18,7 @@
 # a ejecutarse, con un unico rastro en el log ("Could not create Input Merger"). De ahi que
 # aqui todas las reglas nombren el constructor explicitamente.
 -keep class * extends androidx.work.InputMerger { <init>(); }
+
+# Lottie (6-oct) trae okio, que referencia javax.annotation.Nullable: es solo una anotacion
+# de compilacion y no existe en Android. Sin esto R8 corta el build.
+-dontwarn javax.annotation.**

@@ -13,8 +13,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // Versionado: +1 por cada APK generado. Primer APK: 1.0.1 (Fase 7).
-        versionCode = 405
-        versionName = "1.0.405"
+        versionCode = 411
+        versionName = "1.0.411"
     }
 
     buildTypes {
@@ -76,6 +76,9 @@ dependencies {
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 
+    // Animaciones Lottie (6-oct): los direccionales del player salen de un paquete de
+    // stickers de Telegram, que son Lottie comprimido.
+    implementation("com.airbnb.android:lottie-compose:6.6.0")
     implementation("io.insert-koin:koin-android:4.2.0")
     implementation("io.insert-koin:koin-androidx-compose:4.2.0")
 
