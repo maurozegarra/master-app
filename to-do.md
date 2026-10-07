@@ -4,28 +4,9 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **164 / 193** hechos, 29 pendientes.
+Progreso: **171 / 193** hechos, 21 pendientes, 1 descartados.
 
 ## Pendientes
-
-### Bug
-
-- [ ] **TD-149** Borrar una sesion en el telefono del atleta no la borra del servidor
-  - LO QUE PASO, el 21-sep-2026: el coach le hizo a NIKO una demostracion del app en su telefono, con NIKO 1 y NIKO 2, y despues borro esas dos sesiones. Ya habian subido (TD-126) y el servidor no se entero del borrado: el telefono del coach las siguio bajando y el asistente las leyo como entrenamientos de ella -5 y 9 minutos, 'completos'-. Se quitaron a mano con un delete en el SQL Editor. Quedan en el servidor, por lo mismo, tres sesiones a medias del 19-sep (23:45-23:55) que ya no estan en su telefono.
-
-POR QUE: es la regla 1 de TD-126, a proposito. El telefono del atleta solo puede SUBIR, por upload_session, sin leer ni borrar, porque va sin cuenta y con la clave publica. El borrado se quedo sin camino.
-
-CONSECUENCIA: su historial, el del coach y el respaldo que lee el asistente no dicen lo mismo, y el que lee el asistente es justo el que esta mal. Entrenarla con datos falsos es peor que sin datos.
-
-LO QUE HARIA FALTA: una funcion delete_session(p_profile_id, p_session_id) en Supabase, security definer como upload_session, que borre SOLO la sesion de ese perfil con ese id. El app la llama en deleteSession y clearHistory si hay perfil, y quita la marca del ledger de subidas. Sin red, el borrado queda pendiente y se reintenta en la siguiente sincronizacion, igual que la subida. El SQL lo corre el usuario.
-
-A DECIDIR: si borrar todo el historial en el telefono del atleta tambien lo borra en el servidor, o solo el borrado de una sesion.
-
-RIESGO QUE QUEDA: quien conozca el id de perfil y el id de una sesion podria borrarla con la clave publica. Es el mismo nivel que ya tiene upload_session, que puede pisarla.
-
-DESCARTADO el mismo dia: se sospecho que el telefono del coach solo bajaba sesiones al arrancar. No: runSync las baja en cada vuelta a primer plano. Fue un error de lectura del asistente, que imprimio las ultimas 6 de 7 sesiones de una lista ordenada de la mas nueva a la mas vieja.
-
-HECHO en codigo el 21-sep, pendiente del SQL y de probarlo en el telefono de NIKO (necesita release). Se decidio que vaciar todo el historial cuenta igual que borrar una por una: lo que el atleta ya no tiene no puede seguir contandole al coach. SessionSync.toDelete elige lo que llego a subir -lo que esta en el ledger-; WorkoutStore.queueSessionDeletes lo anota como pendiente y lo saca del ledger en la misma escritura, para que una sesion que vuelva con un respaldo suba otra vez; syncSessions manda los borrados ANTES de las subidas. AssignmentRepository.deleteSession llama a delete_session con la clave publica; si la funcion todavia no existe devuelve null y el borrado se queda pendiente hasta que exista. El SQL, en docs/supabase/td-149-delete-session.sql, borra ademas las tres sesiones a medias del 19-sep que ya no estan en el telefono de NIKO.
 
 ### Deseable
 
@@ -96,18 +77,6 @@ EL CAMINO BARATO, y probablemente el bueno: cada progresion es una entrada del c
 LA ALTERNATIVA CARA, descartada de momento: que el ejercicio lleve una referencia propia al video (videoId) y la cache deje de indexarse por movimiento. Resuelve el video pero no el concepto, y el concepto es lo que importa: el coach necesita saber en que nivel esta cada uno, no solo que grabacion se ve.
 
 SIN DECIDIR: si una progresion hereda las instrucciones de su familia o las tiene propias, y que hace el historial cuando alguien baja de nivel.
-- [ ] **TD-143** Antes de repartir, el app dice que le va a llegar incompleto
-  - PEDIDO el 19-sep-2026, a raiz de encontrarlo pasando de verdad: al verificar TD-139 se cruzaron los ejercicios de 'NIKO 2 · Muay Thai' -el que ella entrena el lunes- contra las instrucciones publicadas, y SEIS estaban sin una sola linea: los cinco del calentamiento (cuerda, rotacion de cadera, 90 a 90, rotacion de hombros, sombra) y el salto de llanta. Se asigno asi, y se descubrio por casualidad la vispera.
-
-POR QUE PASA: repartir parecia un solo acto y no lo es. El training viaja, pero las instrucciones y el video son de cada exerciseId y pueden no existir. Cuando faltan, el fallo es SILENCIOSO: quien recibe abre el ejercicio y ve un nombre, y quien reparte no se entera nunca.
-
-QUE SE HACE: DeliveryCheck.gaps(training, instrucciones, videos publicados) lista los ejercicios que llegarian sin instrucciones o sin video, y el dialogo de 'Assign to' lo ensena ANTES de confirmar, con los que no tienen instrucciones primero y en blanco -sin instrucciones no se puede hacer el ejercicio; sin video se puede leer como se hace-.
-
-AVISA, NO BLOQUEA: repartir algo sin video es normal; repartirlo sin saberlo es lo que no.
-
-EL VIDEO PROPIO NO CUENTA: vive en el directorio privado del telefono que lo asigno y no viaja con la rutina, asi que solo vale el publicado. Mirar el estado del video a secas diria que esta cubierto cuando el otro telefono no puede descargarlo.
-
-Y MIRA LAS VARIANTES: un workout rotativo esconde sus ejercicios dentro de ellas, que en el dia de Muay Thai son casi todo el training. Hay un test que lo fija.
 - [ ] **TD-137** Circuitos: alternar ejercicios por rounds en vez de terminar uno para empezar otro
   - LIMITACION DEL MODELO, encontrada al diseñar el dia 6 de NIKO (19-sep-2026). Lo ideal para defensa personal es un circuito: saco 60 s → sprawl 30 s → saco 60 s..., repetido por rounds. El player hace un ejercicio con TODAS sus series y recien pasa al siguiente, asi que un circuito no se puede expresar: hoy va como series seguidas de cada ejercicio.
 
@@ -128,16 +97,6 @@ OJO CON EL CASO DE HOY: 16-sep, puente 6/16/26. El usuario confirmo por chat que
   - PLANTEADO POR EL USUARIO el 14-sep-2026, al leer que dos sesiones se quedaban con el orden equivocado: 'deberias tener control total sobre los registros, eso de que se quedan como estan me suena a que no tenemos control sobre algo que nosotros mismos estamos creando'. Tiene razon. DONDE ESTAMOS HOY. El historial es de **una sola escritura**: lo escribe el player al terminar y despues solo se puede borrar la sesion entera. No hay forma de corregir un dato, ni de anotar nada, ni de reparar algo que se guardo mal. Lo unico que existe es lo que se ha estado haciendo a mano: leer el respaldo del telefono por adb y escribir migraciones de codigo (TD-087, TD-090, TD-091, TD-098). Funciona, pero cada correccion cuesta un build y depende de que el usuario abra el app. EL PROBLEMA MAS SERIO, y lo introdujo el asistente: tras TD-090 el historial tiene una sesion que el player nunca midio -la del 13-sep, reconstruida desde la rutina- y es **indistinguible** de las medidas. Dentro de seis semanas nadie va a saber si esos 12 aguantes se cronometraron o se dedujeron. Si encima se empiezan a corregir registros, el historial deja de ser un registro y pasa a ser una opinion. LO QUE HAY QUE RESOLVER, en tres niveles y por ese orden: (1) ORIGEN. SessionLog gana de donde sale cada registro -medido por el player, reconstruido, o editado a mano-, y el historial lo ensena. Es lo primero porque sin eso lo demas hace dano. Barato: un campo, su serializacion y una marca en la UI. (2) CORREGIR Y ANOTAR desde el app: cambiar reps o peso de una serie mal registrada, quitar un ejercicio que no se hizo, y la nota de como se sintio (TD-089, que es la otra mitad de esto). Le da el control a EL, que es quien estuvo ahi. (3) ESCRITURA REMOTA. Que el historial viaje por el mismo canal que las asignaciones (TD-063/TD-066) para poder leerlo y repararlo sin un build de por medio. Es el unico nivel que da 'control total' de verdad, y es el caro: toca Supabase, identidad y conflictos entre dispositivo y servidor. RECOMENDACION: hacer (1) ya -es pequeno y es el que protege la integridad de todo lo demas-, (2) junto con TD-089, y (3) solo cuando el ciclo de coach lo pida de verdad. EL PRINCIPIO que conviene fijar antes de escribir codigo: el historial tiene que ser **corregible pero auditable**. Que se pueda arreglar un dato malo, y que nunca se pueda confundir lo que se midio con lo que se dedujo.
 - [ ] **TD-096** Poder borrar un ejercicio propio desde la app
   - EL HUECO, encontrado al hacer TD-087: **el app sabe crear ejercicios propios y no sabe borrarlos**. No hay UI, no hay metodo en MasterViewModel, no hay nada: addCustomExercise() los agrega y ahi se quedan para siempre. LA CONSECUENCIA: cada intento de armar algo a mano deja basura en el selector de ejercicios para siempre. Al usuario le quedaron cinco del intento de armar la rutina lumbar y hubo que borrarlos con una migracion de codigo (TD-087), que es una respuesta desproporcionada para algo que deberia ser un swipe. LO QUE HAY QUE RESOLVER, y por eso no es solo agregar un boton: que pasa con un ejercicio propio que SI esta usado en algun training. Borrarlo dejaria a esas instancias sin nombre de catalogo y el player ensenaria el id crudo (ex_curl_up). Opciones: no dejar borrarlo y decir donde se usa; borrarlo y congelar el nombre en cada instancia, que es lo que ya hace ExerciseCatalog.display() con su fallback; o pedir confirmacion nombrando los trainings afectados. La segunda es la que encaja con como esta hecho hoy. Tambien hay que decidir que pasa con su video propio y sus instrucciones, que viven por exerciseId. Relacionado con TD-010 (catalogo expandido) y con el swipe-to-reveal que ya usan las otras listas (TD-039, TD-057).
-- [ ] **TD-095** Modo distancia: ejercicios que se miden en metros
-  - EL HUECO: WorkMode solo sabe de TIME y REPS. Un ejercicio que se mide en metros no se puede expresar. EL CASO QUE LO PIDIO: el suitcase carry de la rutina lumbar son '3 x 30-40 m por lado' y quedo como 2 repeticiones con avance manual y la nota 'One trip of 30-40 m per side' al lado. Funciona porque el usuario sabe lo que tiene que hacer, pero el player ensena '2 REPS', que no es lo que esta haciendo, y el historial guarda 2 reps, que no sirve para ver progreso: la carga real de ese ejercicio es el peso y los metros. DONDE TOCA: WorkMode gana DISTANCE; StepEngine trata el paso como manual igual que REPS; PlayerStep necesita llevar la distancia y su unidad; el editor, un campo mas; SetRecord, donde anotarla; y el historial, como ensenarla. Es mas ancho que TD-085 porque toca la UI del player, no solo el motor. A DECIDIR: si la unidad es fija (metros) o configurable, y si la distancia va por serie -como quedaron el trabajo y el descanso en TD-085- o es una sola del ejercicio. NO ES URGENTE: con la nota al lado la rutina se hace igual. Sube de prioridad en cuanto una rutina incluya caminatas o carries medidos, que es probable en cuanto el bloque de cadera crezca.
-
-DECIDIDO el 23-sep con el usuario, que lo planteo: "me sigue pareciendo raro que diga 2 reps" y "me propusiste pasarlo a tiempo y no veo que sea el camino". Tiene razon: el tiempo cambia con el ritmo y no dice nada del agarre; lo que se entrena es peso y distancia.
-
-HECHO en codigo el mismo dia, pendiente de validar: WorkMode.DISTANCE. Se comporta como REPS -paso manual, lleva peso y su tarjeta, se confirma al terminar- con otra unidad: el player dice "36 M", la notificacion "36 m", el editor tiene "Meters" y el historial "36 m x 20 kg". El registro guarda los metros en SetRecord.distanceM y deja reps en 0; lo guardado antes sigue diciendo "2 reps". El estimado usa ~1 s por metro. Los textos van en su bloque (DistanceStrings), por el tope de Strings.
-
-EN LAS RUTINAS: el suitcase carry del completo y del corto pasa a 36 m POR LADOS (revision 15): el 22-sep anoto que el agarre izquierdo le cuesta mas, y con un registro por mano eso se ve serie a serie. El paseo del granjero de NIKO 3 pasa a 36 m sin lados (revision 11 de NIKO). DistanceTest.
-- [ ] **TD-094** Publicar los videos de los nueve ejercicios del lumbar
-  - LOS NUEVE MOVIMIENTOS que entraron al catalogo con TD-086 -ex_walk, ex_hip_hinge, ex_curl_up, ex_side_plank_l, ex_side_plank_r, ex_bird_dog, ex_glute_bridge, ex_suitcase_carry, ex_box_squat- no tienen video. El gato-camello si: usa ex_cat_cow, que ya estaba publicado desde TD-062. EL CAMINO, que es el unico automatizable y esta documentado en AGENTS.md ('Como poner contenido en el telefono'): renombrar cada mp4 a <exerciseId>.mp4, subirlo con 'gh release upload videos', agregar su entrada a videos.json con file, rev y bytes, y hacer push de videos.json a main. El app lee el manifiesto de GitHub raw y baja cada video la primera vez que hace falta. **No hay que publicar version nueva del app.** PENDIENTE DEL USUARIO: pasar los archivos. Los que ya estan publicados pesan entre 1.7 y 4.8 MB, que es la escala que conviene. DETALLE UTIL: si solo hay un clip de plancha lateral, las entradas de ex_side_plank_l y ex_side_plank_r pueden apuntar al mismo archivo; el app lo baja una vez por cada id. OJO: el push de videos.json necesita autorizacion explicita del usuario, como cualquier push.
 - [ ] **TD-081** Unificar los tres iconos de la franja del player (instrucciones, editar y video)
   - NOTA DEL USUARIO, sin decidir todavia: 'no me convence del todo un boton para instrucciones y otro boton para editar el ejercicio, creo que deberiamos unificarlo o pensar en algo mas'. Hoy la franja de rutina lleva dos iconos sueltos a la derecha: InstructionsButton (lista, abre un ModalBottomSheet con los pasos numerados; no se dibuja si el ejercicio no tiene instrucciones) y EditExerciseButton (lapiz, llama a editRunningExercise; no se dibuja si el training viene asignado). O sea que segun el ejercicio y el training puede haber dos iconos, uno o ninguno, y la franja cambia de contenido sin que el usuario sepa por que. A PENSAR: un solo punto de entrada -menu, sheet unico con pestanas, o accion contextual- en vez de dos iconos que compiten por la misma esquina. Contexto: surge tras descartar las instrucciones como relleno del hueco del video (TD-080), que las devuelve a vivir detras de su boton. Relacionado con TD-071, que busca llegar al video y a las instrucciones de un training asignado sin duplicarlo.
 
@@ -149,25 +108,9 @@ Y son tres con TRES reglas de visibilidad distintas, que es lo que de verdad ens
   - video (camara): se dibuja SIEMPRE, en gris cuando no hay video, justamente para que los otros dos no se muevan de sitio al cambiar de ejercicio.
 
 O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el training, y las tres reglas se contradicen entre si. Cualquier unificacion tiene que decidir PRIMERO una sola regla de visibilidad; el numero de iconos es el sintoma.
-- [ ] **TD-076** Volumen de los pitidos ajustable en Ajustes
-  - El usuario oye los pitidos 'ligeramente mas alto que la musica' y quiere bajarlos un poco; recordaba que eso tenia un porcentaje. LO QUE HABIA: los pitidos de la corrida (AlarmPlayer.beepTone, desde WorkoutPlayerService playBeep y alarmCue) no aplicaban NINGUN volumen, asi que sonaban al 100 % del volumen multimedia, el mismo canal que Spotify. La curva perceptual en dB de AlarmPlayer existia, pero solo la usaba la vista previa de tonos del editor, y fijada a 1f, o sea tambien al 100 %. En el historial de este proyecto nunca hubo un campo de volumen en el modelo; el porcentaje que el usuario recordaba, si acaso, venia del app anterior. Y un comentario en ExerciseEditorScreen hablaba de 'el control de volumen y sonido del beep' cuando solo habia selector de sonido: de los que en un escaneo rapido hacen concluir cosas que no son; se corrigio y ahora remite al ajuste global. DECISION DEL USUARIO entre un nivel fijo mas bajo o un ajuste: el ajuste, para afinarlo el mismo en el telefono en vez de recompilar. LA SOLUCION: MasterConfig.beepVolume en %, default 100 -como sonaban-, guardado en SettingsStore, y en Ajustes -> Player un SegmentedRow con 100/85/70/55/40 % sobre la curva que ya existia (85 son unos -3 dB, 70 unos -5). Es uno solo para todos los pitidos, no por etapa. Al tocar un nivel suena un pitido a ese nivel, que es la unica forma de afinarlo contra la musica sin arrancar un training; se le pasa el nivel elegido en vez de leerlo de Ajustes porque se llama en el mismo toque que lo guarda. El servicio lee el nivel en CADA pitido y no al arrancar, para que un cambio con una corrida en marcha se note en el siguiente. La vista previa del editor tambien usa el nivel de Ajustes, para que no suene distinto que en el training. Los pitidos siguen sin pedir foco de audio: se oyen encima de la musica sin bajarla, que es lo que el usuario quiere.
 
 ### Fix
 
-- [ ] **TD-156** Lo que salio de la primera semana con metros y feedback: carry alternado, respiro para contestar, preparacion de la caminata
-  - REPORTADO el 24-sep, cuatro cosas de una vez:
-(1) El usuario: "Carry demoro el doble, no me gusto". Con la revision 15 el carry iba por lados uno tras otro -tres viajes con la izquierda y despues tres con la derecha- con un minuto entre cada uno: cinco descansos en vez de los dos de antes.
-(2) NIKO: en el cuello, la ultima direccion "no te da tiempo para marcar el feedback, la sesion simplemente termina". Un aguante no se contesta mientras se hace, y la ultima serie no tiene descanso detras.
-(3) El usuario: en la caminata de LUMBAR no hay PREP, "apenas le doy al play, el tiempo ya esta corriendo".
-(4) El usuario: "Minutes until it eased no lo veo marcado". La alarma guardo 24 minutos, y la pantalla final solo tiene botones 0/5/10/15/20/30/45/60: ninguno se encendia.
-
-HECHO en codigo el mismo dia:
-(1) Exercise.alternateSides: izquierda y derecha dentro de cada serie, sin descanso entre manos y con el descanso al cerrar la serie. El carry lo usa (LUMBAR_REVISION 16).
-(2) Al final del training, un respiro de 10 s (StepEngine.ANSWER_SEC) si la ultima serie es por tiempo y pregunta como fue; lo pide el player con buildSteps(answerWindow = true), asi que ni los estimados ni los tests de estructura lo llevan. Entre ejercicios, la tarjeta que quedo sin contestar sale en la PREPARACION del siguiente.
-(3) Las caminatas lumbares llevan 10 s de preparacion.
-(4) FadeMinutes ensena el valor exacto ("Minutes until it eased: 24 min") cuando no es uno de los botones.
-
-UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mitad de corrida, StepEngine comparaba por SERIE, y con lados la serie se repite en cada lado: estando en la serie 2 de la derecha podia volver a la serie 2 de la izquierda, ya hecha. Ahora cada paso lleva su PUESTO (PlayerStep.slot) en el orden en que se hace, que es lo que se compara. Y un ejercicio sin exerciseId no pregunta como fue: sin id no hay historial donde leerlo. AlternateSidesTest.
 - [ ] **TD-100** Dos instancias del mismo ejercicio en un workout se funden en un registro
   - ENCONTRADO al arreglar TD-099 y levantado a peticion del usuario. SessionRecorder agrupa por ExerciseKey (exerciseId, workoutIndex), asi que si un workout repite el mismo ejercicio del catalogo, las dos apariciones escriben en la MISMA casilla: la segunda pisa las series de la primera y en el historial queda un solo registro, con el nombre y las series de la ultima. Se pierde la mitad del trabajo hecho. DONDE MUERDE HOY: es la razon por la que la plancha lateral de la rutina lumbar necesito dos entradas de catalogo, ex_side_plank_l y ex_side_plank_r (TD-086), en vez de una con nota 'cada lado' como hace el resto del catalogo. Se eligio asi a proposito para no perder las series de un lado, pero es rodear el fallo, no arreglarlo. EL FIX APARENTE: meter exerciseIndex en la clave, que desde TD-099 ya viaja en el registro. Dos apariciones del mismo ejercicio pasan a ser dos filas. LO QUE HAY QUE PENSAR ANTES, porque cambia como se cuenta el historial: - Con la clave nueva, un workout con 'Pushups' dos veces pasa de una fila a dos. Es mas fiel, pero es un cambio visible en trainings que el usuario ya tiene (MASTER repite ejercicios en varios sitios: comprobarlo antes). - ExerciseHistoryScreen agrupa por ejercicio a lo largo del tiempo; hay que ver si dos filas por sesion le estropean la serie o la mejoran. - Las sesiones ya guardadas no se pueden separar hacia atras: lo que se fundio, se fundio. - Si se arregla, la plancha lateral podria volver a ser UNA entrada de catalogo con nota, y el catalogo quedaria mas limpio. Eso seria un cambio aparte y posterior. Relacionado con TD-101, que es el que decide que se puede tocar del historial y que no.
 - [ ] **TD-064** Fix: quitar rotativo a un workout borra todas las variantes menos la primera
@@ -175,10 +118,6 @@ UN FALLO ENCONTRADO DE PASO, desde TD-147: al reubicar un paso tras editar a mit
 
 ### Mantenimiento
 
-- [ ] **TD-170** Quitar el ajuste "Leading zeros in clock"
-  - PEDIDO por el usuario el 26-sep, para despues: quitar de Settings > Player el ajuste "Leading zeros in clock" (MasterConfig.padPlayerClock), que decide si el reloj del player dice 05:00 o 5:00.
-
-A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el ajuste es fijar un comportamiento, no borrar una casilla: hay que preguntar cual. Y limpiar lo que lo usa -SettingsViewModel.setPadPlayerClock, el parametro padded de formatPlayerClock y del player- sin dejar un campo huerfano en la configuracion guardada.
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
 
@@ -190,18 +129,19 @@ A DECIDIR ANTES DE QUITARLO: con cual de los dos se queda el reloj. Quitar el aj
 A DEFINIR con él antes de tocar: cómo se marca (inicial, color del training, ícono) sin quitarle protagonismo al puntito de hecho, y qué se ve cuando dos trainings caen el mismo día.
 - [ ] **TD-193** Un solo formato de hora en todo el app (24 h o AM/PM)
   - VISTO el 5-oct en la pantalla Morning. El app mezcla formatos: Morning va en 24 h ("23:30", "5:00"), el agua en 12 h ("5:23 PM", puesto el 4-oct) y el historial dice "8:29 AM". A DEFINIR con él cuál va en todo el app; después, un formateador compartido en util/Format.kt en vez de un DateTimeFormatter en cada pantalla.
-- [ ] **TD-189** Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo
-  - PEDIDO el 4-oct, con capturas, comparando con el play de la lista y con Telegram.
-
-HECHO con su OK (v1.0.380 a 1.0.384): (1) Dims.buttonHeight de 52 a 40 dp, el estándar de Material 3 (cambian juntos todos los botones grandes). (2) AppPrimaryButton solo con el borde de 1 dp del acento, como el play: sin relleno satinado, sin sombra y sin la línea de luz de arriba, que hacían ver el borde más grueso (medido: los dos bordes 3 px). Se quedan el hundimiento y la vuelta de luz. (3) La pantalla previa del training con SettingsScaffold, como Morning: flecha atrás, el título, y la prueba sin registrar (TD-174) como ojo en el acento a la derecha; PREVIEW en mayúsculas y en rojo al lado de Start desentonaba. Start queda solo, a todo lo ancho. (4) SettingsScaffold acepta un subtítulo, como el "last seen" de Telegram: el resumen del training va en la barra, con alto de línea ajustado (24/16 sp, sin relleno de fuente) para caber centrado en los 64 dp sin tocar la hora.
-
-A VALIDAR en el uso: si 40 dp queda chico al tocarlo con las manos cansadas.
 - [ ] **TD-188** La barra de arriba a 56 dp, para igualar el aire bajo el wordmark al de TickTick (sine die)
   - PEDIDO el 4-oct, comparando con TickTick: entre el wordmark y los días de la semana había ~35 dp contra ~28 de "October" a "Mon" en TickTick. Se quitaron los 4 dp de arriba de la lista (v1.0.379): quedan ~31 dp.
 
 LO QUE FALTA: el resto es el aire de adentro de la TopAppBar de Material, que en material3 1.2.1 (BOM 2024.06) mide 64 dp fijos y centra el título, sin parámetro para cambiarlo. Las versiones nuevas aceptan expandedHeight: actualizar el BOM de Compose y poner 56 dp lo dejaría en ~27 dp. Es una línea, pero la actualización afecta a todo el app y hay que revisar las pantallas principales con capturas. Desplazar la semana hacia arriba la recorta (la lista recorta su borde), y una barra propia sería dibujar un control a mano: descartados.
 
 SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
+
+## Descartados
+
+- [-] **TD-094** Publicar los videos de los nueve ejercicios del lumbar
+  - LOS NUEVE MOVIMIENTOS que entraron al catalogo con TD-086 -ex_walk, ex_hip_hinge, ex_curl_up, ex_side_plank_l, ex_side_plank_r, ex_bird_dog, ex_glute_bridge, ex_suitcase_carry, ex_box_squat- no tienen video. El gato-camello si: usa ex_cat_cow, que ya estaba publicado desde TD-062. EL CAMINO, que es el unico automatizable y esta documentado en AGENTS.md ('Como poner contenido en el telefono'): renombrar cada mp4 a <exerciseId>.mp4, subirlo con 'gh release upload videos', agregar su entrada a videos.json con file, rev y bytes, y hacer push de videos.json a main. El app lee el manifiesto de GitHub raw y baja cada video la primera vez que hace falta. **No hay que publicar version nueva del app.** PENDIENTE DEL USUARIO: pasar los archivos. Los que ya estan publicados pesan entre 1.7 y 4.8 MB, que es la escala que conviene. DETALLE UTIL: si solo hay un clip de plancha lateral, las entradas de ex_side_plank_l y ex_side_plank_r pueden apuntar al mismo archivo; el app lo baja una vez por cada id. OJO: el push de videos.json necesita autorizacion explicita del usuario, como cualquier push.
+
+DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de atenderlo". Quedaron 6 de 9 publicados; faltan la bisagra de cadera y las dos planchas laterales.
 
 ## Hechos
 
@@ -214,6 +154,7 @@ SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 - [x] **TD-155** McGill sale "Partial" en el historial con todo hecho
 - [x] **TD-154** Apagar el video es una preferencia del telefono, no del training
 - [x] **TD-153** El lado del ejercicio se corta en el player: DERECHA sale HA
+- [x] **TD-149** Borrar una sesion en el telefono del atleta no la borra del servidor
 - [x] **TD-075** Fix: el video del ejercicio pausa la musica (Spotify) al reproducirse
 - [x] **TD-015** Fix drag-reorder en lista de trainings
 
@@ -233,6 +174,7 @@ SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 - [x] **TD-151** El dolor se anota cuando pasa, no al terminar el training
 - [x] **TD-147** El ejercicio unilateral: el lado entra en el modelo
 - [x] **TD-145** El video es un campo mas del ejercicio: una sola tarjeta y sin carteles
+- [x] **TD-143** Antes de repartir, el app dice que le va a llegar incompleto
 - [x] **TD-139** Las instrucciones dejan de viajar en el APK: una tabla por exerciseId
 - [x] **TD-140** Publicar un video desde el telefono: bucket en Supabase y boton en la ficha del ejercicio
 - [x] **TD-141** Migrar los 7 videos publicados y retirar videos.json
@@ -255,6 +197,7 @@ SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 - [x] **TD-104** Inventariar el equipo disponible para poder disenar con lo que hay
 - [x] **TD-098** Cargar el bloque de cadera y gluteo, que se le queda corto
 - [x] **TD-097** Caminata de cierre en la variante de dia malo
+- [x] **TD-095** Modo distancia: ejercicios que se miden en metros
 - [x] **TD-091** Las indicaciones de la caminata dicen de que protege la regla de la primera hora
 - [x] **TD-090** Anotar en el historial la sesion del 13-sep que se hizo sin el app
 - [x] **TD-089** Registrar como se sintio la sesion, no solo que series se hicieron
@@ -266,6 +209,7 @@ SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 - [x] **TD-079** El chrome del player se desvanece solo y deja el video limpio
 - [x] **TD-078** El video del player se queda con la pantalla (reloj y controles superpuestos)
 - [x] **TD-077** Como reproduce Freeletics sus videos: zoom, loop parcial y velocidad
+- [x] **TD-076** Volumen de los pitidos ajustable en Ajustes
 - [x] **TD-073** Editar el training mientras se esta ejecutando
 - [x] **TD-070** Ver u ocultar el video es cosa de cada ejercicio en su training
 - [x] **TD-068** Entrega automatica de asignaciones con aviso, y deslizar para refrescar
@@ -303,6 +247,7 @@ SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 - [x] **TD-184** Fix: el telefono del coach publicaba sus instrucciones del lumbar, en ingles, y le llegaban a NIKO
 - [x] **TD-176** Los minutos hasta aflojar: una sola fuente, y que se puedan corregir
 - [x] **TD-172** En un circuito, el ejercicio que pasa directo al siguiente nunca pregunta como fue
+- [x] **TD-156** Lo que salio de la primera semana con metros y feedback: carry alternado, respiro para contestar, preparacion de la caminata
 - [x] **TD-146** Apagar el video desde el player, y que lo editado en caliente se vea ya
 - [x] **TD-142** Fix: republicar desde el arranque leia isCoach antes de que existiera
 - [x] **TD-134** Fix: borrar un training dejaba su asignacion viva, y no habia donde quitarla
@@ -347,6 +292,7 @@ SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 
 ### Mantenimiento
 
+- [x] **TD-170** Quitar el ajuste "Leading zeros in clock"
 - [x] **TD-135** El codigo y la documentacion dicen lo que dice la pantalla
 - [x] **TD-103** La rutina va por revision, no por una migracion en cada ajuste
 - [x] **TD-093** Permisos por prefijo, para que los scripts dejen de pedir permiso
@@ -381,6 +327,7 @@ SINE DIE, decisión del usuario el 4-oct: "mucho trabajo para hoy".
 
 ### UI
 
+- [x] **TD-189** Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo
 - [x] **TD-187** Un solo campo de texto en todo el app (AppTextField), en vez de once copiados a mano
 - [x] **TD-183** El reloj para elegir una hora, en 12 horas y con los colores del app
 - [x] **TD-182** Morning: agregar una alarma con un + en la barra, no con un boton a todo lo ancho
