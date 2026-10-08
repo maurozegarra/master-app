@@ -729,6 +729,18 @@ data class MoreStrings(
     val body: BodyStrings = BodyStrings(),
     val water: WaterStrings = WaterStrings(),
     val coach: CoachStrings = CoachStrings(),
+    val holidays: HolidayStrings = HolidayStrings(),
+)
+
+/** Los feriados de la alarma (7-oct). */
+data class HolidayStrings(
+    val title: String = "Holidays",
+    val next: String = "Next",
+    val today: String = "Today",
+    val none: String = "No holidays ahead",
+    val dayOff: String = "Day off",
+    val holiday: String = "holiday",
+    val desc: String = "On a holiday the alarms ring as on a Saturday. Turn off the ones you work.",
 )
 
 /**

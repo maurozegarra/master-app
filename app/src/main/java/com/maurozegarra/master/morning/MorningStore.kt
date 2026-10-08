@@ -22,7 +22,35 @@ class MorningStore(context: Context) {
      * de nada, las dos por defecto APAGADAS: el app llega a otros teléfonos, y ninguno debe
      * empezar a sonar solo por actualizar.
      */
-    fun schedule(): MorningSchedule {
+    fun schedule(): MorningSchedule = alarmsOnly().copy(holidays = holidays())
+
+    /** Los feriados vigentes (7-oct): los del Perú, menos los quitados, más los agregados. */
+    fun holidays(today: java.time.LocalDate = java.time.LocalDate.now()): Set<java.time.LocalDate> =
+        Holidays.of(today.year, dates(KEY_HOL_ADDED), dates(KEY_HOL_REMOVED))
+
+    /** Marca o desmarca [day] como feriado. */
+    fun setHoliday(day: java.time.LocalDate, on: Boolean) {
+        val nacional = Holidays.name(day) != null
+        val added = dates(KEY_HOL_ADDED).toMutableSet()
+        val removed = dates(KEY_HOL_REMOVED).toMutableSet()
+        if (on) {
+            removed -= day
+            if (!nacional) added += day
+        } else {
+            added -= day
+            if (nacional) removed += day
+        }
+        prefs.edit()
+            .putStringSet(KEY_HOL_ADDED, added.map { it.toString() }.toSet())
+            .putStringSet(KEY_HOL_REMOVED, removed.map { it.toString() }.toSet())
+            .apply()
+    }
+
+    private fun dates(key: String): Set<java.time.LocalDate> =
+        (prefs.getStringSet(key, emptySet()) ?: emptySet())
+            .mapNotNull { runCatching { java.time.LocalDate.parse(it) }.getOrNull() }.toSet()
+
+    private fun alarmsOnly(): MorningSchedule {
         prefs.getString(KEY_ALARMS, null)?.let { raw ->
             runCatching { return decodeAlarms(raw) }
         }
@@ -90,6 +118,8 @@ class MorningStore(context: Context) {
         private const val KEY_BED_ON = "bed_enabled"
         private const val KEY_BED_SLEEP = "bed_sleep_min"
         private const val KEY_BED_LEAD = "bed_lead_min"
+        private const val KEY_HOL_ADDED = "holidays_added"
+        private const val KEY_HOL_REMOVED = "holidays_removed"
 
         fun encodeAlarms(s: MorningSchedule): String {
             val a = JSONArray()

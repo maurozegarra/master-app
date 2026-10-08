@@ -53,8 +53,9 @@ object WaterAlarm {
         val bed = WaterPlan.bedFromNextRing(manana, day, morning.bedtime().sleepMin)
         // La alarma de hoy dice si es dia presencial: antes de las 6 (decidido con el, 4-oct).
         // No el training corto: ese va tambien los domingos.
-        val alarmaHoy = morning.schedule().alarms
-            .filter { it.enabled && day.dayOfWeek in it.days && morning.skipDate != day }
+        // Un feriado suena como sábado (7-oct), así que tampoco es presencial.
+        val alarmaHoy = morning.schedule().alarmsOn(day)
+            .filter { morning.skipDate != day }
             .minOfOrNull { it.time }
         val plan = WaterPlan.planFor(alarmaHoy)
         return Today(

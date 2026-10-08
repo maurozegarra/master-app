@@ -10,6 +10,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -141,7 +143,7 @@ fun MorningSettings(t: Strings, accent: Color, addRequests: Int = 0) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(t.morning.alarms, color = AppTheme.colors.textPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 // Saltar mañana sin tocar las alarmas: un feriado, un viaje. Solo si mañana sonaria.
-                if (schedule.ringsOn(manana.dayOfWeek)) {
+                if (schedule.alarmsOn(manana).isNotEmpty()) {
                     Text(
                         if (saltado) t.morning.undo else t.morning.skipTomorrow,
                         color = accent,
@@ -161,7 +163,8 @@ fun MorningSettings(t: Strings, accent: Color, addRequests: Int = 0) {
                 // despertador. Va en la linea de la proxima, que es donde se mira.
                 else proxima?.let {
                     val falta = Countdown.text(java.time.Duration.between(ahora, it).toMinutes().toInt())
-                    "${t.morning.next}: ${it.dayOfWeek.getDisplayName(TextStyle.FULL, t.locale)} ${it.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("H:mm"))} · ${t.morning.inTime.format(falta)}"
+                    val feriado = if (it.toLocalDate() in schedule.holidays) " · ${t.more.holidays.holiday}" else ""
+                    "${t.morning.next}: ${it.dayOfWeek.getDisplayName(TextStyle.FULL, t.locale)} ${it.toLocalTime().format(java.time.format.DateTimeFormatter.ofPattern("H:mm"))}$feriado · ${t.morning.inTime.format(falta)}"
                 }
                     ?: t.morning.alarmOff,
                 color = AppTheme.colors.textDim,
@@ -185,6 +188,12 @@ fun MorningSettings(t: Strings, accent: Color, addRequests: Int = 0) {
                     onDay = { d -> aplicar(schedule.update(a.copy(days = if (d in a.days) a.days - d else a.days + d))) },
                 )
             }
+        }
+        // Los feriados (7-oct): el próximo a la vista, y la lista al tocarlo.
+        HolidaysRow(store, schedule.holidays, accent, t) {
+            schedule = store.schedule()
+            MorningAlarm.reschedule(ctx)
+            cambios++
         }
     }
 
@@ -370,4 +379,92 @@ private fun puedePantallaCompleta(ctx: android.content.Context): Boolean {
 private fun abrirAjustePantallaCompleta(ctx: android.content.Context) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
     ctx.startActivity(Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:${ctx.packageName}")))
+}
+
+
+/**
+ * La fila de los feriados, como una alarma más: el próximo con su nombre, y al tocarla la
+ * lista de los que vienen en el año, cada uno con su interruptor para quitarlo si ese día
+ * se trabaja.
+ */
+@Composable
+private fun HolidaysRow(store: MorningStore, holidays: Set<java.time.LocalDate>, accent: Color, t: Strings, onChange: () -> Unit) {
+    val h = t.more.holidays
+    val hoy = java.time.LocalDate.now()
+    val fmt = java.time.format.DateTimeFormatter.ofPattern("EEEE, MMM d", t.locale)
+    // Los del próximo año: los nacionales, quitados o no, y los agregados.
+    val enUnAnio = remember(holidays) {
+        (Holidays.peru(hoy.year).keys + Holidays.peru(hoy.year + 1).keys + holidays)
+            .filter { !it.isBefore(hoy) && it.isBefore(hoy.plusYears(1)) }
+            .sorted()
+    }
+    // Si hoy es feriado se dice "Today" (8-oct): en pleno feriado, "Next: Thursday, Oct 8"
+    // sonaba a que todavia no llegaba.
+    val proximo = enUnAnio.firstOrNull { it in holidays }
+    var abierta by remember { mutableStateOf(false) }
+    Column(Modifier.listCard().clickable { abierta = true }) {
+        Text(h.title, color = AppTheme.colors.textPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(2.dp))
+        Text(
+            proximo?.let {
+                val cuando = if (it == hoy) h.today else "${h.next}: ${it.format(fmt)}"
+                "$cuando · ${Holidays.name(it) ?: h.dayOff}"
+            } ?: h.none,
+            color = AppTheme.colors.textDim,
+            fontSize = 13.sp,
+        )
+    }
+    if (abierta) {
+        HolidaysSheet(store, holidays, enUnAnio, fmt, accent, t, onChange) { abierta = false }
+    }
+}
+
+/**
+ * La lista de feriados en el sheet del app, el mismo de las instrucciones del player. Abre
+ * a media pantalla y crece al desplazarse, como el de adjuntos de Telegram (7-oct): son unos
+ * trece días y no hace falta tapar la pantalla para ver los primeros.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun HolidaysSheet(
+    store: MorningStore,
+    holidays: Set<java.time.LocalDate>,
+    dias: List<java.time.LocalDate>,
+    fmt: java.time.format.DateTimeFormatter,
+    accent: Color,
+    t: Strings,
+    onChange: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val h = t.more.holidays
+    androidx.compose.material3.ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = false),
+        containerColor = AppTheme.colors.surface,
+    ) {
+        Column(
+            Modifier
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .navigationBarsPadding()
+                .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(h.title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+            Spacer(Modifier.height(4.dp))
+            Text(h.desc, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            Spacer(Modifier.height(12.dp))
+            dias.forEach { d ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(d.format(fmt), color = AppTheme.colors.textPrimary, fontSize = 14.sp)
+                        Text(Holidays.name(d) ?: h.dayOff, color = AppTheme.colors.textDim, fontSize = 12.sp)
+                    }
+                    com.maurozegarra.master.ui.AppSwitch(d in holidays, accent) { on ->
+                        store.setHoliday(d, on)
+                        onChange()
+                    }
+                }
+            }
+        }
+    }
 }

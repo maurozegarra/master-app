@@ -35,8 +35,19 @@ data class MorningAlarmSpec(
     val enabled: Boolean = true,
 )
 
-/** Las alarmas del teléfono. Suena la que toque primero. */
-data class MorningSchedule(val alarms: List<MorningAlarmSpec>) {
+/**
+ * Las alarmas del teléfono. Suena la que toque primero.
+ *
+ * [holidays] no se guarda con las alarmas: lo pone [MorningStore.schedule] al leerlas. Un
+ * feriado suena como un sábado ([Holidays.AS]).
+ */
+data class MorningSchedule(val alarms: List<MorningAlarmSpec>, val holidays: Set<LocalDate> = emptySet()) {
+
+    /** El día de la semana con el que suena [day]: el suyo, o el de los feriados. */
+    fun ringsLike(day: LocalDate): DayOfWeek = if (day in holidays) Holidays.AS else day.dayOfWeek
+
+    /** Las alarmas encendidas que suenan el día [day], feriados incluidos. */
+    fun alarmsOn(day: LocalDate): List<MorningAlarmSpec> = alarms.filter { it.enabled && ringsLike(day) in it.days }
 
     /** Si alguna puede sonar: encendida y con al menos un día. */
     val anyOn: Boolean get() = alarms.any { it.enabled && it.days.isNotEmpty() }
@@ -71,8 +82,7 @@ data class MorningSchedule(val alarms: List<MorningAlarmSpec>) {
             val day = now.toLocalDate().plusDays(i.toLong())
             // Un dia saltado a mano -"Skip tomorrow"- no suena, sin tocar las alarmas.
             if (day == skip) continue
-            val hoy = alarms
-                .filter { it.enabled && day.dayOfWeek in it.days }
+            val hoy = alarmsOn(day)
                 .map { day.atTime(it.time).atZone(now.zone) }
                 .filter { it.isAfter(now) }
                 .minOrNull()
