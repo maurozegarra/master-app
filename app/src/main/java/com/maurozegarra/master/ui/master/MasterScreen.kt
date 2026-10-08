@@ -256,13 +256,9 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             } else {
                                 null
                             },
-                            // Sin uid no hay con que recordar que esta archivado entre
-                            // revisiones, asi que esos no se archivan.
-                            onArchive = if (tr.uid.isNotBlank()) {
-                                { vm.setArchived(tr.id, true) }
-                            } else {
-                                null
-                            },
+                            // Sin el gesto de archivar (8-oct): arriba va uno solo, el de hoy
+                            // o el que sigue, y lo demás baja solo (ver HomeList).
+                            onArchive = null,
                     minutos = TrainingDuration.minutes(tr, vm.sessions),
                     isNext = isNext,
                 )
@@ -314,8 +310,9 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             archivados,
                             key = { _, it -> "archived_${it.id}" },
                             contentType = { _, _ -> ARCHIVED_GROUP },
-                        ) { index, tr ->
-                          DraggableItem(dragDropState, 1 + visibles.size + 1 + index) { _ ->
+                        ) { _, tr ->
+                          // Sin arrastrar: el orden lo pone HomeList (el de NIKO de hoy primero).
+                          run {
                             TrainingCard(
                                 training = tr,
                                 accent = accent,
@@ -337,7 +334,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                                 } else {
                                     null
                                 },
-                                onArchive = { vm.setArchived(tr.id, false) },
+                                onArchive = null,
                                 isArchived = true,
                                 minutos = TrainingDuration.minutes(tr, vm.sessions),
                             )

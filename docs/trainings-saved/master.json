@@ -1,0 +1,1751 @@
+{
+  "id": 44,
+  "uid": "b9d84943-364f-4da8-92d0-a93f5b555ed0",
+  "assigned": false,
+  "tracksPain": false,
+  "scheduleDays": [],
+  "scheduleDates": [],
+  "name": "MASTER",
+  "createdAt": 1784489599558,
+  "updatedAt": 1784515339497,
+  "workouts": [
+    {
+      "id": 1,
+      "name": "Warmup",
+      "exercises": [
+        {
+          "id": 2,
+          "exerciseId": "ex_neck_lr",
+          "name": "Neck Left to Right",
+          "note": "",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 20,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": false,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 3,
+          "exerciseId": "ex_neck_circle",
+          "name": "Neck Circle",
+          "note": "each side",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 10,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 4,
+          "exerciseId": "ex_chest_opening",
+          "name": "Chest Opening",
+          "note": "",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 20,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 5,
+          "exerciseId": "ex_shoulder_rotation",
+          "name": "Shoulder Rotation",
+          "note": "each side",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 10,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 6,
+          "exerciseId": "ex_trunk_rotation",
+          "name": "Trunk Rotation",
+          "note": "",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 20,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 7,
+          "exerciseId": "ex_hip_rotation",
+          "name": "Hip Rotation",
+          "note": "each side",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 10,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 8,
+          "exerciseId": "ex_knee_rotation",
+          "name": "Knee Rotation",
+          "note": "each side",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 10,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 9,
+          "exerciseId": "ex_ankle_rotation",
+          "name": "Ankle Rotation",
+          "note": "each side",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 10,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        }
+      ],
+      "rotating": false,
+      "rotationIndex": 0,
+      "variants": [],
+      "circuit": false
+    },
+    {
+      "id": 10,
+      "name": "Base",
+      "exercises": [
+        {
+          "id": 11,
+          "exerciseId": "ex_jumping_jacks",
+          "name": "Jumping Jacks",
+          "note": "",
+          "prepareSec": 10,
+          "sets": 2,
+          "workMode": "TIME",
+          "workValue": 30,
+          "secPerRep": 3,
+          "restSec": 10,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 30,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 12,
+          "exerciseId": "ex_burpees",
+          "name": "Burpees",
+          "note": "",
+          "prepareSec": 10,
+          "sets": 2,
+          "workMode": "TIME",
+          "workValue": 45,
+          "secPerRep": 3,
+          "restSec": 15,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 60,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 13,
+          "exerciseId": "ex_knee_circle",
+          "name": "Knee Circle",
+          "note": "",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 20,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        },
+        {
+          "id": 14,
+          "exerciseId": "ex_90_90",
+          "name": "90 to 90",
+          "note": "",
+          "prepareSec": 0,
+          "sets": 1,
+          "workMode": "REPS",
+          "workValue": 20,
+          "secPerRep": 3,
+          "restSec": 0,
+          "restSkipOnLastSet": true,
+          "cooldownSec": 0,
+          "weightType": "NONE",
+          "barWeight": 20,
+          "dumbbellCount": 2,
+          "setList": [],
+          "prepareCfg": {
+            "color": 4293026846,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "workCfg": {
+            "color": 4290787627,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "restCfg": {
+            "color": 4279592384,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 3,
+            "confirm": "AUTO"
+          },
+          "cooldownCfg": {
+            "color": 4282735204,
+            "display": "COUNTDOWN",
+            "alarm": true,
+            "finalCount": 0,
+            "confirm": "AUTO"
+          },
+          "showVideo": true,
+          "sides": [],
+          "alternateSides": false
+        }
+      ],
+      "rotating": false,
+      "rotationIndex": 0,
+      "variants": [],
+      "circuit": false
+    },
+    {
+      "id": 15,
+      "name": "Cardio",
+      "exercises": [],
+      "rotating": true,
+      "rotationIndex": 0,
+      "variants": [
+        {
+          "id": 16,
+          "name": "Rope Jumping",
+          "exercises": [
+            {
+              "id": 17,
+              "exerciseId": "ex_rope_jumping",
+              "name": "Rope Jumping",
+              "note": "",
+              "prepareSec": 10,
+              "sets": 15,
+              "workMode": "TIME",
+              "workValue": 30,
+              "secPerRep": 3,
+              "restSec": 10,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 60,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "name": "Tire Jumping",
+          "exercises": [
+            {
+              "id": 19,
+              "exerciseId": "ex_tire_jumping",
+              "name": "Tire Jumping",
+              "note": "",
+              "prepareSec": 10,
+              "sets": 8,
+              "workMode": "TIME",
+              "workValue": 24,
+              "secPerRep": 3,
+              "restSec": 10,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 60,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "name": "Shadow Boxing",
+          "exercises": [
+            {
+              "id": 21,
+              "exerciseId": "ex_shadow_boxing",
+              "name": "Shadow Boxing",
+              "note": "",
+              "prepareSec": 10,
+              "sets": 3,
+              "workMode": "TIME",
+              "workValue": 45,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 60,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "name": "Running",
+          "exercises": [
+            {
+              "id": 23,
+              "exerciseId": "ex_running",
+              "name": "Running",
+              "note": "",
+              "prepareSec": 10,
+              "sets": 1,
+              "workMode": "TIME",
+              "workValue": 600,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 60,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            }
+          ]
+        }
+      ],
+      "circuit": false
+    },
+    {
+      "id": 43,
+      "name": "Strength",
+      "exercises": [],
+      "rotating": true,
+      "rotationIndex": 0,
+      "variants": [
+        {
+          "id": 24,
+          "name": "Lower",
+          "exercises": [
+            {
+              "id": 25,
+              "exerciseId": "ex_deep_squat",
+              "name": "Deep Squat",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 20,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 26,
+              "exerciseId": "ex_knee_stand",
+              "name": "Knee Stand",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 20,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 27,
+              "exerciseId": "ex_knee_jump",
+              "name": "Knee Jump",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 20,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 28,
+              "exerciseId": "ex_cossack_squat",
+              "name": "Cossack Squat",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 20,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 29,
+              "exerciseId": "ex_pistol_squat",
+              "name": "Pistol Squat",
+              "note": "alternating",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 20,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 30,
+              "exerciseId": "ex_hip_thrust",
+              "name": "Hip Thrust",
+              "note": "each side",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 20,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 31,
+              "exerciseId": "ex_back_extension",
+              "name": "Back Extension",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 20,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 32,
+              "exerciseId": "ex_nordic_curl",
+              "name": "Nordic Curl",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 15,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 33,
+              "exerciseId": "ex_seated_calf",
+              "name": "Seated Calf",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 2,
+              "workMode": "REPS",
+              "workValue": 15,
+              "secPerRep": 3,
+              "restSec": 60,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "TOTAL",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [
+                {
+                  "reps": 15,
+                  "weight": 5
+                },
+                {
+                  "reps": 15,
+                  "weight": 10
+                }
+              ],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 34,
+              "exerciseId": "ex_donkey_calf",
+              "name": "Donkey Calf",
+              "note": "each side",
+              "prepareSec": 0,
+              "sets": 2,
+              "workMode": "REPS",
+              "workValue": 15,
+              "secPerRep": 3,
+              "restSec": 60,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "TOTAL",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [
+                {
+                  "reps": 15,
+                  "weight": 15
+                },
+                {
+                  "reps": 15,
+                  "weight": 20
+                }
+              ],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 35,
+              "exerciseId": "ex_deadlift",
+              "name": "Deadlift",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 2,
+              "workMode": "REPS",
+              "workValue": 15,
+              "secPerRep": 3,
+              "restSec": 60,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "BARBELL",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [
+                {
+                  "reps": 15,
+                  "weight": 0
+                },
+                {
+                  "reps": 15,
+                  "weight": 10
+                }
+              ],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 36,
+              "exerciseId": "ex_zercher_squat",
+              "name": "Zercher Squat",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 2,
+              "workMode": "REPS",
+              "workValue": 15,
+              "secPerRep": 3,
+              "restSec": 60,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "BARBELL",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [
+                {
+                  "reps": 15,
+                  "weight": 0
+                },
+                {
+                  "reps": 15,
+                  "weight": 10
+                }
+              ],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            }
+          ]
+        },
+        {
+          "id": 37,
+          "name": "Upper",
+          "exercises": [
+            {
+              "id": 38,
+              "exerciseId": "ex_leg_raises",
+              "name": "Leg Raises",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 2,
+              "workMode": "REPS",
+              "workValue": 10,
+              "secPerRep": 3,
+              "restSec": 60,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 39,
+              "exerciseId": "ex_pull_ups",
+              "name": "Pull-up",
+              "note": "",
+              "prepareSec": 5,
+              "sets": 10,
+              "workMode": "REPS",
+              "workValue": 1,
+              "secPerRep": 3,
+              "restSec": 15,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 40,
+              "exerciseId": "ex_shoulder_press",
+              "name": "Shoulder Press",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 2,
+              "workMode": "REPS",
+              "workValue": 15,
+              "secPerRep": 3,
+              "restSec": 60,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "DUMBBELL",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [
+                {
+                  "reps": 15,
+                  "weight": 5
+                },
+                {
+                  "reps": 15,
+                  "weight": 7.5
+                }
+              ],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 41,
+              "exerciseId": "ex_assisted_dips",
+              "name": "Assisted Dips",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 1,
+              "workMode": "REPS",
+              "workValue": 15,
+              "secPerRep": 3,
+              "restSec": 0,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            },
+            {
+              "id": 42,
+              "exerciseId": "ex_pushups",
+              "name": "Push-ups",
+              "note": "",
+              "prepareSec": 0,
+              "sets": 2,
+              "workMode": "REPS",
+              "workValue": 20,
+              "secPerRep": 3,
+              "restSec": 60,
+              "restSkipOnLastSet": true,
+              "cooldownSec": 0,
+              "weightType": "NONE",
+              "barWeight": 20,
+              "dumbbellCount": 2,
+              "setList": [],
+              "prepareCfg": {
+                "color": 4293026846,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "workCfg": {
+                "color": 4290787627,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "restCfg": {
+                "color": 4279592384,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 3,
+                "confirm": "AUTO"
+              },
+              "cooldownCfg": {
+                "color": 4282735204,
+                "display": "COUNTDOWN",
+                "alarm": true,
+                "finalCount": 0,
+                "confirm": "AUTO"
+              },
+              "showVideo": true,
+              "sides": [],
+              "alternateSides": false
+            }
+          ]
+        }
+      ],
+      "circuit": false
+    }
+  ]
+}

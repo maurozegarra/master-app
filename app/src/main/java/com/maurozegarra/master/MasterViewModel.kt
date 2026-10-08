@@ -23,6 +23,7 @@ import com.maurozegarra.master.data.VideoRepository
 import com.maurozegarra.master.data.VideoState
 import com.maurozegarra.master.data.WorkoutStore
 import com.maurozegarra.master.model.AlarmSound
+import com.maurozegarra.master.model.HomeList
 import com.maurozegarra.master.model.AthleteBody
 import com.maurozegarra.master.model.BodyEntry
 import com.maurozegarra.master.model.BodyLog
@@ -224,11 +225,20 @@ class MasterViewModel(
     var archivedUids by mutableStateOf(store.archivedUids())
         private set
 
-    /** Lo que se ve en la lista: todo menos lo archivado. */
-    val visibleTrainings: List<Training> get() = Archive.visible(trainings, archivedUids)
+    /**
+     * Lo que se ve arriba: solo el de hoy o el que sigue (8-oct, ver [HomeList]). Si nada lleva
+     * programa -un teléfono sin semana ni rutinas numeradas-, todo, como antes.
+     */
+    val visibleTrainings: List<Training>
+        get() = HomeList.main(trainings, sessions, java.time.LocalDate.now(), java.time.ZoneId.systemDefault())
+            ?.let { listOf(it) } ?: HomeList.shown(trainings)
 
-    /** Lo archivado, que la lista ensena plegado al final. */
-    val archivedTrainings: List<Training> get() = Archive.archived(trainings, archivedUids)
+    /** Lo de abajo, plegado: el de NIKO de hoy primero, el resto de NIKO y lo demás. */
+    val archivedTrainings: List<Training>
+        get() = if (visibleTrainings.size != 1) emptyList() else HomeList.rest(
+            trainings, sessions, athleteSessions.map { it.session },
+            java.time.LocalDate.now(), java.time.ZoneId.systemDefault(),
+        )
 
     /**
      * Archiva o desarchiva. No borra, no desasigna y no para las republicaciones (TD-132):
@@ -1911,7 +1921,7 @@ class MasterViewModel(
      * propone. Ver [NextTraining].
      */
     val nextTrainingId: Long?
-        get() = NextTraining.of(visibleTrainings, sessions, java.time.LocalDate.now(), java.time.ZoneId.systemDefault())
+        get() = HomeList.main(trainings, sessions, java.time.LocalDate.now(), java.time.ZoneId.systemDefault())?.id
 
     /**
      * Mover por identidad y no por posicion (TD-167): en la lista, el siguiente va arriba
