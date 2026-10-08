@@ -722,9 +722,14 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // weight feel"- dejaron de dibujarse: el usuario no pudo contestar.
         //
         // Con alto fijo, el hueco elastico deja de depender de lo larga que sea la nota.
+        // Lo que la caja de la nota deja vacío bajo el texto (8-oct): cuando la nota se achica
+        // para caber, el hueco reservado sigue siendo suyo, y la animación del lado, centrada en
+        // el espacio de abajo, quedaba pegada a la tarjeta del peso.
+        var noteSlack by remember { mutableStateOf(0) }
         if (step.note.isNotBlank()) {
-            FittedText(step.note.uppercase(), NOTE_SIZE, TEXT_DIM)
+            FittedText(step.note.uppercase(), NOTE_SIZE, TEXT_DIM) { noteSlack = it }
         }
+        val slack = if (step.note.isBlank()) 0 else noteSlack
 
 
         // Las instrucciones se probaron aquí, llenando el hueco del vídeo, y el usuario las
@@ -773,7 +778,9 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                 // mientras se hace el ejercicio y nunca con vídeo, que es dueño del hueco. Con
                 // tarjeta, se acomoda en el espacio libre encima de ella: en el cuello de NIKO
                 // "How was it?" sale durante el aguante, y quitarlo ahí lo dejaba sin chevrón.
-                Box(Modifier.weight(1f).fillMaxWidth()) {
+                // Subido la mitad del hueco que deja la nota: así queda centrado entre el final
+                // del texto y la tarjeta, que es lo que el ojo mide.
+                Box(Modifier.weight(1f).fillMaxWidth().graphicsLayer { translationY = -slack / 2f }) {
                     if (step.kind == StepKind.WORK && videoFile == null && side != null && side in CHEVRONS) {
                         SideChevron(side)
                     } else if (videoFile == null && cambiaDeLado(vm.playerSteps, vm.playerIndex)) {
@@ -910,7 +917,7 @@ private fun ExerciseTitle(text: String, maxSize: TextUnit) = FittedText(text, ma
  * la tarjeta del peso- por larga que sea la frase de un ejercicio u otro.
  */
 @Composable
-private fun FittedText(text: String, maxSize: TextUnit, color: Color) {
+private fun FittedText(text: String, maxSize: TextUnit, color: Color, onSlack: (Int) -> Unit = {}) {
     val measurer = rememberTextMeasurer()
     // El alto de dos líneas al tamaño máximo, MEDIDO y no calculado. 2 × interlineado se
     // quedaba corto por el relleno que la fuente añade arriba y abajo, y con la caja justa
@@ -932,6 +939,8 @@ private fun FittedText(text: String, maxSize: TextUnit, color: Color) {
             // Solo se llega aquí con un nombre absurdo que no cabe ni al tamaño mínimo:
             // mejor puntos suspensivos que una tercera línea.
             overflow = TextOverflow.Ellipsis,
+            // Cuánto de la caja queda vacío debajo del texto, para quien centre algo debajo.
+            onTextLayout = { onSlack((boxPx - it.size.height).coerceAtLeast(0)) },
         )
     }
 }
