@@ -107,6 +107,14 @@ private fun WaterHome(onBack: () -> Unit) {
         ciclo.lifecycle.addObserver(obs)
         onDispose { ciclo.lifecycle.removeObserver(obs) }
     }
+    // Y cada minuto mientras está abierta (8-oct): con la pantalla siempre encendida, "Next" y
+    // "Pace" se quedaban congelados en lo que valían al abrirla.
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(60_000)
+            vuelta++
+        }
+    }
     val hoy = remember(vuelta) { WaterAlarm.today(ctx) }
     val proximo = remember(vuelta) { WaterAlarm.nextAt(ctx) }
     val tomado = WaterPlan.total(hoy.logs)
@@ -156,7 +164,24 @@ private fun WaterHome(onBack: () -> Unit) {
                         atras <= -WaterPlan.GLASS_ML -> WaterPlan.glasses(-atras).let { "$it" to "${w.glassesWord(it)} ${w.ahead}" }
                         else -> "✓" to w.onTrack
                     }
-                    StatTile(w.pace, ritmo, Modifier.weight(1f), caption = nota)
+                    // Mientras dosifica una botella, la botella y su tercio (8-oct): la de las 9
+                    // no se toma de un sorbo, va 1/3 hasta las 10, 2/3 hasta las 11, 3/3 hasta
+                    // las 12.
+                    val dosis = remember(vuelta) { WaterPlan.doseAt(System.currentTimeMillis(), hoy.logs, zone) }
+                    if (dosis != null) {
+                        // Lo que queda en la botella (8-oct): al abrirla se toma el primer tercio y
+                        // quedan 2/3; una hora después, 1/3; en la última hora, vacía.
+                        val queda = 3 - dosis.part
+                        val hora = { t: Long -> java.time.Instant.ofEpochMilli(t).atZone(zone).format(HORA) }
+                        StatTile(
+                            w.pace, if (queda > 0) "$queda/3" else w.emptyBottle, Modifier.weight(1f),
+                            unit = if (queda > 0) w.left else null,
+                            caption = if (queda > 0) w.until.format(hora(dosis.until)) else w.lastThird.format(hora(dosis.until - 60 * 60_000L)),
+                            leading = { BottleDose(dosis.drink, queda) },
+                        )
+                    } else {
+                        StatTile(w.pace, ritmo, Modifier.weight(1f), caption = nota)
+                    }
                     // "5:23" con "PM" chico al lado, como "0 ml": entero no cabia en un tercio
                     // del ancho y la tarjeta crecia mas que las otras (4-oct).
                     StatTile(
@@ -173,7 +198,13 @@ private fun WaterHome(onBack: () -> Unit) {
                     // Solo la cantidad: con tres botones "Glass 200" no cabia en una linea y el
                     // boton de 40 dp cortaba el numero (4-oct).
                     AppOutlineButton("${WaterPlan.GLASS_ML} ml", accent, Modifier.weight(1f)) { anotar(WaterPlan.GLASS_ML) }
-                    AppOutlineButton("${WaterPlan.BOTTLE_ML} ml", accent, Modifier.weight(1f)) { anotar(WaterPlan.BOTTLE_ML) }
+                    // La botella que toca a esta hora (8-oct): con gas, 600, en la mañana; sin
+                    // gas, 500, en la tarde. Ya no "600 ml" fijo.
+                    AppOutlineButton(w.bottle, accent, Modifier.weight(1f)) {
+                        val (tipo, ml) = WaterPlan.bottleFor(System.currentTimeMillis(), zone)
+                        WaterAlarm.add(ctx, ml, tipo)
+                        vuelta++
+                    }
                     AppOutlineButton(w.other, accent, Modifier.weight(1f)) { dialogo = Dialogo(null) }
                 }
             }
@@ -197,7 +228,7 @@ private fun WaterHome(onBack: () -> Unit) {
         }
     }
     dialogo?.let { d ->
-        DrinkDialog(d.editing, zone, onDismiss = { dialogo = null }) { nueva ->
+        DrinkDialog(d.editing, zone, drinkAt = { at -> WaterAlarm.drinkAt(ctx, at) }, onDismiss = { dialogo = null }) { nueva ->
             WaterAlarm.put(ctx, nueva, replacing = d.editing?.at)
             dialogo = null
             vuelta++

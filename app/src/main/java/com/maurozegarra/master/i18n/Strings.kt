@@ -797,6 +797,15 @@ data class WaterStrings(
     val coffee: String = "Coffee",
     val maca: String = "Maca",
     val lemonade: String = "Lemonade",
+    val sparkling: String = "Sparkling",
+    val stillBottle: String = "Bottle",
+    /** Hasta cuándo va el tercio de botella de ahora: "until 10:00 AM". */
+    val until: String = "until %s",
+    /** Lo que queda en la botella: "2/3" con "left" chico al lado. */
+    val left: String = "left",
+    val emptyBottle: String = "Empty",
+    /** La última hora de la botella, ya vacía: "last third at 11:00 AM". */
+    val lastThird: String = "last third at %s",
 )
 
 /** Los pesajes de los sábados (TD-169): la pestaña Body del historial y su diálogo. */

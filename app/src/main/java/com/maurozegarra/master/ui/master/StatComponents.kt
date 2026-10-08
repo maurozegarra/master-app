@@ -45,10 +45,16 @@ internal fun StatTile(
     unit: String? = null,
     caption: String? = null,
     valueColor: Color = AppTheme.colors.textPrimary,
+    /** Algo antes del valor, a su altura: la botella del agua mientras se dosifica (8-oct). */
+    leading: (@Composable () -> Unit)? = null,
 ) {
     SectionCard(modifier = modifier) {
         Text(label, color = AppTheme.colors.textDim, fontSize = 12.sp)
         Row(verticalAlignment = Alignment.Bottom) {
+            if (leading != null) {
+                leading()
+                Spacer(Modifier.width(6.dp))
+            }
             Text(value, color = valueColor, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             if (unit != null) {
                 Spacer(Modifier.width(3.dp))

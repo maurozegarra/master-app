@@ -14,7 +14,7 @@ class WaterReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             ACTION_REMIND -> WaterAlarm.remind(context)
-            ACTION_ADD -> intent.getIntExtra(EXTRA_ML, 0).takeIf { it > 0 }?.let { WaterAlarm.add(context, it) }
+            ACTION_ADD -> intent.getIntExtra(EXTRA_ML, 0).takeIf { it > 0 }?.let { WaterAlarm.add(context, it, intent.getStringExtra(EXTRA_TYPE)) }
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_TIME_CHANGED,
@@ -27,5 +27,7 @@ class WaterReceiver : BroadcastReceiver() {
         const val ACTION_REMIND = "com.maurozegarra.master.water.REMIND"
         const val ACTION_ADD = "com.maurozegarra.master.water.ADD"
         const val EXTRA_ML = "ml"
+        /** La bebida, cuando el botón la fija (la botella); sin ella, la de la hora. */
+        const val EXTRA_TYPE = "type"
     }
 }

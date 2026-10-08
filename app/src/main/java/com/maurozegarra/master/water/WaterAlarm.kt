@@ -38,6 +38,8 @@ object WaterAlarm {
         /** El horario del día: el de casa o el presencial, según la alarma (ver [WaterPlan.planFor]). */
         val slots: List<Pair<Long, Int>>,
         val office: Boolean,
+        /** El mismo horario con la bebida de cada hora (8-oct), para anotar sin editar. */
+        val plan: List<WaterPlan.Slot> = emptyList(),
     )
 
     fun today(context: Context, now: Long = System.currentTimeMillis()): Today {
@@ -60,14 +62,23 @@ object WaterAlarm {
         val plan = WaterPlan.planFor(alarmaHoy)
         return Today(
             day, logs, WaterPlan.start(wake, logs), WaterPlan.cut(bed, day, zone),
-            WaterPlan.slotsOn(plan, day, zone), plan === WaterPlan.OFFICE,
+            WaterPlan.slotsOn(plan, day, zone), plan === WaterPlan.OFFICE, plan,
         )
     }
 
-    fun add(context: Context, ml: Int) {
+    /** La bebida con la que se anota una toma a la hora [at] (ver [WaterPlan.drinkFor]). */
+    fun drinkAt(context: Context, at: Long): String {
+        val zone = ZoneId.systemDefault()
+        val t = today(context, at)
+        return WaterPlan.drinkFor(at, t.logs, t.plan, t.day, zone, WaterStore(context).logs())
+    }
+
+    fun add(context: Context, ml: Int, type: String? = null) {
         val store = WaterStore(context)
         val zone = ZoneId.systemDefault()
-        store.saveLogs(WaterPlan.add(store.logs(), WaterLog(System.currentTimeMillis(), ml), LocalDate.now(zone), zone))
+        val now = System.currentTimeMillis()
+        // Con la bebida de la hora, no siempre agua (8-oct): a las 12:30 es sopa.
+        store.saveLogs(WaterPlan.add(store.logs(), WaterLog(now, ml, type ?: drinkAt(context, now)), LocalDate.now(zone), zone))
         context.getSystemService(NotificationManager::class.java).cancel(NOTIF)
         reschedule(context)
     }
@@ -128,12 +139,14 @@ object WaterAlarm {
         val atras = WaterPlan.behind(now, t.logs, t.start, t.slots) ?: 0
         val n = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_notif_water)
-            .setContentTitle(w.remindTitle)
+            // Con la bebida que toca: "Time to drink · Soup" a las 12:30.
+            .setContentTitle("${w.remindTitle} · ${drinkName(drinkAt(context, now), w)}")
             .setContentText(w.remindText.format(tomado, WaterPlan.GOAL_ML, WaterPlan.glasses(atras.coerceAtLeast(0)).let { "$it ${w.glassesWord(it)}" }))
             .setAutoCancel(true)
             .setContentIntent(openPending(context))
             .addAction(0, "+${WaterPlan.GLASS_ML} ml", addPending(context, WaterPlan.GLASS_ML))
-            .addAction(0, "+${WaterPlan.BOTTLE_ML} ml", addPending(context, WaterPlan.BOTTLE_ML))
+            // La botella que toca a esta hora: con gas en la mañana, sin gas en la tarde (8-oct).
+            .addAction(0, "+${w.bottle}", WaterPlan.bottleFor(now, ZoneId.systemDefault()).let { (tipo, ml) -> addPending(context, ml, tipo) })
             .build()
         context.getSystemService(NotificationManager::class.java).notify(NOTIF, n)
         // El siguiente no se programa aquí: sale al anotar. Si no anota, se vuelve a mirar en
@@ -158,9 +171,10 @@ object WaterAlarm {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
-    private fun addPending(context: Context, ml: Int): PendingIntent = PendingIntent.getBroadcast(
+    private fun addPending(context: Context, ml: Int, type: String? = null): PendingIntent = PendingIntent.getBroadcast(
         context, 60 + ml / 100,
-        Intent(context, WaterReceiver::class.java).setAction(WaterReceiver.ACTION_ADD).putExtra(WaterReceiver.EXTRA_ML, ml),
+        Intent(context, WaterReceiver::class.java).setAction(WaterReceiver.ACTION_ADD).putExtra(WaterReceiver.EXTRA_ML, ml)
+            .apply { if (type != null) putExtra(WaterReceiver.EXTRA_TYPE, type) },
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
