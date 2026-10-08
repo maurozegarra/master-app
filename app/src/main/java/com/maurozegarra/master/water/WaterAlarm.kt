@@ -127,7 +127,7 @@ object WaterAlarm {
         val tomado = WaterPlan.total(t.logs)
         val atras = WaterPlan.behind(now, t.logs, t.start, t.slots) ?: 0
         val n = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notif_play)
+            .setSmallIcon(R.drawable.ic_notif_water)
             .setContentTitle(w.remindTitle)
             .setContentText(w.remindText.format(tomado, WaterPlan.GOAL_ML, WaterPlan.glasses(atras.coerceAtLeast(0)).let { "$it ${w.glassesWord(it)}" }))
             .setAutoCancel(true)

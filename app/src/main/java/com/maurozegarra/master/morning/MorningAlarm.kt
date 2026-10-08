@@ -200,7 +200,7 @@ object MorningAlarm {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val n = NotificationCompat.Builder(context, CHANNEL_BED)
-            .setSmallIcon(R.drawable.ic_notif_play)
+            .setSmallIcon(R.drawable.ic_notif_bedtime)
             .setContentTitle(t.morning.bedNotifTitle)
             .setContentText(t.morning.bedNotifText.format(Bedtime.bedBy(ring, cfg).format(fmt), ring.format(fmt)))
             .setAutoCancel(true)
@@ -283,7 +283,7 @@ object MorningAlarm {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val n = NotificationCompat.Builder(context, CHANNEL_EASE)
-            .setSmallIcon(R.drawable.ic_notif_play)
+            .setSmallIcon(R.drawable.ic_notif_ease)
             .setContentTitle("Tap when it eases")
             .setContentText("The pain from waking up")
             .setOngoing(true)
