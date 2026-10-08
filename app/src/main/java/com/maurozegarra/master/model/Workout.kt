@@ -61,6 +61,12 @@ data class WorkSet(
     val sec: Int? = null,
     /** Segundos de descanso tras esta serie; null = los del ejercicio. */
     val restSec: Int? = null,
+    /**
+     * Desde qué segundo pitan los últimos del descanso tras esta serie; null = lo del
+     * ejercicio. En el side plank, los descansos largos de la pirámide pitan desde el 4 y no
+     * desde el 3 (8-oct): ese segundo de más es el que le toma volver a la posición.
+     */
+    val restFinalCount: Int? = null,
 )
 
 /**

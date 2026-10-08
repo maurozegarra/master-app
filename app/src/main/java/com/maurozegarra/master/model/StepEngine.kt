@@ -78,7 +78,7 @@ object StepEngine {
                     val rest = e.restSecAt(s)
                     val trabajo = last()
                     if (!cambioDeMano && rest > 0 && !(e.restSkipOnLastSet && lastSet)) {
-                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size, slot = slot))
+                        add(stageStep(StepKind.REST, e, wName, wi, tw, durationSec = rest, setIndex = s, totalSets = sets, workoutBase = w.name, variant = wVariant, rotating = w.rotating, exerciseIndex = ei, side = side, sideIndex = si, sideCount = e.sides.size, slot = slot, finalCount = e.setList.getOrNull(s)?.restFinalCount))
                     } else if (answerWindow && lastSet && trabajo.timeBased && Effort.asks(trabajo) && esElUltimo(t, wi, ei)) {
                         // Un respiro para contestar como fue, al FINAL del training (TD-156). Un
                         // aguante o un round no se contesta mientras se hace -la tarjeta sale en
@@ -222,6 +222,8 @@ object StepEngine {
         sideIndex: Int = 0,
         sideCount: Int = 0,
         slot: Int = 0,
+        /** Los pitidos finales de esta etapa, si la serie trae los suyos ([WorkSet.restFinalCount]). */
+        finalCount: Int? = null,
     ): PlayerStep {
         val cfg = when (kind) {
             StepKind.PREP -> e.prepareCfg
@@ -253,7 +255,7 @@ object StepEngine {
             timeBased = timeBased,
             display = cfg.display,
             confirm = cfg.confirm,
-            finalCount = cfg.finalCount,
+            finalCount = finalCount ?: cfg.finalCount,
             beepSoundUri = cfg.beepSoundUri,
             alarm = cfg.alarm,
             colorArgb = cfg.color,

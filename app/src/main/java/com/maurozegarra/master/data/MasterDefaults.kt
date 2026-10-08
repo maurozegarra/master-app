@@ -399,8 +399,11 @@ object MasterDefaults {
      * 17.5 "bien" las tres, sin malestar en ninguno. El puente sube la de arriba, como quedo la
      * regla: 6 · 11 · 21. El box squat tantea con la ultima: 17.5 · 17.5 · 20. Y la caminata de
      * cierre pasa a 5 km/h en los tres -la hizo a 5 por su cuenta y pregunto si podia ser asi-.
+     *
+     * Revision 31 (8-oct): en el side plank, los descansos largos de la piramide (tras la 6/12 y
+     * la 10/12) pitan desde el 4 y no desde el 3: el segundo de mas es para volver a la posicion.
      */
-    const val LUMBAR_REVISION = 30
+    const val LUMBAR_REVISION = 31
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -1925,6 +1928,8 @@ object MasterDefaults {
              * ejercicio, que al fundirlos ya no existe.
              */
             sideRest: Int = 0,
+            /** Desde qué segundo pitan los descansos largos entre bloques; null = los 3 de siempre. */
+            blockRestFinalCount: Int? = null,
         ): Exercise {
             val total = blocks.sum()
             // Donde termina cada bloque menos el ultimo: ahi van los 30 s de descanso.
@@ -1938,7 +1943,11 @@ object MasterDefaults {
                 rest = 3,
                 setList = (0 until total).map { i ->
                     val fin = i == total - 1 && sides.isNotEmpty() && sideRest > 0
-                    WorkSet(reps = 10, restSec = if (fin) sideRest else if (i in cortes) 30 else null)
+                    WorkSet(
+                        reps = 10,
+                        restSec = if (fin) sideRest else if (i in cortes) 30 else null,
+                        restFinalCount = if (!fin && i in cortes) blockRestFinalCount else null,
+                    )
                 },
             ).copy(sides = sides)
         }
@@ -1972,7 +1981,9 @@ object MasterDefaults {
             name = "McGill Big 3",
             exercises = listOf(
                 pyramid("ex_curl_up", "Alternate the bent leg between blocks", blocks),
-                pyramid("ex_side_plank", "Elbow under the shoulder, knees at 90", blocks, sides = listOf("Left", "Right"), sideRest = 20),
+                // Revision 31 (8-oct): los descansos tras la 6/12 y la 10/12 pitan desde el 4, el
+                // segundo que le toma volver a la plancha.
+                pyramid("ex_side_plank", "Elbow under the shoulder, knees at 90", blocks, sides = listOf("Left", "Right"), sideRest = 20, blockRestFinalCount = 4),
                 pyramid("ex_bird_dog", "Alternate sides between holds", blocks),
             ).map { it.copy(progression = Progression.NONE) },
         )

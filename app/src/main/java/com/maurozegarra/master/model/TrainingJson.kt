@@ -130,6 +130,7 @@ object TrainingJson {
             // alguien lo editara.
             ws.sec?.let { o.put("sec", it) }
             ws.restSec?.let { o.put("restSec", it) }
+            ws.restFinalCount?.let { o.put("restFinalCount", it) }
             sets.put(o)
         }
         return JSONObject()
@@ -173,6 +174,7 @@ object TrainingJson {
                         weight = s.optDouble("weight", 0.0),
                         sec = if (s.isNull("sec")) null else s.optInt("sec"),
                         restSec = if (s.isNull("restSec")) null else s.optInt("restSec"),
+                        restFinalCount = if (s.isNull("restFinalCount")) null else s.optInt("restFinalCount"),
                     ),
                 )
             }

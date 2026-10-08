@@ -569,4 +569,20 @@ class LumbarTrainingTest {
         // Y lo que falta se siembra.
         assertEquals(MasterDefaults.lumbarInstructions()["ex_suitcase_carry"], merged["ex_suitcase_carry"])
     }
+
+    @Test
+    fun `en el side plank los descansos largos pitan desde el 4`() {
+        // Revision 31 (8-oct): tras la 6/12 y la 10/12, el segundo de mas para volver a la
+        // plancha. Los respiros de 3 s y los del curl-up y el bird dog quedan con sus 3.
+        val descansos = StepEngine.buildSteps(training).filter { it.kind == StepKind.REST && it.workoutName == "McGill Big 3" }
+        val largosPlancha = descansos.filter { it.ownerExerciseId == "ex_side_plank" && it.durationSec == 30 }
+        assertEquals(4, largosPlancha.size) // dos por lado
+        assertTrue(largosPlancha.all { it.finalCount == 4 })
+        assertEquals(listOf(5, 9), largosPlancha.filter { it.side == "Left" }.map { it.setIndex })
+        val otros = descansos - largosPlancha.toSet()
+        assertTrue(otros.all { it.finalCount == 3 })
+        // Y sobrevive al guardarse: el training se guarda como JSON.
+        val vuelta = com.maurozegarra.master.model.TrainingJson.decode(com.maurozegarra.master.model.TrainingJson.encode(listOf(training))).single()
+        assertEquals(training, vuelta)
+    }
 }
