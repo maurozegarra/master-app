@@ -5,6 +5,55 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-08 — vigesimoquinta sesión (feriado): el puente con barra sale ligero
+
+**LUMBAR** completo, de 07:50 a 09:13, **82 minutos**, el jueves feriado (revisión 29). La
+alarma sonó a las **7:00** por el feriado, la primera vez que se aplica la lista de feriados:
+**dolor 1, aflojó en 10 minutos**, la mejor mañana desde la racha de 1. **Se acostó a las
+00:18**: unas 6 h 40 en cama.
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| **Puente con barra EZ**, pausa 2 s | **6 · 11 · 16** × 10 | **"ligero" las tres** |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20, alternado | "bien" las seis |
+| Box squat en la plyobox | 17.5 · 17.5 · 17.5 × 8 | "bien" las tres |
+| Caminata de cierre | 5 min | **a 5 km/h**, por su cuenta |
+
+Su nota: *"La caminata final puede ser a 5 km?"* Preguntado, **ningún malestar** ni con el
+puente ni con el box squat.
+
+- **NIKO** probablemente no entrena hoy por sus obligaciones. Sus rutinas van por número, no por
+  fecha: cuando vuelva le toca NIKO 4, sin saltarse nada.
+- **Decidido con él (revisión 30, v1.0.417), para el sábado:**
+  - **Puente 6 · 11 · 21**: la regla de +5 en la de arriba cuando las tres salen ligeras.
+  - **Box squat 17.5 · 17.5 · 20**: dos sesiones "bien" y sin malestar; la última tantea.
+  - **Caminata de cierre a 5 km/h** en los tres trainings.
+  - Carry igual.
+
+---
+
+## 2026-10-07 — vigesimocuarta sesión: el McGill completo entra, pero se come la caminata de cierre
+
+**LUMBAR (short)**, de 05:14 a 05:57, **43 minutos**. Alarma de las 5:00: **dolor 2, aflojó en
+25 minutos**. **Se acostó a las 21:58**: unas 7 h en cama, temprano para un día presencial.
+
+- **McGill completo** (12 aguantes en cada uno) y **carry 15 · 17.5 · 20**, "bien" las seis.
+- **Saltó la caminata de cierre**, y su nota dice por qué:
+
+  > *"Salté la caminata final por tiempo"*
+
+- **Lectura de la prueba de la revisión 27:** el lunes el McGill completo entró en 44 minutos
+  con la caminata de cierre; hoy, para llegar a tiempo, salió la caminata. Queda el jueves, que
+  esta semana es feriado: el corto presencial que falta es el del viernes. Se decide el fin
+  de semana con los tres días: si el cierre se sigue cayendo, o vuelve el McGill a 3-2-1 en el
+  corto, o se recorta otra cosa.
+- **NIKO 3 (Tren superior)** completo, 63 minutos, y **idéntico al del 30-sep**: remo con
+  mancuerna a 10 "pesado" en las dos últimas de cada lado, flexiones 3 × 15 "duras" las tres,
+  el resto "bien". Dos semanas iguales: el 10 del remo y las 15 flexiones están en su límite y
+  ella las completa. Se mantienen; no hay respuesta que pida subir ni bajar.
+
+---
+
 ## 2026-10-06 — vigesimotercera sesión: el box squat por fin sin malestar
 
 **LUMBAR** completo, de 07:34 a 08:43, **69 minutos**, el primero sin hip thrust (revisión

@@ -171,11 +171,12 @@ class LumbarTrainingTest {
         val puente = c.getValue("ex_glute_bridge")
         assertEquals(WeightType.BARBELL, puente.weightType)
         assertEquals(6.0, puente.barWeight, 0.0)
-        assertEquals(listOf(0.0, 5.0, 10.0), puente.setList.map { it.weight })
+        // Revision 30 (8-oct): ligero las tres a 16, sube la de arriba a 21.
+        assertEquals(listOf(0.0, 5.0, 15.0), puente.setList.map { it.weight })
         assertEquals(3, puente.sets)
         assertEquals(10, puente.workValue)
         assertEquals(listOf(15.0, 17.5, 20.0), c.getValue("ex_suitcase_carry").setList.map { it.weight })
-        assertEquals(listOf(17.5, 17.5, 17.5), c.getValue("ex_box_squat").setList.map { it.weight })
+        assertEquals(listOf(17.5, 17.5, 20.0), c.getValue("ex_box_squat").setList.map { it.weight })
         // El corto no se toca: el alivio es del bloque de cadera, no del carry.
         assertEquals(listOf(15.0, 17.5, 20.0), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
     }
@@ -190,7 +191,8 @@ class LumbarTrainingTest {
         // Revision 24 (2-oct): la sentadilla se queda en 17.5 mientras cambia el montaje -la
         // plyobox de 51 cm y la mancuerna en el step-: le dolio la espalda baja recogiendo la
         // mancuerna del piso y en la mitad de abajo.
-        assertEquals(listOf(17.5, 17.5, 17.5), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
+        // Revision 30 (8-oct): dos sesiones "bien" sin malestar; la ultima tantea 20.
+        assertEquals(listOf(17.5, 17.5, 20.0), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
         assertTrue(cadera(normal).getValue("ex_box_squat").note.contains("51 cm"))
         // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
         // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el
@@ -215,6 +217,9 @@ class LumbarTrainingTest {
         // Y la de cierre va mas suave que la de entrada, que es lo que significa "easy".
         val cierre = training.workouts.last().exercises.single()
         assertTrue(cierre.speedKmh!! < entrada.speedKmh!!)
+        // Revision 30 (8-oct): a 5, como la hizo por su cuenta el jueves; sigue siendo mas
+        // suave que la de entrada.
+        assertEquals(5.0, cierre.speedKmh!!, 0.0)
         // El numero ya no se repite en la nota: un dato en dos sitios acaba contradiciendose.
         listOf(entrada, corta, cierre).forEach { assertFalse(it.note.contains("km/h")) }
     }

@@ -394,8 +394,13 @@ object MasterDefaults {
      * el hip thrust, "evitarlo por varios meses". Y el jueves 8 es feriado: va el completo y
      * el viernes 9 el corto, para que la carga de cadera quede dia por medio (martes, jueves,
      * sabado) en vez de jueves, viernes y sabado seguidos.
+     *
+     * Revision 30 (8-oct): el jueves feriado, puente 6 · 11 · 16 "ligero" las tres y box squat
+     * 17.5 "bien" las tres, sin malestar en ninguno. El puente sube la de arriba, como quedo la
+     * regla: 6 · 11 · 21. El box squat tantea con la ultima: 17.5 · 17.5 · 20. Y la caminata de
+     * cierre pasa a 5 km/h en los tres -la hizo a 5 por su cuenta y pregunto si podia ser asi-.
      */
-    const val LUMBAR_REVISION = 29
+    const val LUMBAR_REVISION = 30
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -480,7 +485,7 @@ object MasterDefaults {
                 b.mobility(),
                 b.mcgill(),
                 b.hipGlute(eased = easedHip, bandWalk = bandWalk),
-                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
+                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
             createdAt = now,
             updatedAt = now,
@@ -530,7 +535,7 @@ object MasterDefaults {
                 // demasiado, asi que solo 6 me queda corto". Iba a la mitad (3-2-1) para no
                 // cargar un dia malo, pero McGill es lo que lo alivia, no lo que lo carga.
                 b.mcgill(),
-                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
+                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
             createdAt = now,
             updatedAt = now,
@@ -577,7 +582,7 @@ object MasterDefaults {
                 // alivia, a prueba esta semana: son unos 6 minutos mas.
                 b.mcgill(),
                 b.carryOnly(),
-                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 4.0),
+                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
             createdAt = now,
             updatedAt = now,
@@ -2062,7 +2067,7 @@ object MasterDefaults {
                 // Revision 29 (6-oct): con la barra EZ, 6 · 11 · 16 (discos 0, 5 y 10). Sube 5 kg
                 // la de arriba cada vez que las tres salgan faciles y sin malestar: lo que
                 // molesto el 3-oct fue la carga arriba, asi que el peso lo pide el cuerpo.
-                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(0.0, 5.0, 10.0), WeightType.BARBELL, barWeight = 6.0)
+                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(0.0, 5.0, 15.0), WeightType.BARBELL, barWeight = 6.0)
                 else loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
@@ -2081,7 +2086,9 @@ object MasterDefaults {
                 // Revision 24 (2-oct): a la plyobox de 51 cm, que quita 6 cm de la mitad de
                 // abajo -la que le dolio-, y la mancuerna esperando sobre el step, nunca en el
                 // piso: recogerla del suelo sentado era flexion con carga. Se queda en 17.5.
-                loaded("ex_box_squat", 8, "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor", listOf(17.5, 17.5, 17.5), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                // Revision 30 (8-oct): dos sesiones "bien" y sin malestar en la plyobox; sube la
+                // ultima serie a 20 para tantear.
+                loaded("ex_box_squat", 8, "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor", listOf(17.5, 17.5, 20.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
             ),
         )
     }
