@@ -137,6 +137,9 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
     }
 
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    // El + se esconde al bajar y vuelve al subir (8-oct): con la fila de abajo desplegada
+    // flotaba encima de las tarjetas y tapaba la del medio.
+    var fabVisible by remember { mutableStateOf(true) }
     val timeFmt = remember { java.time.format.DateTimeFormatter.ofPattern("h:mm a") }
     val swipeController = rememberSwipeRowsController()
 
@@ -227,6 +230,17 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             // significa volver a encontrarla asi mas tarde, sin recordar por que.
             LaunchedEffect(listState.isScrollInProgress) {
                 if (listState.isScrollInProgress) swipeController.closeAll()
+            }
+            // Hacia abajo se esconde, hacia arriba aparece; arriba del todo, siempre a la vista.
+            LaunchedEffect(listState) {
+                var antes = 0 to 0
+                androidx.compose.runtime.snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+                    .collect { ahora ->
+                        val bajo = ahora.first > antes.first || (ahora.first == antes.first && ahora.second > antes.second)
+                        val subio = ahora.first < antes.first || (ahora.first == antes.first && ahora.second < antes.second)
+                        if (ahora == (0 to 0) || subio) fabVisible = true else if (bajo) fabVisible = false
+                        antes = ahora
+                    }
             }
             // La tarjeta de un training visible, con todas sus acciones. Una sola definicion
             // para el que va fijo arriba y para los que se arrastran.
@@ -362,9 +376,14 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             )
         }
 
+        androidx.compose.animation.AnimatedVisibility(
+            visible = fabVisible,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = androidx.compose.animation.slideInVertically { it * 2 } + androidx.compose.animation.fadeIn(),
+            exit = androidx.compose.animation.slideOutVertically { it * 2 } + androidx.compose.animation.fadeOut(),
+        ) {
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
                 .padding(16.dp)
                 .size(48.dp)
                 .clip(CircleShape)
@@ -379,6 +398,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                 tint = accent,
                 modifier = Modifier.size(28.dp),
             )
+        }
         }
 
         if (selectedDate != null) {
