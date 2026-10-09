@@ -198,17 +198,33 @@ class WaterPlanTest {
     }
 
     @Test
-    fun `dos tomas en el mismo minuto no chocan`() {
-        // El 8-oct dos tomas de las 12:47 tenian el mismo instante y el app se caia al abrir.
+    fun `dos tomas en el mismo instante conviven, y se borra o corrige solo la elegida`() {
+        // El 8-oct dos tomas de las 12:47 tenian el mismo instante y el app se caia al abrir:
+        // la hora era su identidad. Desde el 9-oct cada toma tiene la suya.
         val una = WaterLog(at(12, 47), 600, Drinks.SPARKLING)
         val otra = WaterLog(at(12, 47), 500, Drinks.BOTTLE)
         val dos = WaterPlan.add(listOf(una), otra, dom, lima)
-        assertEquals(2, dos.map { it.at }.toSet().size)
+        assertEquals(listOf(at(12, 47), at(12, 47)), dos.map { it.at })
         assertEquals(listOf(600, 500), dos.map { it.ml })
-        // A la vista sigue siendo 12:47: solo se corre un milisegundo.
-        assertEquals(at(12, 47) + 1, dos[1].at)
-        // Lo ya guardado se repara al leerlo.
-        assertEquals(2, WaterPlan.unique(listOf(una, otra)).map { it.at }.toSet().size)
+        assertEquals(2, dos.map { it.id }.toSet().size)
+
+        assertEquals(listOf(otra), WaterPlan.remove(dos, una.id))
+
+        val corregida = WaterPlan.replace(dos, otra.id, WaterLog(at(12, 50), 400, Drinks.BOTTLE))
+        assertEquals(listOf(una.id, otra.id), corregida.map { it.id })
+        assertEquals(listOf(600, 400), corregida.map { it.ml })
+    }
+
+    @Test
+    fun `lo guardado sin id recibe uno, y con id lo conserva`() {
+        val viejo = """[{"at":1,"ml":200,"type":"water"},{"at":1,"ml":200,"type":"water"}]"""
+        assertTrue(WaterPlan.missingIds(viejo))
+        val leidas = WaterPlan.decode(viejo)
+        assertEquals(2, leidas.map { it.id }.toSet().size)
+        // Guardado otra vez, ya no falta nada y los ids no cambian al leer.
+        val guardado = WaterPlan.encode(leidas)
+        assertTrue(!WaterPlan.missingIds(guardado))
+        assertEquals(leidas, WaterPlan.decode(guardado))
     }
 
     @Test

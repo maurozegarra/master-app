@@ -83,18 +83,20 @@ object WaterAlarm {
         reschedule(context)
     }
 
-    /** Una toma con su hora, su bebida y su cantidad: lo de antes, o corregir una. */
-    fun put(context: Context, entry: WaterLog, replacing: Long? = null) {
+    /** Una toma con su hora, su bebida y su cantidad: una nueva, o corregir la toma [replacing]. */
+    fun put(context: Context, entry: WaterLog, replacing: String? = null) {
         val store = WaterStore(context)
         val zone = ZoneId.systemDefault()
-        val base = if (replacing != null) WaterPlan.remove(store.logs(), replacing) else store.logs()
-        store.saveLogs(WaterPlan.add(base, entry, LocalDate.now(zone), zone))
+        store.saveLogs(
+            if (replacing != null) WaterPlan.replace(store.logs(), replacing, entry)
+            else WaterPlan.add(store.logs(), entry, LocalDate.now(zone), zone),
+        )
         reschedule(context)
     }
 
-    fun remove(context: Context, at: Long) {
+    fun remove(context: Context, id: String) {
         val store = WaterStore(context)
-        store.saveLogs(WaterPlan.remove(store.logs(), at))
+        store.saveLogs(WaterPlan.remove(store.logs(), id))
         reschedule(context)
     }
 

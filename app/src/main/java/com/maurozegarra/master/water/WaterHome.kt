@@ -219,9 +219,9 @@ private fun WaterHome(onBack: () -> Unit) {
                     }
                 }
             }
-            items(hoy.logs.reversed(), key = { "log-${it.at}" }) { l ->
+            items(hoy.logs.reversed(), key = { "log-${it.id}" }) { l ->
                 LogRow(l, zone, swipe, onEdit = { dialogo = Dialogo(l) }) {
-                    WaterAlarm.remove(ctx, l.at)
+                    WaterAlarm.remove(ctx, l.id)
                     vuelta++
                 }
             }
@@ -229,7 +229,7 @@ private fun WaterHome(onBack: () -> Unit) {
     }
     dialogo?.let { d ->
         DrinkDialog(d.editing, zone, drinkAt = { at -> WaterAlarm.drinkAt(ctx, at) }, onDismiss = { dialogo = null }) { nueva ->
-            WaterAlarm.put(ctx, nueva, replacing = d.editing?.at)
+            WaterAlarm.put(ctx, nueva, replacing = d.editing?.id)
             dialogo = null
             vuelta++
         }

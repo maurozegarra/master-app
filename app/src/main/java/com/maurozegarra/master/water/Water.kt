@@ -27,6 +27,12 @@ data class WaterLog(
     val ml: Int,
     /** La bebida (ver [Drinks]). Todas cuentan igual para la meta, decidido con él el 4-oct. */
     val type: String = Drinks.WATER,
+    /**
+     * Su identidad, que no cambia al corregir la hora ni la cantidad (9-oct). Antes la
+     * identidad era [at], y dos tomas en el mismo minuto chocaban: la lista se caía y borrar
+     * una se llevaba las dos. Anotar dos veces seguidas es normal; la hora no es un DNI.
+     */
+    val id: String = java.util.UUID.randomUUID().toString(),
 )
 
 /**
@@ -295,29 +301,15 @@ object WaterPlan {
 
     fun add(logs: List<WaterLog>, entry: WaterLog, today: LocalDate, zone: ZoneId): List<WaterLog> {
         val corte = today.minusDays(KEEP_DAYS).atStartOfDay(zone).toInstant().toEpochMilli()
-        return unique((logs + entry).filter { it.at >= corte })
+        // sortedBy es estable: dos tomas en el mismo instante quedan en el orden en que se anotaron.
+        return (logs + entry).filter { it.at >= corte }.sortedBy { it.at }
     }
 
-    /**
-     * Cada toma con su propio instante (8-oct). El instante es su identidad -la lista lo usa de
-     * clave y se borra por él-, y el diálogo guarda la hora sin segundos: dos tomas en el mismo
-     * minuto chocaban y el app se caía al abrir la pantalla. La repetida se corre un milisegundo,
-     * que a la vista sigue siendo el mismo minuto. También repara lo ya guardado.
-     */
-    fun unique(logs: List<WaterLog>): List<WaterLog> {
-        var ultimo = Long.MIN_VALUE
-        return logs.sortedBy { it.at }.map { l ->
-            val at = if (l.at <= ultimo) ultimo + 1 else l.at
-            ultimo = at
-            if (at == l.at) l else l.copy(at = at)
-        }
-    }
+    fun remove(logs: List<WaterLog>, id: String): List<WaterLog> = logs.filter { it.id != id }
 
-    fun remove(logs: List<WaterLog>, at: Long): List<WaterLog> = logs.filter { it.at != at }
-
-    /** [old] reemplazada por [new]: corregir la hora, la bebida o la cantidad. */
-    fun replace(logs: List<WaterLog>, old: Long, new: WaterLog): List<WaterLog> =
-        unique(logs.filter { it.at != old } + new)
+    /** La toma [id] corregida: la hora, la bebida o la cantidad. Sigue siendo la misma toma. */
+    fun replace(logs: List<WaterLog>, id: String, new: WaterLog): List<WaterLog> =
+        (logs.filter { it.id != id } + new.copy(id = id)).sortedBy { it.at }
 
     /**
      * Las tomas del 4-oct que anotó en su app de antes (captura del 4-oct), para que el primer
@@ -339,17 +331,31 @@ object WaterPlan {
     }
 
     fun encode(logs: List<WaterLog>): String =
-        JSONArray().apply { logs.forEach { put(JSONObject().put("at", it.at).put("ml", it.ml).put("type", it.type)) } }.toString()
+        JSONArray().apply {
+            logs.forEach { put(JSONObject().put("id", it.id).put("at", it.at).put("ml", it.ml).put("type", it.type)) }
+        }.toString()
 
+    /**
+     * Lo guardado antes del 9-oct, o un respaldo de entonces, no trae id: aquí recibe uno.
+     * Quien lee del disco tiene que guardarlo enseguida ([missingIds]), o cada lectura le
+     * daría otro y no se podría editar ni borrar.
+     */
     fun decode(json: String): List<WaterLog> = runCatching {
         val a = JSONArray(json)
         (0 until a.length()).mapNotNull { i ->
             val o = a.optJSONObject(i) ?: return@mapNotNull null
             val at = o.optLong("at", 0L).takeIf { it > 0 } ?: return@mapNotNull null
             val ml = o.optInt("ml", 0).takeIf { it > 0 } ?: return@mapNotNull null
-            WaterLog(at, ml, o.optString("type").takeIf { it in Drinks.ALL } ?: Drinks.WATER)
-        }
+            val type = o.optString("type").takeIf { it in Drinks.ALL } ?: Drinks.WATER
+            o.optString("id").takeIf { it.isNotBlank() }?.let { WaterLog(at, ml, type, it) } ?: WaterLog(at, ml, type)
+        }.sortedBy { it.at }
     }.getOrDefault(emptyList())
+
+    /** Si a alguna toma de [json] le falta el id: hay que guardar lo leído por [decode]. */
+    fun missingIds(json: String): Boolean = runCatching {
+        val a = JSONArray(json)
+        (0 until a.length()).any { a.optJSONObject(it)?.optString("id").isNullOrBlank() }
+    }.getOrDefault(false)
 
     /** La hora de acostarse de la noche de [day], desde la alarma de la mañana siguiente. */
     fun bedFromNextRing(nextRing: ZonedDateTime?, day: LocalDate, sleepMin: Int): Long? {

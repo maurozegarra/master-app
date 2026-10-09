@@ -10,8 +10,16 @@ class WaterStore(context: Context) {
 
     private val prefs = context.applicationContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
-    // unique: repara las tomas repetidas en el mismo instante que ya estén guardadas (8-oct).
-    fun logs(): List<WaterLog> = WaterPlan.unique(WaterPlan.decode(prefs.getString(KEY_LOGS, "[]") ?: "[]"))
+    /**
+     * Las tomas, cada una con su id. Las guardadas antes del 9-oct no lo traen: se les da al
+     * leerlas y se guardan en el acto, para que la próxima lectura devuelva el mismo.
+     */
+    fun logs(): List<WaterLog> {
+        val json = prefs.getString(KEY_LOGS, "[]") ?: "[]"
+        val list = WaterPlan.decode(json)
+        if (WaterPlan.missingIds(json)) saveLogs(list)
+        return list
+    }
 
     fun saveLogs(list: List<WaterLog>) {
         prefs.edit().putString(KEY_LOGS, WaterPlan.encode(list)).apply()
