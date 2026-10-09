@@ -256,6 +256,15 @@ object WaterPlan {
         return if (ultimoAviso > now && ultimoAviso >= piso) ultimoAviso else null
     }
 
+    /**
+     * Al sonar el aviso: si se enseña. Solo mira el estado, nunca la hora (9-oct). La hora la
+     * decidió [nextReminder] al programarlo, y todo lo que podría cambiarla lo reprograma.
+     * Volver a calcularla aquí era el error: el aviso de las 11:30 suena a las 11:30 y algo, y
+     * para la regla las 11:30 ya habían pasado, así que daba las 12:00, y así todo el día.
+     */
+    fun shouldRemind(today: List<WaterLog>, start: Long?, goal: Int = GOAL_ML): Boolean =
+        start != null && total(today) < goal
+
     /** Las horas en punto después de la última del horario y antes de [cut], de un vaso cada una. */
     private fun extraHours(slots: List<Pair<Long, Int>>, cut: Long): List<Pair<Long, Int>> {
         val ultima = slots.maxOfOrNull { it.first } ?: return emptyList()

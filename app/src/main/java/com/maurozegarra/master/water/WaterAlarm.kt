@@ -122,14 +122,19 @@ object WaterAlarm {
     }
 
     /**
-     * El recordatorio: cuánto lleva y cuánto va atrasado, con +200 y +600 para anotar sin
-     * abrir el app. Antes de enseñarlo se vuelve a mirar: si mientras tanto tomó, ya no toca.
+     * El recordatorio: cuánto lleva y cuánto va atrasado, con +200 y la botella para anotar sin
+     * abrir el app.
+     *
+     * La alarma ya es la decisión: todo lo que cambia el cálculo (anotar, corregir, borrar,
+     * contestar la alarma de la mañana, reiniciar, cambiar la hora) la reprograma con datos
+     * frescos. Aquí no se vuelve a calcular la hora (9-oct): hacerlo desde dentro del aviso
+     * daba siempre "el siguiente" -a las 11:30 el cálculo ya veía las 11:30 como pasadas- y
+     * el agua no avisó en todo el 8 y el 9. Solo se mira el estado ([WaterPlan.shouldRemind]).
      */
     fun remind(context: Context) {
         val now = System.currentTimeMillis()
         val t = today(context, now)
-        val toca = WaterPlan.nextReminder(now, t.logs, t.start, t.cut, t.slots)
-        if (toca == null || toca > now + 60_000) {
+        if (!WaterPlan.shouldRemind(t.logs, t.start)) {
             reschedule(context)
             return
         }

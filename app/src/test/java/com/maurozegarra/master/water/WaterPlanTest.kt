@@ -212,6 +212,17 @@ class WaterPlanTest {
     }
 
     @Test
+    fun `al sonar el aviso solo cuenta el estado, no la hora`() {
+        // El 8 y 9-oct no aviso nunca: al sonar recalculaba la hora, y el aviso de las 11:30,
+        // que suena a las 11:30 y algo, ya le parecia pasado. Ahora la hora no entra.
+        val atrasado = listOf(WaterLog(at(7, 5), 200, Drinks.CREATINE))
+        assertTrue(WaterPlan.shouldRemind(atrasado, at(7, 0)))
+        // Meta cumplida o dia sin empezar: no.
+        assertTrue(!WaterPlan.shouldRemind(listOf(WaterLog(at(14, 0), 2000)), at(7, 0)))
+        assertTrue(!WaterPlan.shouldRemind(emptyList(), null))
+    }
+
+    @Test
     fun `media hora en punto`() {
         assertEquals("10:30", hm(WaterPlan.halfHourUp(at(10, 20))))
         assertEquals("10:30", hm(WaterPlan.halfHourUp(at(10, 30))))

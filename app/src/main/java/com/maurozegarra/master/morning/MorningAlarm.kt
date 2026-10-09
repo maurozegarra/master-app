@@ -47,7 +47,12 @@ object MorningAlarm {
         // El aviso para ir a dormir sale de las mismas alarmas: se reprograma con ellas, en
         // todos los caminos, para que nunca apunte a una alarma que ya no existe (TD-160).
         scheduleBedtime(context)
-        return rescheduleAlarm(context)
+        val ok = rescheduleAlarm(context)
+        // El agua también sale de las alarmas: el horario (casa o presencial) y el corte antes
+        // de dormir. Su aviso programado es la decisión y no se recalcula al sonar (9-oct), así
+        // que cualquier cambio aquí lo tiene que reprogramar.
+        com.maurozegarra.master.water.WaterAlarm.reschedule(context)
+        return ok
     }
 
     private fun rescheduleAlarm(context: Context): Boolean {
