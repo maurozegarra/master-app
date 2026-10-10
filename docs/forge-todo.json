@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-196",
+      "title": "Controlar otros aparatos desde su S26: la tablet de cámaras y el volumen del teléfono de NIKO",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PEDIDO el 10-oct, A DISEÑAR con él antes de tocar nada.\n\n(1) LA TABLET DE CÁMARAS (Galaxy Tab A9+). Desde el 10-oct muestra sus 9 cámaras Xiaomi en tres columnas, con tres copias de Xiaomi Home (perfil normal, Carpeta segura y perfil de trabajo de Island) y la pantalla siempre prendida con el cargador (stay_on_while_plugged_in = 7). La Carpeta segura ya no se bloquea al apagar la pantalla. Lo que falta: a veces necesita apagarla, y Xiaomi pausa el video cada vez que la pantalla se bloquea o algo lo tapa; hay que tocar play en cada columna. Quiere, desde su S26, apagar o prender la pantalla y darle 'play' a todo de un toque.\n\n(2) EL VOLUMEN DEL TELÉFONO DE NIKO. Antes usaba MacroDroid: un botón en su teléfono que, activado, no la dejaba subir el volumen del suyo. Lo extrañó el 10-oct: entrenando juntos ella se emociona y lo pone muy alto.\n\nIDEAS, sin decidir: un app (o una parte de MASTER) en cada aparato que reciba órdenes del S26, por la red de la casa o por Supabase, como ya viajan los trainings; para la tablet, un servicio de accesibilidad que apriete los play (frágil si Xiaomi mueve el botón); para el volumen, escuchar los cambios de volumen y devolverlo al tope. Mientras tanto, MacroDroid sigue existiendo y puede cubrir lo del volumen."
+    },
+    {
       "id": "TD-195",
       "title": "Timer en el tablero: potty fijo, desechables con Ends at, y que suene como alarma",
       "category": "Feature",
