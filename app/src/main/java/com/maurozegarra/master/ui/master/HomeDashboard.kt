@@ -86,6 +86,9 @@ internal fun HomeDashboard(accent: Color, t: Strings, modifier: Modifier = Modif
         CometClock(accent, Modifier.fillMaxWidth().height(170.dp))
         Spacer(Modifier.height(12.dp))
         DashboardTiles(t)
+        // El timer (TD-195), al pie: el potty de un toque y el + para uno nuevo.
+        Spacer(Modifier.height(8.dp))
+        TimerStrip(accent, t)
     }
 }
 

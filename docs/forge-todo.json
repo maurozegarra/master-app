@@ -2,6 +2,16 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-195",
+      "title": "Timer en el tablero: potty fijo, desechables con Ends at, y que suene como alarma",
+      "category": "Feature",
+      "status": "done",
+      "test": [
+        "com.maurozegarra.master.timer.TimerPlanTest"
+      ],
+      "manual": "PEDIDO el 7 y el 9-oct. Migrar a MASTER lo que usa de su mini-timer (T\\MES): el timer 'potty' y el + con 'Ends at'. El 9-oct, además, una alarma desechable: descansó de 13:30 a 14:00 y tuvo que usar su alarma vieja.\n\nDECIDIDO con él: (7-oct) potty fijo de 5:00, que arranca de un toque, para no demorar en el baño; timers desechables, de una sola vida; notificación en vivo con la cuenta regresiva; los pitidos de MASTER, sin sonidos propios; sin '+1 min'. (9-oct) la franja va abajo del tablero (TD-194). Un timer puede sonar como ALARMA a pantalla completa, con Dismiss y Snooze: el interruptor 'Ring as alarm' se prende solo al elegir un 'Ends at' y queda apagado con una duración (1A). Pausa, sí. Nombre opcional: le pasa que pone un timer y olvida para qué. El + abre un sheet en el orden de su Galaxy Watch8: arriba '+ Custom' (teclado, nombre, chips de Ends at y Ring as alarm), luego los 5 recientes, luego los presets: 30 s, 1, 2, 3, 4, 5, 10, 15, 20, 25 y 30 min y 1 h. 'Tú decide, lo pruebo y te comento': un reciente que terminaba a una hora repite la misma DURACIÓN.\n\nCÓMO: cada timer programa su alarma del sistema para la hora de fin (setAlarmClock si suena como alarma, exacta si pita), así suena aunque el app esté cerrado; la notificación de la cuenta usa el cronómetro del sistema, promovida a Live Update en Android 16. Al terminar: pitidos de MASTER, o la pantalla completa con su servicio, como la alarma de la mañana.\n\nVALIDADO el 9-oct (v1.0.442). Ajustes de la misma noche: el sheet del + sin título y con la rayita de Telegram, y de ahí UN sheet para todo el app (ui/AppSheet.kt), que abre al alto del de Telegram medido en su teléfono (y = 982 de 2340, contando la rayita y la barra). Ese sheet de Telegram no abre siempre igual: 943 a las 22:20, 982 a las 22:53."
+    },
+    {
       "id": "TD-194",
       "title": "Pantalla principal con tablero: reloj animado, próxima alarma, agua y hora de dormir",
       "category": "Feature",

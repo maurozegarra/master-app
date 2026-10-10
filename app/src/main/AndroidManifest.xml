@@ -101,6 +101,36 @@
             android:exported="false"
             android:theme="@style/Theme.Master" />
 
+        <!-- El timer del tablero (TD-195): su alarma, su pantalla completa y su receptor. -->
+        <activity
+            android:name=".timer.TimerRingActivity"
+            android:screenOrientation="portrait"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.Master" />
+
+        <service
+            android:name=".timer.TimerRingService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Timer alarm that plays until the user answers" />
+        </service>
+
+        <receiver
+            android:name=".timer.TimerReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
+
         <receiver
             android:name=".water.WaterReceiver"
             android:exported="false">

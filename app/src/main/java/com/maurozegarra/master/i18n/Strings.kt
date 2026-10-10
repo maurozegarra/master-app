@@ -731,6 +731,34 @@ data class MoreStrings(
     val coach: CoachStrings = CoachStrings(),
     val holidays: HolidayStrings = HolidayStrings(),
     val dashboard: DashboardStrings = DashboardStrings(),
+    val timer: TimerStrings = TimerStrings(),
+)
+
+/** El timer del tablero (TD-195): la franja, el sheet, la notificación y la alarma. */
+data class TimerStrings(
+    val timer: String = "Timer",
+    val newTimer: String = "New timer",
+    val custom: String = "Custom",
+    val recent: String = "Recent",
+    val presets: String = "Presets",
+    val name: String = "Name (optional)",
+    val endsAtLabel: String = "Ends at",
+    val ringAsAlarm: String = "Ring as alarm",
+    val start: String = "Start",
+    /** En la franja y la notificación: "ends 14:00". */
+    val endsAt: String = "ends %s",
+    /** Lo mismo cuando suena como alarma: "rings 14:00". */
+    val ringsAt: String = "rings %s",
+    val pausedLeft: String = "Paused · %s left",
+    val pause: String = "Pause",
+    val resume: String = "Resume",
+    val cancel: String = "Cancel",
+    val done: String = "Time's up",
+    val snooze: String = "Snooze 5 min",
+    val dismiss: String = "Dismiss",
+    val channelLive: String = "Timers",
+    val channelDone: String = "Timer done",
+    val channelRing: String = "Timer alarm",
 )
 
 /** El tablero de la pantalla principal (TD-194): las tres tarjetas bajo el reloj. */

@@ -33,6 +33,9 @@ class MasterApp : Application() {
         // alarma o el aviso para dormir, de los que sale la hora de cortar.
         com.maurozegarra.master.water.WaterStore(this).seedOnce(java.time.ZoneId.systemDefault())
         com.maurozegarra.master.water.WaterAlarm.reschedule(this)
+        // Los timers (TD-195) también: si Android perdió sus alarmas (el app forzado a cerrar),
+        // al abrir vuelven, y uno que ya terminó suena ahora.
+        com.maurozegarra.master.timer.TimerAlarm.rescheduleAll(this)
     }
 }
 
