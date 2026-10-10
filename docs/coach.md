@@ -31,6 +31,20 @@ se leen antes de entrenar. Ahí se quedan, y no se repiten en cada conversación
    ajuste: la revisión las sustituye a todas.
 6. Vuelta a 1.
 
+### El ritmo: un plan por semana (desde el 9-oct-2026)
+
+Hasta el 9-oct se revisó **cada día**: era el periodo de prueba. Desde entonces, a pedido
+suyo:
+
+- **El plan es semanal.** El **sábado** se revisa la semana entera (la suya y la de NIKO) y se
+  planifica la siguiente. Entre sábados no se replanifica.
+- **Lo que se identifica, se siembra en el momento**, no el día anterior ni "en la próxima":
+  el 9-oct se vio que los ajustes de NIKO 4 (1-oct) y NIKO 5 (2-oct) se habían quedado escritos
+  en `niko.md` como "para la próxima" y nunca llegaron al código. Un ajuste aprobado que solo
+  vive en un documento es un ajuste olvidado.
+- Entre semana, "revisa el historial" sigue sirviendo para leer sesiones y anotarlas; lo que
+  pida un cambio de plan espera al sábado, salvo dolor o malestar, que se atiende ese día.
+
 ## Dos dolores distintos, con la misma escala
 
 **Desde el 25-sep-2026 se distinguen, y la distinción es suya:**
