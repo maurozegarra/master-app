@@ -231,11 +231,7 @@ private fun StageSection(
     }
 
     if (showColors) {
-        ModalBottomSheet(
-            onDismissRequest = { showColors = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = AppTheme.colors.bg,
-        ) {
+        com.maurozegarra.master.ui.AppSheet(onDismiss = { showColors = false }, containerColor = AppTheme.colors.bg) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(6),
                 modifier = Modifier.fillMaxWidth().padding(20.dp),

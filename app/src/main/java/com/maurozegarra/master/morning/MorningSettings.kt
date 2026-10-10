@@ -437,20 +437,16 @@ private fun HolidaysSheet(
     onDismiss: () -> Unit,
 ) {
     val h = t.more.holidays
-    androidx.compose.material3.ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = false),
-        containerColor = AppTheme.colors.surface,
-    ) {
+    // El sheet de todo el app (9-oct): sin el título "Holidays", que ya dice la tarjeta que lo
+    // abre; la explicación sí se queda, porque dice algo.
+    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss) {
         Column(
             Modifier
                 .verticalScroll(androidx.compose.foundation.rememberScrollState())
                 .navigationBarsPadding()
-                .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(h.title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
-            Spacer(Modifier.height(4.dp))
             Text(h.desc, color = AppTheme.colors.textDim, fontSize = 13.sp)
             Spacer(Modifier.height(12.dp))
             dias.forEach { d ->

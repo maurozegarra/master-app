@@ -415,7 +415,6 @@ private fun DaySessionsSheet(
     onDeleteSession: (Long) -> Unit,
     onExerciseClick: (String) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // Controlador propio: el sheet es otra superficie, y una fila abierta aquí no tiene
     // nada que ver con una abierta en la lista de trainings que hay detrás.
     val sheetListState = rememberLazyListState()
@@ -423,11 +422,7 @@ private fun DaySessionsSheet(
     LaunchedEffect(sheetListState.isScrollInProgress) {
         if (sheetListState.isScrollInProgress) sheetSwipeController.closeAll()
     }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = AppTheme.colors.bg,
-    ) {
+    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss, containerColor = AppTheme.colors.bg) {
         Text(
             dayLabel(date, zone, t),
             color = AppTheme.colors.textPrimary,

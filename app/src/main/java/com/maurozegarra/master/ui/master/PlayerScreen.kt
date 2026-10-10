@@ -1249,11 +1249,7 @@ private data class InstructionsTarget(val title: String, val steps: List<String>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun InstructionsSheet(target: InstructionsTarget, onDismiss: () -> Unit) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = AppTheme.colors.surface,
-    ) {
+    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss) {
         // Con scroll: el contenido no tiene tope, y sin el, lo que no entraba en la pantalla
         // se cortaba sin aviso. No se noto mientras las instrucciones eran cortas; las de la
         // abduccion en español fueron las primeras que no entraron, y el ultimo paso -justo el
