@@ -5,7 +5,7 @@
       "id": "TD-194",
       "title": "Pantalla principal con tablero: reloj animado, próxima alarma, agua y hora de dormir",
       "category": "Feature",
-      "status": "pending",
+      "status": "done",
       "test": [
         "com.maurozegarra.master.model.DashboardTest"
       ],
