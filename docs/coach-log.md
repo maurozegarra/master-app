@@ -5,6 +5,28 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-09 — vigesimosexta sesión: el corto entero, con la caminata de cierre
+
+**LUMBAR (short)** completo, de 07:37 a 08:27, **50 minutos**. La alarma sonó a las **7:00**, no a
+las 5:00: no fue día presencial. **Dolor 2, aflojó en 37 minutos**, la mañana más lenta de la
+semana (13, 32, 25, 10 y ahora 37), el día después del puente con barra y el box squat. **Se
+acostó a las 23:00**: unas 8 h en cama.
+
+- **McGill completo** (12 aguantes en cada uno), **carry 15 · 17.5 · 20** "bien" las seis y
+  **caminata de cierre a 5 km/h**, la primera vez con la velocidad nueva.
+- Su nota: *"Todo bien"*.
+- **La prueba del McGill completo en el corto presencial queda a medias:** el lunes entró con
+  la caminata (44 min), el miércoles se cayó la caminata (43 min), el jueves fue feriado y hoy
+  no fue presencial. Falta una semana normal para decidir.
+- **La mañana lenta** viene después del día de cadera cargada. Un solo dato: se mira si se
+  repite el domingo, después del sábado con el puente a 21.
+- **NIKO 4** el viernes (ver docs/niko.md): el **hip thrust a una pierna "fácil" las seis**, por
+  primera vez, y la pantorrilla a 7.5 ya "bien".
+- **Mañana sábado va igual a lo decidido el jueves** (revisión 30, ya instalada): puente 6 · 11 ·
+  21, box squat 17.5 · 17.5 · 20 y caminata de cierre a 5 km/h. Toca el pesaje de los dos.
+
+---
+
 ## 2026-10-08 — vigesimoquinta sesión (feriado): el puente con barra sale ligero
 
 **LUMBAR** completo, de 07:50 a 09:13, **82 minutos**, el jueves feriado (revisión 29). La

@@ -309,6 +309,27 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
 
+### 2026-10-09 — NIKO 4 · Glúteo a una pierna, la tercera vez
+
+**De 08:19 a 09:30, 71 minutos, completa.** Volvió después de un día sin entrenar (jueves 8).
+
+**Los ajustes "para la próxima NIKO 4" del 1-oct no se sembraron**: corrió con las cargas del
+1-oct. Lo que marcó con ellas:
+
+| Ejercicio | Carga | Lo que marcó | Lectura |
+|---|---|---|---|
+| Subida al cajón | 2×5 las tres, por pierna | bien las seis, **segunda vez** | firme; el 7.5 del 24-sep fue pesado |
+| **Hip thrust a una pierna, 3 × 10** | su peso | **fácil las seis** (bien el 24 y el 1) | **le sobra: sube** |
+| Peso muerto a una pierna | 7.5 · 10 · 10 por lado | bien las seis (el 1-oct la de 7.5 fue ligera) | firme |
+| Hiperextensión, 3 × 10 | su peso | bien las tres | firme |
+| **Pantorrilla sentada** | 5 · 5 · 7.5 · 7.5 | **bien las cuatro** (el 24 y el 1, las de 7.5 pesadas) | **la de 7.5 ya entra** |
+| Puente con banda · caminata lateral | banda media | bien | la caminata lateral, primera vez: bien |
+| Cuello | 4 × 20 s | bien | — |
+
+- Con estos datos, de los ajustes del 1-oct solo sigue en pie **el de la hiperextensión** (3 × 12);
+  la pantorrilla ya no necesita bajar y el peso muerto se queda. Se decide en la próxima NIKO 4.
+- Sigue **NIKO 5**. Tampoco tiene sembrados los tres aumentos que pidió su sesión del 2-oct.
+
 ### 2026-10-02 — NIKO 5 · Muay Thai y potencia, la cuerda con más descanso
 
 **De 07:36 a 08:31, 55 minutos, completa.**
