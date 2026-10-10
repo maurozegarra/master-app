@@ -402,8 +402,14 @@ object MasterDefaults {
      *
      * Revision 31 (8-oct): en el side plank, los descansos largos de la piramide (tras la 6/12 y
      * la 10/12) pitan desde el 4 y no desde el 3: el segundo de mas es para volver a la posicion.
+     *
+     * Revision 32 (10-oct, primera revision semanal): el puente pasa a 16 · 21 · 26. El sabado
+     * marco 21 "ligero" (6 y 11 "bien"), y el jueves las tres de 6 · 11 · 16 fueron ligeras. Lo
+     * propuso el: lo sintio suave, y armar la barra para el puente es un tramite; con 16 · 21 ·
+     * 26 son discos de 5 en 5 sobre la EZ (10, 15 y 20). El box squat sube la del medio: 17.5 ·
+     * 20 · 20, tras tres sesiones "bien" y sin malestar.
      */
-    const val LUMBAR_REVISION = 31
+    const val LUMBAR_REVISION = 32
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -733,8 +739,13 @@ object MasterDefaults {
      *
      * Revision 22 (9-oct): NIKO 5, lo que le sobró dos veces seguidas (25-sep y 2-oct): salto
      * al cajón 4 x 6, rodillas profundas 4 x 40 s y teep 3 x 10 por lado.
+     *
+     * Revision 23 (10-oct, primera revisión semanal): NIKO 4, el hip thrust a una pierna a 3 x
+     * 12 (fácil las seis el 9-oct) y la hiperextensión a 3 x 12 (pendiente desde el 1-oct; bien a
+     * 10 dos veces). NIKO 5, el salto al cajón a 61 cm, la siguiente altura de la plyobox: 4 x 6
+     * a 51 fue fácil tres veces seguidas. Se sube la altura y no las repeticiones.
      */
-    const val NIKO_REVISION = 22
+    const val NIKO_REVISION = 23
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1057,7 +1068,8 @@ object MasterDefaults {
                             // Revision 18: la de 7.5 fue PESADA en los dos lados el 24-sep.
                             weightType = WeightType.DUMBBELL, weights = listOf(5.0, 5.0, 5.0),
                         ).copy(sides = lados),
-                        b.ex("ex_single_leg_hip_thrust", "Una pierna arriba. La cadera no se inclina", 10, sets = 3, rest = 60)
+                        // Revision 23: 3 x 12. Fácil las seis a 10 el 9-oct.
+                        b.ex("ex_single_leg_hip_thrust", "Una pierna arriba. La cadera no se inclina", 12, sets = 3, rest = 60)
                             .copy(sides = lados),
                         b.ex(
                             "ex_single_leg_deadlift", "Una mancuerna en la mano contraria. Cadera atrás", 8, rest = 60,
@@ -1074,7 +1086,9 @@ object MasterDefaults {
                     exercises = listOf(
                         // Revision 18: 3 x 10. Las tres de 12 fueron "Hard" el 24-sep; en NIKO 1
                         // ya salieron bien a 10.
-                        b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 10, sets = 3, rest = 60),
+                        // Revision 23: vuelve a 3 x 12. El 1-oct hizo 12 y salieron bien, y el
+                        // 9-oct las de 10 también.
+                        b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 12, sets = 3, rest = 60),
                         // La pantorrillera es de discos y va en kilos TOTALES: no hay lados que
                         // calcular, la maquina dice lo que lleva.
                         b.ex(
@@ -1127,7 +1141,9 @@ object MasterDefaults {
                     name = "Potencia",
                     exercises = listOf(
                         // Revision 22: 4 x 6. Las cuatro de 5 fueron fáciles el 25-sep y el 2-oct.
-                        b.ex("ex_box_jump", "Cajón de 51 cm. Cae suave y BAJA CAMINANDO, no saltando", 6, sets = 4, rest = 90),
+                        // Revision 23: a 61 cm, la siguiente altura de la plyobox (51 x 61 x 75).
+                        // Fácil a 51 el 25-sep, el 2-oct y el 10-oct.
+                        b.ex("ex_box_jump", "Cajón de 61 cm. Cae suave y BAJA CAMINANDO, no saltando", 6, sets = 4, rest = 90),
                     ),
                 ),
                 Workout(
@@ -2084,7 +2100,8 @@ object MasterDefaults {
                 // Revision 29 (6-oct): con la barra EZ, 6 · 11 · 16 (discos 0, 5 y 10). Sube 5 kg
                 // la de arriba cada vez que las tres salgan faciles y sin malestar: lo que
                 // molesto el 3-oct fue la carga arriba, asi que el peso lo pide el cuerpo.
-                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(0.0, 5.0, 15.0), WeightType.BARBELL, barWeight = 6.0)
+                // Revision 32 (10-oct): 16 · 21 · 26 (discos 10, 15 y 20), ver [LUMBAR_REVISION].
+                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(10.0, 15.0, 20.0), WeightType.BARBELL, barWeight = 6.0)
                 else loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
@@ -2105,7 +2122,8 @@ object MasterDefaults {
                 // piso: recogerla del suelo sentado era flexion con carga. Se queda en 17.5.
                 // Revision 30 (8-oct): dos sesiones "bien" y sin malestar en la plyobox; sube la
                 // ultima serie a 20 para tantear.
-                loaded("ex_box_squat", 8, "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor", listOf(17.5, 17.5, 20.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                // Revision 32 (10-oct): tres sesiones "bien" sin malestar; sube la del medio.
+                loaded("ex_box_squat", 8, "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor", listOf(17.5, 20.0, 20.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
             ),
         )
     }

@@ -172,11 +172,12 @@ class LumbarTrainingTest {
         assertEquals(WeightType.BARBELL, puente.weightType)
         assertEquals(6.0, puente.barWeight, 0.0)
         // Revision 30 (8-oct): ligero las tres a 16, sube la de arriba a 21.
-        assertEquals(listOf(0.0, 5.0, 15.0), puente.setList.map { it.weight })
+        // Revision 32 (10-oct): 16 · 21 · 26, propuesto por el (discos de 5 en 5).
+        assertEquals(listOf(10.0, 15.0, 20.0), puente.setList.map { it.weight })
         assertEquals(3, puente.sets)
         assertEquals(10, puente.workValue)
         assertEquals(listOf(15.0, 17.5, 20.0), c.getValue("ex_suitcase_carry").setList.map { it.weight })
-        assertEquals(listOf(17.5, 17.5, 20.0), c.getValue("ex_box_squat").setList.map { it.weight })
+        assertEquals(listOf(17.5, 20.0, 20.0), c.getValue("ex_box_squat").setList.map { it.weight })
         // El corto no se toca: el alivio es del bloque de cadera, no del carry.
         assertEquals(listOf(15.0, 17.5, 20.0), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
     }
@@ -192,7 +193,8 @@ class LumbarTrainingTest {
         // plyobox de 51 cm y la mancuerna en el step-: le dolio la espalda baja recogiendo la
         // mancuerna del piso y en la mitad de abajo.
         // Revision 30 (8-oct): dos sesiones "bien" sin malestar; la ultima tantea 20.
-        assertEquals(listOf(17.5, 17.5, 20.0), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
+        // Revision 32 (10-oct): tres "bien"; sube la del medio.
+        assertEquals(listOf(17.5, 20.0, 20.0), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
         assertTrue(cadera(normal).getValue("ex_box_squat").note.contains("51 cm"))
         // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
         // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el

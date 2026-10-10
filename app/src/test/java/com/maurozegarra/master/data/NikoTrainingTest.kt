@@ -26,4 +26,15 @@ class NikoTrainingTest {
         assertEquals(3, teep.sets)
         assertEquals(10, teep.workValue)
     }
+
+    @Test
+    fun `revision 23 sube lo que le sobro en NIKO 4 y la altura del salto`() {
+        // 10-oct: el hip thrust a una pierna fue fácil las seis; la hiperextensión, bien a 10.
+        assertEquals(12, ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_single_leg_hip_thrust").workValue)
+        assertEquals(12, ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_back_extension").workValue)
+        // El salto sube de altura, no de repeticiones.
+        val salto = ex(MasterDefaults.NIKO_POWER_ID, "ex_box_jump")
+        assertEquals(6, salto.workValue)
+        assertEquals(true, salto.note.contains("61 cm"))
+    }
 }
