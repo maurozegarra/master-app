@@ -730,6 +730,21 @@ data class MoreStrings(
     val water: WaterStrings = WaterStrings(),
     val coach: CoachStrings = CoachStrings(),
     val holidays: HolidayStrings = HolidayStrings(),
+    val dashboard: DashboardStrings = DashboardStrings(),
+)
+
+/** El tablero de la pantalla principal (TD-194): las tres tarjetas bajo el reloj. */
+data class DashboardStrings(
+    val alarm: String = "Alarm",
+    val water: String = "Water",
+    val bed: String = "Bed",
+    val off: String = "Off",
+    /** El próximo recordatorio del agua: "next 21:00". */
+    val next: String = "next %s",
+    /** El aviso para ir a dormir: "reminder 23:00". */
+    val reminder: String = "reminder %s",
+    val goalMet: String = "goal met",
+    val notStarted: String = "not started",
 )
 
 /** Los feriados de la alarma (7-oct). */

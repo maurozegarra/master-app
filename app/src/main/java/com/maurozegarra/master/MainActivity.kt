@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.ui.Alignment
@@ -34,7 +33,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.outlined.Alarm
-import androidx.compose.material.icons.outlined.AlarmOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -264,47 +262,9 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                 actions = {
                     // Historial y engranaje solo se muestran en la raíz (lista de trainings).
                     if (!canGoBack) {
-                        // La alarma (TD-158), del mismo ancho que los demás íconos: la hora entera
-                        // ("5:00") ocupaba demasiado en la fila (4-oct). Lo que él mira antes de
-                        // dormir es si mañana suena y a qué hora, así que va la hora sola DENTRO
-                        // del reloj, en lugar de las manecillas (5-oct), en el acento y en
-                        // JetBrains Mono. Sin alarma mañana, el reloj tachado: que se note sin leer.
-                        val hora = com.maurozegarra.master.morning.rememberNextRingHour()
-                        IconButton(onClick = { com.maurozegarra.master.morning.MorningHomeActivity.open(context) }) {
-                            if (hora == null) {
-                                Icon(Icons.Outlined.AlarmOff, contentDescription = t.morning.home, tint = AppTheme.colors.textDim)
-                            } else {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(AlarmFace, contentDescription = t.morning.home, tint = AppTheme.colors.textPrimary)
-                                    // La esfera está centrada en y = 13 de las 24 unidades, no en
-                                    // 12: la cifra baja 1 dp para quedar al centro del aro.
-                                    Text(
-                                        "$hora",
-                                        color = accent,
-                                        fontSize = if (hora >= 10) 9.sp else 11.sp,
-                                        lineHeight = 11.sp,
-                                        fontFamily = MonoDigits,
-                                        fontWeight = FontWeight.Bold,
-                                        style = androidx.compose.ui.text.TextStyle(
-                                            platformStyle = androidx.compose.ui.text.PlatformTextStyle(includeFontPadding = false),
-                                            lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(
-                                                androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center,
-                                                androidx.compose.ui.text.style.LineHeightStyle.Trim.Both,
-                                            ),
-                                        ),
-                                        modifier = Modifier.offset(y = 1.dp),
-                                    )
-                                }
-                            }
-                        }
-                        // El agua (TD-190): como el despertador, abre su propia pantalla.
-                        IconButton(onClick = { com.maurozegarra.master.water.WaterHomeActivity.open(context) }) {
-                            Icon(
-                                Icons.Outlined.WaterDrop,
-                                contentDescription = t.more.water.title,
-                                tint = AppTheme.colors.textPrimary,
-                            )
-                        }
+                        // El despertador y la gota se fueron al tablero de la pantalla principal
+                        // (TD-194, 9-oct): la alarma, el agua y la hora de dormir están ahí, cada
+                        // una con su tarjeta, y tocarla abre su pantalla.
                         IconButton(onClick = { vm.openHistory() }) {
                             Icon(
                                 Icons.Outlined.History,
@@ -495,27 +455,3 @@ private fun goBack(vm: MasterViewModel) {
         vm.draft != null -> vm.closeTrainingEditor()
     }
 }
-
-/** JetBrains Mono SemiBold, solo cifras y dos puntos: para horas que se leen de un vistazo. */
-/**
- * El despertador de Material (outlined "alarm") sin las manecillas: el aro y las dos campanas.
- * Adentro va la hora de mañana (5-oct). Es el trazo de Material con el subtrazo de las
- * manecillas quitado, no un dibujo nuevo, para que siga siendo de la misma familia que el
- * resto de los íconos de la barra.
- */
-private val AlarmFace: androidx.compose.ui.graphics.vector.ImageVector by lazy {
-    androidx.compose.ui.graphics.vector.ImageVector.Builder(
-        name = "AlarmFace", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f,
-    ).addPath(
-        pathData = androidx.compose.ui.graphics.vector.addPathNodes(
-            "M22,5.72l-4.6,-3.86 -1.29,1.53 4.6,3.86L22,5.72z" +
-                "M7.88,3.39L6.6,1.86 2,5.71l1.29,1.53 4.59,-3.85z" +
-                "M12,4c-4.97,0 -9,4.03 -9,9s4.02,9 9,9c4.97,0 9,-4.03 9,-9s-4.03,-9 -9,-9z" +
-                "M12,20c-3.87,0 -7,-3.13 -7,-7s3.13,-7 7,-7 7,3.13 7,7 -3.13,7 -7,7z",
-        ),
-        fill = androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.Black),
-        pathFillType = androidx.compose.ui.graphics.PathFillType.EvenOdd,
-    ).build()
-}
-
-private val MonoDigits = androidx.compose.ui.text.font.FontFamily(androidx.compose.ui.text.font.Font(R.font.jetbrains_mono_digits))

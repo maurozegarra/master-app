@@ -2,6 +2,16 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-194",
+      "title": "Pantalla principal con tablero: reloj animado, próxima alarma, agua y hora de dormir",
+      "category": "Feature",
+      "status": "pending",
+      "test": [
+        "com.maurozegarra.master.model.DashboardTest"
+      ],
+      "manual": "PEDIDO el 9-oct. Con un solo training a la vista (8-oct), dos tercios de la pantalla principal quedaban vacíos. Su idea: usar ese espacio como tablero, rescatando la de su app 'Times' (timer, alarma y agua en un solo lugar), y con un reloj, porque deja el app abierto.\n\nDECIDIDO con él: (1) opción A: reloj al centro y tres tarjetas debajo -próxima alarma, agua y hora de dormir-, cada una abre su pantalla; fijo abajo, sin moverse aunque se abra 'Archived'. (2) El reloj es la 'regla con cometa' del prototipo (9-oct): HH:MM grande, una regla de 60 marcas que un cometa rojo recorre con los segundos, dejando estela, los segundos encima del cometa, y un barrido al cerrar el minuto. Los dos puntos LATEN como un corazón (pum-pum): crecen, se tiñen de rojo con un halo y se desvanecen sin apagarse; pidió eso en vez de un simple prender y apagar. Se mueve unos píxeles cada minuto para no marcar la pantalla AMOLED. (3) Se quita el + de crear training: duplica y edita, y lo hará una vez. (4) Se quitan el despertador y la gota de la barra: ya están en el tablero.\n\nDESPUÉS, aparte: la franja del timer (potty y desechables) abajo del tablero, y que el timer pueda sonar como alarma a pantalla completa (la alarma desechable, opción B del 9-oct). Su propio análisis."
+    },
+    {
       "id": "TD-190",
       "title": "Agua: registrar lo que tomo, con recordatorios que se adaptan a lo que de verdad tomé",
       "category": "Feature",
