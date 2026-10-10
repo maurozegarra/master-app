@@ -49,6 +49,7 @@ dia. La medicion de verdad es la cinta.
 | 19-sep | 49.9 | **67** | **0.43** | 18.4 |
 | 26-sep | 49.5 | **66** | **0.43** | 18.2 |
 | 3-oct | 49.7 | **67.5** | **0.44** | 18.3 |
+| 10-oct | 49.9 | **67.5** | **0.44** | 18.4 |
 
 Cintura entre estatura de 0.43: muy bien, lejos del 0.5.
 
@@ -60,6 +61,11 @@ sabado 3 vuelve a bajar, el tema es la comida, no la rutina.
 3-oct (06:36, al despertar): **+0.2 kg y el musculo esqueletico +0.1**: no volvio a bajar,
 asi que la comida no es tema por ahora. La cinta sube 1.5 cm (66 → 67.5), a 0.44, todavia
 muy lejos del 0.5. La balanza: grasa 26.7% (+0.1), visceral 6.
+
+10-oct (07:14): **+0.2 kg y el músculo esquelético +0.1** (18.4). La cinta igual (67.5). La
+balanza: grasa 26.9% (+0.2), visceral 6. Desde la semana pasada come **más arroz**; la palta y
+el maní entran esta semana. +0.2 kg es casi el ritmo buscado (0.25). El músculo esquelético se
+anota en el pesaje del app, campo *Skeletal muscle*, para no pasar la captura de la balanza.
 
 ### Lo que come (contado el 4-oct)
 
@@ -308,6 +314,21 @@ posterior). Y conviene que ella sepa que sus sesiones le llegan al coach.
 ## Sus sesiones
 
 Lo más reciente arriba. Se leen del respaldo del coach, bajo `athleteSessions`.
+
+### 2026-10-10 — NIKO 5 · Muay Thai y potencia, con los aumentos de la revisión 22
+
+**De 07:39 a 08:40, 61 minutos, completa.**
+
+| Ejercicio | Lo que marcó | Lectura |
+|---|---|---|
+| **Salto al cajón, 4 × 6** (subió de 5) | **fácil las cuatro**, tercera vez seguida | le sobra: sube la altura |
+| Rodillas largas, 5 × 30 s | bien | firme |
+| Rodillas profundas, 4 × 40 s (subió de 30) | bien | entró |
+| Teep, 3 × 10 por lado (subió de 2) | bien | entró |
+| Patada baja, 2 × 10 por lado | bien | firme |
+| **Cuerda, 3 × 3 min con 90 s** | **la 2.ª cortada a 2:16 y la 3.ª a 1:55** | el 2-oct fueron completas: por confirmar si fue el aire o el tiempo |
+| Elevación de piernas, 3 × 12 | bien | firme |
+| Cuello | bien | — |
 
 ### 2026-10-09 — NIKO 4 · Glúteo a una pierna, la tercera vez
 

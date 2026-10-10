@@ -5,6 +5,48 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-10 — vigesimoséptima sesión y primera revisión semanal
+
+**LUMBAR** completo, de 07:36 a 08:53, **77 minutos** (revisión 30). Alarma de las 7:00: **dolor 1,
+aflojó en 5 minutos**, la mejor mañana de la semana, y eso que **se acostó a las 00:14** (unas
+6 h 45 en cama).
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| Puente con barra EZ, pausa 2 s | 6 · 11 · **21** × 10 | 6 y 11 "bien", **21 "ligero"** |
+| Box squat en la plyobox | 17.5 · 17.5 · **20** × 8 | "bien" las tres |
+| Suitcase Carry, 36 m | 15 · 17.5 · 20 | "bien" las seis |
+| Caminatas | 12 min a 6 km/h y 5 min a 5 | completas |
+
+**Pesaje:** **83.7 kg** (-0.9) y cintura **94.5** (+0.5). NIKO **49.9 kg** (+0.2) y cintura 67.5 (=).
+
+### La semana (5 al 10 de octubre)
+
+- **Seis de seis**, todas completas. El McGill completo entró en todos los cortos.
+- **Las mañanas:** 2/13, 2/32, 2/25, 1/10, 2/37 y hoy 1/5 (dolor / minutos hasta aflojar). Las
+  dos mejores son las del jueves y el sábado, los días de LUMBAR completo; la más lenta, el
+  viernes, el día después del completo con puente y box squat. No hay patrón claro todavía.
+- **La caminata de cierre** se cayó una vez (miércoles, por tiempo). El corto presencial con el
+  McGill completo queda en observación: esta semana solo hubo dos días presenciales normales.
+- **NIKO, cinco de cinco** (1 al 5), todas completas. Lo que marcó: el remo con mancuerna a 10
+  "pesado" en las dos últimas de cada lado y las flexiones "duras" (NIKO 3, tercera vez igual);
+  el hip thrust a una pierna "fácil" (NIKO 4) y el salto al cajón "fácil" por tercera vez (NIKO 5).
+
+### El plan de la semana que viene (decidido con él; revisión 32 y NIKO 23, v1.0.443)
+
+- **Puente 16 · 21 · 26.** Lo propuso él: lo sintió suave, y armar la barra es un trámite; con
+  discos de 5 en 5 sobre la EZ se arma más rápido. De acuerdo: 16 ya salió ligero el jueves y 21
+  hoy, y 26 es el +5 de la regla. Si 26 se siente pesado arriba o en la pausa, baja a 21 ese día.
+- **Box squat 17.5 · 20 · 20.** Carry y caminatas igual.
+- **Calendario igual**: completo martes, viernes y sábado; corto lunes, miércoles, jueves y
+  domingo. Viernes y sábado quedan seguidos con carga de cadera: se prueba, y si hay malestar lo
+  dice ese día. *"Lo de tener una programación semanal es deseable pero no quiere decir que no
+  sabrás de mí en una semana; sólo quiero dejar el app listo para ser autónomo."*
+- **NIKO 4:** hip thrust a una pierna e hiperextensión a 3 × 12. **NIKO 5:** salto al cajón a
+  **61 cm**. La cuerda se queda: le cuesta pero la quiere dominar. NIKO 3 y NIKO 6, igual.
+
+---
+
 ## 2026-10-09 — vigesimosexta sesión: el corto entero, con la caminata de cierre
 
 **LUMBAR (short)** completo, de 07:37 a 08:27, **50 minutos**. La alarma sonó a las **7:00**, no a
