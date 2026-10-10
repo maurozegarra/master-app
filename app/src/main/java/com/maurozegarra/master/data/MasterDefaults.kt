@@ -730,8 +730,11 @@ object MasterDefaults {
      * caminata lateral en vez de la abduccion con tobillera.
      *
      * Revision 21 (2-oct): NIKO 6, la cosaca con una mancuerna de 5 kg al pecho.
+     *
+     * Revision 22 (9-oct): NIKO 5, lo que le sobró dos veces seguidas (25-sep y 2-oct): salto
+     * al cajón 4 x 6, rodillas profundas 4 x 40 s y teep 3 x 10 por lado.
      */
-    const val NIKO_REVISION = 21
+    const val NIKO_REVISION = 22
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1123,7 +1126,8 @@ object MasterDefaults {
                     id = b.id(),
                     name = "Potencia",
                     exercises = listOf(
-                        b.ex("ex_box_jump", "Cajón de 51 cm. Cae suave y BAJA CAMINANDO, no saltando", 5, sets = 4, rest = 90),
+                        // Revision 22: 4 x 6. Las cuatro de 5 fueron fáciles el 25-sep y el 2-oct.
+                        b.ex("ex_box_jump", "Cajón de 51 cm. Cae suave y BAJA CAMINANDO, no saltando", 6, sets = 4, rest = 90),
                     ),
                 ),
                 Workout(
@@ -1131,14 +1135,16 @@ object MasterDefaults {
                     name = "Rodillas al saco",
                     exercises = listOf(
                         b.ex("ex_long_knees", "Cadera adelante en cada rodilla. Manos arriba", 30, sets = 5, rest = 30, mode = WorkMode.TIME),
-                        b.ex("ex_deep_knees", "Agarre de clinch al saco. Jala hacia ti al subir la rodilla", 30, sets = 4, rest = 30, mode = WorkMode.TIME),
+                        // Revision 22: 40 s. Las cuatro de 30 fueron fáciles el 2-oct.
+                        b.ex("ex_deep_knees", "Agarre de clinch al saco. Jala hacia ti al subir la rodilla", 40, sets = 4, rest = 30, mode = WorkMode.TIME),
                     ),
                 ),
                 Workout(
                     id = b.id(),
                     name = "Patadas",
                     exercises = listOf(
-                        b.ex("ex_teep", "Empuja con la planta, no con la punta. Vuelve a la guardia", 10, sets = 2, rest = 45)
+                        // Revision 22: 3 series. Fácil los dos lados el 25-sep y el 2-oct.
+                        b.ex("ex_teep", "Empuja con la planta, no con la punta. Vuelve a la guardia", 10, sets = 3, rest = 45)
                             .copy(sides = lados),
                         b.ex("ex_low_kick", "Gira la cadera y pega con la canilla. Guardia arriba", 10, sets = 2, rest = 45)
                             .copy(sides = lados),
