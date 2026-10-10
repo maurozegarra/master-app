@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-197",
+      "title": "Cargar 'ir sumando': entre series solo se agregan discos, y el player dice cuál",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PEDIDO el 10-oct, A REVISAR con él antes de tocar nada. Cambiar discos entre series es parte del 'trámite' del puente (A de su lista: armar los discos, rodar la barra, colchoneta y pies, poner los steps). Hoy saca y pone; sus collarines ya son de palanca, de un toque, así que el trámite no es el collarín.\n\nLA IDEA: con una rampa que sube, no sacar nunca: solo sumar. Puente 16 · 21 · 26 sobre la EZ de 6 kg = por lado 5, luego +2.5, luego +2.5 (tiene dos de 2.5 por lado). Se descarga una sola vez al final.\n\nA DEFINIR: (1) si las rampas se arman pensando en sumar (pasos que salgan de los discos que tiene, ver equipo.md); (2) que el player diga qué disco sumar, '+2.5 por lado', además del total; (3) qué pasa si una serie baja de peso (vuelve el sacar y poner). Lo prueba el martes 13-oct con la EZ, a mano."
+    },
+    {
       "id": "TD-196",
       "title": "Controlar otros aparatos desde su S26: la tablet de cámaras y el volumen del teléfono de NIKO",
       "category": "Feature",
