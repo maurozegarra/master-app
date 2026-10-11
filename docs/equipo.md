@@ -15,7 +15,7 @@ daban para armarlas.
 ### Espacio
 
 - Sala propia de **6.4 × 8.5 m**.
-- Zona de suelo de goma de 25 mm, **4 × 3 m**, para trabajo en el piso. No hay colchoneta:
+- Zona de suelo de goma de 20 mm (medido el 10-oct; antes decía 25), **4 × 3 m**, para trabajo en el piso. No hay colchoneta:
   el suelo de goma hace ese papel.
 - **Pasillo lineal de 7 m, con 6 m señalizados.** Es donde hace los carries: 3 vueltas de
   6 m = **36 m**, dentro de los 30-40 m que pide la rutina. El dato importa porque el
