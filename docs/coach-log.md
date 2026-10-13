@@ -23,6 +23,14 @@ movimiento de doblarlo. Todo eso apunta a un **esguince leve del ligamento de af
 señales para radiografía.
 
 - **Las mañanas no lo notaron:** domingo y lunes, dolor 1 y aflojó en 10 minutos.
+- **La almohada.** Desde la noche del viernes 9 duerme con una almohada un poco más alta, y dice
+  que el dolor habitual está casi en 0. Las mañanas lo respaldan: **sábado 1/5, domingo 1/10 y
+  lunes 1/10** (dolor / minutos hasta aflojar), contra 2/13, 2/32, 2/25, 1/10 y 2/37 de lunes a
+  viernes. Duerme de costado, con almohada bajo las rodillas y una pequeña entre las piernas: la
+  única postura que no le duele. La almohada más alta llena el hueco entre la cabeza y el
+  colchón, y así la columna queda recta de punta a punta en vez de caer hacia el colchón.
+  **Ojo:** el domingo y el lunes tampoco entrenó; las próximas mañanas, ya entrenando, dirán si
+  se sostiene.
 - **NIKO siguió:** NIKO 5 el sábado y NIKO 6 el lunes, completos. En el 6, la sentadilla cosaca
   con 5 kg salió con +2.5 pedido en los dos lados.
 
