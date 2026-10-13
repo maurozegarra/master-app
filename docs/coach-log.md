@@ -5,6 +5,41 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-12 — dos días sin entrenar: el tobillo izquierdo
+
+**Domingo 11 y lunes 12 sin sesión.** El sábado por la mañana, después del LUMBAR, iba apurado a
+cortarse el pelo, pisó mal al bajar de la vereda y terminó en el suelo apoyado en las dos manos.
+El **tobillo izquierdo se dobló hacia adentro** y cargó parte de su peso.
+
+| Momento | Cómo estaba |
+|---|---|
+| Sábado de día | dolor manejable |
+| **Sábado en la noche** | **el pico**: apenas podía caminar, algo hinchado |
+| Domingo | adolorido, caminaba cojeando; no entrenó |
+| Lunes | mejor, queda una pequeña molestia al caminar; no entrenó |
+
+Sin moretón ni cambio de color, y **el hueso no duele al presionarlo**. Duele al repetir el
+movimiento de doblarlo. Todo eso apunta a un **esguince leve del ligamento de afuera**; sin
+señales para radiografía.
+
+- **Las mañanas no lo notaron:** domingo y lunes, dolor 1 y aflojó en 10 minutos.
+- **NIKO siguió:** NIKO 5 el sábado y NIKO 6 el lunes, completos. En el 6, la sentadilla cosaca
+  con 5 kg salió con +2.5 pedido en los dos lados.
+
+**Decidido con él (revisión 33, v1.0.444), mientras dure lo del tobillo:**
+- **Las caminatas se quedan**, porque en un esguince leve caminar ayuda; la de entrada empieza
+  a **5 km/h** y la sube él con el + si va bien.
+- **Carry fuera**, en el completo y en el corto: caminar con peso de un solo lado es lo que más
+  le exige al tobillo de costado.
+- **Box squat 17.5 · 17.5 · 17.5**: no es semana para subir. El puente sigue en 16 · 21 · 26.
+- **Círculos de tobillo** al final de la movilidad, 10 por lado, en el rango que no duela.
+- La plancha lateral ya va sobre las rodillas: no cambia.
+- La regla: si algo molesta en el tobillo más de 3/10, o amanece peor, ese ejercicio sale.
+- **Vuelve a lo normal** (`LUMBAR_ANKLE_EASED = false`) cuando camine sin notar el tobillo. Más
+  adelante, equilibrio en una pierna para no repetir la torcedura.
+
+---
+
 ## 2026-10-10 — vigesimoséptima sesión y primera revisión semanal
 
 **LUMBAR** completo, de 07:36 a 08:53, **77 minutos** (revisión 30). Alarma de las 7:00: **dolor 1,
