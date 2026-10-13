@@ -19,10 +19,11 @@ import org.junit.Test
  */
 class LumbarTrainingTest {
 
-    private val training = MasterDefaults.lumbarTraining("en")
+    // La rutina sin lo del tobillo (revision 33), que es temporal: tiene sus propios tests.
+    private val training = MasterDefaults.lumbarTraining("en", easedAnkle = false)
     // El bloque de cadera de siempre, sin el alivio de la revision 22.
-    private val normal = MasterDefaults.lumbarTraining("en", easedHip = false)
-    private val short = MasterDefaults.lumbarShortTraining("en")
+    private val normal = MasterDefaults.lumbarTraining("en", easedHip = false, easedAnkle = false)
+    private val short = MasterDefaults.lumbarShortTraining("en", easedAnkle = false)
     private val steps = StepEngine.buildSteps(training.copy(workouts = training.workouts))
 
     @Test
@@ -164,7 +165,7 @@ class LumbarTrainingTest {
         // unico nuevo ese dia. El puente sin barra prueba el mismo patron sin carga.
         // Revision 28 (5-oct): el carry ya no baja a 15 · 15 · 15 aliviado. No fue lo que
         // molesto el 3-oct, y el 5-oct salio limpio con la rampa entera en el corto.
-        val c = cadera(MasterDefaults.lumbarTraining("en", easedHip = true))
+        val c = cadera(MasterDefaults.lumbarTraining("en", easedHip = true, easedAnkle = false))
         assertFalse(c.containsKey("ex_hip_thrust"))
         // Revision 29 (6-oct): el puente ya lleva la barra EZ, 6 · 11 · 16. Sin peso salio facil
         // y el pidio cargarlo progresivamente.
@@ -586,5 +587,51 @@ class LumbarTrainingTest {
         // Y sobrevive al guardarse: el training se guarda como JSON.
         val vuelta = com.maurozegarra.master.model.TrainingJson.decode(com.maurozegarra.master.model.TrainingJson.encode(listOf(training))).single()
         assertEquals(training, vuelta)
+    }
+
+    // Revision 33 (12-oct): el tobillo izquierdo. Caminar se queda, el carry sale.
+    private val tobillo = MasterDefaults.lumbarTraining("en", easedAnkle = true)
+    private val tobilloCorto = MasterDefaults.lumbarShortTraining("en", easedAnkle = true)
+    private fun ids(t: com.maurozegarra.master.model.Training) = t.workouts.flatMap { it.exercises }.map { it.exerciseId }
+
+    @Test
+    fun `con el tobillo no hay carry, ni en el completo ni en el corto`() {
+        assertFalse(ids(tobillo).contains("ex_suitcase_carry"))
+        assertFalse(ids(tobilloCorto).contains("ex_suitcase_carry"))
+        // El corto no se queda con un bloque vacio.
+        assertEquals(listOf("Warm Walk", "Mobility", "McGill Big 3", "Cool Walk"), tobilloCorto.workouts.map { it.name })
+    }
+
+    @Test
+    fun `con el tobillo se camina igual, empezando a 5`() {
+        listOf(tobillo, tobilloCorto).forEach { t ->
+            val walks = t.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
+            assertEquals(listOf(5.0, 5.0), walks.map { it.speedKmh })
+        }
+    }
+
+    @Test
+    fun `con el tobillo la movilidad suma circulos de tobillo al final, a los dos lados`() {
+        listOf(tobillo, tobilloCorto).forEach { t ->
+            val movilidad = t.workouts.single { it.name == "Mobility" }.exercises
+            assertEquals(listOf("ex_cat_cow", "ex_hip_hinge", "ex_ankle_rotation"), movilidad.map { it.exerciseId })
+            assertEquals(listOf("Left", "Right"), movilidad.last().sides)
+        }
+        assertTrue(MasterDefaults.lumbarInstructions().keys.containsAll(ids(tobillo)))
+    }
+
+    @Test
+    fun `con el tobillo el box squat no sube y el puente sigue igual`() {
+        val cadera = tobillo.workouts.single { it.name == "Hip & Glute" }.exercises.associateBy { it.exerciseId }
+        assertEquals(listOf(17.5, 17.5, 17.5), cadera.getValue("ex_box_squat").setList.map { it.weight })
+        assertEquals(
+            training.workouts.single { it.name == "Hip & Glute" }.exercises.first().setList,
+            cadera.getValue("ex_glute_bridge").setList,
+        )
+    }
+
+    @Test
+    fun `la primera sesion sigue con el carry de aquel dia`() {
+        assertTrue(MasterDefaults.lumbarFirstSession("en").exercises.any { it.exerciseId == "ex_suitcase_carry" })
     }
 }

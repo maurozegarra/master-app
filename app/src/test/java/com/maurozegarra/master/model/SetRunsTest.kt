@@ -41,7 +41,7 @@ class SetRunsTest {
     fun `el recorder guarda el descanso que paso de verdad`() {
         // El curl-up del LUMBAR, como lo arma el player: se descansa entero salvo uno, que se
         // salta a los 10 s.
-        val pasos = StepEngine.buildSteps(MasterDefaults.lumbarTraining("en"))
+        val pasos = StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedAnkle = false))
             .filter { it.ownerExerciseId == "ex_curl_up" }
         val r = SessionRecorder()
         pasos.forEach { p ->
@@ -61,7 +61,7 @@ class SetRunsTest {
     @Test
     fun `alternando, el primer lado descansa lo mismo que el ultimo`() {
         // El carry: izquierda y derecha seguidas, y el descanso al cerrar la serie (TD-156).
-        val pasos = StepEngine.buildSteps(MasterDefaults.lumbarShortTraining("en"))
+        val pasos = StepEngine.buildSteps(MasterDefaults.lumbarShortTraining("en", easedAnkle = false))
             .filter { it.ownerExerciseId == "ex_suitcase_carry" }
         val r = SessionRecorder()
         pasos.forEach { p ->

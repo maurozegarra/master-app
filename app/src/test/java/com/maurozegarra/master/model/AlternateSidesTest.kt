@@ -8,7 +8,7 @@ import org.junit.Test
 /** Lados alternados, el respiro para contestar y el puesto de cada serie (TD-156). */
 class AlternateSidesTest {
 
-    private fun carry() = MasterDefaults.lumbarShortTraining("en").workouts.flatMap { it.exercises }
+    private fun carry() = MasterDefaults.lumbarShortTraining("en", easedAnkle = false).workouts.flatMap { it.exercises }
         .single { it.exerciseId == "ex_suitcase_carry" }
 
     private fun solo(e: Exercise) = Training(id = 1L, name = "T", workouts = listOf(Workout(id = 1L, name = "W", exercises = listOf(e))))

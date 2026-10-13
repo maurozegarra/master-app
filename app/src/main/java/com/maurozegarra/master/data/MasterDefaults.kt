@@ -408,8 +408,27 @@ object MasterDefaults {
      * propuso el: lo sintio suave, y armar la barra para el puente es un tramite; con 16 · 21 ·
      * 26 son discos de 5 en 5 sobre la EZ (10, 15 y 20). El box squat sube la del medio: 17.5 ·
      * 20 · 20, tras tres sesiones "bien" y sin malestar.
+     *
+     * Revision 33 (12-oct): el tobillo izquierdo, ver [LUMBAR_ANKLE_EASED].
      */
-    const val LUMBAR_REVISION = 32
+    const val LUMBAR_REVISION = 33
+
+    /**
+     * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
+     *
+     * Se doblo hacia adentro: un esguince leve del ligamento de afuera. El pico fue esa noche
+     * (casi no podia caminar), el domingo caminaba cojeando y el lunes quedaba una molestia al
+     * caminar. Sin hematoma, apenas hinchado, y el hueso no duele al presionarlo.
+     *
+     * En un esguince leve caminar ayuda, asi que las caminatas se quedan; la de entrada empieza
+     * a 5 y la sube el con el + si va bien. Lo que sale es el carry: caminar con peso de un solo
+     * lado es lo que mas exige al tobillo de costado. El box squat no sube esta semana. Y la
+     * movilidad suma circulos de tobillo, en el rango que no duela.
+     *
+     * Volver a lo normal es poner esto en false y subir la revision, cuando camine sin notar
+     * el tobillo. Decidido con el el 12-oct (coach-log).
+     */
+    const val LUMBAR_ANKLE_EASED = true
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -478,7 +497,12 @@ object MasterDefaults {
      * serie (TD-085). Antes hacian falta tres ejercicios por movimiento y el historial los
      * contaba como tres.
      */
-    fun lumbarTraining(lang: String, easedHip: Boolean = LUMBAR_HIP_EASED, bandWalk: Boolean = LUMBAR_BAND_WALK): Training {
+    fun lumbarTraining(
+        lang: String,
+        easedHip: Boolean = LUMBAR_HIP_EASED,
+        bandWalk: Boolean = LUMBAR_BAND_WALK,
+        easedAnkle: Boolean = LUMBAR_ANKLE_EASED,
+    ): Training {
         val b = LumbarBlocks(lang, seqStart = 950000L)
         val now = System.currentTimeMillis()
         return Training(
@@ -490,10 +514,10 @@ object MasterDefaults {
             // Revision 29: el jueves 8, feriado, cambiado con el viernes (ver LUMBAR_REVISION).
             scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 8)),
             workouts = listOf(
-                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
-                b.mobility(),
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = if (easedAnkle) 5.0 else 6.0),
+                b.mobility(ankle = easedAnkle),
                 b.mcgill(),
-                b.hipGlute(eased = easedHip, bandWalk = bandWalk),
+                b.hipGlute(eased = easedHip, bandWalk = bandWalk, ankle = easedAnkle),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
             createdAt = now,
@@ -572,7 +596,7 @@ object MasterDefaults {
      * caminar 2-3 minutos cada hora. Ocho horas de oficina pesan mas que los 45 minutos de
      * rutina que se ahorra.
      */
-    fun lumbarShortTraining(lang: String): Training {
+    fun lumbarShortTraining(lang: String, easedAnkle: Boolean = LUMBAR_ANKLE_EASED): Training {
         val b = LumbarBlocks(lang, seqStart = 952000L)
         val now = System.currentTimeMillis()
         return Training(
@@ -584,13 +608,16 @@ object MasterDefaults {
             // Revision 29: el viernes 9, cambiado con el jueves feriado (ver LUMBAR_REVISION).
             scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 9)),
             workouts = listOf(
-                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = 6.0),
-                b.mobility(),
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = if (easedAnkle) 5.0 else 6.0),
+                b.mobility(ankle = easedAnkle),
                 // Revision 27 (3-oct): McGill COMPLETO, como en el dia malo (revision 26). Iba a la
                 // mitad por el tiempo de los dias presenciales; el lo pidio completo porque lo
                 // alivia, a prueba esta semana: son unos 6 minutos mas.
                 b.mcgill(),
-                b.carryOnly(),
+            ) + listOfNotNull(
+                // Revision 33: sin carry mientras dure lo del tobillo; el bloque entero, no vacio.
+                if (easedAnkle) null else b.carryOnly(),
+            ) + listOf(
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
             createdAt = now,
@@ -611,7 +638,8 @@ object MasterDefaults {
      * dia que exista TD-089 esto se podra anotar dentro del app.
      */
     fun lumbarFirstSession(lang: String): SessionLog {
-        val t = lumbarTraining(lang)
+        // Sin el tobillo: aquel dia hizo la rutina entera, carry incluido.
+        val t = lumbarTraining(lang, easedAnkle = false)
         val exercises = mutableListOf<ExerciseRecord>()
         t.workouts.forEachIndexed { wi, w ->
             // Un registro por LADO, igual que lo que escribe el recorder (TD-147): la
@@ -1986,12 +2014,16 @@ object MasterDefaults {
             exercises = listOf(ex("ex_walk", note = note, work = sec, prep = 10).copy(speedKmh = kmh)),
         )
 
-        fun mobility(): Workout = Workout(
+        fun mobility(ankle: Boolean = false): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Movilidad" else "Mobility",
-            exercises = listOf(
+            exercises = listOfNotNull(
                 reps("ex_cat_cow", 8, note = "6-8 slow cycles", prep = 10),
                 reps("ex_hip_hinge", 10, note = "Stick on nape, mid-back and sacrum", prep = 10),
+                // Revision 33, ver [LUMBAR_ANKLE_EASED]. Al final y no al principio: el
+                // gato-camello sigue siendo lo primero del dia.
+                if (!ankle) null
+                else reps("ex_ankle_rotation", 10, note = "Pain-free range, both directions", prep = 10).copy(sides = listOf("Left", "Right")),
             ),
         )
 
@@ -2051,7 +2083,7 @@ object MasterDefaults {
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
                 .copy(dumbbellCount = 1, workMode = WorkMode.DISTANCE, sides = listOf("Left", "Right"), alternateSides = true)
 
-        fun hipGlute(eased: Boolean = false, bandWalk: Boolean = false): Workout = Workout(
+        fun hipGlute(eased: Boolean = false, bandWalk: Boolean = false, ankle: Boolean = false): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
             exercises = listOfNotNull(
@@ -2110,7 +2142,8 @@ object MasterDefaults {
                 // Revision 13: los dos primeros viajes ligeros el 22-sep y el tercero "bien"
                 // por segunda vez, asi que la rampa sube entera y 20 pasa a ser la cima.
                 // Revision 28: la rampa entera tambien aliviado (ver [LUMBAR_HIP_EASED]).
-                carry(),
+                // Revision 33: fuera por el tobillo (ver [LUMBAR_ANKLE_EASED]).
+                if (ankle) null else carry(),
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
                 // Despues de 20 viene la de 22.5 -no estaba en el inventario del 18-sep; la
                 // agrego el usuario el 19- y despues 25. El salto de 22.5 a 25 es de 11%.
@@ -2123,7 +2156,11 @@ object MasterDefaults {
                 // Revision 30 (8-oct): dos sesiones "bien" y sin malestar en la plyobox; sube la
                 // ultima serie a 20 para tantear.
                 // Revision 32 (10-oct): tres sesiones "bien" sin malestar; sube la del medio.
-                loaded("ex_box_squat", 8, "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor", listOf(17.5, 20.0, 20.0), WeightType.DUMBBELL).copy(dumbbellCount = 1),
+                // Revision 33: con el tobillo, las tres en 17.5. No es semana de subir.
+                loaded(
+                    "ex_box_squat", 8, "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor",
+                    if (ankle) listOf(17.5, 17.5, 17.5) else listOf(17.5, 20.0, 20.0), WeightType.DUMBBELL,
+                ).copy(dumbbellCount = 1),
             ),
         )
     }
@@ -2215,6 +2252,14 @@ object MasterDefaults {
                 "Dumbbell or anything with a handle, on one side only.",
                 "30-40 m per side, walking tall without leaning towards the weight.",
                 "One of the best there is for the core with minimal load on the spine.",
+            ),
+        ),
+        // Revision 33: por el tobillo izquierdo (ver LUMBAR_ANKLE_EASED).
+        "ex_ankle_rotation" to ExerciseMedia(
+            listOf(
+                "Seated or lying down, foot off the floor.",
+                "Slow circles, 10 each way, as wide as it goes without pain.",
+                "Mild discomfort is fine. If it hurts, make the circle smaller.",
             ),
         ),
         // Revision 24: la plyobox y la mancuerna en el step.

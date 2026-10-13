@@ -10,7 +10,7 @@ import org.junit.Test
 class TrainingPreviewTest {
 
     // Con el respiro para contestar, como la arma el player.
-    private val lumbar = TrainingPreview.of(StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedHip = false), answerWindow = true))
+    private val lumbar = TrainingPreview.of(StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedHip = false, easedAnkle = false), answerWindow = true))
 
     private fun item(blocks: List<PreviewBlock>, id: String) = blocks.flatMap { it.items }.first { it.exerciseId == id }
 
@@ -73,7 +73,7 @@ class TrainingPreviewTest {
 
     @Test
     fun `el tiempo del bloque cuenta tambien las repeticiones`() {
-        val steps = StepEngine.buildSteps(MasterDefaults.lumbarTraining("en"), answerWindow = true)
+        val steps = StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedAnkle = false), answerWindow = true)
         val cadera = TrainingPreview.of(steps).single { it.title == "Hip & Glute" }
         assertEquals(steps.filter { it.workoutIndex == cadera.index }.sumOf { it.estimatedSec }, cadera.estimatedSec)
         assertTrue(cadera.estimatedSec > steps.filter { it.workoutIndex == cadera.index && it.timeBased }.sumOf { it.durationSec })

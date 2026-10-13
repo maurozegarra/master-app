@@ -14,7 +14,7 @@ class DistanceTest {
     @Test
     fun `el carry se registra en metros, por mano`() {
         // Era "2 reps", un viaje por mano, y el historial decia "2 x 17.5 kg".
-        val carry = MasterDefaults.lumbarShortTraining("en").workouts.flatMap { it.exercises }
+        val carry = MasterDefaults.lumbarShortTraining("en", easedAnkle = false).workouts.flatMap { it.exercises }
             .single { it.exerciseId == "ex_suitcase_carry" }
         assertEquals(WorkMode.DISTANCE, carry.workMode)
         assertEquals(listOf("Left", "Right"), carry.sides)
