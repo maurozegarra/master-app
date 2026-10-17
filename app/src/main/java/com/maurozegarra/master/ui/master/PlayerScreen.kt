@@ -99,6 +99,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.outlined.Visibility
+import com.maurozegarra.master.ui.AppSwitch
 import com.maurozegarra.master.ui.AppTextField
 import com.maurozegarra.master.MasterViewModel
 import com.maurozegarra.master.data.ExerciseCatalog
@@ -2036,8 +2037,11 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
         } else {
             PainScale(t.painOnWaking, saved?.painOnWaking, accent, t) { vm.saveHowItWent(painOnWaking = it) }
             Spacer(Modifier.height(12.dp))
-            FadeMinutes(saved?.painFadeMin, accent, t) { vm.saveHowItWent(painFadeMin = it) }
-            Spacer(Modifier.height(12.dp))
+            // Con 0 no hay nada que aflojar (TD-201). Si se cambia a otro numero, vuelve.
+            if (saved?.painOnWaking != 0) {
+                FadeMinutes(saved?.painFadeMin, accent, t) { vm.saveHowItWent(painFadeMin = it) }
+                Spacer(Modifier.height(12.dp))
+            }
         }
 
         // El dolor de CRISIS, aparte y plegado (TD-165). El usuario, el 25-sep: el dolor al
@@ -2052,7 +2056,7 @@ private fun HowItWent(vm: MasterViewModel, accent: Color, t: Strings) {
                 Text(t.crisis.toggle, color = AppTheme.colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 Text(t.crisis.hint, color = AppTheme.colors.textDim, fontSize = 12.sp)
             }
-            androidx.compose.material3.Switch(checked = crisis, onCheckedChange = { crisis = it })
+            AppSwitch(crisis, accent) { crisis = it }
         }
         Spacer(Modifier.height(12.dp))
         if (crisis) {
@@ -2307,15 +2311,21 @@ private fun FinishedView(vm: MasterViewModel, accent: Color, t: Strings) {
                 }
             }
         }
-        PrimaryButton(
-            label = t.close,
-            accent = accent,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(16.dp),
-            onClick = { vm.closePlayer() },
-        )
+        // Close va sobre una franja del color del fondo (TD-201). El boton es solo borde, y
+        // flotando sobre la lista la tarjeta que pasaba por debajo se leia dentro de el. El
+        // degradado de arriba ocupa el mismo hueco que antes era margen: el boton no se mueve.
+        val fondo = AppTheme.colors.bg
+        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+            Box(Modifier.fillMaxWidth().height(16.dp).background(Brush.verticalGradient(listOf(Color.Transparent, fondo))))
+            Box(Modifier.fillMaxWidth().background(fondo).padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                PrimaryButton(
+                    label = t.close,
+                    accent = accent,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { vm.closePlayer() },
+                )
+            }
+        }
     }
 }
 

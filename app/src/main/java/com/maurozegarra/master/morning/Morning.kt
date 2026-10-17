@@ -257,7 +257,19 @@ object MorningLog {
      * acostarse (TD-160), que se anotó la noche antes en esta misma mañana.
      */
     fun answer(existing: MorningEntry?, date: String, pain: Int, now: Long): MorningEntry =
-        (existing ?: MorningEntry(date)).copy(painOnWaking = pain, answeredAt = now, easedAt = null, fadeMin = null)
+        // Con 0 no hay nada que aflojar (TD-201): afloja en el mismo minuto. Sin minutos, la
+        // sesion volvia a preguntar toda la mañana, y quedaba una notificacion sin sentido.
+        (existing ?: MorningEntry(date)).copy(painOnWaking = pain, answeredAt = now, easedAt = now.takeIf { pain == 0 }, fadeMin = null)
+
+    /**
+     * [e] con el dolor corregido a [pain] (TD-201). A 0, los minutos pasan a 0; desde 0 a
+     * otro número, esos 0 minutos no eran una medida y se borran, para que vuelva "It eased".
+     */
+    fun withPain(e: MorningEntry, pain: Int): MorningEntry = when {
+        pain == 0 -> if (e.answeredAt != null) e.copy(painOnWaking = 0, easedAt = e.answeredAt, fadeMin = null) else e.copy(painOnWaking = 0, fadeMin = 0, easedAt = null)
+        e.painOnWaking == 0 -> e.copy(painOnWaking = pain, easedAt = null, fadeMin = null)
+        else -> e.copy(painOnWaking = pain)
+    }
 
     /** La mañana a la que pertenece acostarse a [millis]: de mediodía en adelante, la siguiente. */
     fun morningOf(millis: Long, zone: ZoneId): LocalDate {

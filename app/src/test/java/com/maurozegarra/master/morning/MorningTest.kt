@@ -289,4 +289,27 @@ class MorningTest {
         val semana = java.time.DayOfWeek.entries.toSet() - java.time.DayOfWeek.SATURDAY - java.time.DayOfWeek.SUNDAY
         assertEquals(semana, MorningSchedule.default(true).newAlarmDays())
     }
+
+    @Test
+    fun `dolor 0 afloja en el mismo minuto y no deja minutos por preguntar`() {
+        val e = MorningLog.answer(null, "2026-10-17", 0, 1_000L)
+        assertEquals(0, e.fadeMinutes)
+        // Con dolor si hay que esperar al "It eased".
+        assertNull(MorningLog.answer(null, "2026-10-17", 2, 1_000L).fadeMinutes)
+    }
+
+    @Test
+    fun `corregir el dolor a 0 pone los minutos en 0, y desde 0 los borra`() {
+        val con2 = MorningEntry("2026-10-17", painOnWaking = 2, answeredAt = 1_000L)
+        val a0 = MorningLog.withPain(con2, 0)
+        assertEquals(0, a0.fadeMinutes)
+        val de0a3 = MorningLog.withPain(a0, 3)
+        assertEquals(3, de0a3.painOnWaking)
+        assertNull(de0a3.fadeMinutes)
+        // Entre dos numeros con dolor, los minutos medidos se quedan.
+        val medido = con2.copy(easedAt = 1_000L + 15 * 60_000L)
+        assertEquals(15, MorningLog.withPain(medido, 4).fadeMinutes)
+        // Sin hora de contestar (vino de una sesion), queda el numero.
+        assertEquals(0, MorningLog.withPain(MorningEntry("2026-10-17", painOnWaking = 1, fadeMin = 10), 0).fadeMinutes)
+    }
 }

@@ -284,6 +284,8 @@ private fun Hoy(entry: MorningEntry?, zone: ZoneId, t: Strings, onEdit: (Int) ->
             Spacer(Modifier.height(6.dp))
         }
     }
+    // Con 0 no hubo nada que aflojar (TD-201): ni minutos ni "It eased".
+    if (pain == 0) return
     Spacer(Modifier.height(12.dp))
     val minutos = entry.fadeMinutes
     if (minutos != null) {

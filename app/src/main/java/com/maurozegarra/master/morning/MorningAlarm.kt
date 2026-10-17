@@ -119,7 +119,7 @@ object MorningAlarm {
             if (MorningLog.mayRecord(existente, now, zone) && !MorningLog.alreadyAnswered(existente, zone)) {
                 val entry = MorningLog.answer(existente, MorningLog.dateOf(now, zone), pain, now)
                 store.saveEntries(MorningLog.upsert(store.entries(), entry, LocalDate.now(zone)))
-                showEaseNotification(context)
+                if (pain > 0) showEaseNotification(context)
                 // Despertar empieza el dia del agua (TD-190): sin dia empezado no recuerda.
                 com.maurozegarra.master.water.WaterAlarm.reschedule(context)
             }
@@ -136,8 +136,13 @@ object MorningAlarm {
         val zone = ZoneId.systemDefault()
         val hoy = MorningLog.forDay(store.entries(), System.currentTimeMillis(), zone) ?: return
         if (!MorningLog.mayRecord(hoy, System.currentTimeMillis(), zone)) return
-        store.saveEntries(MorningLog.upsert(store.entries(), hoy.copy(painOnWaking = pain), LocalDate.now(zone)))
+        store.saveEntries(MorningLog.upsert(store.entries(), MorningLog.withPain(hoy, pain), LocalDate.now(zone)))
+        // Recien despierto: de 0 a otro numero vuelve a hacer falta el aviso, y a 0 sobra.
+        if (pain == 0) cancelEase(context) else if (hoy.painOnWaking == 0) showEaseNotification(context)
     }
+
+    private fun cancelEase(context: Context) =
+        context.getSystemService(NotificationManager::class.java).cancel(NOTIF_EASE)
 
     /**
      * Corrige el dolor de la mañana de [date] a cualquier hora, desde la pantalla Morning
@@ -151,7 +156,8 @@ object MorningAlarm {
         val store = MorningStore(context)
         val zone = ZoneId.systemDefault()
         val dia = store.entries().firstOrNull { it.date == date.toString() } ?: MorningEntry(date.toString())
-        store.saveEntries(MorningLog.upsert(store.entries(), dia.copy(painOnWaking = pain), LocalDate.now(zone)))
+        store.saveEntries(MorningLog.upsert(store.entries(), MorningLog.withPain(dia, pain), LocalDate.now(zone)))
+        if (pain == 0) cancelEase(context)
     }
 
     /**
