@@ -589,24 +589,26 @@ class LumbarTrainingTest {
         assertEquals(training, vuelta)
     }
 
-    // Revision 33 (12-oct): el tobillo izquierdo. Caminar se queda, el carry sale.
+    // Revision 33 (12-oct): el tobillo izquierdo. Revision 34 (16-oct): el carry vuelve a 10.
     private val tobillo = MasterDefaults.lumbarTraining("en", easedAnkle = true)
     private val tobilloCorto = MasterDefaults.lumbarShortTraining("en", easedAnkle = true)
     private fun ids(t: com.maurozegarra.master.model.Training) = t.workouts.flatMap { it.exercises }.map { it.exerciseId }
 
     @Test
-    fun `con el tobillo no hay carry, ni en el completo ni en el corto`() {
-        assertFalse(ids(tobillo).contains("ex_suitcase_carry"))
-        assertFalse(ids(tobilloCorto).contains("ex_suitcase_carry"))
-        // El corto no se queda con un bloque vacio.
-        assertEquals(listOf("Warm Walk", "Mobility", "McGill Big 3", "Cool Walk"), tobilloCorto.workouts.map { it.name })
+    fun `con el tobillo el carry va a 10 en las tres, en el completo y en el corto`() {
+        listOf(tobillo, tobilloCorto).forEach { t ->
+            val carry = t.workouts.flatMap { it.exercises }.single { it.exerciseId == "ex_suitcase_carry" }
+            assertEquals(listOf(10.0, 10.0, 10.0), carry.setList.map { it.weight })
+            assertTrue(carry.note.contains("turns"))
+        }
+        assertEquals(listOf("Warm Walk", "Mobility", "McGill Big 3", "Carry", "Cool Walk"), tobilloCorto.workouts.map { it.name })
     }
 
     @Test
-    fun `con el tobillo se camina igual, empezando a 5`() {
+    fun `con el tobillo las caminatas vuelven a 6 y 5`() {
         listOf(tobillo, tobilloCorto).forEach { t ->
             val walks = t.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
-            assertEquals(listOf(5.0, 5.0), walks.map { it.speedKmh })
+            assertEquals(listOf(6.0, 5.0), walks.map { it.speedKmh })
         }
     }
 

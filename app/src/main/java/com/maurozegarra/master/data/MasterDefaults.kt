@@ -410,8 +410,10 @@ object MasterDefaults {
      * 20 · 20, tras tres sesiones "bien" y sin malestar.
      *
      * Revision 33 (12-oct): el tobillo izquierdo, ver [LUMBAR_ANKLE_EASED].
+     *
+     * Revision 34 (16-oct): el tobillo mejora; vuelve el carry a 10 y las caminatas a 6.
      */
-    const val LUMBAR_REVISION = 33
+    const val LUMBAR_REVISION = 34
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -427,6 +429,11 @@ object MasterDefaults {
      *
      * Volver a lo normal es poner esto en false y subir la revision, cuando camine sin notar
      * el tobillo. Decidido con el el 12-oct (coach-log).
+     *
+     * Revision 34 (16-oct): camina normal y sin dolor; solo molesta en los extremos del rango.
+     * Las caminatas vuelven a 6 y el carry vuelve, pero a 10 · 10 · 10 y no a 15: su pasillo
+     * mide 6-7 m y en las vueltas no se siente confiado girando con peso. El peso lo eligio el.
+     * El box squat sigue en 17.5 y los circulos de tobillo se quedan.
      */
     const val LUMBAR_ANKLE_EASED = true
 
@@ -514,7 +521,7 @@ object MasterDefaults {
             // Revision 29: el jueves 8, feriado, cambiado con el viernes (ver LUMBAR_REVISION).
             scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 8)),
             workouts = listOf(
-                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = if (easedAnkle) 5.0 else 6.0),
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
                 b.mobility(ankle = easedAnkle),
                 b.mcgill(),
                 b.hipGlute(eased = easedHip, bandWalk = bandWalk, ankle = easedAnkle),
@@ -608,16 +615,13 @@ object MasterDefaults {
             // Revision 29: el viernes 9, cambiado con el jueves feriado (ver LUMBAR_REVISION).
             scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 9)),
             workouts = listOf(
-                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = if (easedAnkle) 5.0 else 6.0),
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = 6.0),
                 b.mobility(ankle = easedAnkle),
                 // Revision 27 (3-oct): McGill COMPLETO, como en el dia malo (revision 26). Iba a la
                 // mitad por el tiempo de los dias presenciales; el lo pidio completo porque lo
                 // alivia, a prueba esta semana: son unos 6 minutos mas.
                 b.mcgill(),
-            ) + listOfNotNull(
-                // Revision 33: sin carry mientras dure lo del tobillo; el bloque entero, no vacio.
-                if (easedAnkle) null else b.carryOnly(),
-            ) + listOf(
+                b.carryOnly(ankle = easedAnkle),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
             createdAt = now,
@@ -2062,10 +2066,10 @@ object MasterDefaults {
          * nada, y ademas es caminar cargado -que es lo que mas le ha movido el dolor-. El
          * puente y la sentadilla se quedan para los dias en casa.
          */
-        fun carryOnly(): Workout = Workout(
+        fun carryOnly(ankle: Boolean = false): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Carry" else "Carry",
-            exercises = listOf(carry()),
+            exercises = listOf(carry(ankle)),
         )
 
         /**
@@ -2077,8 +2081,13 @@ object MasterDefaults {
          * serie a serie. Todas las series de una mano y despues las de la otra, como la
          * plancha; los pesos van en rampa en cada lado.
          */
-        private fun carry(weights: List<Double> = listOf(15.0, 17.5, 20.0)): Exercise =
-            loaded("ex_suitcase_carry", 36, "3 laps of the hallway: 36 m. Walk tall, don't lean", weights, WeightType.DUMBBELL)
+        // Revision 34: con el tobillo, 10 en las tres y la nota de las vueltas (ver [LUMBAR_ANKLE_EASED]).
+        private fun carry(ankle: Boolean = false): Exercise =
+            loaded(
+                "ex_suitcase_carry", 36,
+                if (ankle) "Short steps at the turns, don't pivot on the loaded foot" else "3 laps of the hallway: 36 m. Walk tall, don't lean",
+                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL,
+            )
                 // Alternando (TD-156, revision 16): izquierda y derecha seguidas, y el descanso
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
                 .copy(dumbbellCount = 1, workMode = WorkMode.DISTANCE, sides = listOf("Left", "Right"), alternateSides = true)
@@ -2142,8 +2151,8 @@ object MasterDefaults {
                 // Revision 13: los dos primeros viajes ligeros el 22-sep y el tercero "bien"
                 // por segunda vez, asi que la rampa sube entera y 20 pasa a ser la cima.
                 // Revision 28: la rampa entera tambien aliviado (ver [LUMBAR_HIP_EASED]).
-                // Revision 33: fuera por el tobillo (ver [LUMBAR_ANKLE_EASED]).
-                if (ankle) null else carry(),
+                // Revision 33: fuera por el tobillo. Revision 34: vuelve a 10 (ver [LUMBAR_ANKLE_EASED]).
+                carry(ankle),
                 // Igual: "ligero" en las tres el 17-sep, y las dos primeras el 18.
                 // Despues de 20 viene la de 22.5 -no estaba en el inventario del 18-sep; la
                 // agrego el usuario el 19- y despues 25. El salto de 22.5 a 25 es de 11%.

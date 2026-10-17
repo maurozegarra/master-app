@@ -59,7 +59,9 @@ La de 22.5 no entro en el inventario del 18-sep; la agrego el 19.
 
 ### Otros pesos
 
-- **Kettlebells:** 2 de 4 kg. Es lo único con poco margen.
+- **Kettlebells (pesas rusas), en pares:** 4 · 6 · 8 · 10 · 12 · 14 · 16 · 20 kg. Hasta el
+  16-oct-2026 eran solo las 2 de 4; ese día ya estaban las demás. Falta la de 18, y piensa
+  comprar más de 20 más adelante.
 - **Chaleco lastrado:** hasta 10 kg, de kilo en kilo.
 - **Tobilleras:** pares de 0.5, 1, 2 y 4 kg.
 - **Banda elástica:** una sola, ligera, en uso para manguito rotador.
