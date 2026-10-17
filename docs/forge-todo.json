@@ -2,6 +2,37 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-201",
+      "title": "Fin de sesión: Close con fondo, switch del app, y con dolor 0 no se preguntan los minutos (ni en la sesión ni en la alarma)",
+      "category": "UI",
+      "status": "pending",
+      "test": [
+        "com.maurozegarra.master.morning.MorningTest"
+      ],
+      "manual": "PEDIDO el 16-oct, con captura del fin del LUMBAR. Tres cosas:\n\n1. EL CLOSE ERA TRANSPARENTE: solo borde, flotando sobre la lista; al hacer scroll la tarjeta de 'Box Squat 20 kg' se veía dentro del botón. Ahora va sobre una franja del color del fondo, con un degradé corto arriba.\n\n2. EL SWITCH DE 'Back crisis today' era el de Material (52x32), no el AppSwitch del app (el de Samsung, 32x20).\n\n3. DOLOR 0: \"si está en 0 por qué me pide Minutes until it eased\". En la sesión, con 0 se oculta la pregunta de los minutos. En la alarma, contestar 0 no deja la notificación 'Tap when it eases' y la mañana queda con 0 minutos (sin eso la sesión volvía a preguntar todo: morningAnsweredFor pide dolor Y minutos). En Morning, con 0 no sale 'It eased'; corregir de 0 a otro número borra esos 0 minutos y vuelve el botón; corregir a 0 los pone y quita la notificación.\n\nPROBAR: terminar un training con dolor (o una prueba no sirve: no pregunta), marcar 0 y ver que desaparecen los minutos; el switch chico; scroll hasta abajo y que nada se vea a través de Close. Mañana, contestar la alarma con 0: sin notificación, y la sesión no pregunta la mañana."
+    },
+    {
+      "id": "TD-200",
+      "title": "Rediseño de la alarma desechable: separar timer y alarma (pestañas o algo así) y poner una hora sin calcular",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PEDIDO el 14-oct, A PROPONER con él antes de tocar nada (él pidió ayuda con la propuesta).\n\nEL PROBLEMA: hoy la alarma desechable vive dentro del sheet del timer (+ → Custom). Los chips de 'Ends at' son solo las seis horas siguientes múltiplos de 5 min (unos 30 min hacia adelante); para una hora más lejana hay que calcular la duración y marcarla en el teclado, y prender 'Ring as alarm' a mano. Sus palabras: \"cuando uno habla de alarma, justamente no quiere ponerse a calcular\". Así nació TD-195: el 9-oct descansó de 13:30 a 14:00 y tuvo que usar su alarma vieja.\n\nLA IDEA SUYA: una pestaña para timer y otra para alarma, \"o algo así\". La alarma se pone por HORA (13:30, 14:00), no por duración.\n\nA DEFINIR: dónde viven las pestañas (el sheet del + de T\\MES, o una pantalla propia); cómo se elige la hora (WheelTimePicker del app, el reloj de 12 h del agua, chips más amplios); si la alarma se queda desechable (suena una vez y se va) o puede repetirse, y cómo convive con las alarmas de la mañana del despertador; qué pasa con 'Ring as alarm' en el timer.\n\nCONTEXTO: TD-198 dejó la franja con ↻ y play/pausa y borrar deslizando (alarma con confirmación). Al terminar, timer y alarma se borran solos de la franja."
+    },
+    {
+      "id": "TD-199",
+      "title": "Compilar rápido al iterar: build dev sin R8, daemon y sin tests en build-debug",
+      "category": "Forge",
+      "status": "pending",
+      "manual": "PEDIDO el 14-oct, a partir de la nota del agente de watchwall en AGENTS.md: \"demora demasiado entre cada compilación, sacrifica lo que tengas que sacrificar\".\n\nHECHO: gradle.properties a la medida de la PC (16 GB, 16 hilos: 4 GB, GC paralelo, parallel, caching, configuration-cache); sin --no-daemon en los scripts; buildType dev = release sin R8 ni shrink, misma firma y applicationId; build-debug.ps1 compila dev y corre tests solo con -Tests; run-tests.ps1 corre testDebugUnitTest y no test (la suite iba una vez por variante).\n\nMEDIDO: build-debug.ps1 de ~3 min 30 s a 27 s caliente (1 min 50 s en frío). verify-compile.ps1, 3 s con caché. Lo que se sacrifica: el APK de iteración pesa ~14 MB en vez de 2, y los tests ya no corren en cada instalación."
+    },
+    {
+      "id": "TD-198",
+      "title": "Timer del tablero: el + dentro de la tarjeta, en una franja fija al pie",
+      "category": "UI",
+      "status": "pending",
+      "manual": "PEDIDO el 12-oct. El + de la franja del timer (TD-195) no le convence: es el único + del app con círculo (los de Water y Morning son el ícono solo), y al agregar un timer 'se pone más raro'. El tablero está anclado al fondo de la pantalla, así que la tarjeta crece HACIA ARRIBA; el + estaba alineado arriba, subía con ella y dejaba un vacío abajo a su derecha. Además de feo, el control se movía (lineamiento: los controles no saltan).\n\nDECIDIDO con él (opción 1 de dos): la tarjeta a todo el ancho y, al pie, una franja fija con el encabezado de las tarjetas del tablero (ícono chico y 'Timers' en gris) y el + a la derecha, sin círculo, como el de Water. Los timers aparecen encima del potty y empujan hacia arriba; la franja no se mueve.\n\nPRIMERA VERSIÓN v1.0.445 (12-oct): T\\MES en gris (12 dp) en lugar de \"Timers\", porque la franja tiene timers y alarmas; pidió el wordmark de su mini-timer. Lo nuevo entra arriba (TimerPlan.stripOrder).\n\n14-oct: fuera el potty fijo de la pantalla principal, a pedido suyo; sin timers queda solo la franja. Con eso el potty vuelve a recientes como cualquier otro. Siguen otros arreglos de la alarma desechable (\"cuando uno habla de alarma, no quiere ponerse a calcular\"): hoy una hora lejana obliga a calcular la duración.\n\n14-oct, segundo ajuste (v1.0.449): fuera la ✕ al lado del play (no le gustaba y se tocaba sin querer). Como en su mini-timer: ↻ Restart (duración completa, en pausa, TimerPlan.restart) y play/pausa al borde, en la columna del +. Borrar es deslizar la fila a la izquierda (SwipeActionsRow, el panel de la lista de trainings y del agua): un timer se borra directo, una alarma pide confirmación."
+    },
+    {
       "id": "TD-197",
       "title": "Cargar 'ir sumando': entre series solo se agregan discos, y el player dice cuál",
       "category": "Feature",
