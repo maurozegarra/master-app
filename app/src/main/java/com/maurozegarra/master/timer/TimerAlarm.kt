@@ -34,16 +34,15 @@ object TimerAlarm {
         val store = TimerStore(context)
         val run = TimerPlan.start(UUID.randomUUID().toString(), name, durationMs, alarm, System.currentTimeMillis())
         store.saveRuns(store.runs() + run)
-        // El potty no va a recientes: ya está siempre en la franja.
-        if (run.name != TimerPlan.POTTY_NAME) {
-            store.saveRecents(TimerPlan.addRecent(store.recents(), RecentTimer(run.name, durationMs, alarm)))
-        }
+        store.saveRecents(TimerPlan.addRecent(store.recents(), RecentTimer(run.name, durationMs, alarm)))
         schedule(context, run)
     }
 
     fun pause(context: Context, id: String) = update(context, id) { TimerPlan.pause(it, System.currentTimeMillis()) }
 
     fun resume(context: Context, id: String) = update(context, id) { TimerPlan.resume(it, System.currentTimeMillis()) }
+
+    fun restart(context: Context, id: String) = update(context, id) { TimerPlan.restart(it) }
 
     fun cancel(context: Context, id: String) {
         val store = TimerStore(context)

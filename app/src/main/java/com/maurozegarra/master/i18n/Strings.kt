@@ -753,6 +753,9 @@ data class TimerStrings(
     val pause: String = "Pause",
     val resume: String = "Resume",
     val cancel: String = "Cancel",
+    val restart: String = "Restart",
+    /** Borrar una alarma pide confirmación; un timer se borra directo (TD-198). */
+    val deleteAlarmConfirm: String = "Delete the alarm that rings at %s?",
     val done: String = "Time's up",
     val snooze: String = "Snooze 5 min",
     val dismiss: String = "Dismiss",

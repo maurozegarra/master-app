@@ -29,10 +29,6 @@ data class RecentTimer(val name: String, val durationMs: Long, val alarm: Boolea
 /** Las reglas del timer, sin Android, para probarlas. */
 object TimerPlan {
 
-    /** El potty: fijo, de 5 minutos, para no demorar en el baño (7-oct). */
-    const val POTTY_NAME = "potty"
-    const val POTTY_MS = 5 * 60_000L
-
     /** Los presets de su Galaxy Watch8 (9-oct), en segundos. */
     val PRESETS_SEC: List<Int> = listOf(30, 60, 120, 180, 240, 300, 600, 900, 1200, 1500, 1800, 3600)
 
@@ -50,8 +46,21 @@ object TimerPlan {
     fun pause(run: TimerRun, now: Long): TimerRun =
         if (run.paused) run else run.copy(pausedLeftMs = (run.endAt - now).coerceAtLeast(0))
 
+    /**
+     * "Restart", el ↻ de su mini-timer (TD-198): vuelve a la duración completa y queda en
+     * pausa, listo para darle play. Uno con "Ends at" vuelve a lo que faltaba al crearlo.
+     */
+    fun restart(run: TimerRun): TimerRun = run.copy(pausedLeftMs = run.durationMs)
+
     fun resume(run: TimerRun, now: Long): TimerRun =
         run.pausedLeftMs?.let { run.copy(endAt = now + it, pausedLeftMs = null) } ?: run
+
+    /**
+     * El orden de la franja del tablero: el último que arrancó, arriba (TD-198). Se guardan en
+     * el orden en que arrancaron; el tablero está anclado al fondo y la franja crece hacia
+     * arriba, así que lo nuevo aparece arriba y lo de abajo -el potty y el +- no se mueve.
+     */
+    fun stripOrder(runs: List<TimerRun>): List<TimerRun> = runs.asReversed()
 
     /** Lo último arriba, sin repetir el mismo timer, y solo [RECENT_MAX]. */
     fun addRecent(list: List<RecentTimer>, r: RecentTimer): List<RecentTimer> =

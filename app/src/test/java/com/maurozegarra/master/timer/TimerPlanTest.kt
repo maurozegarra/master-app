@@ -31,7 +31,7 @@ class TimerPlanTest {
         assertEquals(0L, TimerPlan.digitsToMs(""))
         assertEquals("1:30", TimerPlan.format(90_000))
         assertEquals("1:00:00", TimerPlan.format(3_600_000))
-        assertEquals("5:00", TimerPlan.format(TimerPlan.POTTY_MS))
+        assertEquals("5:00", TimerPlan.format(5 * 60_000L))
     }
 
     @Test
@@ -65,9 +65,30 @@ class TimerPlanTest {
     }
 
     @Test
+    fun `restart vuelve a la duracion completa, en pausa`() {
+        val corriendo = TimerPlan.start("a", "tea", 240_000, false, at(9, 0))
+        val r = TimerPlan.restart(corriendo)
+        assertEquals(240_000L, r.pausedLeftMs)
+        assertEquals(240_000L, TimerPlan.left(r, at(9, 3)))
+        // Desde la pausa tambien, y al darle play cuenta los cuatro minutos enteros.
+        val pausado = TimerPlan.pause(corriendo, at(9, 1))
+        assertEquals(at(9, 7) + 240_000, TimerPlan.resume(TimerPlan.restart(pausado), at(9, 7)).endAt)
+    }
+
+    @Test
+    fun `en la franja el ultimo que arranco va arriba`() {
+        val runs = listOf(
+            TimerPlan.start("a", "potty", 5 * 60_000L, false, at(9, 0)),
+            TimerPlan.start("b", "tea", 240_000, false, at(9, 1)),
+            TimerPlan.start("c", "nap", 1_800_000, true, at(9, 2)),
+        )
+        assertEquals(listOf("c", "b", "a"), TimerPlan.stripOrder(runs).map { it.id })
+    }
+
+    @Test
     fun `ida y vuelta por JSON, con la pausa`() {
         val runs = listOf(
-            TimerPlan.start("a", "potty", TimerPlan.POTTY_MS, false, at(9, 0)),
+            TimerPlan.start("a", "potty", 5 * 60_000L, false, at(9, 0)),
             TimerPlan.pause(TimerPlan.start("b", "nap", 1_800_000, true, at(13, 30)), at(13, 31)),
         )
         assertEquals(runs, TimerPlan.decodeRuns(TimerPlan.encodeRuns(runs)))
