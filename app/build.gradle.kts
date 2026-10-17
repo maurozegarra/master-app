@@ -13,8 +13,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // Versionado: +1 por cada APK generado. Primer APK: 1.0.1 (Fase 7).
-        versionCode = 444
-        versionName = "1.0.444"
+        versionCode = 451
+        versionName = "1.0.451"
     }
 
     buildTypes {
@@ -28,6 +28,15 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        // Para iterar (14-oct-2026): el release sin R8, que era el paso mas lento. Misma firma y
+        // mismo applicationId, asi que se instala encima del release sin perder datos. El
+        // minificado queda para verify-compile.ps1 y build-release.ps1.
+        create("dev") {
+            initWith(getByName("release"))
+            isMinifyEnabled = false
+            isShrinkResources = false
+            matchingFallbacks += listOf("release")
         }
     }
 

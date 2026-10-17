@@ -87,8 +87,9 @@ Lee `docs/forge-todo.json`, deriva el estado de cada item (tests + git log), gen
 - `.\forge-status.ps1 -SkipTests` — usa resultados existentes (instantáneo).
 
 ### `build-debug.ps1` — Iteración rápida
-Corre tests, compila release (minificado), instala en el device, copia APK a `releases/`
-(conservando los últimos 3), bumpea versionCode. Ante un install fallido **aborta**: no
+Compila el build `dev` (el release sin R8, ver "Compilar rápido"), instala en el device,
+copia APK a `releases/` (conservando los últimos 3), bumpea versionCode. Sin tests, salvo con
+`-Tests`. Ante un install fallido **aborta**: no
 desinstala nunca.
 
 ```powershell
@@ -109,6 +110,27 @@ Corre tests, compila release, sube APK a GitHub Releases, actualiza `update.json
 ```powershell
 .\build-release.ps1 -Message "release: TD-NNN descripción"
 ```
+
+### Compilar rápido (14-oct-2026)
+
+Pedido de Mauro, a partir de una nota que dejó el agente de `watchwall`: *"demora demasiado
+entre cada compilación, sacrifica lo que tengas que sacrificar"*. `build-debug.ps1` tardaba
+unos **3 min 30 s**. Ahora tarda **27 s** con el daemon caliente y 1 min 50 s en frío.
+
+- **`gradle.properties`:** la PC tiene 16 GB y 16 hilos, y Gradle iba con 1 GB, GC serial y
+  2 workers. Ahora 4 GB, GC paralelo, workers por defecto, `parallel`, `caching` y
+  `configuration-cache`.
+- **Sin `--no-daemon`** en los scripts: cada build arrancaba la JVM en frío.
+- **Build `dev`** (`app/build.gradle.kts`): el release sin R8 ni shrink, con la misma firma y
+  el mismo `applicationId`, así que se instala encima sin perder datos. Pesa unos 14 MB en
+  vez de 2. `build-debug.ps1` compila este.
+- **Los tests no corren en `build-debug.ps1`** salvo con `-Tests`. Siguen siendo la puerta de
+  `verify-compile.ps1` (antes de commit) y de `build-release.ps1`.
+- **`run-tests.ps1` corre `testDebugUnitTest`**, no `test`, que corría la suite una vez por
+  cada variante (debug, release y ahora dev).
+
+El minificado no se pierde: `verify-compile.ps1` compila el release y `build-release.ps1`
+publica el release minificado de siempre.
 
 ## Cómo poner contenido en el teléfono
 
@@ -264,7 +286,7 @@ dispositivo, no un camino para meter contenido.
 - **Lanzar el app tras instalar** con `adb shell monkey -p com.maurozegarra.master -c android.intent.category.LAUNCHER 1` para que el usuario pueda probar de inmediato.
 - **Reportar tras instalar:** tras cada `build-debug.ps1` o instalación, reportar al usuario: número de versión instalada, qué TD se probó, y pasos concretos para verificar el cambio en el dispositivo (qué mirar, qué interactuar).
 - **Push = GitHub Release.** Cuando el usuario pida "push", proponer `build-release.ps1` (sube APK a GitHub Releases + actualiza `update.json` + commit + push), no `git push` solo.
-- **Minificar siempre**: el APK release pesa ~1.2MB vs ~16MB en debug.
+- **Minificar lo que se publica**: el APK release pesa ~2 MB y el `dev` ~14 MB. Se itera con `dev` y se publica con `build-release.ps1`, que minifica.
 - **Firma estable**: el release se firma con la clave debug para permitir updates sin desinstalar.
 - **Versionado**: +1 por cada APK generado. `versionCode` y `versionName` en `app/build.gradle.kts`.
 - **Idioma**: solo inglés en la app. Comunicación con el usuario en español.

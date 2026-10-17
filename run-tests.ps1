@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
 
 Write-Host "Running unit tests..."
-& "$PSScriptRoot\gradlew.bat" test --no-daemon --console=plain
+& "$PSScriptRoot\gradlew.bat" testDebugUnitTest --console=plain
 if ($LASTEXITCODE -ne 0) { throw "Unit tests failed (exit $LASTEXITCODE). Fix tests before building." }
 
 Write-Host "OK -> all tests passed"

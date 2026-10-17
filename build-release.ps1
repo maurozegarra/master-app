@@ -30,7 +30,7 @@ if ($Bump) {
 
 & "$PSScriptRoot\run-tests.ps1"
 
-& "$PSScriptRoot\gradlew.bat" assembleRelease --no-daemon --console=plain
+& "$PSScriptRoot\gradlew.bat" assembleRelease --console=plain
 if ($LASTEXITCODE -ne 0) { throw "Gradle assembleRelease failed (exit $LASTEXITCODE)" }
 
 $apkSrc = Join-Path $PSScriptRoot 'app\build\outputs\apk\release\app-release.apk'

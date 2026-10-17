@@ -1,5 +1,8 @@
 param(
-    [string]$Message = ''
+    [string]$Message = '',
+    # Los tests no corren por defecto (14-oct-2026): iterar tiene que ser rapido, y la suite
+    # completa ya es la puerta de verify-compile.ps1 antes de cada commit. -Tests los corre.
+    [switch]$Tests
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,12 +26,13 @@ Set-Content $gradleFile $gc -NoNewline
 
 Write-Host "Building v$newVersionName (code $newVersionCode)..."
 
-& "$PSScriptRoot\run-tests.ps1"
+if ($Tests) { & "$PSScriptRoot\run-tests.ps1" }
 
-& "$PSScriptRoot\gradlew.bat" assembleRelease --no-daemon --console=plain
-if ($LASTEXITCODE -ne 0) { throw "Gradle assembleRelease failed (exit $LASTEXITCODE)" }
+# El build "dev": el release sin R8 (ver app/build.gradle.kts). Misma firma, se instala encima.
+& "$PSScriptRoot\gradlew.bat" assembleDev --console=plain
+if ($LASTEXITCODE -ne 0) { throw "Gradle assembleDev failed (exit $LASTEXITCODE)" }
 
-$apkSrc = Join-Path $PSScriptRoot 'app\build\outputs\apk\release\app-release.apk'
+$apkSrc = Join-Path $PSScriptRoot 'app\build\outputs\apk\dev\app-dev.apk'
 if (-not (Test-Path $apkSrc)) { throw "No se encontro el APK generado: $apkSrc" }
 
 # Copia a releases/

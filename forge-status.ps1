@@ -38,7 +38,7 @@ $needTests = $autoTestItems -and -not $SkipTests
 
 if ($needTests) {
     Write-Host "Running tests for forge-status..."
-    & "$repoRoot\gradlew.bat" test --no-daemon --console=plain 2>&1 | Out-Null
+    & "$repoRoot\gradlew.bat" testDebugUnitTest --console=plain 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) {
         Write-Host "WARN -> tests failed; items auto+test se marcaran segun resultados" -ForegroundColor Yellow
     }

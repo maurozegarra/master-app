@@ -6,7 +6,7 @@ $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
 
 & "$PSScriptRoot\run-tests.ps1"
 
-& "$PSScriptRoot\gradlew.bat" compileReleaseKotlin --no-daemon --console=plain
+& "$PSScriptRoot\gradlew.bat" compileReleaseKotlin --console=plain
 if ($LASTEXITCODE -ne 0) { throw "Gradle compileReleaseKotlin failed (exit $LASTEXITCODE)" }
 
 Write-Host ""
