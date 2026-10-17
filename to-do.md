@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **171 / 193** hechos, 21 pendientes, 1 descartados.
+Progreso: **175 / 202** hechos, 26 pendientes, 1 descartados.
 
 ## Pendientes
 
@@ -23,6 +23,34 @@ DESEABLE, no prioridad, decidido por el usuario el 23-sep: "la he visto bastante
 
 ### Feature
 
+- [ ] **TD-202** Pesa rusa como tipo de peso propio, con su ícono, como la mancuerna y la barra
+  - PEDIDO el 17-oct. Desde el 16-oct hay pesas rusas en pares (4 · 6 · 8 · 10 · 12 · 14 · 16 · 20, HomeGym.KETTLEBELLS), y la revisión 35 pasó el carry a pesa rusa 12 · 14 · 16. El app no tiene ese tipo: el carry va como WeightType.DUMBBELL con una nota que empieza con 'Kettlebell', y en el app se ve como mancuerna. Sus palabras: "agregar un ícono de kettlebell al igual que ya tenemos para mancuerna y barra".
+
+A VER: un WeightType.KETTLEBELL (o la mancuerna con variante) con su ícono en el editor, el player y el historial; '1 o 2' como la mancuerna; RoutinesFitEquipmentTest que valide contra KETTLEBELLS por el tipo y no por la nota (hoy mira exerciseId + nota); el respaldo y la sincronización con el tipo nuevo (un teléfono con app vieja tiene que leerlo sin romperse). El carry del lumbar pasa al tipo nuevo con la misma serie de pesos, para no partir el historial.
+- [ ] **TD-200** Rediseño de la alarma desechable: separar timer y alarma (pestañas o algo así) y poner una hora sin calcular
+  - PEDIDO el 14-oct, A PROPONER con él antes de tocar nada (él pidió ayuda con la propuesta).
+
+EL PROBLEMA: hoy la alarma desechable vive dentro del sheet del timer (+ → Custom). Los chips de 'Ends at' son solo las seis horas siguientes múltiplos de 5 min (unos 30 min hacia adelante); para una hora más lejana hay que calcular la duración y marcarla en el teclado, y prender 'Ring as alarm' a mano. Sus palabras: "cuando uno habla de alarma, justamente no quiere ponerse a calcular". Así nació TD-195: el 9-oct descansó de 13:30 a 14:00 y tuvo que usar su alarma vieja.
+
+LA IDEA SUYA: una pestaña para timer y otra para alarma, "o algo así". La alarma se pone por HORA (13:30, 14:00), no por duración.
+
+A DEFINIR: dónde viven las pestañas (el sheet del + de T\MES, o una pantalla propia); cómo se elige la hora (WheelTimePicker del app, el reloj de 12 h del agua, chips más amplios); si la alarma se queda desechable (suena una vez y se va) o puede repetirse, y cómo convive con las alarmas de la mañana del despertador; qué pasa con 'Ring as alarm' en el timer.
+
+CONTEXTO: TD-198 dejó la franja con ↻ y play/pausa y borrar deslizando (alarma con confirmación). Al terminar, timer y alarma se borran solos de la franja.
+- [ ] **TD-197** Cargar 'ir sumando': entre series solo se agregan discos, y el player dice cuál
+  - PEDIDO el 10-oct, A REVISAR con él antes de tocar nada. Cambiar discos entre series es parte del 'trámite' del puente (A de su lista: armar los discos, rodar la barra, colchoneta y pies, poner los steps). Hoy saca y pone; sus collarines ya son de palanca, de un toque, así que el trámite no es el collarín.
+
+LA IDEA: con una rampa que sube, no sacar nunca: solo sumar. Puente 16 · 21 · 26 sobre la EZ de 6 kg = por lado 5, luego +2.5, luego +2.5 (tiene dos de 2.5 por lado). Se descarga una sola vez al final.
+
+A DEFINIR: (1) si las rampas se arman pensando en sumar (pasos que salgan de los discos que tiene, ver equipo.md); (2) que el player diga qué disco sumar, '+2.5 por lado', además del total; (3) qué pasa si una serie baja de peso (vuelve el sacar y poner). Lo prueba el martes 13-oct con la EZ, a mano.
+- [ ] **TD-196** Controlar otros aparatos desde su S26: la tablet de cámaras y el volumen del teléfono de NIKO
+  - PEDIDO el 10-oct, A DISEÑAR con él antes de tocar nada.
+
+(1) LA TABLET DE CÁMARAS (Galaxy Tab A9+). Desde el 10-oct muestra sus 9 cámaras Xiaomi en tres columnas, con tres copias de Xiaomi Home (perfil normal, Carpeta segura y perfil de trabajo de Island) y la pantalla siempre prendida con el cargador (stay_on_while_plugged_in = 7). La Carpeta segura ya no se bloquea al apagar la pantalla. Lo que falta: a veces necesita apagarla, y Xiaomi pausa el video cada vez que la pantalla se bloquea o algo lo tapa; hay que tocar play en cada columna. Quiere, desde su S26, apagar o prender la pantalla y darle 'play' a todo de un toque.
+
+(2) EL VOLUMEN DEL TELÉFONO DE NIKO. Antes usaba MacroDroid: un botón en su teléfono que, activado, no la dejaba subir el volumen del suyo. Lo extrañó el 10-oct: entrenando juntos ella se emociona y lo pone muy alto.
+
+IDEAS, sin decidir: un app (o una parte de MASTER) en cada aparato que reciba órdenes del S26, por la red de la casa o por Supabase, como ya viajan los trainings; para la tablet, un servicio de accesibilidad que apriete los play (frágil si Xiaomi mueve el botón); para el volumen, escuchar los cambios de volumen y devolverlo al tope. Mientras tanto, MacroDroid sigue existiendo y puede cubrir lo del volumen.
 - [ ] **TD-190** Agua: registrar lo que tomo, con recordatorios que se adaptan a lo que de verdad tomé
   - PEDIDO el 4-oct: "un componente más, similar a la alarma, para registrar mi consumo de agua", con "inteligencia". Lo que le molesta de su app actual (captura del 4-oct): recuerda por horario fijo (desde las 7, cada hora) aunque se levante a las 9:50 y acabe de tomar; no acelera cuando va atrasado; sigue recordando tras una botella de 600 aunque vaya adelante; y después de anotar 600 sugiere 600, cuando su vaso es de 200.
 
@@ -43,6 +71,8 @@ EN USO, 5-oct (primer día presencial): 2,100 ml, casi exacto al horario de ofic
 RESUELTO el 6-oct (v1.0.404), con su lógica: la botella no vence entera a su hora, se va tomando. Presencial: las botellas van en vasos por hora (9, 10, 11 y 14, 15, 16). Pasado el horario la cadencia sigue, un vaso por hora hasta cortar, así que lo que falta se pide a la hora siguiente y no cada media hora. Su caso del lunes, 500 ml a las 14:02 con 1,900: Next 17:00. Con un vaso o más de atraso sigue cada 30 min.
 
 AJUSTES del 8-oct (v1.0.420 a 1.0.428), con él: avisos en :00/:30 y nunca a menos de 15 min del último trago (10:45 → 11:00, 10:46 → 11:30); cualquier hora del horario sin cubrir avisa. Cada hora tiene su bebida y se anota con ella: la primera del día creatina, 12:30 sopa, 13:00 limonada, el desayuno repite el último. Botellas del día presencial: con gas 600 a las 9 (Sparkling) y sin gas 500 a las 14 (Bottle), dosificadas por tercios; los 100 ml que faltan se piden en casa a las 20:00. Corte 1 h 30 antes de dormir. Botón Bottle en vez de 600 ml. 'Pace' dibuja la botella con lo que queda (2/3, 1/3, vacía), contando desde la hora en punto más cercana. Arreglado: dos tomas en el mismo minuto tumbaban la pantalla. PENDIENTE: la botella de 'Pace' puede ser más grande, hay espacio en la tarjeta.
+
+ARREGLADO el 9-oct, de fondo, a pedido suyo ("no vaya a ser que hagas un parche sobre ese parche"): (1) EL AGUA NO AVISO en todo el 8 y el 9. La alarma sonaba (12 veces desde el 8 a las 14:23) pero, al sonar, remind() volvía a calcular la hora con el reloj: el aviso de las 11:30 suena a las 11:30 y algo, la regla lo llevaba al siguiente :00/:30 (12:00) y reprogramaba sin avisar, todo el día. Lo rompió el ajuste de los 15 min del 8-oct (v1.0.428). Ahora la alarma programada es la decisión: al sonar solo se mira el estado (día empezado y meta sin cumplir, WaterPlan.shouldRemind), y todo lo que cambia el cálculo la reprograma; se sumó cambiar la alarma, los feriados o la hora de dormir (MorningAlarm.reschedule reprograma el agua). (2) DOS TOMAS SEGUIDAS: la identidad de una toma era su hora, y el 8-oct se 'arregló' corriendo la repetida un milisegundo. Ahora cada toma tiene su id (WaterLog.id); la lista, borrar y corregir van por id, y se quitó WaterPlan.unique. Lo guardado y los respaldos sin id lo reciben al leerse y se guardan en el acto.
 - [ ] **TD-185** Avatar por perfil: en el selector Me / NIKO y donde aparezca su nombre
   - SEPARADO de TD-169 el 3-oct-2026, a pedido del usuario: "el avatar después". A DECIDIR: foto propia o iniciales con color.
 - [ ] **TD-159** Alarma: etiquetas de la noche, para cruzarlas con el dolor de la manana
@@ -125,6 +155,16 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 ### UI
 
+- [ ] **TD-198** Timer del tablero: el + dentro de la tarjeta, en una franja fija al pie
+  - PEDIDO el 12-oct. El + de la franja del timer (TD-195) no le convence: es el único + del app con círculo (los de Water y Morning son el ícono solo), y al agregar un timer 'se pone más raro'. El tablero está anclado al fondo de la pantalla, así que la tarjeta crece HACIA ARRIBA; el + estaba alineado arriba, subía con ella y dejaba un vacío abajo a su derecha. Además de feo, el control se movía (lineamiento: los controles no saltan).
+
+DECIDIDO con él (opción 1 de dos): la tarjeta a todo el ancho y, al pie, una franja fija con el encabezado de las tarjetas del tablero (ícono chico y 'Timers' en gris) y el + a la derecha, sin círculo, como el de Water. Los timers aparecen encima del potty y empujan hacia arriba; la franja no se mueve.
+
+PRIMERA VERSIÓN v1.0.445 (12-oct): T\MES en gris (12 dp) en lugar de "Timers", porque la franja tiene timers y alarmas; pidió el wordmark de su mini-timer. Lo nuevo entra arriba (TimerPlan.stripOrder).
+
+14-oct: fuera el potty fijo de la pantalla principal, a pedido suyo; sin timers queda solo la franja. Con eso el potty vuelve a recientes como cualquier otro. Siguen otros arreglos de la alarma desechable ("cuando uno habla de alarma, no quiere ponerse a calcular"): hoy una hora lejana obliga a calcular la duración.
+
+14-oct, segundo ajuste (v1.0.449): fuera la ✕ al lado del play (no le gustaba y se tocaba sin querer). Como en su mini-timer: ↻ Restart (duración completa, en pausa, TimerPlan.restart) y play/pausa al borde, en la columna del +. Borrar es deslizar la fila a la izquierda (SwipeActionsRow, el panel de la lista de trainings y del agua): un timer se borra directo, una alarma pide confirmación.
 - [ ] **TD-192** La semana de la pantalla principal marca qué training toca cada día
   - PEDIDO el 5-oct, mirando la pantalla principal. Los días futuros de la semana son círculos vacíos: el martes no dice que va LUMBAR, ni el miércoles que va el short. El puntito de abajo solo marca lo ya entrenado. La información ya existe: scheduleDays y scheduleDates de cada training (TD-167, TD-178), que es lo que decide el orden de la lista.
 
@@ -162,6 +202,8 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 
 ### Feature
 
+- [x] **TD-195** Timer en el tablero: potty fijo, desechables con Ends at, y que suene como alarma
+- [x] **TD-194** Pantalla principal con tablero: reloj animado, próxima alarma, agua y hora de dormir
 - [x] **TD-178** El coach asigna un training para una fecha, y la lista lo resalta
 - [x] **TD-175** La alarma como despertador: varias alarmas en tarjetas, y fuera del lanzador
 - [x] **TD-174** Probar un training sin que quede registrado: modo prueba en el player
@@ -287,6 +329,7 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 
 ### Forge
 
+- [x] **TD-199** Compilar rápido al iterar: build dev sin R8, daemon y sin tests en build-debug
 - [x] **TD-004** CI local integrado en scripts de build
 - [x] **TD-003** Tests de dominio (Workout, PlayerStep) - verificado por tests
 - [x] **TD-002** Tests de rotacion idempotente - verificado por tests
@@ -329,6 +372,7 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 
 ### UI
 
+- [x] **TD-201** Fin de sesión: Close con fondo, switch del app, y con dolor 0 no se preguntan los minutos (ni en la sesión ni en la alarma)
 - [x] **TD-189** Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo
 - [x] **TD-187** Un solo campo de texto en todo el app (AppTextField), en vez de once copiados a mano
 - [x] **TD-183** El reloj para elegir una hora, en 12 horas y con los colores del app

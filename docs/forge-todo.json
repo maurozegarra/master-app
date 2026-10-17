@@ -12,7 +12,7 @@
       "id": "TD-201",
       "title": "Fin de sesión: Close con fondo, switch del app, y con dolor 0 no se preguntan los minutos (ni en la sesión ni en la alarma)",
       "category": "UI",
-      "status": "pending",
+      "status": "done",
       "test": [
         "com.maurozegarra.master.morning.MorningTest"
       ],
@@ -29,7 +29,7 @@
       "id": "TD-199",
       "title": "Compilar rápido al iterar: build dev sin R8, daemon y sin tests en build-debug",
       "category": "Forge",
-      "status": "pending",
+      "status": "done",
       "manual": "PEDIDO el 14-oct, a partir de la nota del agente de watchwall en AGENTS.md: \"demora demasiado entre cada compilación, sacrifica lo que tengas que sacrificar\".\n\nHECHO: gradle.properties a la medida de la PC (16 GB, 16 hilos: 4 GB, GC paralelo, parallel, caching, configuration-cache); sin --no-daemon en los scripts; buildType dev = release sin R8 ni shrink, misma firma y applicationId; build-debug.ps1 compila dev y corre tests solo con -Tests; run-tests.ps1 corre testDebugUnitTest y no test (la suite iba una vez por variante).\n\nMEDIDO: build-debug.ps1 de ~3 min 30 s a 27 s caliente (1 min 50 s en frío). verify-compile.ps1, 3 s con caché. Lo que se sacrifica: el APK de iteración pesa ~14 MB en vez de 2, y los tests ya no corren en cada instalación."
     },
     {
