@@ -5,6 +5,47 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-16 — vuelve el carry, a 10 kg, y tres mañanas seguidas en 0
+
+**Cuatro sesiones del 13 al 16, todas completas.** El 13 el LUMBAR con la revisión 33 (sin
+carry, caminata a 5, box squat 17.5 × 3): *"Todo bien"*. El 14 y el 15 el corto, a las 5:11 y
+5:21. El 16 no pudo en la mañana -reunión de trabajo la noche antes, se acostó a las 0:31- y
+lo hizo a las **18:08**: el completo con la revisión 34.
+
+**El dolor de la mañana: 0, 0 y 0** (14, 15 y 16). Es la primera racha en cero de todo el
+historial; venía de 1 con 10 minutos para aflojar. Coincide con la almohada más alta del
+12-oct, y también con dos días de corto: no se puede separar una cosa de la otra todavía.
+
+**El tobillo, el 16.** Camina normal; solo molesta en los extremos, al llevarlo a ciertas
+posiciones. Pidió volver al carry pero no a 15: su zona de caminar mide 6 o 7 m y las vueltas
+le daban desconfianza. **Revisión 34 (v1.0.450):** carry 10 · 10 · 10 con la nota de pasos
+cortos en las vueltas y sin pivotar sobre el pie cargado, caminata de entrada otra vez a 6 km/h,
+box squat sigue en 17.5 × 3 y los círculos de tobillo se quedan. Resultado: *"me fue mucho
+mejor de lo pensé, no molestó"*.
+
+**Lo que marcó el 16:**
+
+| Ejercicio | Peso | Marcó |
+|---|---|---|
+| Glute Bridge | 16 · 21 · 26 | ligero las tres (el 13 solo la última) |
+| Suitcase Carry | 10 · 10 · 10, los dos lados | ligero las seis |
+| Box Squat | 17.5 × 3 | bien, bien, ligero |
+
+**El sueño, lo flojo:** en cama 5.3 h (14), 5.2 h (15) y 6.5 h (16), contra 7 a 7.5 los días
+antes. Las alarmas de las 5:00 con acostarse cerca de medianoche no dan.
+
+**Equipo nuevo:** pesas rusas en pares de 6 a 20 (sin la de 18), además de las de 4
+(`docs/equipo.md`).
+
+**Para la revisión del sábado 17:** el carry y el puente piden subir; el box squat puede volver
+a 17.5 · 20 · 20 si el tobillo sigue tranquilo. Ojo con el sábado: el completo del viernes fue
+a las 18:08 y el del sábado es en la mañana, unas 13 h después; para el puente y la sentadilla
+es poco descanso.
+
+**Lo que se arregló en el app por esta sesión (TD-201, v1.0.451):** con dolor 0 ya no pide
+"Minutes until it eased", ni en la sesión ni en la alarma; el Close tiene fondo y el switch de
+"Back crisis today" es el del app.
+
 ## 2026-10-12 — dos días sin entrenar: el tobillo izquierdo
 
 **Domingo 11 y lunes 12 sin sesión.** El sábado por la mañana, después del LUMBAR, iba apurado a
