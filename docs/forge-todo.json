@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-202",
+      "title": "Pesa rusa como tipo de peso propio, con su ícono, como la mancuerna y la barra",
+      "category": "Feature",
+      "status": "pending",
+      "manual": "PEDIDO el 17-oct. Desde el 16-oct hay pesas rusas en pares (4 · 6 · 8 · 10 · 12 · 14 · 16 · 20, HomeGym.KETTLEBELLS), y la revisión 35 pasó el carry a pesa rusa 12 · 14 · 16. El app no tiene ese tipo: el carry va como WeightType.DUMBBELL con una nota que empieza con 'Kettlebell', y en el app se ve como mancuerna. Sus palabras: \"agregar un ícono de kettlebell al igual que ya tenemos para mancuerna y barra\".\n\nA VER: un WeightType.KETTLEBELL (o la mancuerna con variante) con su ícono en el editor, el player y el historial; '1 o 2' como la mancuerna; RoutinesFitEquipmentTest que valide contra KETTLEBELLS por el tipo y no por la nota (hoy mira exerciseId + nota); el respaldo y la sincronización con el tipo nuevo (un teléfono con app vieja tiene que leerlo sin romperse). El carry del lumbar pasa al tipo nuevo con la misma serie de pesos, para no partir el historial."
+    },
+    {
       "id": "TD-201",
       "title": "Fin de sesión: Close con fondo, switch del app, y con dolor 0 no se preguntan los minutos (ni en la sesión ni en la alarma)",
       "category": "UI",
