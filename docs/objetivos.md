@@ -88,6 +88,8 @@ kilos de grasa, no a trece de peso.
 | 19-sep | 84.4 | **93.5** | **0.52** | justo por debajo de 94 |
 | 26-sep | 84.7 | **93** | **0.51** | la cinta baja medio centimetro; la balanza sube 0.3 kg |
 | 3-oct | 84.6 | **94** | **0.52** | la balanza baja 0.1; la cinta sube 1 cm |
+| 10-oct | 83.7 | **94.5** | **0.52** | la balanza baja 0.9; la cinta sube 0.5 |
+| 17-oct | 84.0 | **94** | **0.52** | la balanza sube 0.3; la cinta baja 0.5. Semana con el tobillo |
 
 La balanza del 19-sep ya ensenio por que no se le cree la grasa visceral: de 10 a 13 en una
 semana y cintura-cadera de 0.9 a 1.4, imposible. Bajo el agua corporal 3.1 puntos. Se lee la

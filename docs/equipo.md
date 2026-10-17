@@ -153,8 +153,9 @@ sentadilla.
 - **El puente tiene recorrido largo por delante**: 41, 46 y más con la misma barra.
 - **El techo de las mancuernas es 25 kg**, con saltos de 2.5 hasta ahí.
 - **La caminadora no es el límite**: 18 km/h contra los 6 que camina hoy.
-- **Faltaban bandas** (resuelto: las dos power bands el 26-sep, las de tela en casa desde el 27-28). La que había es ligera y está en uso. Es la única compra que hace falta,
-  y se hace el lunes 21-sep:
+- **Bandas: compradas y en casa.** Las dos power bands el 26-sep y el set de tela el 27-28
+  (ver la lista de arriba). Esta tabla es lo que se pidió el 21-sep, cuando faltaban; se
+  queda como referencia de qué se buscó:
 
   | Qué | Detalle | Para qué |
   |---|---|---|

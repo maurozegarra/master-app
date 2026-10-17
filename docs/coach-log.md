@@ -5,6 +5,54 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-17 — segunda revisión semanal: el tobillo queda atrás
+
+**LUMBAR** completo a las 08:36, **105 minutos**, 14 horas después del de la noche anterior. Lo
+hizo completo y no el corto que le recomendé: sin molestias, y amaneció en **0** otra vez. El
+carry lo hizo con la **pesa rusa de 12** (el app tenía 10) y anotó *"se sintió ligero"*.
+
+| | Hoy | Su respuesta |
+|---|---|---|
+| Puente con barra EZ | 16 · 21 · 26 × 10 | ligero las tres (el 16 también) |
+| Box squat en la plyobox | 17.5 × 3 × 8 | ligero las tres |
+| Suitcase Carry, 36 m | 12 (pesa rusa) | ligero las seis |
+
+**Pesaje:** **84.0 kg** (+0.3), cintura **94** (−0.5), esquelético 34.0 (+0.2). NIKO **50.3 kg**
+(+0.4), cintura **68.5** (+1), esquelético 18.4 (+0.1): la dirección que se busca con ella.
+
+### La semana (11 al 17 de octubre)
+
+- **Cinco sesiones de siete**, todas completas: domingo y lunes sin entrenar por el tobillo.
+- **Las mañanas: 1/10, 1/10, 1/10 y después 0, 0, 0, 0.** Cuatro seguidas en cero, la primera
+  racha así del historial. Coincide con la almohada más alta (desde el 9) y con el tobillo, que
+  obligó a bajar cargas: todavía no se puede separar.
+- **El sueño:** 5.2 y 5.3 h en cama los días de alarma a las 5:00.
+- **El tobillo:** el 17, *"casi nada"* en los extremos.
+- **NIKO, seis de seis** (6, 1, 2, 3, 4 y 5). El hip thrust pidió +2.5 en las tres de arriba; el
+  remo a 10 otra vez pesado en las dos últimas de cada lado; las flexiones, la primera serie
+  dura; en el NIKO 4 el puente y la caminata con banda fáciles, y el peso muerto a una pierna,
+  la primera de 7.5 fácil.
+
+### El plan de la semana que viene (decidido con él; revisión 35 y NIKO 24, v1.0.452)
+
+- **Tobillo de vuelta a lo normal** (`LUMBAR_ANKLE_EASED = false`). Lo que se queda: el
+  **equilibrio en una pierna**, descalzo y junto a la pared, 30 s por pie, en la movilidad de
+  todos los días en lugar de los círculos. Le interesó. Una serie y no dos: con dos el corto
+  pasaba de los 35 minutos. Cuando 30 s salgan fáciles, con los ojos cerrados.
+- **Puente 21 · 26 · 31**, la rampa entera: dos sesiones seguidas con las tres ligeras.
+- **Box squat 17.5 · 20 · 20**, lo de antes del tobillo.
+- **Carry con pesa rusa 12 · 14 · 16**: tiene de 2 en 2, y la mancuerna salta de 2.5. La nota
+  de las vueltas (pasos cortos, sin pivotar sobre el pie cargado) se queda.
+- **Calendario igual.**
+- **NIKO 1:** hip thrust 46 · 58.5 · 68.5 · 73.5. **NIKO 3:** remo a 7.5 en las cuatro; vuelve
+  al 10 cuando el 7.5 salga fácil. **NIKO 4:** banda **fuerte** en el puente y la caminata, y el
+  peso muerto a una pierna a 10 en las tres. **NIKO 6:** cosaca a 7.5.
+- Se corrigió `equipo.md`: un párrafo viejo decía que faltaba comprar las bandas, y el set de
+  tela (ligera, media, fuerte) está en casa desde el 27-28 de septiembre. Por ese párrafo
+  propuse la banda fuerte "si tiene", y él lo señaló.
+
+---
+
 ## 2026-10-16 — vuelve el carry, a 10 kg, y tres mañanas seguidas en 0
 
 **Cuatro sesiones del 13 al 16, todas completas.** El 13 el LUMBAR con la revisión 33 (sin

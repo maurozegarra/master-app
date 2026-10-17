@@ -50,6 +50,7 @@ dia. La medicion de verdad es la cinta.
 | 26-sep | 49.5 | **66** | **0.43** | 18.2 |
 | 3-oct | 49.7 | **67.5** | **0.44** | 18.3 |
 | 10-oct | 49.9 | **67.5** | **0.44** | 18.4 |
+| 17-oct | 50.3 | **68.5** | **0.44** | 18.4 |
 
 Cintura entre estatura de 0.43: muy bien, lejos del 0.5.
 
