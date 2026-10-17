@@ -41,11 +41,16 @@ class RoutinesFitEquipmentTest {
 
     @Test
     fun `cada peso con mancuerna es una mancuerna que existe`() {
+        // Los que van con PESA RUSA, que el app carga como mancuerna (una, por serie). Su nota
+        // lo dice, y sus pesos tienen que ser pesas rusas que existen (revision 35, el carry).
+        val pesasRusas = setOf("ex_suitcase_carry")
         rutinas.forEach { t ->
             t.workouts.flatMap { it.exercises }.filter { it.weightType == WeightType.DUMBBELL }.forEach { e ->
+                val rusa = e.exerciseId in pesasRusas && e.note.startsWith("Kettlebell")
                 (0 until e.sets).forEach { i ->
                     val kg = e.setAt(i).weight
-                    assertTrue("${t.name} / ${e.name} serie ${i + 1}: no hay mancuerna de $kg", kg in HomeGym.DUMBBELLS)
+                    if (rusa) assertTrue("${t.name} / ${e.name} serie ${i + 1}: no hay pesa rusa de $kg", kg in HomeGym.KETTLEBELLS)
+                    else assertTrue("${t.name} / ${e.name} serie ${i + 1}: no hay mancuerna de $kg", kg in HomeGym.DUMBBELLS)
                 }
             }
         }

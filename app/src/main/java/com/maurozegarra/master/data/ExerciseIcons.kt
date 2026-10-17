@@ -18,6 +18,7 @@ object ExerciseIcons {
         "ex_deep_squat" to "🧎",
         "ex_knee_rotation" to "🦵",
         "ex_ankle_rotation" to "🦶",
+        "ex_single_leg_balance" to "🦩",
         // Base
         "ex_knee_circle" to "🦵",
         "ex_90_90" to "🧘",

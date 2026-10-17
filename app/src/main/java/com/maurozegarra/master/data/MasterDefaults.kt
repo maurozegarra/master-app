@@ -412,8 +412,15 @@ object MasterDefaults {
      * Revision 33 (12-oct): el tobillo izquierdo, ver [LUMBAR_ANKLE_EASED].
      *
      * Revision 34 (16-oct): el tobillo mejora; vuelve el carry a 10 y las caminatas a 6.
+     *
+     * Revision 35 (17-oct, segunda revision semanal): el tobillo ya casi no molesta y
+     * [LUMBAR_ANKLE_EASED] pasa a false. El puente sube la rampa entera a 21 · 26 · 31: las
+     * tres "ligero" el 16 y el 17. El box squat vuelve a 17.5 · 20 · 20 (ligero las tres el
+     * 17). El carry pasa a pesa rusa 12 · 14 · 16: el 17 lo hizo con la de 12 y anoto que se
+     * sintio ligero, y desde el 16-oct tiene pesas rusas de 2 en 2. La movilidad cambia los
+     * circulos de tobillo por equilibrio en una pierna, para no repetir la torcedura.
      */
-    const val LUMBAR_REVISION = 34
+    const val LUMBAR_REVISION = 35
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -434,8 +441,11 @@ object MasterDefaults {
      * Las caminatas vuelven a 6 y el carry vuelve, pero a 10 · 10 · 10 y no a 15: su pasillo
      * mide 6-7 m y en las vueltas no se siente confiado girando con peso. El peso lo eligio el.
      * El box squat sigue en 17.5 y los circulos de tobillo se quedan.
+     *
+     * Revision 35 (17-oct): "casi nada" en los extremos, y el carry de 12 sin molestias. Vuelve
+     * a lo normal; lo que se queda del tobillo es el equilibrio en una pierna (ver mobility).
      */
-    const val LUMBAR_ANKLE_EASED = true
+    const val LUMBAR_ANKLE_EASED = false
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -776,8 +786,14 @@ object MasterDefaults {
      * 12 (fácil las seis el 9-oct) y la hiperextensión a 3 x 12 (pendiente desde el 1-oct; bien a
      * 10 dos veces). NIKO 5, el salto al cajón a 61 cm, la siguiente altura de la plyobox: 4 x 6
      * a 51 fue fácil tres veces seguidas. Se sube la altura y no las repeticiones.
+     *
+     * Revision 24 (17-oct, segunda revisión semanal): NIKO 1, el hip thrust 46 · 58.5 · 68.5 ·
+     * 73.5 (+2.5 pedido en las tres de arriba el 13-oct). NIKO 3, el remo a 7.5 en las cuatro:
+     * el de 10 salió pesado otra vez. NIKO 4, la banda FUERTE (puente y caminata fáciles el
+     * 16-oct) y el peso muerto a una pierna a 10 en las tres (7.5 fácil). NIKO 6, la cosaca a
+     * 7.5 (+2.5 pedido en los dos lados el 12-oct).
      */
-    const val NIKO_REVISION = 23
+    const val NIKO_REVISION = 24
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -862,9 +878,10 @@ object MasterDefaults {
                         //
                         // Ahora son discos sobre la barra de 6 y todos se arman:
                         // hip thrust 46/56/66/71 = 20, 25, 30 y 32.5 por lado.
+                        // Revision 24: 46/58.5/68.5/73.5 = 20, 26.25, 31.25 y 33.75 por lado.
                         b.ex(
                             "ex_hip_thrust", "PAUSA de 2 s arriba, en cada repetición", 8, rest = 120,
-                            weightType = WeightType.BARBELL, barWeight = 6.0, weights = listOf(40.0, 50.0, 60.0, 65.0),
+                            weightType = WeightType.BARBELL, barWeight = 6.0, weights = listOf(40.0, 52.5, 62.5, 67.5),
                         ),
                         // Rumano 26/31/36/36 = 10, 12.5 y 15 por lado. Conservador: la bisagra
                         // es nueva para ella y se aprende antes de cargarse.
@@ -1003,7 +1020,10 @@ object MasterDefaults {
                         b.ex("ex_inverted_row", "Barra del rack a la altura de la cadera. Pecho a la barra, cuerpo recto", 8, sets = 4, rest = 90),
                         b.ex(
                             "ex_dumbbell_row", "Hacia la cadera, codo pegado. El torso no gira", 10, rest = 60,
-                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 7.5, 10.0, 10.0),
+                            // Revision 24: 7.5 en las cuatro. La de 10 fue pesada las dos últimas
+                            // de cada lado el 15-oct, como la semana anterior. Vuelve al 10 cuando
+                            // marque fácil el 7.5.
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 7.5, 7.5, 7.5),
                         ).copy(sides = listOf("Izquierda", "Derecha")),
                         // Revision 17 (29-sep): la dominada, con la banda de 3.2 cm comprada
                         // para esto. La traccion vertical es lo que mas le falta para el clinch,
@@ -1086,8 +1106,9 @@ object MasterDefaults {
                         // Revision 20 (1-oct): con las bandas de tela. El puente lleva la media sobre
                         // las rodillas -lo marco facil-, y la abduccion de lado con tobillera pasa a
                         // caminata lateral con banda, que trabaja lo mismo de pie.
-                        b.ex("ex_glute_bridge", "Banda MEDIA sobre las rodillas, sin dejar que se junten. Aprieta 2 s arriba", 15, sets = 2, rest = 30),
-                        b.ex("ex_lateral_band_walk", "Banda MEDIA sobre las rodillas. 10 pasos a cada lado", 10, sets = 2, rest = 30)
+                        // Revision 24: la banda FUERTE. Fáciles las dos cosas con la media el 16-oct.
+                        b.ex("ex_glute_bridge", "Banda FUERTE sobre las rodillas, sin dejar que se junten. Aprieta 2 s arriba", 15, sets = 2, rest = 30),
+                        b.ex("ex_lateral_band_walk", "Banda FUERTE sobre las rodillas. 10 pasos a cada lado", 10, sets = 2, rest = 30)
                             .copy(sides = listOf("Izquierda", "Derecha"), alternateSides = true),
                     ),
                 ),
@@ -1108,7 +1129,8 @@ object MasterDefaults {
                             // Revision 18: la izquierda, facil las tres; la derecha, bien, bien,
                             // facil. Sube a 10 en rampa, para no pasar de largo por el lado que
                             // todavia marca "bien".
-                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 10.0, 10.0),
+                            // Revision 24: 10 en las tres; la de 7.5 fue fácil en los dos lados el 16-oct.
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(10.0, 10.0, 10.0),
                         ).copy(sides = lados),
                     ),
                 ),
@@ -1279,9 +1301,10 @@ object MasterDefaults {
                         b.ex("ex_90_90", "Lento. Llega hasta donde llegues y respira", 10, sets = 2, rest = 20),
                         // Revision 21 (2-oct): con una mancuerna de 5 kg al pecho. El 26-sep
                         // marco facil las cuatro sin peso.
+                        // Revision 24: a 7.5. Pidio +2.5 en las cuatro el 12-oct.
                         b.ex(
-                            "ex_cossack_squat", "Mancuerna de 5 kg al pecho. Talón apoyado, baja solo hasta donde controles", 8, rest = 30,
-                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(5.0, 5.0),
+                            "ex_cossack_squat", "Mancuerna de 7.5 kg al pecho. Talón apoyado, baja solo hasta donde controles", 8, rest = 30,
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 7.5),
                         ).copy(sides = listOf("Izquierda", "Derecha")),
                         b.ex("ex_hip_rotation", "Círculos grandes y lentos", 10, sets = 1, rest = 0),
                         b.ex("ex_front_side_stretch", "Sin rebotes. Respira hondo en cada posición", 60, sets = 1, rest = 0, mode = WorkMode.TIME),
@@ -2026,8 +2049,14 @@ object MasterDefaults {
                 reps("ex_hip_hinge", 10, note = "Stick on nape, mid-back and sacrum", prep = 10),
                 // Revision 33, ver [LUMBAR_ANKLE_EASED]. Al final y no al principio: el
                 // gato-camello sigue siendo lo primero del dia.
-                if (!ankle) null
-                else reps("ex_ankle_rotation", 10, note = "Pain-free range, both directions", prep = 10).copy(sides = listOf("Left", "Right")),
+                // Revision 35: sano el tobillo, los circulos pasan a equilibrio en una pierna.
+                // Despues de un esguince lo que queda flojo es la propiocepcion, y es lo que
+                // evita la segunda torcedura. Va todos los dias: una serie de 30 s por lado, que
+                // con dos el corto pasaba de los 35 minutos. No pregunta como fue, como el resto
+                // de la movilidad: progresa cerrando los ojos, no con una respuesta.
+                if (ankle) reps("ex_ankle_rotation", 10, note = "Pain-free range, both directions", prep = 10).copy(sides = listOf("Left", "Right"))
+                else ex("ex_single_leg_balance", note = "Barefoot, next to the wall. Eyes closed once 30 s is easy", work = 30, prep = 10)
+                    .copy(sides = listOf("Left", "Right"), progression = Progression.NONE),
             ),
         )
 
@@ -2085,8 +2114,10 @@ object MasterDefaults {
         private fun carry(ankle: Boolean = false): Exercise =
             loaded(
                 "ex_suitcase_carry", 36,
-                if (ankle) "Short steps at the turns, don't pivot on the loaded foot" else "3 laps of the hallway: 36 m. Walk tall, don't lean",
-                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(15.0, 17.5, 20.0), WeightType.DUMBBELL,
+                if (ankle) "Short steps at the turns, don't pivot on the loaded foot"
+                else "Kettlebell. Short steps at the turns, don't pivot on the loaded foot. Walk tall",
+                // Revision 35: con PESA RUSA, que tiene de 2 en 2 (la mancuerna salta de 2.5).
+                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(12.0, 14.0, 16.0), WeightType.DUMBBELL,
             )
                 // Alternando (TD-156, revision 16): izquierda y derecha seguidas, y el descanso
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
@@ -2142,7 +2173,8 @@ object MasterDefaults {
                 // la de arriba cada vez que las tres salgan faciles y sin malestar: lo que
                 // molesto el 3-oct fue la carga arriba, asi que el peso lo pide el cuerpo.
                 // Revision 32 (10-oct): 16 · 21 · 26 (discos 10, 15 y 20), ver [LUMBAR_REVISION].
-                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(10.0, 15.0, 20.0), WeightType.BARBELL, barWeight = 6.0)
+                // Revision 35 (17-oct): 21 · 26 · 31 (discos 15, 20 y 25).
+                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(15.0, 20.0, 25.0), WeightType.BARBELL, barWeight = 6.0)
                 else loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
@@ -2261,6 +2293,14 @@ object MasterDefaults {
                 "Dumbbell or anything with a handle, on one side only.",
                 "30-40 m per side, walking tall without leaning towards the weight.",
                 "One of the best there is for the core with minimal load on the spine.",
+            ),
+        ),
+        // Revision 35: lo que se queda del tobillo izquierdo (ver LUMBAR_ANKLE_EASED).
+        "ex_single_leg_balance" to ExerciseMedia(
+            listOf(
+                "Barefoot, standing on one foot next to the wall, a hand ready but not touching it.",
+                "Knee soft, hips level. The ankle does the small corrections: let it.",
+                "When 30 s is easy on both sides, do it with your eyes closed.",
             ),
         ),
         // Revision 33: por el tobillo izquierdo (ver LUMBAR_ANKLE_EASED).

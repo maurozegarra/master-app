@@ -31,7 +31,7 @@ class TrainingPreviewTest {
     @Test
     fun `el carry dice metros, lados alternados y su peso`() {
         val carry = TrainingPreview.describe(item(lumbar, "ex_suitcase_carry"))
-        assertTrue(carry, carry.startsWith("3 × 36 m · sides alternating · 15/17.5/20 kg"))
+        assertTrue(carry, carry.startsWith("3 × 36 m · sides alternating · 12/14/16 kg"))
     }
 
     @Test

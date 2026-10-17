@@ -21,6 +21,7 @@ object ExerciseCatalog {
         Triple("ex_deep_squat", "Sentadilla profunda", "Deep Squat"),
         Triple("ex_knee_rotation", "Rotación de rodilla", "Knee Rotation"),
         Triple("ex_ankle_rotation", "Rotación de tobillo", "Ankle Rotation"),
+        Triple("ex_single_leg_balance", "Equilibrio en una pierna", "Single-Leg Balance"),
         // Base
         Triple("ex_knee_circle", "Círculo de rodilla", "Knee Circle"),
         Triple("ex_90_90", "90 a 90", "90 to 90"),

@@ -31,7 +31,7 @@ class DistanceTest {
         val serie = registro.first().sets.last()
         assertEquals(36, serie.distanceM)
         assertEquals(0, serie.reps)
-        assertEquals("36 m × 20 kg", setSummary(serie, timeBased = false, I18n.EN))
+        assertEquals("36 m × 16 kg", setSummary(serie, timeBased = false, I18n.EN))
     }
 
     @Test

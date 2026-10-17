@@ -16,4 +16,7 @@ object HomeGym {
      * usuario el 19, y es la que evita el salto de 20 a 25.
      */
     val DUMBBELLS = listOf(1.0, 2.0, 2.5, 3.0, 4.0, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0, 22.5, 25.0)
+
+    /** Pesas rusas, en pares, desde el 16-oct-2026. Falta la de 18. */
+    val KETTLEBELLS = listOf(4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 20.0)
 }

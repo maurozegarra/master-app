@@ -33,8 +33,9 @@ class LumbarTrainingTest {
             training.workouts.map { it.name },
         )
         // 3 en McGill y no 4 desde TD-147: la plancha lateral era dos ejercicios clonados y
-        // ahora es uno con sus dos lados declarados.
-        assertEquals(listOf(1, 2, 3, 3, 1), training.workouts.map { it.exercises.size })
+        // ahora es uno con sus dos lados declarados. 3 en la movilidad desde la revision 35:
+        // el equilibrio en una pierna.
+        assertEquals(listOf(1, 3, 3, 3, 1), training.workouts.map { it.exercises.size })
     }
 
     @Test
@@ -174,13 +175,14 @@ class LumbarTrainingTest {
         assertEquals(6.0, puente.barWeight, 0.0)
         // Revision 30 (8-oct): ligero las tres a 16, sube la de arriba a 21.
         // Revision 32 (10-oct): 16 · 21 · 26, propuesto por el (discos de 5 en 5).
-        assertEquals(listOf(10.0, 15.0, 20.0), puente.setList.map { it.weight })
+        // Revision 35 (17-oct): 21 · 26 · 31, ligero las tres dos sesiones seguidas.
+        assertEquals(listOf(15.0, 20.0, 25.0), puente.setList.map { it.weight })
         assertEquals(3, puente.sets)
         assertEquals(10, puente.workValue)
-        assertEquals(listOf(15.0, 17.5, 20.0), c.getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertEquals(listOf(12.0, 14.0, 16.0), c.getValue("ex_suitcase_carry").setList.map { it.weight })
         assertEquals(listOf(17.5, 20.0, 20.0), c.getValue("ex_box_squat").setList.map { it.weight })
         // El corto no se toca: el alivio es del bloque de cadera, no del carry.
-        assertEquals(listOf(15.0, 17.5, 20.0), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
+        assertEquals(listOf(12.0, 14.0, 16.0), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
     }
 
     @Test
@@ -189,7 +191,9 @@ class LumbarTrainingTest {
         // series del bloque marcadas ligeras el 19-sep). En la 13 suben las dos: el 22-sep
         // marco ligeras ocho de las nueve series, y la unica "bien" fue el tercer viaje del
         // carry, que por eso pasa a ser el primer peldano de la rampa nueva.
-        assertEquals(listOf(15.0, 17.5, 20.0), cadera(normal).getValue("ex_suitcase_carry").setList.map { it.weight })
+        // Revision 35 (17-oct): con pesa rusa, 12 · 14 · 16, que tiene de 2 en 2.
+        assertEquals(listOf(12.0, 14.0, 16.0), cadera(normal).getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertTrue(cadera(normal).getValue("ex_suitcase_carry").note.startsWith("Kettlebell"))
         // Revision 24 (2-oct): la sentadilla se queda en 17.5 mientras cambia el montaje -la
         // plyobox de 51 cm y la mancuerna en el step-: le dolio la espalda baja recogiendo la
         // mancuerna del piso y en la mitad de abajo.
@@ -267,11 +271,12 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `lo cronometrado suma 40 minutos y 58 segundos`() {
+    fun `lo cronometrado suma 40 minutos y 28 segundos`() {
         // Revision 16: el carry ALTERNA las manos dentro de cada serie, asi que vuelven a ser
         // dos descansos y no cinco (-3 min respecto de la 15), y las dos caminatas ganan 10 s
         // de preparacion cada una (+20 s): 2518 - 180 + 20.
-        assertEquals(2358, steps.sumOf { it.durationSec })
+        // Revision 35: +70 s del equilibrio en una pierna (10 de preparacion y 30 por pie).
+        assertEquals(2428, steps.sumOf { it.durationSec })
     }
 
     @Test
@@ -515,8 +520,9 @@ class LumbarTrainingTest {
     @Test
     fun `la sesion recoge los doce registros, todos completos`() {
         // Doce registros de once ejercicios: desde la revision 15 el carry va por lados
-        // (TD-095) y deja uno por mano, igual que la plancha.
-        assertEquals(12, session.exercises.size)
+        // (TD-095) y deja uno por mano, igual que la plancha. Catorce desde la 35: el
+        // equilibrio en una pierna, uno por pie.
+        assertEquals(14, session.exercises.size)
         assertTrue(session.exercises.all { it.setsCompleted == it.totalSets })
         assertTrue(session.exercises.none { r -> r.sets.any { it.skipped } })
         assertEquals(com.maurozegarra.master.model.SessionStatus.COMPLETED, session.status)
