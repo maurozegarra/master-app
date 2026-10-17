@@ -1,7 +1,7 @@
 {
-  "versionCode": 431,
-  "changelog": "release: feriados, agua con botellas y horario, pantalla principal con un solo training, animacion centrada",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.431/master-1.0.431.apk",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.452/master-1.0.452.apk",
+  "changelog": "Timers: + abajo, reiniciar y borrar deslizando. Fin de sesion: con dolor 0 no pide minutos. Compilado mas rapido.",
+  "versionCode": 452,
   "minVersionCode": 1,
-  "versionName": "1.0.431"
+  "versionName": "1.0.452"
 }
