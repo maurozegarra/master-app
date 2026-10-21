@@ -5,6 +5,37 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-20 — el lunes sin sesión por sueño, y hoy la revisión 35 completa
+
+**Domingo 18:** el corto a las 10:10, ya con la revisión 35: equilibrio 30 s por pie y carry
+12 · 14 · 16. Marcó el 12 *bien* y el 14 y el 16 *ligero*, de los dos lados.
+
+**Lunes 19 sin sesión** (tocaba el corto, día presencial). No fue por la espalda ni por el
+tobillo: le faltó sueño, y dice que está bien. Se acostó el domingo a las 23:14 y la alarma
+sonó a las 6:00 (6.8 h en cama), después de un sábado que se acostó a la 1:08.
+
+**Martes 20:** el completo a las 07:17, 90 minutos, la primera vez con la revisión 35 entera.
+
+| Ejercicio | Peso | Marcó |
+|---|---|---|
+| Glute Bridge | 21 · 26 · 31 × 10 | bien, bien, ligero |
+| Suitcase Carry, 36 m | 12 · 14 · 16 (pesa rusa) | bien las seis |
+| Box Squat | 17.5 · 20 · 20 × 8 | bien las tres |
+
+- **Las mañanas, seis seguidas en 0** (15 al 20). La racha sigue.
+- **Lo que dice la tabla:** la rampa nueva del puente y el box squat de antes del tobillo
+  entraron sin problema. El 16 del carry, *ligero* el domingo y *bien* hoy, después del puente
+  y con la espalda ya trabajada: tiene sentido.
+- **Sin cambios a mitad de semana.** Para el sábado 24: el puente puede pedir el 33.5 arriba si
+  el 31 vuelve a salir ligero.
+- **El equilibrio:** con los ojos abiertos le salió muy fácil desde el primer día, así que ya
+  lo hace con los ojos **cerrados**, y ahí todavía tambalea. Es el nivel que toca; el app sigue
+  diciendo "ojos cerrados cuando 30 s sea fácil".
+- **NIKO:** el 5 el sábado, el 6 el lunes (cosaca a 7.5, las cuatro bien) y el 1 hoy: hip thrust
+  46 · 58.5 · 68.5 · 73.5, todas bien.
+
+---
+
 ## 2026-10-17 — segunda revisión semanal: el tobillo queda atrás
 
 **LUMBAR** completo a las 08:36, **105 minutos**, 14 horas después del de la noche anterior. Lo
