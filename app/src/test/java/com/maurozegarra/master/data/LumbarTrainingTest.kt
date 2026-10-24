@@ -141,6 +141,28 @@ class LumbarTrainingTest {
     }
 
     @Test
+    fun `el equilibrio va con los ojos cerrados y su texto viejo se reemplaza`() {
+        // Revision 36 (20-oct): con los ojos abiertos le salio facil desde el primer dia.
+        val equilibrio = training.workouts.first { it.name == "Mobility" }.exercises.first { it.exerciseId == "ex_single_leg_balance" }
+        assertEquals("Barefoot, next to the wall. Eyes closed", equilibrio.note)
+        // Y 5 s para cambiar de pie: el derecho arrancaba en el mismo segundo. Despues del
+        // derecho no, que lo que sigue ya trae su preparacion.
+        val cambio = StepEngine.buildSteps(short).filter { it.kind == StepKind.REST && it.side in listOf("Left", "Right") && it.durationSec == 5 }
+        assertEquals(listOf("Left"), cambio.map { it.side })
+        val viejo = com.maurozegarra.master.model.ExerciseMedia(
+            listOf(
+                "Barefoot, standing on one foot next to the wall, a hand ready but not touching it.",
+                "Knee soft, hips level. The ankle does the small corrections: let it.",
+                "When 30 s is easy on both sides, do it with your eyes closed.",
+            ),
+        )
+        assertEquals(
+            MasterDefaults.lumbarInstructions()["ex_single_leg_balance"],
+            MasterDefaults.mergeLumbarInstructions(mapOf("ex_single_leg_balance" to viejo))["ex_single_leg_balance"],
+        )
+    }
+
+    @Test
     fun `la caminata lateral activa el bloque normal, y aliviado no esta`() {
         // Revision 23: con las bandas de tela. Aliviado no entra: la abduccion carga la zona
         // del pinchazo del 29-sep.
@@ -271,12 +293,13 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `lo cronometrado suma 40 minutos y 28 segundos`() {
+    fun `lo cronometrado suma 40 minutos y 33 segundos`() {
         // Revision 16: el carry ALTERNA las manos dentro de cada serie, asi que vuelven a ser
         // dos descansos y no cinco (-3 min respecto de la 15), y las dos caminatas ganan 10 s
         // de preparacion cada una (+20 s): 2518 - 180 + 20.
         // Revision 35: +70 s del equilibrio en una pierna (10 de preparacion y 30 por pie).
-        assertEquals(2428, steps.sumOf { it.durationSec })
+        // Revision 37: +5 s para cambiar de pie.
+        assertEquals(2433, steps.sumOf { it.durationSec })
     }
 
     @Test

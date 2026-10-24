@@ -419,8 +419,15 @@ object MasterDefaults {
      * 17). El carry pasa a pesa rusa 12 · 14 · 16: el 17 lo hizo con la de 12 y anoto que se
      * sintio ligero, y desde el 16-oct tiene pesas rusas de 2 en 2. La movilidad cambia los
      * circulos de tobillo por equilibrio en una pierna, para no repetir la torcedura.
+     *
+     * Revision 36 (20-oct): el equilibrio, ya con los ojos cerrados. Con los ojos abiertos le
+     * salio muy facil desde el primer dia y lo hace cerrados, donde todavia tambalea. La nota
+     * decia "ojos cerrados cuando 30 s sea facil", y eso ya paso.
+     *
+     * Revision 37 (20-oct, la misma noche): 5 s para cambiar de pie, que no tenia: "espera que
+     * de un salto de un segundo al otro". Numero nuevo porque la 36 ya estaba en el telefono.
      */
-    const val LUMBAR_REVISION = 35
+    const val LUMBAR_REVISION = 37
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -2054,8 +2061,11 @@ object MasterDefaults {
                 // evita la segunda torcedura. Va todos los dias: una serie de 30 s por lado, que
                 // con dos el corto pasaba de los 35 minutos. No pregunta como fue, como el resto
                 // de la movilidad: progresa cerrando los ojos, no con una respuesta.
+                // Revision 37: 5 s para cambiar de pie. Sin ellos el derecho arrancaba en el
+                // mismo segundo en que terminaba el izquierdo; el descanso de la ultima serie
+                // solo sale entre un lado y el otro (restSkipOnLastSet).
                 if (ankle) reps("ex_ankle_rotation", 10, note = "Pain-free range, both directions", prep = 10).copy(sides = listOf("Left", "Right"))
-                else ex("ex_single_leg_balance", note = "Barefoot, next to the wall. Eyes closed once 30 s is easy", work = 30, prep = 10)
+                else ex("ex_single_leg_balance", note = "Barefoot, next to the wall. Eyes closed", work = 30, prep = 10, rest = 5)
                     .copy(sides = listOf("Left", "Right"), progression = Progression.NONE),
             ),
         )
@@ -2296,11 +2306,12 @@ object MasterDefaults {
             ),
         ),
         // Revision 35: lo que se queda del tobillo izquierdo (ver LUMBAR_ANKLE_EASED).
+        // Revision 36: con los ojos cerrados desde el principio.
         "ex_single_leg_balance" to ExerciseMedia(
             listOf(
                 "Barefoot, standing on one foot next to the wall, a hand ready but not touching it.",
-                "Knee soft, hips level. The ankle does the small corrections: let it.",
-                "When 30 s is easy on both sides, do it with your eyes closed.",
+                "Eyes closed. Knee soft, hips level. The ankle does the small corrections: let it.",
+                "Wobbling is the work. If you touch the wall, open your eyes, settle and close them again.",
             ),
         ),
         // Revision 33: por el tobillo izquierdo (ver LUMBAR_ANKLE_EASED).
@@ -2359,6 +2370,16 @@ object MasterDefaults {
                     "Controlled on the way down until you touch, then stand up. Chest up.",
                     "To finish, sit and lower the dumbbell to your thighs. It never goes to or comes from the floor.",
                     "Without weight, the same: to a box or a chair.",
+                ),
+            ),
+        ),
+        // Revision 35: con los ojos abiertos, y cerrarlos como el paso siguiente.
+        "ex_single_leg_balance" to listOf(
+            ExerciseMedia(
+                listOf(
+                    "Barefoot, standing on one foot next to the wall, a hand ready but not touching it.",
+                    "Knee soft, hips level. The ankle does the small corrections: let it.",
+                    "When 30 s is easy on both sides, do it with your eyes closed.",
                 ),
             ),
         ),
