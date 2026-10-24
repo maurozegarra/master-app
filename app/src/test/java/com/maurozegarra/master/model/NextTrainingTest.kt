@@ -68,8 +68,9 @@ class NextTrainingTest {
 
     @Test
     fun `las rutinas del codigo traen su programa`() {
-        assertEquals(setOf(DayOfWeek.TUESDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY), MasterDefaults.lumbarTraining("en").scheduleDays)
-        assertEquals(setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.SUNDAY), MasterDefaults.lumbarShortTraining("en").scheduleDays)
+        // Revision 38: el viernes pasa al corto, para que las dominadas no vayan dos dias seguidos.
+        assertEquals(setOf(DayOfWeek.TUESDAY, DayOfWeek.SATURDAY), MasterDefaults.lumbarTraining("en").scheduleDays)
+        assertEquals(setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SUNDAY), MasterDefaults.lumbarShortTraining("en").scheduleDays)
         assertEquals(emptySet<DayOfWeek>(), MasterDefaults.lumbarBadDayTraining("en").scheduleDays)
         assertEquals((1..6).toList(), MasterDefaults.nikoTrainings("es").map { it.cycleDay })
     }

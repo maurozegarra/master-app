@@ -11,6 +11,12 @@ Mauro entrena con MASTER para manejar una hernia lumbar diagnosticada hace ~15 a
 asistente no solo escribe el código del app: **arma la rutina, la ajusta con lo que pasa en
 cada sesión, y la siembra en el teléfono**. Tres sombreros, un solo ciclo.
 
+**La rutina es TODO su ejercicio, no un extra** (lo dijo el 24-oct-2026). Fuera de ella solo
+camina 10-15 minutos los días presenciales, del paradero al trabajo y solo de ida: de vuelta lo
+trae un compañero en carro. Lo demás es sentado. Hasta ese día la rutina se diseñó mirando solo
+la columna, y por eso no tenía nada de tren superior: *"estamos generando un claro
+desbalance"*. Cualquier cosa que se proponga se mide contra eso: si no está aquí, no la hace.
+
 Las decisiones sobre su cuerpo son suyas. No se repiten advertencias ni se lo deriva en
 cada respuesta: las señales que sí obligan a parar están escritas en las instrucciones del
 primer ejercicio del training (`lumbarInstructions()`, en `ex_walk`), viajan con el app y
@@ -106,17 +112,22 @@ destapó un olvido —ocho días entrenando sin que nadie mencionara el descanso
 | Día | Qué | Lleva carga de cadera |
 |---|---|---|
 | Lunes | **LUMBAR (short)** | no |
-| Martes | **LUMBAR** | **sí** |
+| Martes | **LUMBAR**, con flexiones y dominadas | **sí** |
 | Miércoles | **LUMBAR (short)** | no |
 | Jueves | **LUMBAR (short)** | no |
-| Viernes | **LUMBAR** | **sí** |
-| Sábado | **LUMBAR** | **sí** |
+| Viernes | **LUMBAR (short)** (desde el 24-oct, revisión 38) | no |
+| Sábado | **LUMBAR**, con flexiones y dominadas | **sí** |
 | Domingo | **LUMBAR (short)** | no |
 | Cuando la espalda mande | **LUMBAR (bad day)**, en lugar del que tocaba | no |
 
 **Caminar y McGill van los siete días.** En esta fase el descanso no es dejar de moverse:
 su dolor de la mañana aparece por estar quieto, y McGill es resistencia a baja carga, no
 fuerza.
+
+**Desde la revisión 38 (24-oct) el completo va dos días, martes y sábado**, y lleva el tren
+superior: flexiones y dominadas. El viernes pasó al corto para que las dominadas no caigan dos
+días seguidos; el puente y la sentadilla bajaron de tres días a dos. Lo de abajo cuenta cómo
+era antes.
 
 **El puente y la sentadilla van tres días**, con descanso entre ellos. Llegó a hacerlos
 siete días seguidos subiendo carga en cada sesión, que es lo que esta tabla corrige. El

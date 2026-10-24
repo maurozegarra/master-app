@@ -5,6 +5,40 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-24 — la rutina es todo su ejercicio: entra el tren superior
+
+**Lo que destapó el sábado.** Le propuse empezar el Muay Thai (la fecha para decidirlo era el
+18-oct y se me pasó; los tres criterios se cumplen, con diez mañanas seguidas en 0) y dije que
+la cintura no se mueve porque la rutina es mantenimiento. Me preguntó: *"tú sabes que yo sólo
+hago lo que me indicas para hacer ejercicio, verdad? o asumes que la rutina que me das es un
+extra"*. No estaba escrito en ningún lado, y la rutina se diseñó como si fuera un complemento:
+solo columna, nada de empujar ni de jalar. Ahora está en `coach.md`.
+
+**Lo que corrigió él.** Mi primera propuesta fue Muay Thai de entrada -shadow, saco y llanta,
+sábado y domingo-: *"99% que mañana no me pongo en pie"*. Pidió lo de siempre: un ejercicio o
+dos a la vez, primero acondicionamiento, y aproximaciones al shadow de 3 × 1 min. Tiene razón y
+es como se ha manejado todo. Descartó el press en el piso por el montaje (*"tanto trámite como
+el glute bridge"*) y el remo (*"si no le voy, debe haber algo mejor"*).
+
+**Revisión 38 (v1.0.461):** bloque **Upper Body** después de la cadera, martes y sábado.
+
+| Ejercicio | Dosis | Antes de retomar |
+|---|---|---|
+| Flexiones de rodillas | 1 × 12, calentamiento | 1 × 15 |
+| Flexiones | 3 × 8 | 2 × 10, y declinadas |
+| Dominadas estrictas | 4 × 2, 2 min de descanso, bajando a la plyobox | 4 seguidas |
+
+- Suben por repeticiones; las dos se cargan con el **chaleco** (hasta 10 kg) cuando toque.
+- **El viernes pasa al corto**: el puente y la sentadilla, de tres días a dos. Son dos cambios a
+  la vez; si algo molesta, lo primero que se mira es lo nuevo.
+- **Después:** hombros (face pull con la banda, elevaciones laterales), y luego el shadow de
+  3 × 1 min. El saco necesita vendas, que todavía no tiene.
+- **Lo que caminas los días presenciales** (10-15 min, solo de ida) queda anotado para más
+  adelante: un cambio a la vez.
+- **Sin pesaje esta semana:** la balanza falla. Vuelve el sábado 31, de los dos.
+
+---
+
 ## 2026-10-20 — el lunes sin sesión por sueño, y hoy la revisión 35 completa
 
 **Domingo 18:** el corto a las 10:10, ya con la revisión 35: equilibrio 30 s por pie y carry

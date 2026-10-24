@@ -62,6 +62,8 @@ object ExerciseCatalog {
         Triple("ex_shoulder_press", "Press de hombro", "Shoulder Press"),
         Triple("ex_assisted_dips", "Fondos asistidos", "Assisted Dips"),
         Triple("ex_pushups", "Flexiones", "Push-ups"),
+        // La serie de calentamiento de las flexiones (lumbar, revision 38).
+        Triple("ex_knee_pushups", "Flexiones de rodillas", "Knee Push-ups"),
         // Traccion y agarre para el clinch (NIKO 3).
         Triple("ex_inverted_row", "Remo invertido", "Inverted Row"),
         Triple("ex_dumbbell_row", "Remo con mancuerna", "Dumbbell Row"),

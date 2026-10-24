@@ -27,15 +27,39 @@ class LumbarTrainingTest {
     private val steps = StepEngine.buildSteps(training.copy(workouts = training.workouts))
 
     @Test
-    fun `tiene los cinco bloques de la rutina`() {
+    fun `tiene los seis bloques de la rutina`() {
+        // Revision 38: el tren superior, despues de la cadera.
         assertEquals(
-            listOf("Warm Walk", "Mobility", "McGill Big 3", "Hip & Glute", "Cool Walk"),
+            listOf("Warm Walk", "Mobility", "McGill Big 3", "Hip & Glute", "Upper Body", "Cool Walk"),
             training.workouts.map { it.name },
         )
         // 3 en McGill y no 4 desde TD-147: la plancha lateral era dos ejercicios clonados y
         // ahora es uno con sus dos lados declarados. 3 en la movilidad desde la revision 35:
         // el equilibrio en una pierna.
-        assertEquals(listOf(1, 3, 3, 3, 1), training.workouts.map { it.exercises.size })
+        assertEquals(listOf(1, 3, 3, 3, 3, 1), training.workouts.map { it.exercises.size })
+    }
+
+    @Test
+    fun `el tren superior empuja y jala con el cuerpo`() {
+        // Revision 38 (24-oct): flexiones y dominadas, sin montaje y cargables con el chaleco.
+        val arriba = training.workouts.first { it.name == "Upper Body" }.exercises
+        assertEquals(listOf("ex_knee_pushups", "ex_pushups", "ex_pull_ups"), arriba.map { it.exerciseId })
+        assertTrue(arriba.all { it.weightType == WeightType.NONE })
+        // El calentamiento no pregunta; las flexiones y las dominadas, cada serie.
+        assertEquals(com.maurozegarra.master.model.Progression.NONE, com.maurozegarra.master.model.Effort.of(arriba[0]))
+        assertEquals(com.maurozegarra.master.model.Progression.REPS, com.maurozegarra.master.model.Effort.of(arriba[1]))
+        assertEquals(com.maurozegarra.master.model.Progression.REPS, com.maurozegarra.master.model.Effort.of(arriba[2]))
+        assertEquals(listOf(12), listOf(arriba[0].workValue))
+        assertEquals(3 to 8, arriba[1].sets to arriba[1].workValue)
+        assertEquals(4 to 2, arriba[2].sets to arriba[2].workValue)
+        // No esta en el corto ni en el dia malo: va dos dias, martes y sabado.
+        assertFalse(short.workouts.any { it.name == "Upper Body" })
+        // Las instrucciones en ingles le llegan aunque el catalogo ya haya sembrado las de NIKO.
+        val catalogo = MasterDefaults.catalogInstructions().getValue("ex_pushups")
+        assertEquals(
+            MasterDefaults.lumbarInstructions()["ex_pushups"],
+            MasterDefaults.mergeLumbarInstructions(mapOf("ex_pushups" to catalogo))["ex_pushups"],
+        )
     }
 
     @Test
@@ -293,13 +317,15 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `lo cronometrado suma 40 minutos y 33 segundos`() {
+    fun `lo cronometrado suma 49 minutos y 8 segundos`() {
         // Revision 16: el carry ALTERNA las manos dentro de cada serie, asi que vuelven a ser
         // dos descansos y no cinco (-3 min respecto de la 15), y las dos caminatas ganan 10 s
         // de preparacion cada una (+20 s): 2518 - 180 + 20.
         // Revision 35: +70 s del equilibrio en una pierna (10 de preparacion y 30 por pie).
         // Revision 37: +5 s para cambiar de pie.
-        assertEquals(2433, steps.sumOf { it.durationSec })
+        // Revision 38: +515 s del tren superior (preparaciones y descansos; las repeticiones
+        // no cuentan tiempo).
+        assertEquals(2948, steps.sumOf { it.durationSec })
     }
 
     @Test
@@ -449,7 +475,7 @@ class LumbarTrainingTest {
 
         assertEquals(4, out.size)
         assertEquals(MasterDefaults.LUMBAR_ID, out[0].id)
-        assertEquals(5, out[0].workouts.size)
+        assertEquals(6, out[0].workouts.size)
         assertEquals(master, out[1])
     }
 
@@ -463,7 +489,7 @@ class LumbarTrainingTest {
 
         assertEquals("uid-de-siempre", out.uid)
         assertEquals(111L, out.createdAt)
-        assertEquals(5, out.workouts.size)
+        assertEquals(6, out.workouts.size)
     }
 
     @Test
@@ -544,8 +570,10 @@ class LumbarTrainingTest {
     fun `la sesion recoge los doce registros, todos completos`() {
         // Doce registros de once ejercicios: desde la revision 15 el carry va por lados
         // (TD-095) y deja uno por mano, igual que la plancha. Catorce desde la 35: el
-        // equilibrio en una pierna, uno por pie.
-        assertEquals(14, session.exercises.size)
+        // equilibrio en una pierna, uno por pie. 17 desde la 38, con el tren superior: la
+        // reconstruccion sale de la rutina de hoy, pero se guardo una sola vez en su telefono
+        // (seedFirstSession) y lo que quedo ahi no cambia.
+        assertEquals(17, session.exercises.size)
         assertTrue(session.exercises.all { it.setsCompleted == it.totalSets })
         assertTrue(session.exercises.none { r -> r.sets.any { it.skipped } })
         assertEquals(com.maurozegarra.master.model.SessionStatus.COMPLETED, session.status)

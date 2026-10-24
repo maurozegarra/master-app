@@ -47,6 +47,7 @@ object ExerciseIcons {
         "ex_shoulder_press" to "💪",
         "ex_assisted_dips" to "🤸",
         "ex_pushups" to "💪",
+        "ex_knee_pushups" to "🧎",
         // Movilidad de columna
         "ex_kneeling_spine_extension" to "🧎",
         "ex_cobra_to_child" to "🐍",

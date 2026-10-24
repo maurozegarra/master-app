@@ -426,8 +426,16 @@ object MasterDefaults {
      *
      * Revision 37 (20-oct, la misma noche): 5 s para cambiar de pie, que no tenia: "espera que
      * de un salto de un segundo al otro". Numero nuevo porque la 36 ya estaba en el telefono.
+     *
+     * Revision 38 (24-oct, tercera revision semanal): entra el tren superior. Planteado por el:
+     * la rutina es TODO su ejercicio -no un extra- y no tenia nada de empujar ni de jalar, "un
+     * claro desbalance". Flexiones y dominadas ([LumbarBlocks.upperBody]), las dos con el
+     * cuerpo y cargables con el chaleco, sin montaje. Van en el completo, que pasa a martes y
+     * sabado: el viernes queda en el corto para que las dominadas no caigan dos dias seguidos,
+     * y el puente y la sentadilla bajan de tres dias a dos. El Muay Thai espera: primero esto,
+     * despues shadow de 3 x 1 min, y recien despues el saco y la llanta.
      */
-    const val LUMBAR_REVISION = 37
+    const val LUMBAR_REVISION = 38
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -534,7 +542,8 @@ object MasterDefaults {
             name = "LUMBAR",
             tracksPain = true,
             // Su semana (ver docs/coach.md, La semana): lo que decide cual va primero (TD-167).
-            scheduleDays = setOf(java.time.DayOfWeek.TUESDAY, java.time.DayOfWeek.FRIDAY, java.time.DayOfWeek.SATURDAY),
+            // Revision 38: el viernes pasa al corto (ver LUMBAR_REVISION).
+            scheduleDays = setOf(java.time.DayOfWeek.TUESDAY, java.time.DayOfWeek.SATURDAY),
             // Revision 29: el jueves 8, feriado, cambiado con el viernes (ver LUMBAR_REVISION).
             scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 8)),
             workouts = listOf(
@@ -542,6 +551,10 @@ object MasterDefaults {
                 b.mobility(ankle = easedAnkle),
                 b.mcgill(),
                 b.hipGlute(eased = easedHip, bandWalk = bandWalk, ankle = easedAnkle),
+                // Revision 38: despues de la cadera, que llega fresca y tiene la prioridad. Con
+                // ids propios: LUMBAR_ID (950016) cae dentro de la secuencia de este training, y
+                // los cuatro ids nuevos llegaban justo a el.
+                LumbarBlocks(lang, seqStart = 950100L).upperBody(),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
             createdAt = now,
@@ -628,7 +641,8 @@ object MasterDefaults {
             name = "LUMBAR (short)",
             tracksPain = true,
             // Su semana (ver docs/coach.md, La semana): lo que decide cual va primero (TD-167).
-            scheduleDays = setOf(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.WEDNESDAY, java.time.DayOfWeek.THURSDAY, java.time.DayOfWeek.SUNDAY),
+            // Revision 38: y el viernes, que deja el completo (ver LUMBAR_REVISION).
+            scheduleDays = setOf(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.WEDNESDAY, java.time.DayOfWeek.THURSDAY, java.time.DayOfWeek.FRIDAY, java.time.DayOfWeek.SUNDAY),
             // Revision 29: el viernes 9, cambiado con el jueves feriado (ver LUMBAR_REVISION).
             scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 9)),
             workouts = listOf(
@@ -2133,6 +2147,34 @@ object MasterDefaults {
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
                 .copy(dumbbellCount = 1, workMode = WorkMode.DISTANCE, sides = listOf("Left", "Right"), alternateSides = true)
 
+        /**
+         * Empujar y jalar (revision 38): flexiones y dominadas, martes y sabado.
+         *
+         * Con el cuerpo y no con mancuernas porque el montaje cuesta: el press en el piso lo
+         * descarto el mismo, "cuando quiera mover pesado, el ponerme en posicion va a ser tanto
+         * tramite como lo fue el glute bridge". Las dos se cargan con el chaleco (hasta 10 kg,
+         * de kilo en kilo) cuando haga falta, sin armar nada.
+         *
+         * La flexion es una plancha en movimiento: el abdomen sostiene la cadera, lo mismo que
+         * pide McGill. La dominada estira la columna con su peso mientras cuelga; sin balanceo,
+         * y bajando a la plyobox: saltar al piso en cada serie es impacto directo al disco.
+         *
+         * Las dosis, por debajo de lo que hacia antes de retomar: 1 x 15 de rodillas y 2 x 10
+         * normales, y 4 dominadas estrictas seguidas. Suben por repeticiones (Progression.REPS
+         * pregunta cada serie): flexiones hasta 3 x 12, despues declinadas y despues el chaleco;
+         * dominadas 4 x 3, 4 x 4, cinco series y despues el chaleco.
+         */
+        fun upperBody(): Workout = Workout(
+            id = id(),
+            name = if (lang == "es") "Tren superior" else "Upper Body",
+            exercises = listOf(
+                reps("ex_knee_pushups", 12, "Warm-up. Body straight from the knees", prep = 10)
+                    .copy(progression = Progression.NONE),
+                reps("ex_pushups", 8, "Body straight from head to heels. Chest almost to the floor", sets = 3, rest = 60, prep = 10),
+                reps("ex_pull_ups", 2, "Strict, no swing. Step down onto the plyobox, don't drop", sets = 4, rest = 120, prep = 15),
+            ),
+        )
+
         fun hipGlute(eased: Boolean = false, bandWalk: Boolean = false, ankle: Boolean = false): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
@@ -2305,6 +2347,30 @@ object MasterDefaults {
                 "One of the best there is for the core with minimal load on the spine.",
             ),
         ),
+        // Revision 38: el tren superior (ver LumbarBlocks.upperBody).
+        "ex_knee_pushups" to ExerciseMedia(
+            listOf(
+                "Warm-up for the push-ups: same movement, knees on the floor.",
+                "Body straight from the knees to the head. Hips don't sag or pike.",
+                "Easy pace. It wakes up chest, shoulders and triceps before the real sets.",
+            ),
+        ),
+        "ex_pushups" to ExerciseMedia(
+            listOf(
+                "Hands a bit wider than the shoulders. Body straight from head to heels.",
+                "Brace the abs and squeeze the glutes: it is a moving plank, the hips don't sag. That is what protects the lower back.",
+                "Chest almost to the floor, elbows back at an angle, not flared out to the sides.",
+                "If the last reps break your form, stop there and mark it hard. A sagging hip is not a rep.",
+            ),
+        ),
+        "ex_pull_ups" to ExerciseMedia(
+            listOf(
+                "Overhand grip, a bit wider than the shoulders. Start from a dead hang, arms straight.",
+                "Strict: pull until the chin passes the bar, no swinging or kicking. The swing (kipping) is what the spine doesn't need.",
+                "Lower under control. Hanging stretches the spine with your own weight; enjoy it for a second at the bottom.",
+                "To finish, step down onto the plyobox. Don't drop to the floor: that landing, every set, goes straight to the disc.",
+            ),
+        ),
         // Revision 35: lo que se queda del tobillo izquierdo (ver LUMBAR_ANKLE_EASED).
         // Revision 36: con los ojos cerrados desde el principio.
         "ex_single_leg_balance" to ExerciseMedia(
@@ -2348,6 +2414,8 @@ object MasterDefaults {
         // escritas para NIKO, porque lo hizo en el training MASTER.
         "ex_hip_thrust" to listOf(catalogInstructions().getValue("ex_hip_thrust")),
         "ex_lateral_band_walk" to listOf(catalogInstructions().getValue("ex_lateral_band_walk")),
+        // Revision 38: las del catalogo estan en espanol y escritas para NIKO.
+        "ex_pushups" to listOf(catalogInstructions().getValue("ex_pushups")),
         "ex_glute_bridge" to listOf(
             ExerciseMedia(
                 listOf(
