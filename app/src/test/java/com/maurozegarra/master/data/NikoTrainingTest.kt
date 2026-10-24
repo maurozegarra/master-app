@@ -54,4 +54,12 @@ class NikoTrainingTest {
         assertEquals(listOf(7.5, 7.5), cosaca.setList.map { it.weight })
         assertEquals(true, cosaca.note.contains("7.5 kg"))
     }
+
+    @Test
+    fun `revision 25 sube los pasos de la caminata con banda en NIKO 4`() {
+        // Facil las cuatro series con la banda fuerte, que es la mas dura: suben los pasos.
+        val banda = ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_lateral_band_walk")
+        assertEquals(15, banda.workValue)
+        assertEquals(true, banda.note.contains("FUERTE") && banda.note.contains("15 pasos"))
+    }
 }

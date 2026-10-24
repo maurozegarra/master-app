@@ -434,8 +434,13 @@ object MasterDefaults {
      * sabado: el viernes queda en el corto para que las dominadas no caigan dos dias seguidos,
      * y el puente y la sentadilla bajan de tres dias a dos. El Muay Thai espera: primero esto,
      * despues shadow de 3 x 1 min, y recien despues el saco y la llanta.
+     *
+     * Revision 39 (24-oct, la misma revision semanal, con la sesion de la manana): el app pasa a
+     * decir lo que ya hace. El puente a 26 · 31 · 36: lo hizo asi el viernes y el sabado, por su
+     * cuenta, y lo marco ligero las dos veces. El carry a 14 · 16 · 20: el sabado lo hizo asi y el
+     * de 20 "salio facil". Las flexiones y las dominadas se quedan: costaron, pero salieron.
      */
-    const val LUMBAR_REVISION = 38
+    const val LUMBAR_REVISION = 39
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -813,8 +818,12 @@ object MasterDefaults {
      * el de 10 salió pesado otra vez. NIKO 4, la banda FUERTE (puente y caminata fáciles el
      * 16-oct) y el peso muerto a una pierna a 10 en las tres (7.5 fácil). NIKO 6, la cosaca a
      * 7.5 (+2.5 pedido en los dos lados el 12-oct).
+     *
+     * Revision 25 (24-oct, tercera revisión semanal): NIKO 4, la caminata con banda a 15 pasos
+     * por lado. El 23-oct, fácil las cuatro series con la banda fuerte, que es la más dura del set:
+     * no queda banda a la que subir, así que suben los pasos.
      */
-    const val NIKO_REVISION = 24
+    const val NIKO_REVISION = 25
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1129,7 +1138,7 @@ object MasterDefaults {
                         // caminata lateral con banda, que trabaja lo mismo de pie.
                         // Revision 24: la banda FUERTE. Fáciles las dos cosas con la media el 16-oct.
                         b.ex("ex_glute_bridge", "Banda FUERTE sobre las rodillas, sin dejar que se junten. Aprieta 2 s arriba", 15, sets = 2, rest = 30),
-                        b.ex("ex_lateral_band_walk", "Banda FUERTE sobre las rodillas. 10 pasos a cada lado", 10, sets = 2, rest = 30)
+                        b.ex("ex_lateral_band_walk", "Banda FUERTE sobre las rodillas. 15 pasos a cada lado", 15, sets = 2, rest = 30)
                             .copy(sides = listOf("Izquierda", "Derecha"), alternateSides = true),
                     ),
                 ),
@@ -2141,7 +2150,8 @@ object MasterDefaults {
                 if (ankle) "Short steps at the turns, don't pivot on the loaded foot"
                 else "Kettlebell. Short steps at the turns, don't pivot on the loaded foot. Walk tall",
                 // Revision 35: con PESA RUSA, que tiene de 2 en 2 (la mancuerna salta de 2.5).
-                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(12.0, 14.0, 16.0), WeightType.DUMBBELL,
+                // Revision 39: 14 · 16 · 20, lo que hizo el 24-oct. No tiene la de 18.
+                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(14.0, 16.0, 20.0), WeightType.DUMBBELL,
             )
                 // Alternando (TD-156, revision 16): izquierda y derecha seguidas, y el descanso
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
@@ -2226,7 +2236,8 @@ object MasterDefaults {
                 // molesto el 3-oct fue la carga arriba, asi que el peso lo pide el cuerpo.
                 // Revision 32 (10-oct): 16 · 21 · 26 (discos 10, 15 y 20), ver [LUMBAR_REVISION].
                 // Revision 35 (17-oct): 21 · 26 · 31 (discos 15, 20 y 25).
-                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(15.0, 20.0, 25.0), WeightType.BARBELL, barWeight = 6.0)
+                // Revision 39 (24-oct): 26 · 31 · 36 (discos 20, 25 y 30), lo que ya hacia.
+                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(20.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0)
                 else loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,

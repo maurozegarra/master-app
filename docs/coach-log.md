@@ -8,7 +8,8 @@ Lo más reciente arriba.
 ## 2026-10-24 — la rutina es todo su ejercicio: entra el tren superior
 
 **Lo que destapó el sábado.** Le propuse empezar el Muay Thai (la fecha para decidirlo era el
-18-oct y se me pasó; los tres criterios se cumplen, con diez mañanas seguidas en 0) y dije que
+18-oct y se me pasó; los tres criterios se cumplen. Le dije "diez mañanas seguidas en 0" y era falso: fueron ocho, del
+15 al 22, y el viernes 23 amaneció en 1 con 18 minutos. Lo vi al leer el respaldo de la tarde) y dije que
 la cintura no se mueve porque la rutina es mantenimiento. Me preguntó: *"tú sabes que yo sólo
 hago lo que me indicas para hacer ejercicio, verdad? o asumes que la rutina que me das es un
 extra"*. No estaba escrito en ningún lado, y la rutina se diseñó como si fuera un complemento:
@@ -36,6 +37,30 @@ el glute bridge"*) y el remo (*"si no le voy, debe haber algo mejor"*).
 - **Lo que caminas los días presenciales** (10-15 min, solo de ida) queda anotado para más
   adelante: un cambio a la vez.
 - **Sin pesaje esta semana:** la balanza falla. Vuelve el sábado 31, de los dos.
+
+**El estreno, a las 9:42 (134 min, 25 de ellos al teléfono con su mamá).** Mañana en 0.
+
+| Ejercicio | En el app | Lo que hizo | Marcó |
+|---|---|---|---|
+| Puente | 21 · 26 · 31 | 26 · 31 · 36 (también el viernes) | ligero las tres |
+| Carry | 12 · 14 · 16 | 14 · 16 · 20 | bien, bien, ligero; el 20 "salió fácil" |
+| Box squat | 17.5 · 20 · 20 | igual | bien las tres |
+| Flexiones | 3 × 8 | igual | costó, bien, costó |
+| Dominadas | 4 × 2 | igual | bien, bien, bien, costó |
+
+Al colgarse y al bajar a la plyobox, *"todo bien, nada extraño"*.
+
+**La semana (18 al 24): seis sesiones de siete**, todas completas; solo faltó el lunes, por
+sueño. Las mañanas: ocho seguidas en 0 (15 al 22), el viernes 1 con 18 minutos, y hoy 0.
+**NIKO** hizo del 1 al 4, todo *bien*, salvo la caminata con banda de NIKO 4: fácil las cuatro
+series con la fuerte.
+
+**Revisión 39 y NIKO 25 (v1.0.462):** el app pasa a decir lo que ya hace. Puente 26 · 31 · 36 y
+carry 14 · 16 · 20; flexiones y dominadas igual. NIKO 4, la caminata con banda a 15 pasos por
+lado: no hay banda más fuerte.
+
+**Para la próxima:** el carry quiere 22 y no hay pesa rusa de 22; sí está la **mancuerna de
+22.5**.
 
 ---
 

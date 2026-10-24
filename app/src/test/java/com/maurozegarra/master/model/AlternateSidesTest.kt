@@ -22,7 +22,7 @@ class AlternateSidesTest {
             pasos.map { if (it.kind == StepKind.REST) "R" else "W ${it.side} ${it.setIndex}" },
         )
         // Y con la rampa de peso en cada mano.
-        assertEquals(listOf(12.0, 12.0, 14.0, 14.0, 16.0, 16.0), pasos.filter { it.kind == StepKind.WORK }.map { it.weightTotal })
+        assertEquals(listOf(14.0, 14.0, 16.0, 16.0, 20.0, 20.0), pasos.filter { it.kind == StepKind.WORK }.map { it.weightTotal })
     }
 
     @Test
