@@ -1,8 +1,10 @@
 package com.maurozegarra.master.model
 
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 
 /**
  * Qué se ve en la pantalla principal (8-oct-2026, pedido suyo).
@@ -28,6 +30,9 @@ object HomeList {
     )
 
     fun shown(trainings: List<Training>): List<Training> = trainings.filter { it.uid !in HIDDEN_UIDS }
+
+    /** El lunes de la semana de [today]: donde empieza el calendario de arriba. */
+    fun weekStart(today: LocalDate): LocalDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
 
     /** El de arriba: el de hoy o el que sigue. Null si nada lleva programa. */
     fun main(trainings: List<Training>, sessions: List<SessionLog>, today: LocalDate, zone: ZoneId): Training? {

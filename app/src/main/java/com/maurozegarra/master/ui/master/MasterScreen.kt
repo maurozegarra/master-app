@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
@@ -51,12 +52,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import com.maurozegarra.master.model.HomeList
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -94,11 +102,9 @@ import com.maurozegarra.master.ui.rememberDragDropState
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.util.formatRemaining
-import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.temporal.TemporalAdjusters
 
 /** Router de la sección principal según el estado de navegación del ViewModel. */
 @Composable
@@ -122,10 +128,23 @@ fun MasterScreen(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> 
 private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> Unit) {
     val ctx = LocalContext.current
     val zone = remember { ZoneId.systemDefault() }
-    val today = remember { LocalDate.now() }
-    val baseWeekStart = remember { today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }
+    // El día lo lleva el ViewModel (TD-203): aquí solo se le avisa que mire el reloj, cada
+    // minuto y al volver a la pantalla, como las tarjetas de HomeDashboard.
+    val ciclo = LocalLifecycleOwner.current
+    DisposableEffect(ciclo) {
+        val obs = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_RESUME) vm.refreshToday() }
+        ciclo.lifecycle.addObserver(obs)
+        onDispose { ciclo.lifecycle.removeObserver(obs) }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000 - System.currentTimeMillis() % 60_000)
+            vm.refreshToday()
+        }
+    }
+    val today = vm.today
     var weekOffset by remember { mutableStateOf(0) }
-    val weekStart = remember(weekOffset) { baseWeekStart.plusWeeks(weekOffset.toLong()) }
+    val weekStart = remember(today, weekOffset) { HomeList.weekStart(today).plusWeeks(weekOffset.toLong()) }
 
     val sessionDates = remember(vm.sessions.toList()) {
         vm.sessions
@@ -505,35 +524,58 @@ private fun WeekCalendar(
                     .then(if (hasSessions) Modifier.clickable { onDayClick(date) } else Modifier),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                // Medidas copiadas de TickTick (24-oct, con captura suya): sin aros en los
+                // demas dias, el nombre en gris tambien hoy -la marca es el circulo- y el punto
+                // chico DENTRO del alto del circulo, debajo del numero.
                 Text(
                     text = dayLabels[i],
-                    color = if (isToday) accent else AppTheme.colors.textDim,
-                    fontSize = 11.sp,
-                    fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                    color = AppTheme.colors.textDim,
+                    fontSize = 12.sp,
                 )
-                Spacer(Modifier.height(4.dp))
-                DayCircle(date.dayOfMonth.toString(), selected = isToday, accent = accent)
-                Spacer(Modifier.height(4.dp))
-                val sessionStatus = sessionDates[date]
+                Spacer(Modifier.height(WEEK_LABEL_GAP))
                 Box(
-                    modifier = Modifier.size(8.dp)
+                    modifier = Modifier
+                        // TickTick deja 7 dp entre el circulo y la card; la lista separa todo
+                        // con 12, asi que el calendario declara 5 dp menos de alto y el circulo
+                        // ocupa ese hueco.
+                        .layout { m, c ->
+                            val p = m.measure(c)
+                            layout(p.width, p.height - WEEK_CARD_OVERLAP.roundToPx()) { p.place(0, 0) }
+                        }
+                        .size(32.dp)
                         .clip(CircleShape)
-                        .background(
-                            if (sessionStatus == SessionStatus.COMPLETED) accent
-                            else Color.Transparent
-                        )
-                        .border(
-                            1.dp,
-                            if (sessionStatus == SessionStatus.PARTIAL) accent
-                            else Color.Transparent,
-                            CircleShape,
-                        ),
-                )
+                        .background(if (isToday) accent else Color.Transparent),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = date.dayOfMonth.toString(),
+                        color = if (isToday) AppTheme.colors.onAccent else AppTheme.colors.textPrimary,
+                        fontSize = 15.sp,
+                    )
+                    val sessionStatus = sessionDates[date]
+                    // Sobre el circulo de hoy el acento no se veria.
+                    val dot = if (isToday) AppTheme.colors.onAccent else accent
+                    Box(
+                        modifier = Modifier
+                            .offset(y = 11.dp)
+                            .size(4.dp)
+                            .clip(CircleShape)
+                            .background(if (sessionStatus == SessionStatus.COMPLETED) dot else Color.Transparent)
+                            .border(1.dp, if (sessionStatus == SessionStatus.PARTIAL) dot else Color.Transparent, CircleShape),
+                    )
+                }
             }
         }
     }
     }
 }
+
+/**
+ * Del nombre del dia al circulo. Casi nada: el circulo de 32 dp ya deja aire sobre el numero, y
+ * asi quedan 28 dp de la parte de arriba de las letras a la del numero, medido en TickTick.
+ */
+private val WEEK_LABEL_GAP = 1.dp
+private val WEEK_CARD_OVERLAP = 5.dp
 
 /**
  * La fila que resume lo archivado y lo despliega en el sitio (TD-138).

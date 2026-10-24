@@ -219,6 +219,20 @@ class MasterViewModel(
         private set
 
     /**
+     * El día de la pantalla principal, como estado (TD-203). Calcularlo al dibujar dejaba la
+     * pantalla en el día en que se abrió: el 24-oct, abierta desde la víspera, marcaba el viernes
+     * como hoy. Lo refresca la lista ([refreshToday]) cada minuto y al volver a primer plano, y
+     * al cambiar recompone el calendario y el training de arriba.
+     */
+    var today: java.time.LocalDate by mutableStateOf(java.time.LocalDate.now())
+        private set
+
+    fun refreshToday() {
+        val now = java.time.LocalDate.now()
+        if (now != today) today = now
+    }
+
+    /**
      * Los uid archivados (TD-138), en memoria para que la lista reaccione al archivar.
      * Declarado antes del `init` por la misma razon que los candados de arriba.
      */
@@ -230,14 +244,14 @@ class MasterViewModel(
      * programa -un teléfono sin semana ni rutinas numeradas-, todo, como antes.
      */
     val visibleTrainings: List<Training>
-        get() = HomeList.main(trainings, sessions, java.time.LocalDate.now(), java.time.ZoneId.systemDefault())
+        get() = HomeList.main(trainings, sessions, today, java.time.ZoneId.systemDefault())
             ?.let { listOf(it) } ?: HomeList.shown(trainings)
 
     /** Lo de abajo, plegado: el de NIKO de hoy primero, el resto de NIKO y lo demás. */
     val archivedTrainings: List<Training>
         get() = if (visibleTrainings.size != 1) emptyList() else HomeList.rest(
             trainings, sessions, athleteSessions.map { it.session },
-            java.time.LocalDate.now(), java.time.ZoneId.systemDefault(),
+            today, java.time.ZoneId.systemDefault(),
         )
 
     /**
@@ -1921,7 +1935,7 @@ class MasterViewModel(
      * propone. Ver [NextTraining].
      */
     val nextTrainingId: Long?
-        get() = HomeList.main(trainings, sessions, java.time.LocalDate.now(), java.time.ZoneId.systemDefault())?.id
+        get() = HomeList.main(trainings, sessions, today, java.time.ZoneId.systemDefault())?.id
 
     /**
      * Mover por identidad y no por posicion (TD-167): en la lista, el siguiente va arriba

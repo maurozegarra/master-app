@@ -2,6 +2,16 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-203",
+      "title": "La pantalla principal cambia de día sola: el calendario marcaba ayer como hoy",
+      "category": "Fix",
+      "status": "done",
+      "test": [
+        "com.maurozegarra.master.model.HomeListTest"
+      ],
+      "manual": "PEDIDO el 24-oct, con captura (\"juguemos un poco, dime qué está mal\"): el sábado 24 a las 8:12 el calendario marcaba el viernes 23 como hoy, con el reloj grande diciendo bien Saturday, Oct 24. La pantalla seguía abierta desde el viernes y MasterScreen calculaba hoy UNA vez (remember { LocalDate.now() }). De ese hoy salía también la semana, y el training de arriba (HomeList.main) solo se recalculaba si algo más cambiaba.\n\nAHORA: el día vive en el ViewModel (today, como estado) y la lista lo refresca cada minuto y al volver a la pantalla, con el mismo mecanismo que las tarjetas de abajo. El calendario, la semana y el training de arriba lo leen de ahí.\n\nPROBAR: dejar la pantalla principal abierta pasada la medianoche (o volver a ella al día siguiente sin cerrar el app). Al minuto, el día marcado en rojo es el de hoy, y un lunes la semana es la nueva.\n\nY EL CALENDARIO COMO TICKTICK (24-oct, con captura suya, medido pixel a pixel): sin aros en los demás días, el nombre del día en gris también hoy, número 15 sp normal, punto de 4 dp (era 8) dentro del alto del círculo, y 7 dp del círculo a la card (eran 24). Del nombre del día a la card: 57 dp, TickTick 56 (antes 76)."
+    },
+    {
       "id": "TD-202",
       "title": "Pesa rusa como tipo de peso propio, con su ícono, como la mancuerna y la barra",
       "category": "Feature",

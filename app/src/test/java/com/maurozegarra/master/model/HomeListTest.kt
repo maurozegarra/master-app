@@ -24,6 +24,23 @@ class HomeListTest {
         SessionLog(id = cuando, trainingId = 999L, trainingName = tr, completedAt = cuando, status = SessionStatus.COMPLETED)
 
     @Test
+    fun `la semana empieza el lunes del dia que se le pasa`() {
+        // TD-203: el 24-oct el calendario seguia en el dia en que se abrio la pantalla. La semana
+        // sale del dia que lleva el ViewModel, asi que cambia sola al llegar el lunes.
+        assertEquals(LocalDate.of(2026, 10, 19), HomeList.weekStart(LocalDate.of(2026, 10, 24)))
+        assertEquals(LocalDate.of(2026, 10, 19), HomeList.weekStart(LocalDate.of(2026, 10, 25)))
+        assertEquals(LocalDate.of(2026, 10, 26), HomeList.weekStart(LocalDate.of(2026, 10, 26)))
+    }
+
+    @Test
+    fun `al pasar de dia, arriba va el del dia nuevo`() {
+        // TD-203: con la pantalla abierta desde la vispera. El jueves sin entrenar va el
+        // completo; el viernes, con el mismo historial, el corto.
+        assertEquals(completo, HomeList.main(todos, emptyList(), jueves, lima))
+        assertEquals(corto, HomeList.main(todos, emptyList(), jueves.plusDays(1), lima))
+    }
+
+    @Test
     fun `arriba solo el que sigue, y ya entreno el de hoy`() {
         // El jueves feriado hizo el completo: arriba va el corto del viernes, solo.
         val hoy = listOf(hecha("LUMBAR", at(jueves, 9)).copy(trainingId = 2L))
