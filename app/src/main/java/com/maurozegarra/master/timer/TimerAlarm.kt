@@ -38,6 +38,21 @@ object TimerAlarm {
         schedule(context, run)
     }
 
+    /**
+     * Una alarma de la pestaña Alarm (TD-200): suena a [minuteOfDay], hoy o mañana, siempre a
+     * pantalla completa. Por dentro es un timer que dura lo que falta; lo que cambia es que se
+     * recuerda por la hora, en sus propios recientes.
+     */
+    fun startAt(context: Context, name: String, minuteOfDay: Int) {
+        val store = TimerStore(context)
+        val now = System.currentTimeMillis()
+        val dura = TimerPlan.nextAt(minuteOfDay, now, java.time.ZoneId.systemDefault()) - now
+        val run = TimerPlan.start(UUID.randomUUID().toString(), name, dura, true, now)
+        store.saveRuns(store.runs() + run)
+        store.saveAlarmRecents(TimerPlan.addAlarmRecent(store.alarmRecents(), RecentAlarm(run.name, minuteOfDay)))
+        schedule(context, run)
+    }
+
     fun pause(context: Context, id: String) = update(context, id) { TimerPlan.pause(it, System.currentTimeMillis()) }
 
     fun resume(context: Context, id: String) = update(context, id) { TimerPlan.resume(it, System.currentTimeMillis()) }

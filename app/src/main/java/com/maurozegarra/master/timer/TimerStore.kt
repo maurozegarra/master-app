@@ -28,10 +28,23 @@ class TimerStore(context: Context) {
         prefs.edit().putString(KEY_RECENTS, TimerPlan.encodeRecents(list)).apply()
     }
 
+    fun alarmRecents(): List<RecentAlarm> = TimerPlan.decodeAlarmRecents(prefs.getString(KEY_ALARM_RECENTS, "[]") ?: "[]")
+
+    fun saveAlarmRecents(list: List<RecentAlarm>) {
+        prefs.edit().putString(KEY_ALARM_RECENTS, TimerPlan.encodeAlarmRecents(list)).apply()
+    }
+
+    /** La pestaña del + con la que se abre: la última que se usó (TD-200). */
+    var alarmTab: Boolean
+        get() = prefs.getBoolean(KEY_ALARM_TAB, false)
+        set(v) = prefs.edit().putBoolean(KEY_ALARM_TAB, v).apply()
+
     companion object {
         private const val FILE = "timers"
         private const val KEY_RUNS = "runs"
         private const val KEY_RECENTS = "recents"
+        private const val KEY_ALARM_RECENTS = "alarm_recents"
+        private const val KEY_ALARM_TAB = "alarm_tab"
 
         private val state = MutableStateFlow<List<TimerRun>?>(null)
 

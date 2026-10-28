@@ -742,9 +742,25 @@ data class TimerStrings(
     val recent: String = "Recent",
     val presets: String = "Presets",
     val name: String = "Name (optional)",
-    val endsAtLabel: String = "Ends at",
-    val ringAsAlarm: String = "Ring as alarm",
     val start: String = "Start",
+    // TD-200: las pestañas, las ruedas y cómo termina un timer.
+    val alarm: String = "Alarm",
+    val hour: String = "Hour",
+    val hr: String = "Hr",
+    val min: String = "Min",
+    val sec: String = "Sec",
+    val whenItEnds: String = "When it ends",
+    val endNotification: String = "Notification",
+    val endNotificationHint: String = "A banner and the MASTER beeps",
+    val endFullScreen: String = "Full screen",
+    val endFullScreenHint: String = "Rings at alarm volume and wakes the phone",
+    val today: String = "Today",
+    val tomorrow: String = "Tomorrow",
+    /** "Today · rings in 2 h 15 min". */
+    val ringsIn: String = "%1${'$'}s · rings in %2${'$'}s",
+    /** Bajo la rueda del timer: "Ends at 10:30 PM". */
+    val endsAtTime: String = "Ends at %s",
+    val setAlarm: String = "Set alarm",
     /** En la franja y la notificación: "ends 14:00". */
     val endsAt: String = "ends %s",
     /** Lo mismo cuando suena como alarma: "rings 14:00". */

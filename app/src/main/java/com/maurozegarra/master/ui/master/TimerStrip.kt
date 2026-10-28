@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Backspace
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Delete
@@ -32,8 +31,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,7 +59,6 @@ import com.maurozegarra.master.timer.TimerAlarm
 import com.maurozegarra.master.timer.TimerPlan
 import com.maurozegarra.master.timer.TimerRun
 import com.maurozegarra.master.timer.TimerStore
-import com.maurozegarra.master.ui.AppSwitch
 import com.maurozegarra.master.ui.SwipeAction
 import com.maurozegarra.master.ui.SwipeActionsRow
 import com.maurozegarra.master.ui.SwipeRowsController
@@ -205,21 +202,29 @@ private fun StripIcon(icon: ImageVector, label: String, tint: Color, onClick: ()
 }
 
 /**
- * El sheet de un timer nuevo, en el orden de su Galaxy Watch8 (9-oct): arriba "+ Custom", que
- * despliega el teclado, los chips de "Ends at", el nombre y "Ring as alarm"; después los cinco
- * recientes y los presets. Un reciente o un preset arranca de un toque.
+ * El sheet del + (TD-200): dos pestañas, Timer y Alarm, con el selector del app (el de
+ * Sessions | Body), y se abre en la última que se usó.
+ *
+ * Antes la alarma vivía dentro del timer -unos chips de "Ends at" y un interruptor- y una
+ * hora lejana obligaba a calcular la duración. Sus palabras (14-oct): "cuando uno habla de
+ * alarma, justamente no quiere ponerse a calcular". Ahora la alarma se pone por HORA.
+ *
+ * Timer: "+ Custom" despliega la rueda, y debajo los recientes y los presets de su Galaxy
+ * Watch8, que arrancan de un toque.
  */
 @Composable
 private fun NewTimerSheet(accent: Color, t: Strings, onDismiss: () -> Unit) {
     val ctx = LocalContext.current
     val w = t.more.timer
     val c = AppTheme.colors
-    val recientes = remember { TimerStore(ctx).recents() }
+    val store = remember { TimerStore(ctx) }
+    val recientes = remember { store.recents() }
+    var alarma by remember { mutableStateOf(store.alarmTab) }
     var custom by remember { mutableStateOf(false) }
 
-    // Sin título, como los de Telegram (9-oct). Con Custom abierto crece: el teclado no cabe
-    // en el alto normal.
-    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss, tall = custom) {
+    // Sin título, como los de Telegram (9-oct). La alarma y la rueda del timer no caben en el
+    // alto normal.
+    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss, tall = custom || alarma) {
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
@@ -227,6 +232,18 @@ private fun NewTimerSheet(accent: Color, t: Strings, onDismiss: () -> Unit) {
                 .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            SegmentToggle(
+                options = listOf("timer" to w.timer, "alarm" to w.alarm),
+                selected = if (alarma) "alarm" else "timer",
+                accent = accent,
+            ) { alarma = it == "alarm"; store.alarmTab = alarma }
+            Spacer(Modifier.height(4.dp))
+
+            if (alarma) {
+                AlarmTab(accent, t, onStarted = onDismiss)
+                return@Column
+            }
+
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -240,7 +257,7 @@ private fun NewTimerSheet(accent: Color, t: Strings, onDismiss: () -> Unit) {
                 Spacer(Modifier.width(8.dp))
                 Text(w.custom, color = c.textPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
-            if (custom) CustomPanel(accent, t, onStarted = onDismiss)
+            if (custom) CustomTimer(accent, t, onStarted = onDismiss)
 
             if (recientes.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
@@ -294,110 +311,168 @@ private fun RecentRow(r: RecentTimer, accent: Color, t: Strings, onClick: () -> 
 }
 
 /**
- * El teclado de su mini-timer (los dígitos entran por la derecha), los chips de "Ends at", el
- * nombre y "Ring as alarm". El interruptor se prende solo al elegir una hora de fin y se apaga
- * al teclear una duración (decisión 1A del 9-oct); después se puede cambiar a mano.
+ * La duración de un timer con la rueda (TD-200), como el timer de su Watch8: Hr, Min y Sec, y
+ * una sola columna activa. Reemplaza al teclado: así el timer y la alarma se usan igual.
+ *
+ * "When it ends" era "Ring as alarm", y el nombre confundía, más al lado de una pestaña que se
+ * llama Alarm. Él lo ve como dos timers: el normal y el de pantalla completa que puede
+ * despertar el teléfono (lo mostró en Multi Timer: Fullscreen / Simple Notification).
  */
 @Composable
-private fun CustomPanel(accent: Color, t: Strings, onStarted: () -> Unit) {
+private fun CustomTimer(accent: Color, t: Strings, onStarted: () -> Unit) {
     val ctx = LocalContext.current
     val w = t.more.timer
     val c = AppTheme.colors
     val zone = remember { ZoneId.systemDefault() }
-    var digitos by remember { mutableStateOf("") }
-    var finEn by remember { mutableStateOf<Long?>(null) }
-    var alarma by remember { mutableStateOf(false) }
+    var h by remember { mutableStateOf(0) }
+    var m by remember { mutableStateOf(5) }
+    var sg by remember { mutableStateOf(0) }
+    // Como en el reloj, la que se mueve primero es la de los minutos: es la que más se usa.
+    var foco by remember { mutableStateOf(1) }
+    var teclado by remember { mutableStateOf(false) }
+    var arrastre by remember { mutableStateOf(0) }
+    var pantalla by remember { mutableStateOf(false) }
     var nombre by remember { mutableStateOf("") }
-    val chips = remember { TimerPlan.endsAtChips(System.currentTimeMillis()) }
-
-    fun teclear(d: String) {
-        digitos = (digitos + d).trimStart('0').takeLast(6)
-        if (finEn != null) { finEn = null; alarma = false }
-    }
+    val ahora by produceState(System.currentTimeMillis()) { while (true) { delay(15_000); value = System.currentTimeMillis() } }
+    val duracion = TimerPlan.durationMs(h, m, sg)
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // La pantalla del teclado: HH:MM:SS, o la hora de fin elegida.
-        val d = digitos.padStart(6, '0')
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            // Arrastrar mueve la rueda, con el teclado abierto o no; tocar lo abre (ver WheelField).
+            WheelField(
+                h, 0..TimerPlan.TIMER_HOURS_MAX, w.hr, foco == 0, accent, { foco = 0; arrastre++ }, { h = it }, minWidth = 84.dp,
+                keyboard = teclado, onTap = { foco = 0; teclado = true },
+            )
+            WheelColon()
+            WheelField(
+                m, 0..59, w.min, foco == 1, accent, { foco = 1; arrastre++ }, { m = it }, minWidth = 84.dp,
+                keyboard = teclado, onTap = { foco = 1; teclado = true },
+            )
+            WheelColon()
+            WheelField(
+                sg, 0..59, w.sec, foco == 2, accent, { foco = 2; arrastre++ }, { sg = it }, minWidth = 84.dp,
+                keyboard = teclado, onTap = { foco = 2; teclado = true },
+            )
+            WheelKeyboard(
+                teclado, foco, arrastre, listOf(0..TimerPlan.TIMER_HOURS_MAX, 0..59, 0..59),
+                onValue = { col, v -> when (col) { 0 -> h = v; 1 -> m = v; else -> sg = v } },
+                onColumn = { foco = it }, onClosed = { teclado = false },
+            )
+        }
         Text(
-            finEn?.let { "${w.endsAtLabel} ${TimerPlan.clock(it, zone)}" } ?: "${d.substring(0, 2)}:${d.substring(2, 4)}:${d.substring(4, 6)}",
-            color = if (digitos.isEmpty() && finEn == null) c.textDim else c.textPrimary,
-            fontSize = 36.sp, fontFamily = if (finEn == null) TimerMono else null,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            if (duracion > 0) w.endsAtTime.format(TimerPlan.clock12(ahora + duracion, zone)) else "",
+            color = c.textDim, fontSize = 14.sp,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
-        val teclas = listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"), listOf("", "0", "<"))
-        teclas.forEach { fila ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                fila.forEach { k ->
+
+        Spacer(Modifier.height(4.dp))
+        Text(w.whenItEnds, color = c.textDim, fontSize = 13.sp)
+        SegmentToggle(
+            options = listOf("notification" to w.endNotification, "full" to w.endFullScreen),
+            selected = if (pantalla) "full" else "notification",
+            accent = accent,
+        ) { pantalla = it == "full" }
+        Text(if (pantalla) w.endFullScreenHint else w.endNotificationHint, color = c.textDim, fontSize = 13.sp, modifier = Modifier.padding(start = 4.dp))
+
+        com.maurozegarra.master.ui.AppTextField(
+            value = nombre,
+            onValueChange = { nombre = it.take(40) },
+            label = w.name,
+            modifier = Modifier.fillMaxWidth(),
+            accent = accent,
+        )
+        PrimaryButton(label = w.start, accent = accent, enabled = duracion > 0, modifier = Modifier.fillMaxWidth()) {
+            TimerAlarm.start(ctx, nombre, duracion, pantalla)
+            onStarted()
+        }
+    }
+}
+
+/**
+ * La pestaña Alarm (TD-200): la hora directa, en 12 horas con AM/PM como el reloj del app
+ * (TD-183), y los minutos de uno en uno, "como una alarma normal". Debajo, cuándo suena -hoy o
+ * mañana, y en cuánto- para confirmar de un vistazo lo que se puso: la cuenta la hace el app.
+ *
+ * Siempre a pantalla completa: para eso es una alarma. Suena una vez y se va de la franja, y no
+ * se mezcla con las alarmas de la mañana del despertador.
+ */
+@Composable
+private fun AlarmTab(accent: Color, t: Strings, onStarted: () -> Unit) {
+    val ctx = LocalContext.current
+    val w = t.more.timer
+    val c = AppTheme.colors
+    val zone = remember { ZoneId.systemDefault() }
+    val recientes = remember { TimerStore(ctx).alarmRecents() }
+    val inicial = remember { TimerPlan.defaultAlarmMinute(System.currentTimeMillis(), zone) }
+    var hora12 by remember { mutableStateOf(TimerPlan.hour12(inicial / 60)) }
+    var minuto by remember { mutableStateOf(inicial % 60) }
+    var pm by remember { mutableStateOf(inicial >= 12 * 60) }
+    var foco by remember { mutableStateOf(0) }
+    var teclado by remember { mutableStateOf(false) }
+    var arrastre by remember { mutableStateOf(0) }
+    var nombre by remember { mutableStateOf("") }
+    val ahora by produceState(System.currentTimeMillis()) { while (true) { delay(15_000); value = System.currentTimeMillis() } }
+    val minutoDelDia = TimerPlan.to24(hora12, pm) * 60 + minuto
+    val suena = TimerPlan.nextAt(minutoDelDia, ahora, zone)
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            WheelField(
+                hora12, 1..12, w.hour, foco == 0, accent, { foco = 0; arrastre++ }, { hora12 = it }, minWidth = 72.dp, format = { "$it" },
+                keyboard = teclado, onTap = { foco = 0; teclado = true },
+            )
+            WheelColon()
+            WheelField(
+                minuto, 0..59, w.min, foco == 1, accent, { foco = 1; arrastre++ }, { minuto = it }, minWidth = 96.dp,
+                keyboard = teclado, onTap = { foco = 1; teclado = true },
+            )
+            WheelKeyboard(
+                teclado, foco, arrastre, listOf(1..12, 0..59),
+                onValue = { col, v -> if (col == 0) hora12 = v else minuto = v },
+                onColumn = { foco = it }, onClosed = { teclado = false },
+            )
+            AmPmToggle(pm, { pm = it })
+        }
+        Text(
+            w.ringsIn.format(if (TimerPlan.isTomorrow(suena, ahora, zone)) w.tomorrow else w.today, TimerPlan.untilLabel(suena - ahora)),
+            color = c.textDim, fontSize = 14.sp,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+
+        if (recientes.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Text(w.recent, color = c.textDim, fontSize = 13.sp)
+            // Un reciente suena de un toque, como los del timer: es una hora que se repite.
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                recientes.forEach { r ->
                     Box(
                         Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (k.isEmpty()) Color.Transparent else c.track)
-                            .then(
-                                if (k.isEmpty()) Modifier
-                                else Modifier.clickable { if (k == "<") digitos = digitos.dropLast(1) else teclear(k) },
-                            ),
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .border(1.dp, accent, RoundedCornerShape(20.dp))
+                            .clickable { TimerAlarm.startAt(ctx, r.name, r.minuteOfDay); onStarted() }
+                            .padding(horizontal = 14.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (k == "<") Icon(Icons.AutoMirrored.Outlined.Backspace, contentDescription = null, tint = c.textPrimary)
-                        else Text(k, color = c.textPrimary, fontSize = 20.sp, fontFamily = TimerMono)
+                        Text(listOf(TimerPlan.clock12(r.minuteOfDay), r.name).filter { it.isNotBlank() }.joinToString("  "), color = c.textPrimary, fontSize = 15.sp)
                     }
                 }
             }
         }
 
-        Text(w.endsAtLabel, color = c.textDim, fontSize = 13.sp)
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            chips.forEach { fin ->
-                val elegido = finEn == fin
-                Box(
-                    Modifier
-                        .height(40.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .then(if (elegido) Modifier.background(accent) else Modifier.border(1.dp, accent, RoundedCornerShape(20.dp)))
-                        .clickable { finEn = fin; digitos = ""; alarma = true }
-                        .padding(horizontal = 14.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(TimerPlan.clock(fin, zone), color = if (elegido) c.onAccent else c.textPrimary, fontSize = 15.sp, fontFamily = TimerMono)
-                }
-            }
-        }
-
-        OutlinedTextField(
+        Spacer(Modifier.height(4.dp))
+        com.maurozegarra.master.ui.AppTextField(
             value = nombre,
             onValueChange = { nombre = it.take(40) },
-            label = { Text(w.name) },
-            singleLine = true,
+            label = w.name,
             modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = accent, focusedLabelColor = accent, cursorColor = accent,
-                focusedTextColor = c.textPrimary, unfocusedTextColor = c.textPrimary,
-                unfocusedBorderColor = c.textFaded, unfocusedLabelColor = c.textDim,
-            ),
+            accent = accent,
         )
-
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(w.ringAsAlarm, color = c.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
-            AppSwitch(alarma, accent) { alarma = it }
-        }
-
-        val duracion = finEn?.let { it - System.currentTimeMillis() } ?: TimerPlan.digitsToMs(digitos)
-        val listo = duracion > 0
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(if (listo) accent else c.track)
-                .clickable(enabled = listo) {
-                    TimerAlarm.start(ctx, nombre, finEn?.let { it - System.currentTimeMillis() } ?: duracion, alarma)
-                    onStarted()
-                },
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(w.start, color = if (listo) c.onAccent else c.textDim, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+        PrimaryButton(label = w.setAlarm, accent = accent, modifier = Modifier.fillMaxWidth()) {
+            TimerAlarm.startAt(ctx, nombre, minutoDelDia)
+            onStarted()
         }
     }
 }
