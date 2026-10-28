@@ -1446,6 +1446,13 @@
       "test": [
         "com.maurozegarra.master.model.StepEngineTest"
       ]
+    },
+    {
+      "id": "TD-204",
+      "title": "Con el teclado abierto, la flechita de abajo baja el teclado y no cierra la hoja",
+      "category": "Fix",
+      "status": "done",
+      "manual": "PEDIDO el 27-oct, probando la rueda del timer (TD-200): con el teclado abierto, la flechita de abajo del S26 (el 'atrás' de Android) cerraba la hoja entera. Lo probé también con el campo Name, que es un campo de texto normal: igual. No era la rueda sino AppSheet, que usan las cinco hojas del app (timer, editor de ejercicios, Morning, lista principal y player).\n\nCAUSA (mirada en las clases de material3 1.2.1): ModalBottomSheetWindow registra su OnBackInvokedCallback con prioridad 1000000 (PRIORITY_OVERLAY), que le gana al del teclado. Con targetSdk 36 el 'atrás' va solo por esos callbacks.\n\nAHORA: desde Android 13 el de Material se apaga (shouldDismissOnBackPress = false) y AppSheet registra el suyo con PRIORITY_DEFAULT. El teclado, que se registra al abrirse, lo atiende primero y solo se baja; ya cerrado, el 'atrás' cierra la hoja con su animación. Antes de 13 queda el de Material.\n\nPROBAR: + de T\\MES -> Alarm, tocar Name: con su teclado abierto, la flechita baja el teclado y la hoja se queda. Otra vez la flechita: se cierra la hoja. Lo mismo tocando la hora de la rueda. Y en otra hoja sin teclado (la del agua, por ejemplo), la flechita la cierra como siempre. APROBADO el 27-oct, junto con TD-200."
     }
   ]
 }

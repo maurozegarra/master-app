@@ -13,13 +13,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.SecureFlagPolicy
+import android.os.Build
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import kotlinx.coroutines.launch
 import com.maurozegarra.master.ui.theme.AppTheme
 
 /**
@@ -48,10 +59,20 @@ internal fun AppSheet(
     val density = androidx.compose.ui.platform.LocalDensity.current
     val barra = with(density) { WindowInsets.navigationBars.getBottom(this).toDp() }
     val maximo = alto * (if (tall) TALL else HEIGHT) - HANDLE - barra
+    val estado = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    val cerrar by rememberUpdatedState(onDismiss)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = estado,
         containerColor = containerColor,
+        // El "atrás" de Android 13 en adelante lo pone la hoja misma (ver más abajo): el de
+        // Material se registra con PRIORITY_OVERLAY y le gana al teclado.
+        properties = ModalBottomSheetProperties(
+            securePolicy = SecureFlagPolicy.Inherit,
+            isFocusable = true,
+            shouldDismissOnBackPress = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU,
+        ),
         dragHandle = {
             Box(
                 Modifier
@@ -62,6 +83,23 @@ internal fun AppSheet(
             )
         },
     ) {
+        // TD-204 (27-oct): con el teclado abierto, la flechita de abajo del S26 cerraba la hoja
+        // entera, también desde el campo Name, que es un campo normal. El "atrás" de la hoja de
+        // Material 1.2.1 va con PRIORITY_OVERLAY y le gana al del teclado. Este va con la
+        // prioridad normal: el teclado, que se registra al abrirse, lo atiende primero y solo se
+        // baja; ya cerrado, el "atrás" llega aquí y cierra la hoja con su animación. Antes de
+        // Android 13 el teclado se lleva el "atrás" por su cuenta y queda el de Material.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val view = LocalView.current
+            DisposableEffect(view) {
+                val dispatcher = view.findOnBackInvokedDispatcher()
+                val callback = OnBackInvokedCallback {
+                    scope.launch { estado.hide() }.invokeOnCompletion { cerrar() }
+                }
+                dispatcher?.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback)
+                onDispose { dispatcher?.unregisterOnBackInvokedCallback(callback) }
+            }
+        }
         Column(Modifier.fillMaxWidth().heightIn(max = maximo), content = content)
     }
 }
