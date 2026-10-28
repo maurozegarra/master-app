@@ -5,6 +5,35 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-27 — tres días con la revisión 39, y el segundo tren superior
+
+**Domingo 25:** el corto a las 12:08. Amaneció en **1 con 10 minutos**, tras acostarse a las
+00:28. Carry 14 · 16 · 20, *bien* las tres de los dos lados.
+
+**Lunes 26 (presencial):** el corto a las **5:21**, tras dormir unas 5 horas (23:51 a 5:00).
+Mañana en 0. Carry igual, *bien* las tres.
+
+**Martes 27:** el completo a las 7:37 (93 min). Mañana en 0.
+
+| Ejercicio | Dosis | Marcó |
+|---|---|---|
+| Puente | 26 · 31 · 36 | bien, bien, ligero |
+| Carry | 14 · 16 · 20 | bien las tres, los dos lados |
+| Box squat | 17.5 · 20 · 20 | bien las tres |
+| Flexiones | 3 × 8 | costó, bien, bien (el sábado: costó, bien, costó) |
+| Dominadas | 4 × 2 | bien, bien, bien, costó (igual que el sábado) |
+
+**El carry lleva cuatro sesiones con el 20 en *bien*** (sábado a martes). Es el momento que se
+dejó anotado para la mancuerna de 22.5 en la serie de arriba.
+
+**Revisión 40 (v1.0.463):** carry a **14 · 16 · 22.5**, las dos primeras con pesa rusa y la de
+arriba con la mancuerna. Lo pidió esta noche; se estrena el miércoles en el corto.
+
+**NIKO:** el sábado NIKO 5, los saltos al cajón *fácil* las cuatro series (también el 10-oct;
+el 17 fueron *bien*). El lunes NIKO 6 y hoy NIKO 1, todo *bien*.
+
+---
+
 ## 2026-10-24 — la rutina es todo su ejercicio: entra el tren superior
 
 **Lo que destapó el sábado.** Le propuse empezar el Muay Thai (la fecha para decidirlo era el

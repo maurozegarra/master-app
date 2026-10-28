@@ -49,7 +49,10 @@ class RoutinesFitEquipmentTest {
                 val rusa = e.exerciseId in pesasRusas && e.note.startsWith("Kettlebell")
                 (0 until e.sets).forEach { i ->
                     val kg = e.setAt(i).weight
-                    if (rusa) assertTrue("${t.name} / ${e.name} serie ${i + 1}: no hay pesa rusa de $kg", kg in HomeGym.KETTLEBELLS)
+                    // Revision 40: la serie de arriba del carry va con la mancuerna de 22.5, y
+                    // la nota lo dice. Vale si es una pesa rusa, o la mancuerna que nombra la nota.
+                    val mancuernaNombrada = kg in HomeGym.DUMBBELLS && e.note.contains("$kg dumbbell")
+                    if (rusa) assertTrue("${t.name} / ${e.name} serie ${i + 1}: no hay pesa rusa de $kg", kg in HomeGym.KETTLEBELLS || mancuernaNombrada)
                     else assertTrue("${t.name} / ${e.name} serie ${i + 1}: no hay mancuerna de $kg", kg in HomeGym.DUMBBELLS)
                 }
             }

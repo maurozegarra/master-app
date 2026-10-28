@@ -439,8 +439,12 @@ object MasterDefaults {
      * decir lo que ya hace. El puente a 26 · 31 · 36: lo hizo asi el viernes y el sabado, por su
      * cuenta, y lo marco ligero las dos veces. El carry a 14 · 16 · 20: el sabado lo hizo asi y el
      * de 20 "salio facil". Las flexiones y las dominadas se quedan: costaron, pero salieron.
+     *
+     * Revision 40 (27-oct): el carry a 14 · 16 · 22.5. Cuatro sesiones seguidas con el 20 en
+     * "bien" (24 al 27), y el 24 dijo que salio facil. No hay pesa rusa de 22, asi que la serie
+     * de arriba va con la mancuerna de 22.5.
      */
-    const val LUMBAR_REVISION = 39
+    const val LUMBAR_REVISION = 40
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -2148,10 +2152,11 @@ object MasterDefaults {
             loaded(
                 "ex_suitcase_carry", 36,
                 if (ankle) "Short steps at the turns, don't pivot on the loaded foot"
-                else "Kettlebell. Short steps at the turns, don't pivot on the loaded foot. Walk tall",
+                else "Kettlebell; the last set with the 22.5 dumbbell. Short steps at the turns, don't pivot on the loaded foot. Walk tall",
                 // Revision 35: con PESA RUSA, que tiene de 2 en 2 (la mancuerna salta de 2.5).
                 // Revision 39: 14 · 16 · 20, lo que hizo el 24-oct. No tiene la de 18.
-                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(14.0, 16.0, 20.0), WeightType.DUMBBELL,
+                // Revision 40: la de arriba con la mancuerna de 22.5 (no hay pesa rusa de 22).
+                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(14.0, 16.0, 22.5), WeightType.DUMBBELL,
             )
                 // Alternando (TD-156, revision 16): izquierda y derecha seguidas, y el descanso
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".
