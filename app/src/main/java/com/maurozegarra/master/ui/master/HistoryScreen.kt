@@ -83,12 +83,12 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
     val sessions = vm.historySessions
     val ajeno = vm.historyAthlete != null
 
-    // De quien es, arriba, antes que nada (TD-168): el historial de NIKO se elige aqui y ya
-    // no se busca en Settings. Sin atletas no hay nada que elegir y no se dibuja. Debajo,
-    // sesiones o pesajes (TD-169), de quien este elegido.
+    // Arriba, sesiones o pesajes (TD-169); debajo, de quien (TD-168): sin atletas no hay nada
+    // que elegir y los chips no se dibujan. Iba al reves y "se sentia rarito" (31-oct, TD-206):
+    // la pestaña es la seccion, y los chips filtran lo que hay dentro, pegados a la lista.
     Column(Modifier.fillMaxSize()) {
-        if (vm.historyOwners.isNotEmpty()) HistoryOwnerPicker(vm, accent, t)
         HistoryTabs(vm, accent, t)
+        if (vm.historyOwners.isNotEmpty()) HistoryOwnerPicker(vm, accent, t)
         Box(Modifier.weight(1f)) {
             if (vm.historyTab == MasterViewModel.HistoryTab.BODY) BodyTab(vm, accent, t)
             else HistoryBody(vm, sessions, ajeno, accent, t)
@@ -105,8 +105,8 @@ fun HistoryScreen(vm: MasterViewModel, accent: Color, t: Strings) {
 private fun HistoryOwnerPicker(vm: MasterViewModel, accent: Color, t: Strings) {
     val actual = vm.historyAthlete?.id
     Row(
-        // Sin margen arriba y 8 dp hasta la pestaña (4 aquí y 4 suyos): el aire que sobraba (5-oct).
-        Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+        // 8 dp desde la pestaña (4 aquí y 4 suyos), como cuando iban arriba (5-oct), y 4 hasta la lista.
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         OwnerChip(t.more.historyOf.me, actual == null, accent) { vm.closeAthleteHistory() }
@@ -138,7 +138,7 @@ private fun HistoryOwnerPicker(vm: MasterViewModel, accent: Color, t: Strings) {
 
 @Composable
 private fun OwnerChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
-    // Chip de 32 dp y solo borde (5-oct): mas chico que la pestaña de abajo, que es lo que
+    // Chip de 32 dp y solo borde (5-oct): mas chico que la pestaña de arriba, que es lo que
     // marca la jerarquia ahora que ninguno de los dos va relleno.
     val forma = RoundedCornerShape(percent = 50)
     Box(

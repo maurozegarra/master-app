@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **180 / 205** hechos, 24 pendientes, 1 descartados.
+Progreso: **181 / 206** hechos, 24 pendientes, 1 descartados.
 
 ## Pendientes
 
@@ -373,3 +373,4 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 - [x] **TD-109** La escala de dolor describe cada numero, no solo los extremos
 - [x] **TD-107** El centro del player cede sitio a la nota: contador junto a las reps y tarjeta de peso translucida
 - [x] **TD-074** Nombre del ejercicio en el player: dos lineas como mucho, sin cortar palabras y con alto fijo
+- [x] **TD-206** Historial: las pestañas Sessions / Body arriba y los chips de quién debajo

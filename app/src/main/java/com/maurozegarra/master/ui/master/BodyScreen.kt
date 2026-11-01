@@ -279,8 +279,8 @@ private fun NumberField(label: String, value: String, onChange: (String) -> Unit
 }
 
 /**
- * Sesiones o pesajes, debajo de los nombres, con el selector segmentado del app. Cada opción
- * lleva cuántos hay del elegido arriba ("Sessions · 37"): antes el conteo era una fila que se
+ * Sesiones o pesajes, encima de los nombres (TD-206), con el selector segmentado del app. Cada opción
+ * lleva cuántos hay del elegido abajo ("Sessions · 37"): antes el conteo era una fila que se
  * interponía entre la pestaña y la lista (3-oct).
  */
 @Composable
