@@ -283,8 +283,9 @@ private fun MasterApp(settingsVm: SettingsViewModel, pendingWorkoutId: androidx.
                     // Borrar todo el historial es solo del propio: el de un atleta no se
                     // toca desde aqui (TD-168).
                     // En Body, un + para anotar el pesaje (TD-169), como el + de Morning
-                    // (TD-182): en la barra y no con un boton a todo lo ancho. Solo el propio.
-                    if (vm.showingHistory && vm.historyAthlete == null && vm.historyTab == MasterViewModel.HistoryTab.BODY) {
+                    // (TD-182): en la barra y no con un boton a todo lo ancho. Tambien con el
+                    // chip de un atleta: el coach anota el suyo cuando se lo dicta (TD-205).
+                    if (vm.showingHistory && vm.historyTab == MasterViewModel.HistoryTab.BODY) {
                         IconButton(onClick = { vm.openWeighIn() }) {
                             // En el acento, como el + de Morning: es la accion de la pantalla.
                             Icon(Icons.Filled.Add, contentDescription = t.more.body.add, tint = AppTheme.colors.accent)

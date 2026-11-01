@@ -110,4 +110,75 @@ class BodyLogTest {
         val niko = BodyLog.SEED.getValue("niko")
         assertEquals(listOf(18.0, 18.4, 18.2, 18.3), niko.map { it.skeletalKg })
     }
+    // ---------- TD-205: el coach anota por el atleta, y el atleta lo ve ----------
+
+    private fun huella(vararg es: BodyEntry) = es.associate { it.date to BodyLog.payloadOf(it).hashCode() }
+
+    @Test
+    fun `por dia manda el servidor, y lo que el coach corrigio llega al atleta`() {
+        val subido = BodyEntry("2026-10-17", weightKg = 50.0)
+        val corregido = BodyEntry("2026-10-17", weightKg = 50.2)
+        val r = BodyLog.mergeOwn(listOf(subido), listOf(corregido), huella(subido), emptySet())
+        assertEquals(listOf(corregido), r.entries)
+        // Entra al ledger con su huella: no se vuelve a subir.
+        assertTrue(BodyLog.pending(r.entries, r.ledger).isEmpty())
+    }
+
+    @Test
+    fun `un cambio de aqui que no subio no lo pisa el servidor`() {
+        val subido = BodyEntry("2026-10-17", weightKg = 50.0)
+        val mio = BodyEntry("2026-10-17", weightKg = 49.8)
+        val r = BodyLog.mergeOwn(listOf(mio), listOf(subido), huella(subido), emptySet())
+        assertEquals(listOf(mio), r.entries)
+        assertEquals(listOf(mio), BodyLog.pending(r.entries, r.ledger))
+    }
+
+    @Test
+    fun `lo que el coach anoto aparece, y lo que borro se va`() {
+        val subido = BodyEntry("2026-10-17", weightKg = 50.0)
+        val delCoach = BodyEntry("2026-10-31", weightKg = 50.2, waistCm = 67.0, skeletalKg = 18.5)
+        val r = BodyLog.mergeOwn(listOf(subido), listOf(delCoach), huella(subido), emptySet())
+        // El del 17 ya habia subido y no esta alla: lo borro el coach.
+        assertEquals(listOf(delCoach), r.entries)
+        assertEquals(huella(delCoach), r.ledger)
+    }
+
+    @Test
+    fun `uno nuevo que nunca subio se queda aunque el servidor no lo tenga`() {
+        val nuevo = BodyEntry("2026-10-31", weightKg = 50.2)
+        val r = BodyLog.mergeOwn(listOf(nuevo), emptyList(), emptyMap(), emptySet())
+        assertEquals(listOf(nuevo), r.entries)
+    }
+
+    @Test
+    fun `un borrado de aqui en cola no vuelve desde el servidor`() {
+        val viejo = BodyEntry("2026-10-17", weightKg = 50.0)
+        val r = BodyLog.mergeOwn(emptyList(), listOf(viejo), emptyMap(), setOf("2026-10-17"))
+        assertTrue(r.entries.isEmpty())
+    }
+
+    @Test
+    fun `el coach no pierde lo que anoto y no subio al bajar`() {
+        val antes = AthleteBody("niko", BodyEntry("2026-10-31", weightKg = 50.0))
+        val mio = AthleteBody("niko", BodyEntry("2026-10-31", weightKg = 50.2))
+        val otro = AthleteBody("niko", BodyEntry("2026-10-24", weightKg = 49.9))
+        val pendiente = setOf(BodyLog.key("niko", "2026-10-31"))
+        assertEquals(listOf(otro, mio), BodyLog.mergeKeepingPending(listOf(mio), listOf(antes, otro), pendiente))
+        // Sin pendiente, manda lo que bajo, como siempre.
+        assertEquals(listOf(otro, antes), BodyLog.mergeKeepingPending(listOf(mio), listOf(antes, otro), emptySet()))
+    }
+
+    @Test
+    fun `la llave guarda perfil y dia`() {
+        val k = BodyLog.key("niko", "2026-10-31")
+        assertEquals("niko", BodyLog.profileOfKey(k))
+        assertEquals("2026-10-31", BodyLog.dateOfKey(k))
+    }
+
+    @Test
+    fun `filas de my_body`() {
+        val rows = """[{"date":"2026-10-31","payload":{"date":"2026-10-31","weightKg":50.2,"waistCm":67}}]"""
+        assertEquals(listOf(BodyEntry("2026-10-31", weightKg = 50.2, waistCm = 67.0)), BodyLog.parseOwnRows(rows))
+        assertNull(BodyLog.parseOwnRows("""{"message":"no existe"}"""))
+    }
 }

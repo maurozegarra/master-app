@@ -45,6 +45,41 @@ class BodyStore(context: Context) {
         prefs.edit().putString(KEY_LEDGER, o.toString()).apply()
     }
 
+    /** El ledger entero, después de unir los propios con los del servidor (TD-205). */
+    fun saveLedger(ledger: Map<String, Int>) {
+        prefs.edit().putString(KEY_LEDGER, JSONObject(ledger).toString()).apply()
+    }
+
+    /**
+     * Pesajes de atletas que el coach anotó o corrigió aquí y faltan subir (TD-205), por
+     * llave [BodyLog.key]. Lo que se sube es lo que hay en [athletes] al momento de subir.
+     */
+    fun athleteUploads(): Set<String> = prefs.getStringSet(KEY_ATHLETE_UPLOADS, emptySet()).orEmpty()
+
+    /** Pesajes de atletas que el coach borró aquí y faltan borrar allá. */
+    fun athleteDeletes(): Set<String> = prefs.getStringSet(KEY_ATHLETE_DELETES, emptySet()).orEmpty()
+
+    fun queueAthleteUpload(key: String) {
+        prefs.edit()
+            .putStringSet(KEY_ATHLETE_UPLOADS, athleteUploads() + key)
+            .putStringSet(KEY_ATHLETE_DELETES, athleteDeletes() - key)
+            .apply()
+    }
+
+    fun queueAthleteDelete(key: String) {
+        prefs.edit()
+            .putStringSet(KEY_ATHLETE_DELETES, athleteDeletes() + key)
+            .putStringSet(KEY_ATHLETE_UPLOADS, athleteUploads() - key)
+            .apply()
+    }
+
+    fun athleteSynced(key: String) {
+        prefs.edit()
+            .putStringSet(KEY_ATHLETE_UPLOADS, athleteUploads() - key)
+            .putStringSet(KEY_ATHLETE_DELETES, athleteDeletes() - key)
+            .apply()
+    }
+
     /** Días borrados aquí que hay que borrar también en el servidor. */
     fun pendingDeletes(): Set<String> = prefs.getStringSet(KEY_DELETES, emptySet()).orEmpty()
 
@@ -95,5 +130,7 @@ class BodyStore(context: Context) {
         const val KEY_SEEDED = "seeded_v1"
         const val KEY_REMINDED = "reminded_on"
         const val KEY_RESTORED = "restored_v1"
+        const val KEY_ATHLETE_UPLOADS = "athlete_uploads"
+        const val KEY_ATHLETE_DELETES = "athlete_deletes"
     }
 }

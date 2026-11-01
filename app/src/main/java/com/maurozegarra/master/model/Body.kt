@@ -77,6 +77,51 @@ object BodyLog {
     }
 
     /**
+     * Como [merge], pero sin pisar lo que el coach anotó o borró aquí y todavía no subió
+     * (TD-205): [pending] son esas llaves ([key]). Lo que bajó de esos días es lo de antes.
+     */
+    fun mergeKeepingPending(local: List<AthleteBody>, downloaded: List<AthleteBody>, pending: Set<String>): List<AthleteBody> =
+        merge(local, downloaded.filter { key(it.profileId, it.entry.date) !in pending })
+
+    /** La llave de un pesaje de un atleta en las colas del coach: perfil y día. */
+    fun key(profileId: String, date: String): String = "$profileId|$date"
+
+    fun profileOfKey(key: String): String = key.substringBefore('|')
+
+    fun dateOfKey(key: String): String = key.substringAfter('|')
+
+    /** Los propios después de bajar los del servidor, y la huella de lo que ya está allá. */
+    data class OwnMerge(val entries: List<BodyEntry>, val ledger: Map<String, Int>)
+
+    /**
+     * Los propios unidos con los que el servidor tiene de este perfil (TD-205): así el atleta
+     * ve lo que el coach anotó, corrigió o borró por él o ella.
+     *
+     * Por día manda el servidor, salvo un cambio de aquí que todavía no subió ([ledger] no
+     * tiene su huella) o un borrado de aquí en cola ([pendingDeletes]). Uno que ya había subido
+     * y ya no está allá lo borró el coach: se borra también aquí. Lo que llega del servidor
+     * entra al [ledger], para no volver a subirlo.
+     */
+    fun mergeOwn(local: List<BodyEntry>, server: List<BodyEntry>, ledger: Map<String, Int>, pendingDeletes: Set<String>): OwnMerge {
+        val servidor = server.filter { it.date !in pendingDeletes }.associateBy { it.date }
+        val huella = ledger.toMutableMap()
+        val quedan = mutableListOf<BodyEntry>()
+        local.forEach { e ->
+            val s = servidor[e.date]
+            when {
+                ledger[e.date] != payloadOf(e).hashCode() -> quedan += e
+                s != null -> { quedan += s; huella[e.date] = payloadOf(s).hashCode() }
+                else -> huella.remove(e.date)
+            }
+        }
+        servidor.values.filter { s -> local.none { it.date == s.date } }.forEach { s ->
+            quedan += s
+            huella[s.date] = payloadOf(s).hashCode()
+        }
+        return OwnMerge(quedan.sortedBy { it.date }, huella)
+    }
+
+    /**
      * Si hay que recordar el pesaje: sábado, de [REMINDER_HOUR] en adelante, sin pesaje de hoy
      * y sin haberlo recordado ya hoy ([remindedOn]).
      */
@@ -108,6 +153,12 @@ object BodyLog {
             val e = row.optJSONObject("payload")?.let(::fromJson) ?: return@mapNotNull null
             AthleteBody(row.getString("profile_id"), e)
         }
+    }.getOrNull()
+
+    /** Filas de `my_body` (TD-205): `[{date, payload}, ...]`, solo las del perfil que pidió. */
+    fun parseOwnRows(json: String): List<BodyEntry>? = runCatching {
+        val arr = JSONArray(json)
+        (0 until arr.length()).mapNotNull { i -> arr.getJSONObject(i).optJSONObject("payload")?.let(::fromJson) }
     }.getOrNull()
 
     // ---------- JSON ----------

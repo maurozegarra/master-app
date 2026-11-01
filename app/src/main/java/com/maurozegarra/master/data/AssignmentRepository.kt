@@ -295,6 +295,23 @@ class AssignmentRepository(context: Context, private val auth: AuthStore) {
         return res.body.trim() == "true"
     }
 
+    /**
+     * Los pesajes de UN perfil, para su propio telefono (TD-205): asi ve los que el coach
+     * anoto por el o ella. Por funcion y sin sesion, como subir y borrar; la tabla solo la lee
+     * el coach. Null sin red o sin la funcion en el servidor (falta correr td-205-my-body.sql).
+     */
+    fun myBody(profileId: String): List<com.maurozegarra.master.model.BodyEntry>? {
+        val body = JSONObject().put("p_profile_id", profileId).toString()
+        val res = runCatching {
+            Http.request("POST", "${Supabase.REST}rpc/my_body", Supabase.headers(), body)
+        }.onFailure { Log.w(TAG, "no se pudieron bajar los pesajes propios", it) }.getOrNull() ?: return null
+        if (!res.ok) {
+            Log.w(TAG, "my_body rechazo: HTTP ${res.code} ${res.body}")
+            return null
+        }
+        return com.maurozegarra.master.model.BodyLog.parseOwnRows(res.body)
+    }
+
     /** Los pesajes de todos los perfiles, para el coach. Null sin sesion de entrenador o sin red. */
     fun athleteBody(): List<com.maurozegarra.master.model.AthleteBody>? {
         val token = auth.accessToken() ?: return null

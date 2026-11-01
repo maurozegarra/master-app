@@ -1683,6 +1683,13 @@ class MasterViewModel(
     var weighIn by mutableStateOf<BodyEntry?>(null)
         private set
 
+    /**
+     * De quien es el pesaje abierto: null el propio, o el atleta por el que lo anota el coach
+     * (TD-205). Se fija al abrirlo, no al guardar, para que guarde en el mismo que se abrio.
+     */
+    var weighInFor by mutableStateOf<Profile?>(null)
+        private set
+
     /** Los pesajes del historial abierto -el propio o el del atleta elegido-, del mas viejo al mas nuevo. */
     val historyBody: List<BodyEntry>
         get() = historyAthlete?.let { BodyLog.of(bodyAthletes, it.id) } ?: bodyMine.sortedBy { it.date }
@@ -1693,7 +1700,9 @@ class MasterViewModel(
      */
     fun openWeighIn(date: java.time.LocalDate = java.time.LocalDate.now()) {
         val dia = date.toString()
-        weighIn = bodyMine.firstOrNull { it.date == dia } ?: BodyEntry(dia, heightCm = BodyLog.heightOf(bodyMine))
+        weighInFor = historyAthlete
+        val propios = historyBody
+        weighIn = propios.firstOrNull { it.date == dia } ?: BodyEntry(dia, heightCm = BodyLog.heightOf(propios))
     }
 
     /** Desde la notificacion del sabado: el historial, en Body, con el pesaje de hoy abierto. */
@@ -1704,14 +1713,20 @@ class MasterViewModel(
     }
 
     fun editWeighIn(entry: BodyEntry) {
+        weighInFor = historyAthlete
         weighIn = entry
     }
 
     fun closeWeighIn() {
         weighIn = null
+        weighInFor = null
     }
 
     fun saveWeighIn(entry: BodyEntry) {
+        weighInFor?.let { atleta ->
+            saveAthleteBody(atleta.id, entry)
+            return
+        }
         val lista = BodyLog.upsert(bodyMine.toList(), entry)
         bodyStore.saveMine(lista)
         bodyMine.clear()
@@ -1723,6 +1738,11 @@ class MasterViewModel(
 
     /** Borra un pesaje propio, y en el servidor si ya habia subido. */
     fun deleteWeighIn(date: String) {
+        // Se borra desde la fila, sin dialogo abierto: manda el chip elegido.
+        (if (weighIn != null) weighInFor else historyAthlete)?.let { atleta ->
+            deleteAthleteBody(atleta.id, date)
+            return
+        }
         val lista = BodyLog.remove(bodyMine.toList(), date)
         bodyStore.saveMine(lista)
         bodyMine.clear()
@@ -1733,6 +1753,36 @@ class MasterViewModel(
             bodyStore.queueDelete(date)
             bodyStore.forgetUploaded(date)
         }
+        syncSessions()
+    }
+
+    /**
+     * El coach anota o corrige el pesaje de un atleta (TD-205). Queda en sus pesajes de atletas
+     * y sube con el perfil del atleta; sin red, en la siguiente sincronizacion.
+     */
+    private fun saveAthleteBody(profileId: String, entry: BodyEntry) {
+        val otros = bodyAthletes.filterNot { it.profileId == profileId && it.entry.date == entry.date }
+        val lista = (otros + AthleteBody(profileId, entry)).sortedWith(compareBy({ it.profileId }, { it.entry.date }))
+        bodyStore.saveAthletes(lista)
+        bodyAthletes.clear()
+        bodyAthletes.addAll(lista)
+        bodyStore.queueAthleteUpload(BodyLog.key(profileId, entry.date))
+        weighIn = null
+        weighInFor = null
+        snapshot()
+        syncSessions()
+    }
+
+    private fun deleteAthleteBody(profileId: String, date: String) {
+        val lista = bodyAthletes.filterNot { it.profileId == profileId && it.entry.date == date }
+        bodyStore.saveAthletes(lista)
+        bodyAthletes.clear()
+        bodyAthletes.addAll(lista)
+        // Se borra alla aunque no lo haya subido este telefono: lo pudo subir el del atleta.
+        bodyStore.queueAthleteDelete(BodyLog.key(profileId, date))
+        weighIn = null
+        weighInFor = null
+        snapshot()
         syncSessions()
     }
 
@@ -1754,11 +1804,36 @@ class MasterViewModel(
                 assignments.uploadBody(perfil, e) ?: break
                 bodyStore.markUploaded(e.date, BodyLog.payloadOf(e).hashCode())
             }
+            // Lo que el coach anoto, corrigio o borro por este perfil (TD-205). Solo despues de
+            // subir: lo que no subio sigue pendiente y no lo pisa el servidor.
+            assignments.myBody(perfil)?.let { servidor ->
+                val r = BodyLog.mergeOwn(bodyStore.mine(), servidor, bodyStore.ledger(), bodyStore.pendingDeletes())
+                if (r.entries != bodyStore.mine() || r.ledger != bodyStore.ledger()) {
+                    bodyStore.saveMine(r.entries)
+                    bodyStore.saveLedger(r.ledger)
+                    withContext(Dispatchers.Main) {
+                        bodyMine.clear()
+                        bodyMine.addAll(r.entries)
+                        snapshot()
+                    }
+                }
+            }
         }
         if (!auth.isCoach) return
+        // Lo que el coach anoto o borro por sus atletas (TD-205), antes de bajar.
+        for (k in bodyStore.athleteDeletes()) {
+            assignments.deleteBody(BodyLog.profileOfKey(k), BodyLog.dateOfKey(k)) ?: break
+            bodyStore.athleteSynced(k)
+        }
+        for (k in bodyStore.athleteUploads()) {
+            val e = bodyStore.athletes().firstOrNull { BodyLog.key(it.profileId, it.entry.date) == k }
+            if (e != null) assignments.uploadBody(e.profileId, e.entry) ?: break
+            bodyStore.athleteSynced(k)
+        }
         val bajados = assignments.athleteBody() ?: return
+        val pendientes = bodyStore.athleteUploads() + bodyStore.athleteDeletes()
         // Los propios tambien estan en la tabla: no son de un atleta.
-        val unidos = BodyLog.merge(bodyStore.athletes(), bajados.filter { it.profileId != perfil })
+        val unidos = BodyLog.mergeKeepingPending(bodyStore.athletes(), bajados.filter { it.profileId != perfil }, pendientes)
         if (unidos == bodyStore.athletes()) return
         bodyStore.saveAthletes(unidos)
         withContext(Dispatchers.Main) {

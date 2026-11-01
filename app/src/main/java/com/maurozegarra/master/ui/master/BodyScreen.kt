@@ -69,7 +69,8 @@ fun BodyTab(vm: MasterViewModel, accent: Color, t: Strings) {
             verticalArrangement = Arrangement.Center,
         ) {
             Text(if (propio) b.empty else b.emptyAthlete, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
-            if (propio) Text(b.emptyHint, color = AppTheme.colors.textDim, fontSize = 14.sp)
+            // El + tambien anota por el atleta (TD-205): la pista vale para los dos.
+            Text(b.emptyHint, color = AppTheme.colors.textDim, fontSize = 14.sp)
         }
         return
     }
@@ -132,7 +133,8 @@ fun BodyTab(vm: MasterViewModel, accent: Color, t: Strings) {
         }
         // El conteo va en la pestaña ("Body · 4"), no en una fila antes de la tabla.
         items(entries.reversed(), key = { "row-${it.date}" }) { e ->
-            EntryRow(e, alto, propio, t, swipeController, onEdit = { vm.editWeighIn(e) }, onDelete = { vm.deleteWeighIn(e.date) })
+            // Las del atleta tambien se corrigen y se borran: el coach las anota por el (TD-205).
+            EntryRow(e, alto, true, t, swipeController, onEdit = { vm.editWeighIn(e) }, onDelete = { vm.deleteWeighIn(e.date) })
         }
     }
 }
@@ -241,7 +243,8 @@ fun WeighInDialog(vm: MasterViewModel, t: Strings) {
         onDismissRequest = { vm.closeWeighIn() },
         containerColor = AppTheme.colors.surface,
         titleContentColor = AppTheme.colors.textPrimary,
-        title = { Text("${b.editTitle} · ${dia(e.date)}") },
+        // Con el nombre del atleta si es por el o ella (TD-205): que no se anote en el propio sin querer.
+        title = { Text(listOfNotNull(b.editTitle, vm.weighInFor?.name, dia(e.date)).joinToString(" · ")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 NumberField("${b.weight} (${t.kg})", peso) { peso = it }
