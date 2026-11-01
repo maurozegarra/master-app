@@ -5,6 +5,38 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-10-31 — cuarta revisión semanal: siete de siete
+
+**La semana (25 al 31): siete sesiones de siete**, todas completas. Las mañanas: el domingo 1
+con 10 minutos, y del lunes al sábado **seis seguidas en 0**.
+
+**El carry con el 22.5 (revisión 40), del miércoles al sábado:** el 22.5 *bien* las cuatro
+veces, de los dos lados. Las de abajo empezaron a quedarse cortas: el 14 *ligero* jueves,
+viernes y sábado, y el 16 *ligero* viernes y sábado.
+
+**Sábado 31, el completo a las 9:47 (96 min).** Mañana en 0.
+
+| Ejercicio | Dosis | Marcó |
+|---|---|---|
+| Puente | 26 · 31 · 36 | bien, bien, ligero (el 36, también el martes) |
+| Carry | 14 · 16 · 22.5 | ligero, ligero, bien |
+| Box squat | 17.5 · 20 · 20 | bien, bien, ligero (el 24 y el 27, bien las tres) |
+| Flexiones | 3 × 8 | **bien las tres** (martes: costó, bien, bien) |
+| Dominadas | 4 × 2 | **bien las cuatro** (antes la última costaba) |
+
+**Pesaje:** 83.2 kg y 93 cm de cintura (el 17-oct: 84 y 94), 34.2 kg de músculo. NIKO, dicho por
+él: 50.2 kg, 67 cm de cintura y 18.5 kg de músculo (el 17-oct: 50.3, 68.5 y 18.4).
+
+**NIKO:** del 6 al 4 (lunes a viernes), todo *bien*, incluida la caminata con banda a 15 pasos.
+NIKO 5 todavía no figura esta semana; los saltos al cajón fueron *fácil* cuatro de las últimas
+cinco veces.
+
+**Revisión 41 (v1.0.474):** carry a **16 · 20 · 22.5**. Un cambio a la vez; quedan para la
+próxima el puente (el 36 ligero dos veces), las dominadas a 4 × 3, las flexiones a 3 × 10 y los
+saltos al cajón de NIKO.
+
+---
+
 ## 2026-10-27 — tres días con la revisión 39, y el segundo tren superior
 
 **Domingo 25:** el corto a las 12:08. Amaneció en **1 con 10 minutos**, tras acostarse a las

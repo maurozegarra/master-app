@@ -443,8 +443,12 @@ object MasterDefaults {
      * Revision 40 (27-oct): el carry a 14 · 16 · 22.5. Cuatro sesiones seguidas con el 20 en
      * "bien" (24 al 27), y el 24 dijo que salio facil. No hay pesa rusa de 22, asi que la serie
      * de arriba va con la mancuerna de 22.5.
+     *
+     * Revision 41 (31-oct, cuarta revision semanal): el carry a 16 · 20 · 22.5. El 22.5 salio
+     * "bien" las cuatro veces; las de abajo se quedaron cortas: el 14 "ligero" tres sesiones
+     * seguidas y el 16 dos. Suben solo esas dos, con pesa rusa; la de arriba no se mueve.
      */
-    const val LUMBAR_REVISION = 40
+    const val LUMBAR_REVISION = 41
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -2156,7 +2160,8 @@ object MasterDefaults {
                 // Revision 35: con PESA RUSA, que tiene de 2 en 2 (la mancuerna salta de 2.5).
                 // Revision 39: 14 · 16 · 20, lo que hizo el 24-oct. No tiene la de 18.
                 // Revision 40: la de arriba con la mancuerna de 22.5 (no hay pesa rusa de 22).
-                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(14.0, 16.0, 22.5), WeightType.DUMBBELL,
+                // Revision 41: 16 · 20 · 22.5, las de abajo marcaban ligero.
+                if (ankle) listOf(10.0, 10.0, 10.0) else listOf(16.0, 20.0, 22.5), WeightType.DUMBBELL,
             )
                 // Alternando (TD-156, revision 16): izquierda y derecha seguidas, y el descanso
                 // al cerrar la serie. Por lado, el 24-sep, "demoro el doble, no me gusto".

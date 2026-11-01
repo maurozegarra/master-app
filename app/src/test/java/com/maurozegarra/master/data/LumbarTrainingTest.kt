@@ -228,10 +228,11 @@ class LumbarTrainingTest {
         assertEquals(10, puente.workValue)
         // Revision 39: 14 · 16 · 20, como lo hizo el 24-oct ("salio facil").
         // Revision 40: la de arriba a 22.5, tras cuatro sesiones con el 20 en "bien".
-        assertEquals(listOf(14.0, 16.0, 22.5), c.getValue("ex_suitcase_carry").setList.map { it.weight })
+        // Revision 41: 16 · 20 · 22.5, las de abajo marcaban ligero.
+        assertEquals(listOf(16.0, 20.0, 22.5), c.getValue("ex_suitcase_carry").setList.map { it.weight })
         assertEquals(listOf(17.5, 20.0, 20.0), c.getValue("ex_box_squat").setList.map { it.weight })
         // El corto no se toca: el alivio es del bloque de cadera, no del carry.
-        assertEquals(listOf(14.0, 16.0, 22.5), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
+        assertEquals(listOf(16.0, 20.0, 22.5), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
     }
 
     @Test
@@ -241,7 +242,7 @@ class LumbarTrainingTest {
         // marco ligeras ocho de las nueve series, y la unica "bien" fue el tercer viaje del
         // carry, que por eso pasa a ser el primer peldano de la rampa nueva.
         // Revision 35 (17-oct): con pesa rusa, 12 · 14 · 16, que tiene de 2 en 2.
-        assertEquals(listOf(14.0, 16.0, 22.5), cadera(normal).getValue("ex_suitcase_carry").setList.map { it.weight })
+        assertEquals(listOf(16.0, 20.0, 22.5), cadera(normal).getValue("ex_suitcase_carry").setList.map { it.weight })
         assertTrue(cadera(normal).getValue("ex_suitcase_carry").note.startsWith("Kettlebell"))
         // Revision 24 (2-oct): la sentadilla se queda en 17.5 mientras cambia el montaje -la
         // plyobox de 51 cm y la mancuerna en el step-: le dolio la espalda baja recogiendo la
