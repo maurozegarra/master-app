@@ -447,8 +447,19 @@ object MasterDefaults {
      * Revision 41 (31-oct, cuarta revision semanal): el carry a 16 · 20 · 22.5. El 22.5 salio
      * "bien" las cuatro veces; las de abajo se quedaron cortas: el 14 "ligero" tres sesiones
      * seguidas y el 16 dos. Suben solo esas dos, con pesa rusa; la de arriba no se mueve.
+     *
+     * Revision 42 (31-oct, pedida por el tras entrenar): en el tren superior, 1 min entre las
+     * flexiones de rodillas y las normales (eran 10 s de preparacion) y 1 min entre dominadas
+     * (eran 2). Solo descansos: series, reps y cargas no cambian.
+     *
+     * Revision 43 (31-oct, acordada con el): el completo pierde la caminata de cierre. Estaba
+     * para mover la columna sin carga despues del bloque de cadera, ocupar el momento en que
+     * da ganas de estirar tocando la punta de los pies, y sumar minutos de caminar. Lo que mas
+     * pesa es lo primero, y solo importa si despues viene estar sentado: los dias presenciales,
+     * dos horas de camino. El completo va martes y sabado, en casa, y ya abre con 12 minutos
+     * de caminata. El corto (presenciales) y el dia malo la conservan.
      */
-    const val LUMBAR_REVISION = 41
+    const val LUMBAR_REVISION = 43
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -568,7 +579,8 @@ object MasterDefaults {
                 // ids propios: LUMBAR_ID (950016) cae dentro de la secuencia de este training, y
                 // los cuatro ids nuevos llegaban justo a el.
                 LumbarBlocks(lang, seqStart = 950100L).upperBody(),
-                b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
+                // Revision 43: sin caminata de cierre. Va los dias en casa, y ahi no viene detras
+                // lo que la justificaba: dos horas sentado en el camino (ver LUMBAR_REVISION).
             ),
             createdAt = now,
             updatedAt = now,
@@ -2190,8 +2202,11 @@ object MasterDefaults {
             exercises = listOf(
                 reps("ex_knee_pushups", 12, "Warm-up. Body straight from the knees", prep = 10)
                     .copy(progression = Progression.NONE),
-                reps("ex_pushups", 8, "Body straight from head to heels. Chest almost to the floor", sets = 3, rest = 60, prep = 10),
-                reps("ex_pull_ups", 2, "Strict, no swing. Step down onto the plyobox, don't drop", sets = 4, rest = 120, prep = 15),
+                // Revision 42 (31-oct): la serie de rodillas es una sola y no deja descanso, asi
+                // que la pausa hasta las normales es esta preparacion. Con 10 s no alcanzaba; un
+                // minuto, como entre series. Y la dominada descansa 1 min y no 2: "es mas que suficiente".
+                reps("ex_pushups", 8, "Body straight from head to heels. Chest almost to the floor", sets = 3, rest = 60, prep = 60),
+                reps("ex_pull_ups", 2, "Strict, no swing. Step down onto the plyobox, don't drop", sets = 4, rest = 60, prep = 15),
             ),
         )
 

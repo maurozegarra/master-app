@@ -27,16 +27,17 @@ class LumbarTrainingTest {
     private val steps = StepEngine.buildSteps(training.copy(workouts = training.workouts))
 
     @Test
-    fun `tiene los seis bloques de la rutina`() {
+    fun `tiene los cinco bloques de la rutina`() {
         // Revision 38: el tren superior, despues de la cadera.
         assertEquals(
-            listOf("Warm Walk", "Mobility", "McGill Big 3", "Hip & Glute", "Upper Body", "Cool Walk"),
+            // Revision 43: sin caminata de cierre (va los dias en casa).
+            listOf("Warm Walk", "Mobility", "McGill Big 3", "Hip & Glute", "Upper Body"),
             training.workouts.map { it.name },
         )
         // 3 en McGill y no 4 desde TD-147: la plancha lateral era dos ejercicios clonados y
         // ahora es uno con sus dos lados declarados. 3 en la movilidad desde la revision 35:
         // el equilibrio en una pierna.
-        assertEquals(listOf(1, 3, 3, 3, 3, 1), training.workouts.map { it.exercises.size })
+        assertEquals(listOf(1, 3, 3, 3, 3), training.workouts.map { it.exercises.size })
     }
 
     @Test
@@ -65,7 +66,8 @@ class LumbarTrainingTest {
     @Test
     fun `las caminatas son de 12 y de 5 minutos`() {
         assertEquals(720, training.workouts.first().exercises.single().workValue)
-        assertEquals(300, training.workouts.last().exercises.single().workValue)
+        // La de 5, la de cierre, solo en el corto desde la revision 43.
+        assertEquals(300, short.workouts.last().exercises.single().workValue)
     }
 
     @Test
@@ -272,7 +274,8 @@ class LumbarTrainingTest {
         assertEquals(6.0, entrada.speedKmh!!, 0.0)
         assertEquals(6.0, corta.speedKmh!!, 0.0)
         // Y la de cierre va mas suave que la de entrada, que es lo que significa "easy".
-        val cierre = training.workouts.last().exercises.single()
+        // Desde la revision 43 la de cierre solo esta en el corto y en el dia malo.
+        val cierre = short.workouts.last().exercises.single()
         assertTrue(cierre.speedKmh!! < entrada.speedKmh!!)
         // Revision 30 (8-oct): a 5, como la hizo por su cuenta el jueves; sigue siendo mas
         // suave que la de entrada.
@@ -321,7 +324,7 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `lo cronometrado suma 49 minutos y 8 segundos`() {
+    fun `lo cronometrado suma 41 minutos y 48 segundos`() {
         // Revision 16: el carry ALTERNA las manos dentro de cada serie, asi que vuelven a ser
         // dos descansos y no cinco (-3 min respecto de la 15), y las dos caminatas ganan 10 s
         // de preparacion cada una (+20 s): 2518 - 180 + 20.
@@ -329,7 +332,10 @@ class LumbarTrainingTest {
         // Revision 37: +5 s para cambiar de pie.
         // Revision 38: +515 s del tren superior (preparaciones y descansos; las repeticiones
         // no cuentan tiempo).
-        assertEquals(2948, steps.sumOf { it.durationSec })
+        // Revision 42: +50 s de preparacion antes de las flexiones (10 -> 60) y -180 s en los
+        // tres descansos entre dominadas (120 -> 60).
+        // Revision 43: -310 s de la caminata de cierre (300 y 10 de preparacion).
+        assertEquals(2508, steps.sumOf { it.durationSec })
     }
 
     @Test
@@ -422,9 +428,10 @@ class LumbarTrainingTest {
         // falta es movimiento.
         val malo = badDay.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
         assertEquals(listOf(600, 300), malo.map { it.workValue })
-        // 15 minutos de caminata frente a los 17 del dia bueno, pero sin nada de carga.
+        // 15 minutos de caminata frente a los 12 del dia bueno (17 hasta la revision 43, que
+        // le quito la de cierre), y sin nada de carga.
         val bueno = training.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
-        assertEquals(listOf(720, 300), bueno.map { it.workValue })
+        assertEquals(listOf(720), bueno.map { it.workValue })
     }
 
     @Test
@@ -479,7 +486,7 @@ class LumbarTrainingTest {
 
         assertEquals(4, out.size)
         assertEquals(MasterDefaults.LUMBAR_ID, out[0].id)
-        assertEquals(6, out[0].workouts.size)
+        assertEquals(5, out[0].workouts.size)
         assertEquals(master, out[1])
     }
 
@@ -493,7 +500,7 @@ class LumbarTrainingTest {
 
         assertEquals("uid-de-siempre", out.uid)
         assertEquals(111L, out.createdAt)
-        assertEquals(6, out.workouts.size)
+        assertEquals(5, out.workouts.size)
     }
 
     @Test
@@ -576,8 +583,8 @@ class LumbarTrainingTest {
         // (TD-095) y deja uno por mano, igual que la plancha. Catorce desde la 35: el
         // equilibrio en una pierna, uno por pie. 17 desde la 38, con el tren superior: la
         // reconstruccion sale de la rutina de hoy, pero se guardo una sola vez en su telefono
-        // (seedFirstSession) y lo que quedo ahi no cambia.
-        assertEquals(17, session.exercises.size)
+        // (seedFirstSession) y lo que quedo ahi no cambia. 16 desde la 43, sin la caminata de cierre.
+        assertEquals(16, session.exercises.size)
         assertTrue(session.exercises.all { it.setsCompleted == it.totalSets })
         assertTrue(session.exercises.none { r -> r.sets.any { it.skipped } })
         assertEquals(com.maurozegarra.master.model.SessionStatus.COMPLETED, session.status)
@@ -667,9 +674,10 @@ class LumbarTrainingTest {
 
     @Test
     fun `con el tobillo las caminatas vuelven a 6 y 5`() {
-        listOf(tobillo, tobilloCorto).forEach { t ->
+        // El completo, sin la de cierre desde la revision 43.
+        listOf(tobillo to listOf(6.0), tobilloCorto to listOf(6.0, 5.0)).forEach { (t, velocidades) ->
             val walks = t.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
-            assertEquals(listOf(6.0, 5.0), walks.map { it.speedKmh })
+            assertEquals(velocidades, walks.map { it.speedKmh })
         }
     }
 

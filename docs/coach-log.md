@@ -35,6 +35,19 @@ cinco veces.
 próxima el puente (el 36 ligero dos veces), las dominadas a 4 × 3, las flexiones a 3 × 10 y los
 saltos al cajón de NIKO.
 
+**Revisión 42 (22:08, pedida por él):** en el tren superior, solo descansos. Entre las flexiones de
+rodillas y las normales había 10 s (la preparación de las normales, porque las de rodillas son una
+sola serie); ahora **1 min**, como entre series. Entre dominadas, **1 min** en vez de 2: *"es más
+que suficiente"*.
+
+**Revisión 43 (22:18, acordada con él):** el completo (martes y sábado, en casa) pierde la
+caminata de cierre. Preguntó si hacía falta. Lo que la sostiene es mover la columna sin carga
+antes de pasar horas sentado, y eso pasa los días presenciales: *"paso sentado casi 2
+horas"*. En casa ya abre con 12 minutos de caminata, y el 7-oct, que se la saltó, no cambió nada.
+El corto y el día malo la conservan. El corto también va viernes y domingo, que está en casa:
+esos días **se la salta**, decisión suya (*"me lo salto, déjalo así"*). No se separa un corto
+para casa.
+
 ---
 
 ## 2026-10-27 — tres días con la revisión 39, y el segundo tren superior
