@@ -48,6 +48,12 @@ El corto y el día malo la conservan. El corto también va viernes y domingo, qu
 esos días **se la salta**, decisión suya (*"me lo salto, déjalo así"*). No se separa un corto
 para casa.
 
+**Revisión 44 (22:46):** el bird dog *"lo siento muy ligero"*. Van **cuadrados**: durante cada
+aguante dibuja cuadrados pequeños con la mano y el pie, con la espalda quieta. Es la progresión de
+McGill, en la que los 10 s no se alargan. Se le dieron tres opciones (cuadrados, tensión total,
+tobillera) y eligió los cuadrados; si en una semana también sale ligero, sigue la tobillera de
+1 kg. Llega a los tres trainings, porque el McGill es el mismo.
+
 ---
 
 ## 2026-10-27 — tres días con la revisión 39, y el segundo tren superior

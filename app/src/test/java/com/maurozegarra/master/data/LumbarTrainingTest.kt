@@ -189,6 +189,27 @@ class LumbarTrainingTest {
     }
 
     @Test
+    fun `el bird dog dibuja cuadrados, y las instrucciones viejas se reemplazan`() {
+        // Revision 44: lo sentia ligero. Los aguantes no se alargan; se hacen mas exigentes.
+        val bird = training.workouts.first { it.name == "McGill Big 3" }.exercises.first { it.exerciseId == "ex_bird_dog" }
+        assertTrue(bird.note.startsWith("Small squares"))
+        assertEquals(10, bird.workValue)
+        val viejo = com.maurozegarra.master.model.ExerciseMedia(
+            listOf(
+                "Opposite arm and leg, up to shoulder and hip height, no higher.",
+                "The back stays still: if the hip tilts, you went lower than your control.",
+                "Alternate sides between holds.",
+            ),
+        )
+        val nuevas = MasterDefaults.mergeLumbarInstructions(mapOf("ex_bird_dog" to viejo))["ex_bird_dog"]!!
+        assertEquals(MasterDefaults.lumbarInstructions()["ex_bird_dog"], nuevas)
+        assertTrue(nuevas.instructions.any { it.contains("squares") })
+        // Lo que el haya escrito a mano no se pisa.
+        val suya = com.maurozegarra.master.model.ExerciseMedia(listOf("Mine"))
+        assertEquals(suya, MasterDefaults.mergeLumbarInstructions(mapOf("ex_bird_dog" to suya))["ex_bird_dog"])
+    }
+
+    @Test
     fun `la caminata lateral activa el bloque normal, y aliviado no esta`() {
         // Revision 23: con las bandas de tela. Aliviado no entra: la abduccion carga la zona
         // del pinchazo del 29-sep.

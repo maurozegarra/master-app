@@ -458,8 +458,13 @@ object MasterDefaults {
      * pesa es lo primero, y solo importa si despues viene estar sentado: los dias presenciales,
      * dos horas de camino. El completo va martes y sabado, en casa, y ya abre con 12 minutos
      * de caminata. El corto (presenciales) y el dia malo la conservan.
+     *
+     * Revision 44 (31-oct): el bird dog, que sentia muy ligero, con cuadrados: durante cada
+     * aguante se dibujan cuadrados pequenos con la mano y el pie. Es la progresion de McGill:
+     * los 10 s no se alargan, se hacen mas exigentes. Va en los tres trainings (el McGill es el
+     * mismo); si en una semana tambien sale ligero, sigue la tobillera de 1 kg.
      */
-    const val LUMBAR_REVISION = 43
+    const val LUMBAR_REVISION = 44
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -2124,7 +2129,10 @@ object MasterDefaults {
                 // Revision 31 (8-oct): los descansos tras la 6/12 y la 10/12 pitan desde el 4, el
                 // segundo que le toma volver a la plancha.
                 pyramid("ex_side_plank", "Elbow under the shoulder, knees at 90", blocks, sides = listOf("Left", "Right"), sideRest = 20, blockRestFinalCount = 4),
-                pyramid("ex_bird_dog", "Alternate sides between holds", blocks),
+                // Revision 44 (31-oct): lo sentia muy ligero. Los aguantes siguen en 10 s -McGill
+                // progresa con mas exigencia dentro del aguante, no alargandolo- y se dibujan
+                // cuadrados con la mano y el pie mientras la espalda se queda quieta.
+                pyramid("ex_bird_dog", "Small squares with hand and foot. Alternate sides between holds", blocks),
             ).map { it.copy(progression = Progression.NONE) },
         )
 
@@ -2336,10 +2344,12 @@ object MasterDefaults {
             ),
         ),
         "ex_side_plank" to sidePlankSteps(),
+        // Revision 44: los cuadrados, la progresion del propio McGill (ver LUMBAR_REVISION).
         "ex_bird_dog" to ExerciseMedia(
             listOf(
                 "Opposite arm and leg, up to shoulder and hip height, no higher.",
-                "The back stays still: if the hip tilts, you went lower than your control.",
+                "During each hold, draw small squares in the air with the hand and the foot at the same time, about 20-30 cm per side. Slow, the whole 10 s.",
+                "The back stays still while the limbs move: if the hip tilts or the back sways, make the squares smaller.",
                 "Alternate sides between holds.",
             ),
         ),
@@ -2446,6 +2456,16 @@ object MasterDefaults {
      * lo que sigue palabra por palabra como se sembro: eso no lo toco nadie.
      */
     private val LUMBAR_INSTRUCTIONS_SUPERSEDED: Map<String, List<ExerciseMedia>> by lazy { mapOf(
+        // Revision 44: el bird dog sin los cuadrados, tal cual se sembro.
+        "ex_bird_dog" to listOf(
+            ExerciseMedia(
+                listOf(
+                    "Opposite arm and leg, up to shoulder and hip height, no higher.",
+                    "The back stays still: if the hip tilts, you went lower than your control.",
+                    "Alternate sides between holds.",
+                ),
+            ),
+        ),
         // Revision 19: en su telefono el hip thrust tenia las del catalogo, en espanol y
         // escritas para NIKO, porque lo hizo en el training MASTER.
         "ex_hip_thrust" to listOf(catalogInstructions().getValue("ex_hip_thrust")),
