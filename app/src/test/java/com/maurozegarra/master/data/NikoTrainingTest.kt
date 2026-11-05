@@ -35,7 +35,8 @@ class NikoTrainingTest {
         // El salto sube de altura, no de repeticiones.
         val salto = ex(MasterDefaults.NIKO_POWER_ID, "ex_box_jump")
         assertEquals(6, salto.workValue)
-        assertEquals(true, salto.note.contains("61 cm"))
+        // A 61 en la 23; a 75 desde la 26.
+        assertEquals(true, salto.note.contains("75 cm"))
     }
 
     @Test
@@ -50,9 +51,6 @@ class NikoTrainingTest {
         assertEquals(true, ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_glute_bridge").note.contains("FUERTE"))
         // NIKO 1 sigue con la media: ahi la marco bien, no facil.
         assertEquals(true, ex(MasterDefaults.NIKO_GLUTE_ID, "ex_lateral_band_walk").note.contains("MEDIA"))
-        val cosaca = ex(MasterDefaults.NIKO_MIXED_ID, "ex_cossack_squat")
-        assertEquals(listOf(7.5, 7.5), cosaca.setList.map { it.weight })
-        assertEquals(true, cosaca.note.contains("7.5 kg"))
     }
 
     @Test
@@ -61,5 +59,17 @@ class NikoTrainingTest {
         val banda = ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_lateral_band_walk")
         assertEquals(15, banda.workValue)
         assertEquals(true, banda.note.contains("FUERTE") && banda.note.contains("15 pasos"))
+    }
+
+    @Test
+    fun `revision 26 sube lo que marco facil o ligero, y que se note`() {
+        val salto = ex(MasterDefaults.NIKO_POWER_ID, "ex_box_jump")
+        assertEquals(true, salto.note.contains("75 cm"))
+        assertEquals(listOf(6, 4), listOf(salto.workValue, salto.sets))
+        val cosaca = ex(MasterDefaults.NIKO_MIXED_ID, "ex_cossack_squat")
+        assertEquals(listOf(10.0, 10.0), cosaca.setList.map { it.weight })
+        assertEquals(true, cosaca.note.contains("10 kg"))
+        val llanta = ex(MasterDefaults.NIKO_MUAY_THAI_ID, "ex_tire_jumping")
+        assertEquals(listOf(40, 6), listOf(llanta.workValue, llanta.sets))
     }
 }

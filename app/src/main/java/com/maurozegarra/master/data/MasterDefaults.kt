@@ -847,8 +847,14 @@ object MasterDefaults {
      * Revision 25 (24-oct, tercera revisión semanal): NIKO 4, la caminata con banda a 15 pasos
      * por lado. El 23-oct, fácil las cuatro series con la banda fuerte, que es la más dura del set:
      * no queda banda a la que subir, así que suben los pasos.
+     *
+     * Revision 26 (4-nov, a pedido del usuario): "súbele algo y que se note ya". NIKO le había
+     * dicho hacía una semana que algunos ejercicios los sentía muy ligeros, y esperaba la
+     * revisión del sábado. Suben a la vez los tres que lo marcaron en el app: el salto al
+     * cajón a 75 cm (NIKO 5), la llanta a 6 x 40 s (NIKO 2) y la cosaca a 10 kg (NIKO 6). Lo
+     * demás lo marca "bien": si también le sobra, tiene que marcarlo para que se vea.
      */
-    const val NIKO_REVISION = 25
+    const val NIKO_REVISION = 26
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1011,7 +1017,8 @@ object MasterDefaults {
                     id = b.id(),
                     name = "Pies",
                     exercises = listOf(
-                        b.ex("ex_tire_jumping", "Ligera, sobre la punta de los pies", 30, sets = 6, rest = 15, mode = WorkMode.TIME),
+                        // Revision 26 (4-nov): 40 s y no 30. Fácil cinco de las seis el 4-nov.
+                        b.ex("ex_tire_jumping", "Ligera, sobre la punta de los pies", 40, sets = 6, rest = 15, mode = WorkMode.TIME),
                     ),
                 ),
                 Workout(
@@ -1252,7 +1259,9 @@ object MasterDefaults {
                         // Revision 22: 4 x 6. Las cuatro de 5 fueron fáciles el 25-sep y el 2-oct.
                         // Revision 23: a 61 cm, la siguiente altura de la plyobox (51 x 61 x 75).
                         // Fácil a 51 el 25-sep, el 2-oct y el 10-oct.
-                        b.ex("ex_box_jump", "Cajón de 61 cm. Cae suave y BAJA CAMINANDO, no saltando", 6, sets = 4, rest = 90),
+                        // Revision 26 (4-nov): a 75, la altura más alta de la plyobox. A 61, fácil
+                        // las cuatro el 24-oct y tres de cuatro el 1-nov.
+                        b.ex("ex_box_jump", "Cajón de 75 cm. Cae suave y BAJA CAMINANDO, no saltando", 6, sets = 4, rest = 90),
                     ),
                 ),
                 Workout(
@@ -1357,9 +1366,10 @@ object MasterDefaults {
                         // Revision 21 (2-oct): con una mancuerna de 5 kg al pecho. El 26-sep
                         // marco facil las cuatro sin peso.
                         // Revision 24: a 7.5. Pidio +2.5 en las cuatro el 12-oct.
+                        // Revision 26 (4-nov): a 10. Pidió +2.5 en tres de las cuatro el 2-nov.
                         b.ex(
-                            "ex_cossack_squat", "Mancuerna de 7.5 kg al pecho. Talón apoyado, baja solo hasta donde controles", 8, rest = 30,
-                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(7.5, 7.5),
+                            "ex_cossack_squat", "Mancuerna de 10 kg al pecho. Talón apoyado, baja solo hasta donde controles", 8, rest = 30,
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(10.0, 10.0),
                         ).copy(sides = listOf("Izquierda", "Derecha")),
                         b.ex("ex_hip_rotation", "Círculos grandes y lentos", 10, sets = 1, rest = 0),
                         b.ex("ex_front_side_stretch", "Sin rebotes. Respira hondo en cada posición", 60, sets = 1, rest = 0, mode = WorkMode.TIME),
