@@ -19,11 +19,12 @@ import org.junit.Test
  */
 class LumbarTrainingTest {
 
-    // La rutina sin lo del tobillo (revision 33), que es temporal: tiene sus propios tests.
-    private val training = MasterDefaults.lumbarTraining("en", easedAnkle = false)
+    // La rutina sin lo del tobillo (revision 33) ni lo de la muñeca (revision 45), que son
+    // temporales: tienen sus propios tests.
+    private val training = MasterDefaults.lumbarTraining("en", easedAnkle = false, easedWrist = false)
     // El bloque de cadera de siempre, sin el alivio de la revision 22.
-    private val normal = MasterDefaults.lumbarTraining("en", easedHip = false, easedAnkle = false)
-    private val short = MasterDefaults.lumbarShortTraining("en", easedAnkle = false)
+    private val normal = MasterDefaults.lumbarTraining("en", easedHip = false, easedAnkle = false, easedWrist = false)
+    private val short = MasterDefaults.lumbarShortTraining("en", easedAnkle = false, easedWrist = false)
     private val steps = StepEngine.buildSteps(training.copy(workouts = training.workouts))
 
     @Test
@@ -432,7 +433,7 @@ class LumbarTrainingTest {
 
     // ---------- La variante de dia malo (TD-088) ----------
 
-    private val badDay = MasterDefaults.lumbarBadDayTraining("en")
+    private val badDay = MasterDefaults.lumbarBadDayTraining("en", easedWrist = false)
 
     @Test
     fun `el dia malo abre con movilidad y camina despues`() {
@@ -725,5 +726,34 @@ class LumbarTrainingTest {
     @Test
     fun `la primera sesion sigue con el carry de aquel dia`() {
         assertTrue(MasterDefaults.lumbarFirstSession("en").exercises.any { it.exerciseId == "ex_suitcase_carry" })
+    }
+
+    // ---------- Revision 45: la muñeca derecha ----------
+
+    @Test
+    fun `con la muñeca no hay flexiones, y lo apoyado va sobre el puño`() {
+        val completo = MasterDefaults.lumbarTraining("en", easedAnkle = false, easedWrist = true)
+        val corto = MasterDefaults.lumbarShortTraining("en", easedAnkle = false, easedWrist = true)
+        val malo = MasterDefaults.lumbarBadDayTraining("en", easedWrist = true)
+        val arriba = completo.workouts.first { it.name == "Upper Body" }.exercises.map { it.exerciseId }
+        // Colgar no dobla la muñeca: la dominada se queda.
+        assertEquals(listOf("ex_pull_ups"), arriba)
+        listOf(completo, corto, malo).forEach { t ->
+            val todos = t.workouts.flatMap { it.exercises }
+            assertTrue(todos.none { it.exerciseId in setOf("ex_pushups", "ex_knee_pushups") })
+            listOf("ex_cat_cow", "ex_bird_dog").forEach { id ->
+                assertTrue("${t.name} $id", todos.single { it.exerciseId == id }.note.startsWith("On your fists"))
+            }
+        }
+        // El carry, con su agarre, sigue igual.
+        val carry = corto.workouts.flatMap { it.exercises }.single { it.exerciseId == "ex_suitcase_carry" }
+        assertEquals(listOf(16.0, 20.0, 22.5), carry.setList.map { it.weight }.distinct())
+    }
+
+    @Test
+    fun `sin la muñeca vuelven las flexiones y las notas de siempre`() {
+        val arriba = training.workouts.first { it.name == "Upper Body" }.exercises.map { it.exerciseId }
+        assertEquals(listOf("ex_knee_pushups", "ex_pushups", "ex_pull_ups"), arriba)
+        assertTrue(training.workouts.flatMap { it.exercises }.none { it.note.startsWith("On your fists") })
     }
 }

@@ -58,12 +58,12 @@ class EffortTest {
         // banda le va, y desde la 38 las flexiones y las dominadas. Su calentamiento de
         // rodillas no.
         val arriba = setOf("ex_pushups", "ex_pull_ups")
-        val lumbar = MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = true)
+        val lumbar = MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = true, easedWrist = false)
         assertEquals(setOf("ex_lateral_band_walk") + arriba, StepEngine.buildSteps(lumbar).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
-        assertEquals(arriba, StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = false)).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
+        assertEquals(arriba, StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = false, easedWrist = false)).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
         // Aliviado, el puente iba sin peso y preguntaba como fue (revision 22). Desde la 29 lleva
         // barra, y lo que dice si molesta es el feedback de peso de cada serie, como el carry.
-        val aliviado = MasterDefaults.lumbarTraining("en", easedHip = true)
+        val aliviado = MasterDefaults.lumbarTraining("en", easedHip = true, easedWrist = false)
         assertEquals(arriba, StepEngine.buildSteps(aliviado).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
 
         val niko = MasterDefaults.nikoTrainings("es")

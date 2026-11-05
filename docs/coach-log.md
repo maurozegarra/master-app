@@ -5,6 +5,48 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-11-04 — el martes sin sesión, y NIKO sube sin esperar al sábado
+
+**Sus sesiones (domingo a miércoles):** el corto el domingo (13:09), el lunes y hoy. **El martes
+no entrenó** (*"no pude hacer"*), así que el completo con los cambios del sábado sigue sin
+probarse: los descansos de 1 min del tren superior y el cierre sin caminata.
+
+- **Carry 16 · 20 · 22.5:** *bien* las seis series en las tres sesiones. El 16 y el 20, que
+  venían *ligero*, quedaron justos con la revisión 41.
+- **Bird dog con cuadrados** (revisión 44): *"bastante bien, la variedad se siente bien"*.
+- **Mañanas:** domingo, lunes y martes en 1 (aflojó en 15, 19 y 15 min), después de seis
+  seguidas en 0. Hoy, 0.
+
+**NIKO, cuatro de cuatro** (NIKO 5, 6, 1 y 2), todo *bien* salvo: el salto al cajón a 61, *fácil*
+tres de cuatro (y las cuatro el 24-oct); la llanta, *fácil* cinco de seis; la cosaca a 7.5,
+*ligero* tres de cuatro.
+
+**NIKO revisión 26, sin esperar al sábado.** El coach proponía dejarlo para la revisión
+semanal, uno a la vez. Él no: NIKO le dijo hace una semana que algunos ejercicios los sentía muy
+ligeros, y él le contestó *"confía en el proceso"*: *"veo que la estamos dejando de lado, así
+que súbele algo y que se note ya"*. Suben los tres a la vez: **cajón a 75 cm** (la altura más
+alta de la plyobox), **llanta 6 × 40 s** (eran 30) y **cosaca con 10 kg**. Lo demás lo marca
+*bien* en el app: si también le sobra, tiene que marcarlo *fácil* o *ligero* para que se vea.
+
+**La muñeca derecha (contada a las 22:42).** El 10-oct, cuando se dobló el tobillo, cayó frenando
+con las manos y sintió un dolor pequeño en las dos muñecas. Después nada. Una semana más tarde
+empezó a dolerle la derecha, sin causa, y no se le ha ido; estos días subió un poco y está
+constante. Le duele **del lado del pulgar**, al **apoyar la mano con peso** (como en las
+flexiones) y más aún doblándola hacia el otro lado. **Sin hinchazón.** Es la zona del escafoides,
+la fisura que más se pasa por alto tras una caída sobre las manos. Se le pidió que lo vea un
+traumatólogo, con la proyección de escafoides en la radiografía.
+
+**Revisión 45 (con su OK):** mientras tanto, nada de mano apoyada con la muñeca doblada.
+**Fuera las flexiones** (también las de rodillas); el **gato-camello y el bird dog, sobre el
+puño**, con la muñeca recta. Dominadas y carry se quedan, porque colgar y agarrar no la doblan; si
+le duelen, salen. Va en los tres trainings, con `LUMBAR_WRIST_EASED`: vuelve a lo normal cuando el
+médico lo diga.
+
+**La lección:** lo que el atleta le dice a él por fuera del app también es dato. Se pregunta en
+cada revisión, en vez de esperar a que aparezca en las marcas.
+
+---
+
 ## 2026-10-31 — cuarta revisión semanal: siete de siete
 
 **La semana (25 al 31): siete sesiones de siete**, todas completas. Las mañanas: el domingo 1

@@ -463,8 +463,11 @@ object MasterDefaults {
      * aguante se dibujan cuadrados pequenos con la mano y el pie. Es la progresion de McGill:
      * los 10 s no se alargan, se hacen mas exigentes. Va en los tres trainings (el McGill es el
      * mismo); si en una semana tambien sale ligero, sigue la tobillera de 1 kg.
+     *
+     * Revision 45 (4-nov): la muñeca derecha, ver [LUMBAR_WRIST_EASED]. Sin flexiones, y el
+     * gato-camello y el bird dog sobre el puño, en los tres trainings.
      */
-    const val LUMBAR_REVISION = 44
+    const val LUMBAR_REVISION = 45
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -490,6 +493,21 @@ object MasterDefaults {
      * a lo normal; lo que se queda del tobillo es el equilibrio en una pierna (ver mobility).
      */
     const val LUMBAR_ANKLE_EASED = false
+
+    /**
+     * La muñeca derecha (revision 45, 4-nov): dolor del lado del pulgar desde una semana despues
+     * de la caida del 10-oct, cuando se doblo el tobillo y freno con las manos. Constante y algo
+     * mas fuerte estos dias, sin hinchazon; empeora apoyando la mano con peso (flexiones) y mas
+     * aun doblandola hacia el otro lado. Es la zona del escafoides, asi que se le pidio que lo
+     * vea un traumatologo con la proyeccion de escafoides.
+     *
+     * Mientras tanto, nada de mano apoyada con la muñeca doblada: fuera las flexiones (las de
+     * rodillas tambien), y el gato-camello y el bird dog sobre el puño, con la muñeca recta.
+     * Dominadas y carry se quedan: colgar y agarrar no la doblan.
+     *
+     * Volver a lo normal es poner esto en false y subir la revision, cuando el medico lo diga.
+     */
+    const val LUMBAR_WRIST_EASED = true
 
     /**
      * El bloque de cadera aliviado, por el pinchazo en la nalga izquierda del 29-sep.
@@ -563,8 +581,9 @@ object MasterDefaults {
         easedHip: Boolean = LUMBAR_HIP_EASED,
         bandWalk: Boolean = LUMBAR_BAND_WALK,
         easedAnkle: Boolean = LUMBAR_ANKLE_EASED,
+        easedWrist: Boolean = LUMBAR_WRIST_EASED,
     ): Training {
-        val b = LumbarBlocks(lang, seqStart = 950000L)
+        val b = LumbarBlocks(lang, seqStart = 950000L, wrist = easedWrist)
         val now = System.currentTimeMillis()
         return Training(
             id = LUMBAR_ID,
@@ -583,7 +602,7 @@ object MasterDefaults {
                 // Revision 38: despues de la cadera, que llega fresca y tiene la prioridad. Con
                 // ids propios: LUMBAR_ID (950016) cae dentro de la secuencia de este training, y
                 // los cuatro ids nuevos llegaban justo a el.
-                LumbarBlocks(lang, seqStart = 950100L).upperBody(),
+                LumbarBlocks(lang, seqStart = 950100L, wrist = easedWrist).upperBody(),
                 // Revision 43: sin caminata de cierre. Va los dias en casa, y ahi no viene detras
                 // lo que la justificaba: dos horas sentado en el camino (ver LUMBAR_REVISION).
             ),
@@ -615,8 +634,8 @@ object MasterDefaults {
      * Es un training aparte y no una edicion del otro: el normal ya esta validado para un
      * dia normal, y tener los dos permite comparar en la bitacora que paso con cada orden.
      */
-    fun lumbarBadDayTraining(lang: String): Training {
-        val b = LumbarBlocks(lang, seqStart = 951000L)
+    fun lumbarBadDayTraining(lang: String, easedWrist: Boolean = LUMBAR_WRIST_EASED): Training {
+        val b = LumbarBlocks(lang, seqStart = 951000L, wrist = easedWrist)
         val now = System.currentTimeMillis()
         return Training(
             id = LUMBAR_BAD_DAY_ID,
@@ -663,8 +682,8 @@ object MasterDefaults {
      * caminar 2-3 minutos cada hora. Ocho horas de oficina pesan mas que los 45 minutos de
      * rutina que se ahorra.
      */
-    fun lumbarShortTraining(lang: String, easedAnkle: Boolean = LUMBAR_ANKLE_EASED): Training {
-        val b = LumbarBlocks(lang, seqStart = 952000L)
+    fun lumbarShortTraining(lang: String, easedAnkle: Boolean = LUMBAR_ANKLE_EASED, easedWrist: Boolean = LUMBAR_WRIST_EASED): Training {
+        val b = LumbarBlocks(lang, seqStart = 952000L, wrist = easedWrist)
         val now = System.currentTimeMillis()
         return Training(
             id = LUMBAR_SHORT_ID,
@@ -704,7 +723,7 @@ object MasterDefaults {
      */
     fun lumbarFirstSession(lang: String): SessionLog {
         // Sin el tobillo: aquel dia hizo la rutina entera, carry incluido.
-        val t = lumbarTraining(lang, easedAnkle = false)
+        val t = lumbarTraining(lang, easedAnkle = false, easedWrist = false)
         val exercises = mutableListOf<ExerciseRecord>()
         t.workouts.forEachIndexed { wi, w ->
             // Un registro por LADO, igual que lo que escribe el recorder (TD-147): la
@@ -1982,7 +2001,11 @@ object MasterDefaults {
      *
      * [seqStart] separa los ids de un training y del otro.
      */
-    private class LumbarBlocks(private val lang: String, seqStart: Long) {
+    /** [wrist]: la muñeca derecha, ver [LUMBAR_WRIST_EASED]. */
+    private class LumbarBlocks(private val lang: String, seqStart: Long, private val wrist: Boolean = false) {
+
+        /** La nota de lo que va con la mano apoyada, con la muñeca aliviada: sobre el puño. */
+        private fun fist(note: String) = if (wrist) "On your fists, wrist straight. $note" else note
 
         private var seq = seqStart
         private fun id(): Long = seq++
@@ -2110,7 +2133,7 @@ object MasterDefaults {
             id = id(),
             name = if (lang == "es") "Movilidad" else "Mobility",
             exercises = listOfNotNull(
-                reps("ex_cat_cow", 8, note = "6-8 slow cycles", prep = 10),
+                reps("ex_cat_cow", 8, note = fist("6-8 slow cycles"), prep = 10),
                 reps("ex_hip_hinge", 10, note = "Stick on nape, mid-back and sacrum", prep = 10),
                 // Revision 33, ver [LUMBAR_ANKLE_EASED]. Al final y no al principio: el
                 // gato-camello sigue siendo lo primero del dia.
@@ -2142,7 +2165,7 @@ object MasterDefaults {
                 // Revision 44 (31-oct): lo sentia muy ligero. Los aguantes siguen en 10 s -McGill
                 // progresa con mas exigencia dentro del aguante, no alargandolo- y se dibujan
                 // cuadrados con la mano y el pie mientras la espalda se queda quieta.
-                pyramid("ex_bird_dog", "Small squares with hand and foot. Alternate sides between holds", blocks),
+                pyramid("ex_bird_dog", fist("Small squares with hand and foot. Alternate sides between holds"), blocks),
             ).map { it.copy(progression = Progression.NONE) },
         )
 
@@ -2217,13 +2240,16 @@ object MasterDefaults {
         fun upperBody(): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Tren superior" else "Upper Body",
-            exercises = listOf(
-                reps("ex_knee_pushups", 12, "Warm-up. Body straight from the knees", prep = 10)
+            // Revision 45: sin flexiones mientras dure lo de la muñeca (ver [LUMBAR_WRIST_EASED]).
+            exercises = listOfNotNull(
+                if (wrist) null
+                else reps("ex_knee_pushups", 12, "Warm-up. Body straight from the knees", prep = 10)
                     .copy(progression = Progression.NONE),
                 // Revision 42 (31-oct): la serie de rodillas es una sola y no deja descanso, asi
                 // que la pausa hasta las normales es esta preparacion. Con 10 s no alcanzaba; un
                 // minuto, como entre series. Y la dominada descansa 1 min y no 2: "es mas que suficiente".
-                reps("ex_pushups", 8, "Body straight from head to heels. Chest almost to the floor", sets = 3, rest = 60, prep = 60),
+                if (wrist) null
+                else reps("ex_pushups", 8, "Body straight from head to heels. Chest almost to the floor", sets = 3, rest = 60, prep = 60),
                 reps("ex_pull_ups", 2, "Strict, no swing. Step down onto the plyobox, don't drop", sets = 4, rest = 60, prep = 15),
             ),
         )
