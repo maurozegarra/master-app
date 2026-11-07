@@ -53,6 +53,23 @@ object BodyLog {
     fun heightOf(entries: List<BodyEntry>): Double? =
         entries.sortedBy { it.date }.lastOrNull { it.heightCm != null }?.heightCm
 
+    /**
+     * El último valor anotado ANTES de [date] (TD-207): contra qué se compara lo que se está
+     * escribiendo en el pesaje. Antes de la fecha y no "el último", para que corregir un
+     * pesaje viejo lo compare con el suyo de la semana anterior, no consigo mismo ni con uno
+     * posterior. Salta los pesajes sin ese dato (el 12-sep solo hubo balanza).
+     */
+    fun previous(entries: List<BodyEntry>, date: String, value: (BodyEntry) -> Double?): Pair<String, Double>? =
+        entries.filter { it.date < date && value(it) != null }.maxByOrNull { it.date }?.let { it.date to value(it)!! }
+
+    /**
+     * La diferencia que se enseña con flecha, como la app de la balanza de Xiaomi (TD-207): con
+     * un decimal, y null si no cambió, porque ahí sin cambio no se dice nada. El signo dice la
+     * flecha (arriba o abajo); la pantalla dibuja el valor absoluto.
+     */
+    fun delta(now: Double, before: Double): Double? =
+        (Math.round((now - before) * 10) / 10.0).takeIf { it != 0.0 }
+
     /** [entries] con la de su día reemplazada por [entry], ordenadas por fecha. */
     fun upsert(entries: List<BodyEntry>, entry: BodyEntry): List<BodyEntry> =
         (entries.filter { it.date != entry.date } + entry).sortedBy { it.date }

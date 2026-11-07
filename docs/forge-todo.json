@@ -1467,6 +1467,13 @@
       "category": "UI",
       "status": "done",
       "manual": "PEDIDO el 31-oct, con captura del historial: \"el tab arriba y los chips abajo, para mi así se siente más natural, como está se siente rarito\". Hasta ahora iban los chips Me / Niko arriba (TD-168) y la pestaña Sessions · N / Body · N debajo (TD-169). Se invierte el orden, y se mantienen los 8 dp entre los dos. La línea de fuera de sesión sigue pegada a los chips."
+    },
+    {
+      "id": "TD-207",
+      "title": "Body: las tarjetas del mismo alto, y el pesaje anterior debajo de cada campo al anotar",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO el 7-nov, con captura de Historial -> Body: \"la card de weight y waist están más grandes\" y \"al agregar un registro de peso, debe recordar el registro de la semana pasada, así apenas registro ya sé si subí o bajé mientras lo reviso\".\n\nCAUSA de lo primero: \"+0.3 vs previous\" no cabía en una línea y Weight y Waist crecían. El texto pasa a \"vs last\", y las tres tarjetas de la fila toman siempre el alto de la más alta (IntrinsicSize.Min), así que no vuelven a quedar desparejas.\n\nLO SEGUNDO: debajo de peso, cintura y músculo, en gris, \"Last: 83.2 · Sat 31 Oct\" al abrir y \"Last: 83.2 · +0.3\" en cuanto se escribe un número. En gris y no en verde o rojo, como el cambio de las tarjetas: subir es bueno para NIKO. Compara con el último pesaje con ese dato ANTES de la fecha: corregir uno viejo compara con su anterior. Con el chip de un atleta, con los suyos. La estatura no lleva línea: ya viene copiada.\n\nSEGUNDA VUELTA (mismo día): \"no me convence, la pantalla de registro de peso está muy cargada\", con captura del reporte de peso de Xiaomi como referencia: \"una flecha arriba/abajo indicando el delta, sencillo y efectivo, quita eso de vs last\". Fuera las líneas de debajo de los campos y el \"vs last\". En las tarjetas, \"↑0.3\" en gris al lado de la unidad; en el diálogo, la misma flecha dentro del campo, a la derecha, en cuanto hay un número. Sin cambio no se muestra nada, como en Xiaomi.\n\nTERCERA VUELTA: \"eso de que las tarjetas crezcan fue pésima idea, las tarjetas no deben crecer en ningún escenario\". La flecha al lado del número no cabía en un tercio del ancho y se partió en una columna de caracteres, y la altura igualada hizo crecer las tres. Fuera la altura igualada; la flecha va sola en la línea de abajo (\"↑0.3\"), y en StatTile ninguna línea pasa a la siguiente: lo que no cabe se corta con \"…\". Vale también para las tarjetas del agua."
     }
   ]
 }

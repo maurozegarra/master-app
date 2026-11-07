@@ -892,7 +892,7 @@ data class BodyStrings(
     val reminderTitle: String = "Saturday weigh-in",
     val reminderText: String = "Weight and waist at the navel, before breakfast",
     val reminderChannel: String = "Weigh-in",
-    val vsPrevious: String = "vs previous",
+
 )
 
 /**

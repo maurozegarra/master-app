@@ -294,6 +294,8 @@ internal fun AppTextField(
     label: String? = null,
     placeholder: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
+    /** Algo al final, dentro del campo: la diferencia con el pesaje anterior (TD-207). */
+    trailingIcon: (@Composable () -> Unit)? = null,
     singleLine: Boolean = true,
     /**
      * Con varias lineas, hasta cuantas crece antes de desplazar el texto por dentro. Como la
@@ -326,6 +328,7 @@ internal fun AppTextField(
         label = label?.let { { Text(it) } },
         placeholder = placeholder?.let { { Text(it, color = c.textFaded) } },
         leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
         singleLine = singleLine,
         maxLines = if (singleLine) 1 else maxLines,
         keyboardOptions = keyboardOptions,

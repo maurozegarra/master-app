@@ -92,16 +92,20 @@ fun BodyTab(vm: MasterViewModel, accent: Color, t: Strings) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "tiles") {
+            // Las tarjetas no crecen, en ningún caso (TD-207, 7-nov): cada línea de StatTile es
+            // una sola. Con "+0.3 vs previous" Weight y Waist pasaban a dos líneas; igualar las
+            // alturas fue peor (crecían las tres) y poner la flecha al lado del número no cabía
+            // en un tercio del ancho. El cambio va solo, con su flecha, en la línea de abajo.
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 // El cambio va en gris y no en verde o rojo: para uno bajar es bueno y para otra
                 // no (NIKO tiene que construir).
                 StatTile(
                     b.weight, conPeso.lastOrNull()?.weightKg?.let(::fmtNum) ?: "–", Modifier.weight(1f),
-                    unit = t.kg, caption = change(conPeso.map { it.weightKg!! }, b.vsPrevious),
+                    unit = t.kg, delta = change(conPeso.map { it.weightKg!! }),
                 )
                 StatTile(
                     b.waist, conCintura.lastOrNull()?.waistCm?.let(::fmtNum) ?: "–", Modifier.weight(1f),
-                    unit = "cm", caption = change(conCintura.map { it.waistCm!! }, b.vsPrevious),
+                    unit = "cm", delta = change(conCintura.map { it.waistCm!! }),
                 )
                 val ratio = conCintura.lastOrNull()?.let { BodyLog.waistToHeight(it, alto) }
                 StatTile(
@@ -146,16 +150,10 @@ private fun dia(date: String): String = runCatching { LocalDate.parse(date).form
 /** Cintura / estatura y su meta, siempre con dos decimales: 0.52, 0.50. */
 private fun two(v: Double): String = String.format(Locale.US, "%.2f", v)
 
-/** "−0.1 vs previous", contra el pesaje anterior; null con uno solo. */
-private fun change(values: List<Double>, vsPrevious: String): String? {
+/** La diferencia con el pesaje anterior; null con uno solo o sin cambio. */
+private fun change(values: List<Double>): Double? {
     if (values.size < 2) return null
-    val d = Math.round((values.last() - values[values.size - 2]) * 10) / 10.0
-    val signo = when {
-        d > 0 -> "+${fmtNum(d)}"
-        d < 0 -> "−${fmtNum(-d)}"
-        else -> "±0"
-    }
-    return "$signo $vsPrevious"
+    return BodyLog.delta(values.last(), values[values.size - 2])
 }
 
 /**
@@ -239,6 +237,17 @@ fun WeighInDialog(vm: MasterViewModel, t: Strings) {
     fun num(s: String): Double? = s.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it > 0 }
     val algo = num(peso) != null || num(cintura) != null || num(musculo) != null
 
+    // Contra el pesaje anterior de quien se está anotando (TD-207): "apenas registro ya sé si
+    // subí o bajé". historyBody es el del chip elegido, el propio o el del atleta. Solo la
+    // flecha, dentro del campo y en cuanto hay un número: con una línea debajo de cada campo
+    // el diálogo quedaba "muy cargado".
+    val serie = vm.historyBody
+    fun delta(value: (BodyEntry) -> Double?, escrito: String): Double? {
+        val ahora = num(escrito) ?: return null
+        val (_, antes) = BodyLog.previous(serie, e.date, value) ?: return null
+        return BodyLog.delta(ahora, antes)
+    }
+
     AlertDialog(
         onDismissRequest = { vm.closeWeighIn() },
         containerColor = AppTheme.colors.surface,
@@ -247,9 +256,10 @@ fun WeighInDialog(vm: MasterViewModel, t: Strings) {
         title = { Text(listOfNotNull(b.editTitle, vm.weighInFor?.name, dia(e.date)).joinToString(" · ")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                NumberField("${b.weight} (${t.kg})", peso) { peso = it }
-                NumberField("${b.waist} (cm)", cintura) { cintura = it }
-                NumberField("${b.skeletal} (${t.kg}) · ${b.optional}", musculo) { musculo = it }
+                NumberField("${b.weight} (${t.kg})", peso, delta({ it.weightKg }, peso)) { peso = it }
+                NumberField("${b.waist} (cm)", cintura, delta({ it.waistCm }, cintura)) { cintura = it }
+                NumberField("${b.skeletal} (${t.kg}) · ${b.optional}", musculo, delta({ it.skeletalKg }, musculo)) { musculo = it }
+                // La estatura no: ya viene copiada del último.
                 NumberField("${b.height} (cm)", alto) { alto = it }
             }
         },
@@ -266,14 +276,18 @@ fun WeighInDialog(vm: MasterViewModel, t: Strings) {
     )
 }
 
-/** Un número con decimales: el campo del app con el teclado numérico. */
+/**
+ * Un número con decimales: el campo del app con el teclado numérico. [delta] va al final, dentro
+ * del campo y en gris, como en las tarjetas: "↑0.3" contra el pesaje anterior (TD-207).
+ */
 @Composable
-private fun NumberField(label: String, value: String, onChange: (String) -> Unit) {
+private fun NumberField(label: String, value: String, delta: Double? = null, onChange: (String) -> Unit) {
     AppTextField(
         value = value,
         onValueChange = { s -> onChange(s.filter { it.isDigit() || it == '.' || it == ',' }.take(6)) },
         label = label,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        trailingIcon = delta?.let { { DeltaLabel(it, Modifier.padding(end = 12.dp)) } },
         modifier = Modifier.fillMaxWidth(),
     )
 }

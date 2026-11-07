@@ -110,6 +110,37 @@ class BodyLogTest {
         val niko = BodyLog.SEED.getValue("niko")
         assertEquals(listOf(18.0, 18.4, 18.2, 18.3), niko.map { it.skeletalKg })
     }
+    // ---------- TD-207: el pesaje anterior, al anotar ----------
+
+    @Test
+    fun `el anterior es el ultimo con ese dato antes de la fecha`() {
+        val serie = listOf(
+            BodyEntry("2026-10-17", weightKg = 84.0, waistCm = 94.0),
+            BodyEntry("2026-10-24", weightKg = 83.6),
+            BodyEntry("2026-10-31", weightKg = 83.2, waistCm = 93.0),
+            BodyEntry("2026-11-07", weightKg = 83.5, waistCm = 93.5),
+        )
+        // Anotando hoy: contra la semana pasada.
+        assertEquals("2026-10-31" to 83.2, BodyLog.previous(serie, "2026-11-07") { it.weightKg })
+        // Corrigiendo uno viejo: contra el suyo anterior, no contra el ultimo ni consigo mismo.
+        assertEquals("2026-10-24" to 83.6, BodyLog.previous(serie, "2026-10-31") { it.weightKg })
+        // Sin cinta el 24: salta a la anterior que si la tiene.
+        assertEquals("2026-10-17" to 94.0, BodyLog.previous(serie, "2026-10-31") { it.waistCm })
+        // El primero no tiene con que compararse.
+        assertNull(BodyLog.previous(serie, "2026-10-17") { it.weightKg })
+    }
+
+    @Test
+    fun `la diferencia lleva un decimal, y sin cambio no hay nada que enseñar`() {
+        // Como la balanza de Xiaomi.
+        assertEquals(0.3, BodyLog.delta(83.5, 83.2)!!, 0.0)
+        assertEquals(-0.5, BodyLog.delta(93.0, 93.5)!!, 0.0)
+        assertEquals(1.0, BodyLog.delta(84.0, 83.0)!!, 0.0)
+        assertNull(BodyLog.delta(83.2, 83.2))
+        // Lo que se pierde al redondear a un decimal tampoco es cambio.
+        assertNull(BodyLog.delta(83.24, 83.2))
+    }
+
     // ---------- TD-205: el coach anota por el atleta, y el atleta lo ve ----------
 
     private fun huella(vararg es: BodyEntry) = es.associate { it.date to BodyLog.payloadOf(it).hashCode() }
