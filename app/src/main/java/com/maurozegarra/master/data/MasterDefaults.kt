@@ -466,8 +466,11 @@ object MasterDefaults {
      *
      * Revision 45 (4-nov): la muñeca derecha, ver [LUMBAR_WRIST_EASED]. Sin flexiones, y el
      * gato-camello y el bird dog sobre el puño, en los tres trainings.
+     *
+     * Revision 46 (8-nov): hoy domingo toca el corto, pero pidió el completo: el bloque de cadera
+     * lleva desde el 31-oct sin hacerse. Va por fecha y solo este día; la semana no cambia.
      */
-    const val LUMBAR_REVISION = 45
+    const val LUMBAR_REVISION = 46
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -593,7 +596,8 @@ object MasterDefaults {
             // Revision 38: el viernes pasa al corto (ver LUMBAR_REVISION).
             scheduleDays = setOf(java.time.DayOfWeek.TUESDAY, java.time.DayOfWeek.SATURDAY),
             // Revision 29: el jueves 8, feriado, cambiado con el viernes (ver LUMBAR_REVISION).
-            scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 8)),
+            // Revision 46: el domingo 8-nov, a pedido suyo (ver LUMBAR_REVISION).
+            scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 8), java.time.LocalDate.of(2026, 11, 8)),
             workouts = listOf(
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
                 b.mobility(ankle = easedAnkle),
@@ -872,8 +876,11 @@ object MasterDefaults {
      * revisión del sábado. Suben a la vez los tres que lo marcaron en el app: el salto al
      * cajón a 75 cm (NIKO 5), la llanta a 6 x 40 s (NIKO 2) y la cosaca a 10 kg (NIKO 6). Lo
      * demás lo marca "bien": si también le sobra, tiene que marcarlo para que se vea.
+     *
+     * Revision 27 (8-nov): el peso muerto a una pierna de NIKO 4 pasa de 10 a 12.5 kg. Las seis
+     * series del 6-nov salieron ligeras.
      */
-    const val NIKO_REVISION = 26
+    const val NIKO_REVISION = 27
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1211,7 +1218,8 @@ object MasterDefaults {
                             // facil. Sube a 10 en rampa, para no pasar de largo por el lado que
                             // todavia marca "bien".
                             // Revision 24: 10 en las tres; la de 7.5 fue fácil en los dos lados el 16-oct.
-                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(10.0, 10.0, 10.0),
+                            // Revision 27: 12.5 en las tres; las seis series de 10 salieron ligeras el 6-nov.
+                            weightType = WeightType.DUMBBELL, dumbbellCount = 1, weights = listOf(12.5, 12.5, 12.5),
                         ).copy(sides = lados),
                     ),
                 ),

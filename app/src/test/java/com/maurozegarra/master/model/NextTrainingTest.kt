@@ -88,6 +88,15 @@ class NextTrainingTest {
     }
 
     @Test
+    fun `el domingo 8 de noviembre va el completo y el siguiente domingo vuelve el corto`() {
+        val lumbar = MasterDefaults.lumbarTraining("en").copy(id = 2L)
+        val corto = MasterDefaults.lumbarShortTraining("en").copy(id = 1L)
+        val trainings = listOf(corto, lumbar)
+        assertEquals(2L, NextTraining.of(trainings, emptyList(), LocalDate.of(2026, 11, 8), lima))
+        assertEquals(1L, NextTraining.of(trainings, emptyList(), LocalDate.of(2026, 11, 15), lima))
+    }
+
+    @Test
     fun `el programa viaja con el training`() {
         val t = completo.copy(cycleDay = 3)
         val vuelta = TrainingJson.decode(TrainingJson.encode(listOf(t))).single()

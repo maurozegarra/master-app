@@ -45,12 +45,17 @@ class NikoTrainingTest {
         assertEquals(listOf(46.0, 58.5, 68.5, 73.5), hip.setList.map { hip.barWeight + it.weight })
         val remo = ex(MasterDefaults.NIKO_UPPER_ID, "ex_dumbbell_row")
         assertEquals(listOf(7.5, 7.5, 7.5, 7.5), remo.setList.map { it.weight })
-        val pmUna = ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_single_leg_deadlift")
-        assertEquals(listOf(10.0, 10.0, 10.0), pmUna.setList.map { it.weight })
         assertEquals(true, ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_lateral_band_walk").note.contains("FUERTE"))
         assertEquals(true, ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_glute_bridge").note.contains("FUERTE"))
         // NIKO 1 sigue con la media: ahi la marco bien, no facil.
         assertEquals(true, ex(MasterDefaults.NIKO_GLUTE_ID, "ex_lateral_band_walk").note.contains("MEDIA"))
+    }
+
+    @Test
+    fun `revision 27 sube el peso muerto a una pierna a 12 y medio`() {
+        // Reemplaza la comprobacion de 10 kg que estaba en la revision 24: ligero las seis series.
+        val pmUna = ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_single_leg_deadlift")
+        assertEquals(listOf(12.5, 12.5, 12.5), pmUna.setList.map { it.weight })
     }
 
     @Test

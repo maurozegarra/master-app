@@ -5,6 +5,43 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-11-08 — la muñeca: contusión, y quinta revisión semanal
+
+**Sábado 7, sin sesión:** fue al traumatólogo. Radiografía de la muñeca derecha, de frente y de
+perfil, sin la proyección de escafoides. **Diagnóstico: contusión de muñeca derecha.** Le recetó
+una inyección antiinflamatoria, celecoxib por 5 días y un gel, y le dijo que nada de actividad
+física por 2 semanas.
+
+**Lo que decidió él:** fue por la radiografía, como una opinión más. A los 29 años un médico le
+dijo que nunca más haría ejercicio y lleva 16 años entrenando sin problemas: *"le hacemos caso?
+definitivamente no"*. **Sigue entrenando.** De lo recetado solo compró el gel, mañana y noche,
+desde la noche del 7: sin inyección ni pastillas, el dolor sigue siendo una señal que se puede leer.
+La revisión 45 (sin flexiones, gato-camello y bird dog sobre el puño) sigue igual.
+
+**Terapia física, el mismo 7:** electroterapia, compresa caliente 10 min, magnetoterapia y masaje.
+Para él la visita cumplió lo que buscaba: descartar algo grave, y el papel dice contusión. Pidió la
+proyección de escafoides al médico y al radiólogo, ninguno le contestó, y dejó de insistir.
+
+**La semana (1 al 7): cinco sesiones de siete**, las cinco el corto. Sin completo el martes
+(*"no pude hacer"*) ni el sábado, así que el bloque de cadera lleva desde el 31-oct sin hacerse, y
+los descansos de 1 min y el cierre sin caminata siguen sin probarse. Carry 16 · 20 · 22.5, *bien*
+todas las series. Mañanas: 1, 1, 1, 0, 1, 0, 0, y las de 1 aflojaron en 15-19 min.
+
+**Pesaje del 7:** 83.5 kg, 93.5 cm y 34.2 kg de músculo (el 31-oct: 83.2, 93 y 34.2). NIKO: 50.1
+kg, 67 cm y 18.8 kg de músculo (50.2, 67 y 18.5): 0.3 kg más de músculo con el mismo peso.
+
+**NIKO, siete de siete** (NIKO 5, 6, 1, 2, 3, 4 y 5). No comentó nada por fuera del app. El cajón
+a 75 cm (revisión 26), *bien* las cuatro: el 1-nov a 61 había sido *fácil* tres de cuatro. El peso
+muerto a una pierna con 10 kg, ***ligero* las seis series** el 6-nov. La cosaca con 10 y la llanta
+de 40 s todavía no le tocaron.
+
+**Lo que cambia:** NIKO revisión 27, el peso muerto a una pierna de 10 a **12.5 kg** en las tres
+series. Lumbar revisión 46: **hoy domingo va el completo** en vez del corto, a pedido suyo y solo
+este día. Entra sin flexiones y es la primera vez que se prueban los descansos de 1 min y el cierre
+sin caminata.
+
+---
+
 ## 2026-11-04 — el martes sin sesión, y NIKO sube sin esperar al sábado
 
 **Sus sesiones (domingo a miércoles):** el corto el domingo (13:09), el lunes y hoy. **El martes
