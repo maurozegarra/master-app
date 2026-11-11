@@ -230,7 +230,7 @@ internal fun SwitchRow(
             }
         }
         Spacer(Modifier.width(12.dp))
-        AppSwitch(checked, accent, onCheckedChange)
+        AppSwitch(checked, accent, onCheckedChange = onCheckedChange)
     }
 }
 
@@ -239,7 +239,17 @@ internal fun SwitchRow(
  * tarjetas que llevan uno sin etiqueta, como las alarmas (TD-175).
  */
 @Composable
-internal fun AppSwitch(checked: Boolean, accent: Color, onCheckedChange: (Boolean) -> Unit) {
+internal fun AppSwitch(
+    checked: Boolean,
+    accent: Color,
+    /**
+     * Con borde apagado: sobre el fondo de una hoja el riel gris casi no se distingue y solo se
+     * veía la bolita (10-nov, la hoja del timer). Parche a pedido suyo; queda pendiente revisar
+     * el switch para todo el app.
+     */
+    outlined: Boolean = false,
+    onCheckedChange: (Boolean) -> Unit,
+) {
     val c = AppTheme.colors
     // A la medida del switch de Samsung, medido en su pantalla de alarmas el 5-oct (90 x 56 px
     // el riel y 45 px el botón, a 450 dpi): 32 x 20 dp, botón de 16 y 2 dp de margen. El de
@@ -264,7 +274,11 @@ internal fun AppSwitch(checked: Boolean, accent: Color, onCheckedChange: (Boolea
             Modifier
                 .size(width = 32.dp, height = 20.dp)
                 .clip(RoundedCornerShape(percent = 50))
-                .background(if (checked) accent else c.track),
+                .background(if (checked) accent else c.track)
+                .then(
+                    if (outlined && !checked) Modifier.border(1.dp, c.textFaded, RoundedCornerShape(percent = 50))
+                    else Modifier,
+                ),
         ) {
             Box(
                 Modifier

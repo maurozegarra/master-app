@@ -151,6 +151,11 @@ fun SwipeActionsRow(
      * y porque el long-press, que sería la otra vía, ya es el arrastre para reordenar.
      */
     rightAction: SwipeAction? = null,
+    /**
+     * Sin el círculo: solo el ícono, con el mismo sitio para tocar. A prueba en los recientes
+     * del timer (TD-211, 10-nov): "quiero probar cómo se vería".
+     */
+    outlined: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     if (actions.isEmpty() && rightAction == null) {
@@ -201,7 +206,7 @@ fun SwipeActionsRow(
                         modifier = Modifier
                             .size(ButtonSize)
                             .clip(CircleShape)
-                            .border(SwipeBorder, AppTheme.colors.textPrimary, CircleShape)
+                            .then(if (outlined) Modifier.border(SwipeBorder, AppTheme.colors.textPrimary, CircleShape) else Modifier)
                             .clickable {
                                 scope.launch { state.animateTo(SwipeState.Closed) }
                                 action.onClick()

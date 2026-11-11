@@ -336,7 +336,7 @@ private fun AlarmCard(
                 fontFamily = MonoDigits,
                 modifier = Modifier.weight(1f).clickable(onClick = onTime),
             )
-            com.maurozegarra.master.ui.AppSwitch(a.enabled, accent, onToggle)
+            com.maurozegarra.master.ui.AppSwitch(a.enabled, accent, onCheckedChange = onToggle)
         }
         Spacer(Modifier.height(8.dp))
         // Apagada, los días se atenúan como la hora (5-oct): seguían en rojo vivo y parecía

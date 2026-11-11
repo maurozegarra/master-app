@@ -73,6 +73,20 @@ object TimerPlan {
     fun addRecent(list: List<RecentTimer>, r: RecentTimer): List<RecentTimer> =
         (listOf(r) + list.filter { it != r }).take(RECENT_MAX)
 
+    /**
+     * Los chips de "Ends at" de su mini-timer: las seis horas siguientes múltiplos de 5
+     * minutos, a un minuto o más de ahora. A las 23:22 son 23:25, 23:30... A las 23:24:30 la
+     * de 23:25 ya no entra. Salieron con TD-200 y volvieron con TD-211, a pedido suyo.
+     */
+    fun endsAtChips(now: Long, count: Int = 6): List<Long> {
+        val paso = 5 * 60_000L
+        val desde = now + 60_000
+        // Sobre el instante: en las zonas de horas enteras o medias (Lima) los múltiplos de 5
+        // minutos del instante caen en múltiplos de 5 del reloj.
+        val primero = ((desde + paso - 1) / paso) * paso
+        return (0 until count).map { primero + it * paso }
+    }
+
     /** Lo mismo para las alarmas por hora (TD-200). */
     fun addAlarmRecent(list: List<RecentAlarm>, r: RecentAlarm): List<RecentAlarm> =
         (listOf(r) + list.filter { it != r }).take(RECENT_MAX)

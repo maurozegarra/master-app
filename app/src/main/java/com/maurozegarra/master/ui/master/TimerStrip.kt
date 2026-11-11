@@ -3,7 +3,11 @@ package com.maurozegarra.master.ui.master
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -203,33 +207,23 @@ private fun StripIcon(icon: ImageVector, label: String, tint: Color, onClick: ()
 
 /**
  * El sheet del + (TD-200): dos pestañas, Timer y Alarm, con el selector del app (el de
- * Sessions | Body), y se abre en la última que se usó.
- *
- * Antes la alarma vivía dentro del timer -unos chips de "Ends at" y un interruptor- y una
- * hora lejana obligaba a calcular la duración. Sus palabras (14-oct): "cuando uno habla de
- * alarma, justamente no quiere ponerse a calcular". Ahora la alarma se pone por HORA.
- *
- * Timer: "+ Custom" despliega la rueda, y debajo los recientes y los presets de su Galaxy
- * Watch8, que arrancan de un toque.
+ * Sessions | Body), y se abre en la última que se usó. Las dos con el mismo alto, el de Alarm
+ * (TD-211): cambiar de pestaña no hace saltar la hoja.
  */
 @Composable
 private fun NewTimerSheet(accent: Color, t: Strings, onDismiss: () -> Unit) {
     val ctx = LocalContext.current
     val w = t.more.timer
-    val c = AppTheme.colors
     val store = remember { TimerStore(ctx) }
-    val recientes = remember { store.recents() }
     var alarma by remember { mutableStateOf(store.alarmTab) }
-    var custom by remember { mutableStateOf(false) }
 
-    // Sin título, como los de Telegram (9-oct). La alarma y la rueda del timer no caben en el
-    // alto normal.
-    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss, tall = custom || alarma) {
+    // Sin título, como los de Telegram (9-oct).
+    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss, tall = true) {
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
                 .navigationBarsPadding()
-                .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                .padding(start = SHEET_PAD, end = SHEET_PAD, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SegmentToggle(
@@ -237,52 +231,234 @@ private fun NewTimerSheet(accent: Color, t: Strings, onDismiss: () -> Unit) {
                 selected = if (alarma) "alarm" else "timer",
                 accent = accent,
             ) { alarma = it == "alarm"; store.alarmTab = alarma }
-            Spacer(Modifier.height(4.dp))
 
-            if (alarma) {
-                AlarmTab(accent, t, onStarted = onDismiss)
-                return@Column
-            }
-
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(Dims.card))
-                    .background(c.track)
-                    .clickable { custom = !custom }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = null, tint = accent)
-                Spacer(Modifier.width(8.dp))
-                Text(w.custom, color = c.textPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-            }
-            if (custom) CustomTimer(accent, t, onStarted = onDismiss)
-
-            if (recientes.isNotEmpty()) {
-                Spacer(Modifier.height(8.dp))
-                Text(w.recent, color = c.textDim, fontSize = 13.sp)
-                recientes.forEach { r -> RecentRow(r, accent, t) { TimerAlarm.start(ctx, r.name, r.durationMs, r.alarm); onDismiss() } }
-            }
-
-            Spacer(Modifier.height(8.dp))
-            Text(w.presets, color = c.textDim, fontSize = 13.sp)
-            TimerPlan.PRESETS_SEC.chunked(4).forEach { fila ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    fila.forEach { sec ->
-                        Box(
-                            Modifier
-                                .weight(1f)
-                                .height(44.dp)
-                                .clip(RoundedCornerShape(22.dp))
-                                .border(1.dp, accent, RoundedCornerShape(22.dp))
-                                .clickable { TimerAlarm.start(ctx, "", sec * 1000L, alarm = false); onDismiss() },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(TimerPlan.presetLabel(sec), color = c.textPrimary, fontSize = 15.sp)
-                        }
+            // El alto lo pone SIEMPRE Alarm (TD-211): se mide aunque se esté en Timer, y Timer
+            // ocupa ese mismo alto con su propio scroll. El primer intento solo subió el tope de
+            // la hoja, y cada pestaña seguía midiendo lo que su contenido: Timer llegaba al 92 %
+            // y Alarm se quedaba en ~55 %. La que no se ve se mide pero no se coloca: ni se
+            // dibuja ni recibe toques.
+            androidx.compose.ui.layout.Layout(
+                content = {
+                    AlarmTab(accent, t, onStarted = onDismiss)
+                    // Una barrita de scroll al costado mientras haya más de lo que entra (10-nov). Se
+                    // probó desvanecer el pie, pero el aviso dependía de lo que cayera en el borde:
+                    // con dos recientes caía el hueco antes de Presets y no se veía nada. La barrita
+                    // avisa siempre, y dice cuánto falta. A todo el ancho de la hoja, con su margen
+                    // por dentro: así va pegada al borde de la pantalla, como en Chrome o Telegram.
+                    val desliza = rememberScrollState()
+                    val barra = AppTheme.colors.textDim
+                    Column(
+                        Modifier
+                            .toSheetEdge()
+                            .drawWithContent {
+                                drawContent()
+                                val total = desliza.maxValue
+                                if (total in 1 until Int.MAX_VALUE) {
+                                    val alto = size.height
+                                    val largo = maxOf(alto * alto / (alto + total), 24.dp.toPx())
+                                    val y = (alto - largo) * desliza.value / total
+                                    val ancho = 3.dp.toPx()
+                                    drawRoundRect(
+                                        barra.copy(alpha = 0.6f),
+                                        topLeft = androidx.compose.ui.geometry.Offset(size.width - ancho - 4.dp.toPx(), y),
+                                        size = androidx.compose.ui.geometry.Size(ancho, largo),
+                                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(ancho / 2),
+                                    )
+                                }
+                            }
+                            .verticalScroll(desliza)
+                            .padding(horizontal = SHEET_PAD),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        TimerTab(accent, t, onStarted = onDismiss)
                     }
+                },
+            ) { medibles, limites ->
+                val ancho = limites.maxWidth
+                val deAlarma = medibles[0].measure(androidx.compose.ui.unit.Constraints(minWidth = ancho, maxWidth = ancho))
+                val alto = deAlarma.height
+                val deTimer = if (alarma) null else medibles[1].measure(androidx.compose.ui.unit.Constraints.fixed(ancho, alto))
+                layout(ancho, alto) { (deTimer ?: deAlarma).place(0, 0) }
+            }
+        }
+    }
+}
+
+/**
+ * La pestaña Timer (TD-211): todo arranca de un toque, y lo de arriba -cómo termina y el
+ * nombre- vale para lo que se toque debajo. Fuera "+ Custom" con su rueda: para él bastaba
+ * con que volviera "Ends at", y las duraciones las cubren los presets.
+ */
+@Composable
+private fun TimerTab(accent: Color, t: Strings, onStarted: () -> Unit) {
+    val ctx = LocalContext.current
+    val w = t.more.timer
+    val c = AppTheme.colors
+    val zone = remember { ZoneId.systemDefault() }
+    val store = remember { TimerStore(ctx) }
+    var recientes by remember { mutableStateOf(store.recents()) }
+    var pantalla by remember { mutableStateOf(false) }
+    var nombre by remember { mutableStateOf("") }
+    val ahora by produceState(System.currentTimeMillis()) { while (true) { delay(15_000); value = System.currentTimeMillis() } }
+    val swipe = rememberSwipeRowsController()
+
+    fun arrancar(ms: Long, suNombre: String = "") {
+        TimerAlarm.start(ctx, nombre.trim().ifBlank { suNombre }, ms, pantalla)
+        onStarted()
+    }
+
+    // Un switch y no el selector de pestañas (TD-211, 10-nov): con el mismo selector que
+    // Timer | Alarm, "Notification" competía con "Timer". Es un sí o no; apagado, notificación.
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { pantalla = !pantalla }
+            .padding(top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(w.endFullScreen, color = c.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        // Sin la zona mínima de 48 dp del switch: aquí la fila entera es la que se toca, y esos
+        // 48 dp eran casi todo el aire que sobraba (10-nov).
+        @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+        androidx.compose.runtime.CompositionLocalProvider(
+            androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement provides false,
+        ) {
+            com.maurozegarra.master.ui.AppSwitch(pantalla, accent, outlined = true) { pantalla = it }
+        }
+    }
+    NameField(nombre, { nombre = it }, accent, t)
+
+    Text(w.endsAtLabel, color = c.textDim, fontSize = 13.sp)
+    Row(Modifier.toSheetEdge().horizontalScroll(rememberScrollState()).padding(horizontal = SHEET_PAD), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        TimerPlan.endsAtChips(ahora).forEach { fin ->
+            OutlineChip(TimerPlan.clock12(fin, zone), accent) { arrancar(fin - System.currentTimeMillis()) }
+        }
+    }
+
+    if (recientes.isNotEmpty()) {
+        Spacer(Modifier.height(8.dp))
+        Text(w.recent, color = c.textDim, fontSize = 13.sp)
+        // Borrar es deslizar, como un timer de la franja (TD-211).
+        recientes.forEach { r ->
+            key(r) {
+                SwipeActionsRow(
+                    actions = listOf(
+                        SwipeAction(Icons.Outlined.Delete, t.delete) {
+                            recientes = recientes - r
+                            store.saveRecents(recientes)
+                        },
+                    ),
+                    controller = swipe,
+                    outlined = false,
+                ) {
+                    RecentRow(r, accent, t) { arrancar(r.durationMs, r.name) }
                 }
+            }
+        }
+    }
+
+    Spacer(Modifier.height(8.dp))
+    Text(w.presets, color = c.textDim, fontSize = 13.sp)
+    TimerPlan.PRESETS_SEC.chunked(4).forEach { fila ->
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            fila.forEach { sec ->
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(44.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .border(1.dp, accent, RoundedCornerShape(22.dp))
+                        .clickable { arrancar(sec * 1000L) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(TimerPlan.presetLabel(sec), color = c.textPrimary, fontSize = 15.sp)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * El nombre, que se usa poco (TD-211): un "+ Name" chico, y el campo solo cuando se toca. Con
+ * algo escrito se queda abierto.
+ */
+@Composable
+private fun NameField(value: String, onChange: (String) -> Unit, accent: Color, t: Strings) {
+    val w = t.more.timer
+    var abierto by remember { mutableStateOf(value.isNotEmpty()) }
+    if (!abierto) {
+        // El "+" como texto y no como ícono: el ícono trae margen propio y el + quedaba más
+        // adentro que los títulos de la hoja (10-nov).
+        Text(
+            androidx.compose.ui.text.buildAnnotatedString {
+                pushStyle(androidx.compose.ui.text.SpanStyle(color = accent, fontWeight = FontWeight.Bold, fontSize = 18.sp))
+                append("+  ")
+                pop()
+                append(w.nameShort)
+            },
+            color = AppTheme.colors.textPrimary,
+            fontSize = 15.sp,
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .clickable { abierto = true }
+                .padding(end = 8.dp, top = 8.dp, bottom = 8.dp),
+        )
+        return
+    }
+    val pedir = remember { androidx.compose.ui.focus.FocusRequester() }
+    LaunchedEffect(Unit) { pedir.requestFocus() }
+    com.maurozegarra.master.ui.AppTextField(
+        value = value,
+        onValueChange = { onChange(it.take(40)) },
+        label = w.name,
+        modifier = Modifier.fillMaxWidth().focusRequester(pedir),
+        accent = accent,
+    )
+}
+
+/** El margen de la hoja del +. Los chips lo cruzan para llegar al borde ([toSheetEdge]). */
+private val SHEET_PAD = 16.dp
+
+/**
+ * Una fila que se desliza de lado llega hasta el borde de la pantalla, por encima del margen de
+ * la hoja: cortada en el margen, el último chip parecía un error y no algo que sigue (10-nov).
+ * Dentro lleva el mismo margen, así el primer chip queda alineado con los títulos.
+ */
+private fun Modifier.toSheetEdge(): Modifier = this.layout { medible, limites ->
+    val margen = SHEET_PAD.roundToPx()
+    val ancho = limites.maxWidth + margen * 2
+    val p = medible.measure(limites.copy(minWidth = ancho, maxWidth = ancho))
+    layout(limites.maxWidth, p.height) { p.place(-margen, 0) }
+}
+
+/**
+ * Un chip con borde: los Ends at y los recientes de la alarma. [onLongClick], si lo trae, abre
+ * un menú con Delete (TD-211).
+ */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+private fun OutlineChip(text: String, accent: Color, onDelete: (() -> Unit)? = null, t: Strings? = null, onClick: () -> Unit) {
+    var menu by remember { mutableStateOf(false) }
+    Box {
+        Box(
+            Modifier
+                .height(40.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .border(1.dp, accent, RoundedCornerShape(20.dp))
+                .combinedClickable(onClick = onClick, onLongClick = onDelete?.let { { menu = true } })
+                .padding(horizontal = 14.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(text, color = AppTheme.colors.textPrimary, fontSize = 15.sp, maxLines = 1)
+        }
+        if (onDelete != null && t != null) {
+            androidx.compose.material3.DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                androidx.compose.material3.DropdownMenuItem(
+                    text = { Text(t.delete) },
+                    leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) },
+                    onClick = { menu = false; onDelete() },
+                )
             }
         }
     }
@@ -296,7 +472,7 @@ private fun RecentRow(r: RecentTimer, accent: Color, t: Strings, onClick: () -> 
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 10.dp),
+            .padding(end = 4.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (r.alarm) {
@@ -307,85 +483,6 @@ private fun RecentRow(r: RecentTimer, accent: Color, t: Strings, onClick: () -> 
         Text(TimerPlan.format(r.durationMs), color = c.textPrimary, fontSize = 16.sp, fontFamily = TimerMono)
         Spacer(Modifier.width(8.dp))
         Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = accent)
-    }
-}
-
-/**
- * La duración de un timer con la rueda (TD-200), como el timer de su Watch8: Hr, Min y Sec, y
- * una sola columna activa. Reemplaza al teclado: así el timer y la alarma se usan igual.
- *
- * "When it ends" era "Ring as alarm", y el nombre confundía, más al lado de una pestaña que se
- * llama Alarm. Él lo ve como dos timers: el normal y el de pantalla completa que puede
- * despertar el teléfono (lo mostró en Multi Timer: Fullscreen / Simple Notification).
- */
-@Composable
-private fun CustomTimer(accent: Color, t: Strings, onStarted: () -> Unit) {
-    val ctx = LocalContext.current
-    val w = t.more.timer
-    val c = AppTheme.colors
-    val zone = remember { ZoneId.systemDefault() }
-    var h by remember { mutableStateOf(0) }
-    var m by remember { mutableStateOf(5) }
-    var sg by remember { mutableStateOf(0) }
-    // Como en el reloj, la que se mueve primero es la de los minutos: es la que más se usa.
-    var foco by remember { mutableStateOf(1) }
-    var teclado by remember { mutableStateOf(false) }
-    var arrastre by remember { mutableStateOf(0) }
-    var pantalla by remember { mutableStateOf(false) }
-    var nombre by remember { mutableStateOf("") }
-    val ahora by produceState(System.currentTimeMillis()) { while (true) { delay(15_000); value = System.currentTimeMillis() } }
-    val duracion = TimerPlan.durationMs(h, m, sg)
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            // Arrastrar mueve la rueda, con el teclado abierto o no; tocar lo abre (ver WheelField).
-            WheelField(
-                h, 0..TimerPlan.TIMER_HOURS_MAX, w.hr, foco == 0, accent, { foco = 0; arrastre++ }, { h = it }, minWidth = 84.dp,
-                keyboard = teclado, onTap = { foco = 0; teclado = true },
-            )
-            WheelColon()
-            WheelField(
-                m, 0..59, w.min, foco == 1, accent, { foco = 1; arrastre++ }, { m = it }, minWidth = 84.dp,
-                keyboard = teclado, onTap = { foco = 1; teclado = true },
-            )
-            WheelColon()
-            WheelField(
-                sg, 0..59, w.sec, foco == 2, accent, { foco = 2; arrastre++ }, { sg = it }, minWidth = 84.dp,
-                keyboard = teclado, onTap = { foco = 2; teclado = true },
-            )
-            WheelKeyboard(
-                teclado, foco, arrastre, listOf(0..TimerPlan.TIMER_HOURS_MAX, 0..59, 0..59),
-                onValue = { col, v -> when (col) { 0 -> h = v; 1 -> m = v; else -> sg = v } },
-                onColumn = { foco = it }, onClosed = { teclado = false },
-            )
-        }
-        Text(
-            if (duracion > 0) w.endsAtTime.format(TimerPlan.clock12(ahora + duracion, zone)) else "",
-            color = c.textDim, fontSize = 14.sp,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-        )
-
-        Spacer(Modifier.height(4.dp))
-        Text(w.whenItEnds, color = c.textDim, fontSize = 13.sp)
-        SegmentToggle(
-            options = listOf("notification" to w.endNotification, "full" to w.endFullScreen),
-            selected = if (pantalla) "full" else "notification",
-            accent = accent,
-        ) { pantalla = it == "full" }
-        Text(if (pantalla) w.endFullScreenHint else w.endNotificationHint, color = c.textDim, fontSize = 13.sp, modifier = Modifier.padding(start = 4.dp))
-
-        com.maurozegarra.master.ui.AppTextField(
-            value = nombre,
-            onValueChange = { nombre = it.take(40) },
-            label = w.name,
-            modifier = Modifier.fillMaxWidth(),
-            accent = accent,
-        )
-        PrimaryButton(label = w.start, accent = accent, enabled = duracion > 0, modifier = Modifier.fillMaxWidth()) {
-            TimerAlarm.start(ctx, nombre, duracion, pantalla)
-            onStarted()
-        }
     }
 }
 
@@ -403,7 +500,8 @@ private fun AlarmTab(accent: Color, t: Strings, onStarted: () -> Unit) {
     val w = t.more.timer
     val c = AppTheme.colors
     val zone = remember { ZoneId.systemDefault() }
-    val recientes = remember { TimerStore(ctx).alarmRecents() }
+    val store = remember { TimerStore(ctx) }
+    var recientes by remember { mutableStateOf(store.alarmRecents()) }
     val inicial = remember { TimerPlan.defaultAlarmMinute(System.currentTimeMillis(), zone) }
     var hora12 by remember { mutableStateOf(TimerPlan.hour12(inicial / 60)) }
     var minuto by remember { mutableStateOf(inicial % 60) }
@@ -444,32 +542,24 @@ private fun AlarmTab(accent: Color, t: Strings, onStarted: () -> Unit) {
         if (recientes.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
             Text(w.recent, color = c.textDim, fontSize = 13.sp)
-            // Un reciente suena de un toque, como los del timer: es una hora que se repite.
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Un reciente suena de un toque, como los del timer: es una hora que se repite. Con
+            // un toque largo se borra (TD-211): son chips, no filas que deslizar.
+            Row(Modifier.toSheetEdge().horizontalScroll(rememberScrollState()).padding(horizontal = SHEET_PAD), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 recientes.forEach { r ->
-                    Box(
-                        Modifier
-                            .height(40.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .border(1.dp, accent, RoundedCornerShape(20.dp))
-                            .clickable { TimerAlarm.startAt(ctx, r.name, r.minuteOfDay); onStarted() }
-                            .padding(horizontal = 14.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(listOf(TimerPlan.clock12(r.minuteOfDay), r.name).filter { it.isNotBlank() }.joinToString("  "), color = c.textPrimary, fontSize = 15.sp)
+                    key(r) {
+                        OutlineChip(
+                            listOf(TimerPlan.clock12(r.minuteOfDay), r.name).filter { it.isNotBlank() }.joinToString("  "),
+                            accent,
+                            onDelete = { recientes = recientes - r; store.saveAlarmRecents(recientes) },
+                            t = t,
+                        ) { TimerAlarm.startAt(ctx, r.name, r.minuteOfDay); onStarted() }
                     }
                 }
             }
         }
 
         Spacer(Modifier.height(4.dp))
-        com.maurozegarra.master.ui.AppTextField(
-            value = nombre,
-            onValueChange = { nombre = it.take(40) },
-            label = w.name,
-            modifier = Modifier.fillMaxWidth(),
-            accent = accent,
-        )
+        NameField(nombre, { nombre = it }, accent, t)
         PrimaryButton(label = w.setAlarm, accent = accent, modifier = Modifier.fillMaxWidth()) {
             TimerAlarm.startAt(ctx, nombre, minutoDelDia)
             onStarted()

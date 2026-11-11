@@ -10,6 +10,19 @@ import java.time.ZoneId
 /** El timer del tablero (TD-195): lo que se calcula sin Android. */
 class TimerPlanTest {
 
+    @Test
+    fun `los chips de Ends at son los seis multiplos de 5 minutos, a un minuto o mas`() {
+        val zona = java.time.ZoneId.of("America/Lima")
+        fun a(h: Int, m: Int, s: Int = 0) =
+            java.time.LocalDate.of(2026, 11, 10).atTime(h, m, s).atZone(zona).toInstant().toEpochMilli()
+        assertEquals(
+            listOf("23:25", "23:30", "23:35", "23:40", "23:45", "23:50"),
+            TimerPlan.endsAtChips(a(23, 22)).map { TimerPlan.clock(it, zona) },
+        )
+        // A las 23:24:30 la de 23:25 queda a menos de un minuto: no entra.
+        assertEquals("23:30", TimerPlan.clock(TimerPlan.endsAtChips(a(23, 24, 30)).first(), zona))
+    }
+
     private val lima = ZoneId.of("America/Lima")
     private fun at(h: Int, m: Int, s: Int = 0) =
         LocalDate.of(2026, 10, 9).atTime(h, m, s).atZone(lima).toInstant().toEpochMilli()

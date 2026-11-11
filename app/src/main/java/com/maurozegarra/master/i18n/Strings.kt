@@ -739,11 +739,11 @@ data class MoreStrings(
 data class TimerStrings(
     val timer: String = "Timer",
     val newTimer: String = "New timer",
-    val custom: String = "Custom",
     val recent: String = "Recent",
     val presets: String = "Presets",
     val name: String = "Name (optional)",
-    val start: String = "Start",
+    /** El "+ Name" que abre el campo (TD-211). */
+    val nameShort: String = "Name",
     // TD-200: las pestañas, las ruedas y cómo termina un timer.
     val alarm: String = "Alarm",
     val hour: String = "Hour",
@@ -752,15 +752,13 @@ data class TimerStrings(
     val sec: String = "Sec",
     val whenItEnds: String = "When it ends",
     val endNotification: String = "Notification",
-    val endNotificationHint: String = "A banner and the MASTER beeps",
     val endFullScreen: String = "Full screen",
-    val endFullScreenHint: String = "Rings at alarm volume and wakes the phone",
     val today: String = "Today",
     val tomorrow: String = "Tomorrow",
     /** "Today · rings in 2 h 15 min". */
     val ringsIn: String = "%1${'$'}s · rings in %2${'$'}s",
-    /** Bajo la rueda del timer: "Ends at 10:30 PM". */
-    val endsAtTime: String = "Ends at %s",
+    /** Sobre los chips de las próximas horas (TD-211). */
+    val endsAtLabel: String = "Ends at",
     val setAlarm: String = "Set alarm",
     /** En la franja y la notificación: "ends 14:00". */
     val endsAt: String = "ends %s",
