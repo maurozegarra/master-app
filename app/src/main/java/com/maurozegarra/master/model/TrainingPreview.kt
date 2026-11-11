@@ -95,11 +95,20 @@ object TrainingPreview {
                 rotating = first.rotating,
                 variant = first.variantName,
                 circuit = first.circuit,
-                rounds = if (first.circuit) (works.maxOfOrNull { it.slot } ?: 0) + 1 else 0,
+                // Los rounds que HAY en la cola y no el último número: a mitad de circuito
+                // lo que falta no empieza en el round 0 (TD-210).
+                rounds = if (first.circuit) works.map { it.slot }.distinct().size else 0,
                 estimatedSec = list.sumOf { it.estimatedSec },
                 items = items,
             )
         }
+
+    /**
+     * Lo que falta de una corrida en el paso [index] (TD-210): todo lo que viene DESPUÉS del
+     * paso actual, empezando por lo que dice el "Next". Las series que quedan del ejercicio en
+     * curso cuentan, porque también faltan.
+     */
+    fun remaining(steps: List<PlayerStep>, index: Int): List<PreviewBlock> = of(steps.drop(index + 1))
 
     /** "3 × 10 · 21/31/36 kg · rest 90 s", "12 min · 6 km/h". */
     fun describe(item: PreviewItem, w: PreviewWords = PreviewWords()): String = listOfNotNull(

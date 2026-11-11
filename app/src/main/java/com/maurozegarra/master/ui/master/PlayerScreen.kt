@@ -511,6 +511,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     // training avanza de ejercicio mientras lees no se te cambia el texto por debajo.
     var sheetTarget by remember { mutableStateOf<InstructionsTarget?>(null) }
     var noteTarget by remember { mutableStateOf<NoteTarget?>(null) }
+    var remainingOpen by remember { mutableStateOf<List<PreviewBlock>?>(null) }
     // Color de fase completo, oscurecido 12% para legibilidad del texto blanco.
     // En pausa se oscurece adicionalmente como indicador visual.
     val isPaused = !step.manual && !vm.playerRunning
@@ -836,13 +837,30 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // el botón de confirmar de un paso manual nunca llega a irse.
         Controls(vm, step, accent, t)
         Spacer(Modifier.height(8.dp))
-        NextExerciseLabel(vm, t)
+        NextExerciseLabel(vm, t) {
+            remainingOpen = TrainingPreview.remaining(vm.playerSteps, vm.playerIndex)
+            vm.hidePlayerControls()
+        }
         Spacer(Modifier.height(8.dp))
     }
         // Hermano del chrome, no hijo suyo: por eso sigue abierto cuando las franjas ya se
         // fueron. Solo lo cierra el usuario.
         sheetTarget?.let { InstructionsSheet(it) { sheetTarget = null } }
         noteTarget?.let { ExerciseNoteSheet(it, vm, accent, t) { noteTarget = null } }
+        remainingOpen?.let { bloques ->
+            RemainingSheet(
+                bloques, vm, accent, t,
+                onExercise = { item ->
+                    // Una hoja a la vez: las instrucciones reemplazan a lo que falta.
+                    remainingOpen = null
+                    sheetTarget = InstructionsTarget(
+                        title = ExerciseCatalog.display(item.exerciseId, item.name, t.locale.language),
+                        steps = vm.mediaFor(item.exerciseId)?.instructions.orEmpty(),
+                    )
+                },
+                onDismiss = { remainingOpen = null },
+            )
+        }
         // La marca de prueba (TD-174), SIEMPRE visible: tiene que saberse de un vistazo que
         // esta corrida no se va a registrar. Superpuesta en la franja de arriba, asi no mueve
         // nada de sitio. Va justo despues del contador, y su hueco lo reserva una copia
@@ -1369,7 +1387,7 @@ private fun InstructionsSheet(target: InstructionsTarget, onDismiss: () -> Unit)
 }
 
 @Composable
-private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
+private fun NextExerciseLabel(vm: MasterViewModel, t: Strings, onOpen: () -> Unit) {
     // Cuando no hay siguiente se pinta VACIO, no se deja de pintar. Antes hacia `return` y
     // en el ultimo ejercicio los controles, que estan justo encima, se descolgaban ~20dp:
     // un control cambiando de sitio solo porque se acaba el training. Un Text vacio ocupa
@@ -1418,7 +1436,11 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
         color = Color.White,
         fontSize = 14.sp,
         fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.fillMaxWidth(),
+        // Tocarlo abre lo que falta (TD-210). Sin siguiente no hay nada que enseñar.
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(enabled = nextWork != null, onClick = onOpen),
         textAlign = TextAlign.Start,
         style = LocalTextStyle.current.copy(
             shadow = Shadow(
@@ -1428,6 +1450,61 @@ private fun NextExerciseLabel(vm: MasterViewModel, t: Strings) {
             ),
         ),
     )
+}
+
+/**
+ * Lo que falta del training, con las tarjetas de la previa y todas abiertas (TD-210). Se
+ * captura al abrir, como las otras hojas del player: no se reordena mientras lo lees.
+ */
+@Composable
+private fun RemainingSheet(
+    blocks: List<PreviewBlock>,
+    vm: MasterViewModel,
+    accent: Color,
+    t: Strings,
+    onExercise: (PreviewItem) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val words = PreviewWords(
+        rest = t.more.preview.rest,
+        eachSide = t.more.preview.eachSide,
+        alternating = t.more.preview.alternating,
+        reps = t.more.preview.reps,
+        kg = t.kg,
+        kmh = t.kmh,
+    )
+    val cerrados = remember { mutableStateMapOf<Int, Boolean>() }
+    val total = blocks.sumOf { it.items.size }
+    val segundos = blocks.sumOf { it.estimatedSec }
+    // El fondo de la previa: sobre el de las hojas, las tarjetas no se distinguirían. Del alto
+    // de siempre, el de las instrucciones: la alta era demasiado (10-nov) y la lista se desplaza.
+    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss, containerColor = AppTheme.colors.bg) {
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) {
+            Text(t.more.preview.remaining, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+            Text(
+                buildString {
+                    append(t.exerciseCount(total))
+                    if (segundos > 0) append(" · ~${formatRemaining(segundos * 1000L)}")
+                },
+                color = AppTheme.colors.textDim,
+                fontSize = 13.sp,
+            )
+        }
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.navigationBarsPadding(),
+        ) {
+            items(blocks, key = { it.index }) { g ->
+                val open = cerrados[g.index] != true
+                WorkoutGroupCard(
+                    g, open, accent, t, words, vm::videoFileFor,
+                    onToggle = { cerrados[g.index] = open },
+                    onExercise = onExercise,
+                )
+            }
+        }
+    }
 }
 
 @Composable

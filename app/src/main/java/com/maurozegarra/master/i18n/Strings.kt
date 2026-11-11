@@ -912,6 +912,8 @@ data class PreviewStrings(
     val reps: String,
     val circuit: String,
     val rounds: String,
+    /** El título de lo que falta, al tocar el "Next" del player (TD-210). */
+    val remaining: String = "Remaining",
 )
 
 /** Correr un training sin que quede nada registrado (TD-174). */

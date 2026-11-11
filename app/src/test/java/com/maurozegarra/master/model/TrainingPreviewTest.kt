@@ -80,6 +80,30 @@ class TrainingPreviewTest {
     }
 
     @Test
+    fun `lo que falta empieza despues del paso actual, con las series que quedan`() {
+        val steps = StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedAnkle = false), answerWindow = true)
+        // En la segunda serie de un ejercicio de tres: faltan la segunda y la tercera.
+        val i = steps.indexOfFirst { it.kind == StepKind.WORK && it.totalSets == 3 && it.setIndex == 1 && it.sideCount <= 1 }
+        val actual = steps[i]
+        val falta = TrainingPreview.remaining(steps, i - 1)
+        assertEquals(actual.workoutIndex, falta.first().index)
+        assertEquals(actual.ownerExerciseId, falta.first().items.first().exerciseId)
+        assertEquals(2, falta.first().items.first().work.size)
+        // Lo de antes no está.
+        assertTrue(falta.none { it.index < actual.workoutIndex })
+        // Al final no falta nada.
+        assertTrue(TrainingPreview.remaining(steps, steps.lastIndex).isEmpty())
+    }
+
+    @Test
+    fun `a mitad de circuito cuenta los rounds que quedan`() {
+        val niko6 = MasterDefaults.nikoTrainings("es").single { it.name.startsWith("NIKO 6") }
+        val steps = StepEngine.buildSteps(niko6, answerWindow = true)
+        val i = steps.indexOfFirst { it.circuit && it.kind == StepKind.WORK && it.slot == 2 }
+        assertEquals(2, TrainingPreview.of(steps.drop(i)).single { it.circuit }.rounds)
+    }
+
+    @Test
     fun `formas de la receta`() {
         fun it(kind: PreviewItem.Kind, work: List<Int>) = PreviewItem("x", "", true, kind, work, emptyList(), 1, false, emptyList())
         assertEquals("12 reps", TrainingPreview.describe(it(PreviewItem.Kind.REPS, listOf(12))))
