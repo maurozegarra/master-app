@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **186 / 211** hechos, 24 pendientes, 1 descartados.
+Progreso: **186 / 212** hechos, 25 pendientes, 1 descartados.
 
 ## Pendientes
 
@@ -140,6 +140,14 @@ O sea que la franja puede tener uno, dos o tres iconos segun el ejercicio y el t
 
 ### Mantenimiento
 
+- [ ] **TD-212** Publicar sin GitHub: que MASTER se actualice como watchwall
+  - PEDIDO el 10-nov, después de publicar la v1.0.499: 'hay que mejorar el proceso de publicación para la próxima, watchwall también actualiza sin necesidad de github, a eso deberíamos apuntar'. A PROPONER con él antes de tocar nada.
+
+HOY (build-release.ps1): sube el APK a GitHub Releases, escribe update.json en la raíz del repo, commit y push; el app lee update.json de raw.githubusercontent.com y muestra una barra que pide dos toques (descargar, instalar). Publicar exige gh, un commit y un push, y borra releases viejos para no acumular.
+
+CÓMO LO HACE WATCHWALL (visto el 10-nov en code\watchwall): pafo/publish-app.sh compila el release, lo sube por ssh al server de la casa (spot-data/app/), comprueba el sha256 de la subida, deja la versión anterior al lado para volver atrás y escribe version.json AL FINAL (nadie ve una versión sin su apk). Se niega a publicar con cambios sin commit, y las notas son los commits desde lo último publicado. El app (update/Updater.kt) revisa al pasar al frente y cada 30 min, baja el apk, comprueba el sha256 y se instala sola con PackageInstaller, sin confirmación (la primera vez Android pide el permiso de instalar apps desconocidas); en HyperOS cae al instalador del sistema.
+
+A DEFINIR: dónde vive el apk -el server de watchwall (llega afuera por el mismo camino que la vista NIKO) o el Supabase de MASTER, donde ya están los vídeos-; si se instala sola o sigue con la barra; qué pasa con update.json y los releases de GitHub (el de 'videos' es el respaldo frío de TD-141).
 - [ ] **TD-071** Llegar al video e instrucciones de un training asignado sin duplicarlo
   - A la ficha de video e instrucciones (ExerciseMediaCard) no se llega desde un training asignado. Vive solo dentro de ExerciseEditorScreen, y a ese se entra por Edit -> workout -> ejercicio; un training asignado no ofrece Edit, solo Duplicate. El usuario ya tiene salida -duplicar el training y editar la copia- y le parece bien la regla, asi que esto no bloquea a nadie. Pero queda anotado porque es dano colateral: esa regla existe para proteger la ESTRUCTURA del training, que la sincronizacion si pisa, y el video y las instrucciones no corren ese riesgo porque viven aparte, por exerciseId del catalogo, y la sincronizacion no los toca nunca. Si algun dia molesta, el sitio natural es la vista previa: tocar un training asignado ya abre PreviewView con sus workouts y ejercicios, y desde ahi se podria entrar al material de cada uno sin reabrir la edicion. Salio al revisar TD-070.
 

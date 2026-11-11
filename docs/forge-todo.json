@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-212",
+      "title": "Publicar sin GitHub: que MASTER se actualice como watchwall",
+      "category": "Mantenimiento",
+      "status": "pending",
+      "manual": "PEDIDO el 10-nov, después de publicar la v1.0.499: 'hay que mejorar el proceso de publicación para la próxima, watchwall también actualiza sin necesidad de github, a eso deberíamos apuntar'. A PROPONER con él antes de tocar nada.\n\nHOY (build-release.ps1): sube el APK a GitHub Releases, escribe update.json en la raíz del repo, commit y push; el app lee update.json de raw.githubusercontent.com y muestra una barra que pide dos toques (descargar, instalar). Publicar exige gh, un commit y un push, y borra releases viejos para no acumular.\n\nCÓMO LO HACE WATCHWALL (visto el 10-nov en code\\watchwall): pafo/publish-app.sh compila el release, lo sube por ssh al server de la casa (spot-data/app/), comprueba el sha256 de la subida, deja la versión anterior al lado para volver atrás y escribe version.json AL FINAL (nadie ve una versión sin su apk). Se niega a publicar con cambios sin commit, y las notas son los commits desde lo último publicado. El app (update/Updater.kt) revisa al pasar al frente y cada 30 min, baja el apk, comprueba el sha256 y se instala sola con PackageInstaller, sin confirmación (la primera vez Android pide el permiso de instalar apps desconocidas); en HyperOS cae al instalador del sistema.\n\nA DEFINIR: dónde vive el apk -el server de watchwall (llega afuera por el mismo camino que la vista NIKO) o el Supabase de MASTER, donde ya están los vídeos-; si se instala sola o sigue con la barra; qué pasa con update.json y los releases de GitHub (el de 'videos' es el respaldo frío de TD-141)."
+    },
+    {
       "id": "TD-211",
       "title": "Hoja del timer: vuelve Ends at, fuera Custom, recientes que se borran y el mismo alto que Alarm",
       "category": "UI",
