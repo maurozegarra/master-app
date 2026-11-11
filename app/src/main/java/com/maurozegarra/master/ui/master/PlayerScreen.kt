@@ -1196,21 +1196,11 @@ private fun ToggleVideoButton(vm: MasterViewModel, step: PlayerStep, t: Strings)
     vm.playerTrainingId ?: return
     val hayVideo = vm.videoStateFor(step.ownerExerciseId) !is VideoState.None
 
-    Box(
-        modifier = Modifier
-            .padding(start = 12.dp)
-            .size(36.dp)
-            .clip(CircleShape)
-            .clickable(enabled = hayVideo) { vm.toggleRunningVideo(step) },
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            if (step.showVideo) Icons.Filled.Videocam else Icons.Filled.VideocamOff,
-            contentDescription = t.showVideoHere,
-            tint = Color.White.copy(alpha = if (hayVideo) 0.7f else 0.25f),
-            modifier = Modifier.size(20.dp),
-        )
-    }
+    StripIcon(
+        if (step.showVideo) Icons.Filled.Videocam else Icons.Filled.VideocamOff,
+        t.showVideoHere,
+        enabled = hayVideo,
+    ) { vm.toggleRunningVideo(step) }
 }
 
 @Composable
@@ -1218,21 +1208,7 @@ private fun EditExerciseButton(vm: MasterViewModel, step: PlayerStep, t: Strings
     val id = vm.playerTrainingId ?: return
     if (vm.trainings.firstOrNull { it.id == id }?.assigned != false) return
 
-    Box(
-        modifier = Modifier
-            .padding(start = 12.dp)
-            .size(36.dp)
-            .clip(CircleShape)
-            .clickable { vm.editRunningExercise(step) },
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            Icons.Filled.Edit,
-            contentDescription = t.edit,
-            tint = Color.White.copy(alpha = 0.7f),
-            modifier = Modifier.size(20.dp),
-        )
-    }
+    StripIcon(Icons.Filled.Edit, t.edit) { vm.editRunningExercise(step) }
 }
 
 /**
@@ -1247,22 +1223,7 @@ private fun EditExerciseButton(vm: MasterViewModel, step: PlayerStep, t: Strings
 private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, t: Strings, onOpen: () -> Unit) {
     if (vm.mediaFor(exerciseId)?.instructions.orEmpty().isEmpty()) return
 
-    Box(
-        modifier = Modifier
-            .padding(start = 12.dp)
-            .size(36.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onOpen),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            Icons.AutoMirrored.Filled.List,
-            contentDescription = t.instructions,
-            tint = Color.White.copy(alpha = 0.7f),
-            modifier = Modifier.size(20.dp),
-        )
-    }
-
+    StripIcon(Icons.AutoMirrored.Filled.List, t.instructions, onClick = onOpen)
 }
 
 /**
@@ -1273,18 +1234,42 @@ private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, t: Strin
 @Composable
 private fun NoteButton(vm: MasterViewModel, step: PlayerStep, t: Strings, onOpen: () -> Unit) {
     val hayNota = vm.exerciseNote(step).isNotEmpty()
+    StripIcon(
+        if (hayNota) Icons.Filled.ChatBubble else Icons.Outlined.ChatBubbleOutline,
+        t.more.exerciseNote,
+        highlighted = hayNota,
+        onClick = onOpen,
+    )
+}
+
+/**
+ * Un ícono de la franja de arriba del player: los cuatro son este mismo (10-nov), así que su
+ * tamaño, su separación y su blanco se cambian aquí una vez.
+ *
+ * Tres tonos de blanco y no colores, porque el fondo es el color de cada etapa: [enabled] en
+ * falso lo apaga (la cámara sin vídeo) y [highlighted] lo deja sin transparencia (el globito
+ * con nota).
+ */
+@Composable
+private fun StripIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    description: String,
+    enabled: Boolean = true,
+    highlighted: Boolean = false,
+    onClick: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .padding(start = 12.dp)
             .size(36.dp)
             .clip(CircleShape)
-            .clickable(onClick = onOpen),
+            .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            if (hayNota) Icons.Filled.ChatBubble else Icons.Outlined.ChatBubbleOutline,
-            contentDescription = t.more.exerciseNote,
-            tint = Color.White.copy(alpha = if (hayNota) 1f else 0.7f),
+            icon,
+            contentDescription = description,
+            tint = Color.White.copy(alpha = if (!enabled) 0.25f else if (highlighted) 1f else 0.7f),
             modifier = Modifier.size(20.dp),
         )
     }
