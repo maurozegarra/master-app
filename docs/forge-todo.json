@@ -2,6 +2,34 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-211",
+      "title": "Hoja del timer: vuelve Ends at, fuera Custom, recientes que se borran y el mismo alto que Alarm",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO el 10-nov, con captura de la hoja del +. (1) Los recientes del timer se borran: deslizando a la izquierda, como un timer de la franja; los de Alarm, que son chips, con toque largo -> Delete. (2) Timer y Alarm con el mismo alto, el de Alarm. (3) Vuelve 'Ends at', que salió con TD-200: las seis próximas horas múltiplo de 5 min. (4) Fuera '+ Custom' entero (rueda, Start): 'con traer de vuelta ends at estaría bien'. (5) 'When it ends' en una sola línea, sin la frase de explicación. (6) El nombre, que usa poco, como un '+ Name' chico que abre el campo; también en Alarm.\n\nDECIDIDO con él: todo arranca de un toque (Ends at, recientes y presets), y When it ends y el nombre de arriba valen para lo que se toque; los Ends at siguen el selector, no se ponen solos en pantalla completa como antes.\n\nProbar: el + del tablero. Las dos pestañas del mismo alto. En Timer: When it ends en una línea, '+ Name', los chips de Ends at que arrancan al tocarlos, deslizar un reciente para borrarlo. En Alarm: toque largo en un reciente -> Delete."
+    },
+    {
+      "id": "TD-210",
+      "title": "Player: tocar el Next abre lo que falta, con las tarjetas de la previa abiertas",
+      "category": "Feature",
+      "status": "done",
+      "manual": "PEDIDO el 10-nov: que el texto 'NEXT: EJERCICIO' se pueda tocar y muestre en una hoja los ejercicios que faltan, como la vista previa y todo expandido.\n\nLo que falta es todo lo que viene después del paso actual, empezando por lo que dice el Next: si está entre series, las series que quedan del ejercicio en curso cuentan. Tocar un ejercicio de la hoja abre sus instrucciones, como en la previa.\n\nProbar: en el player, tocar la línea NEXT de abajo. Sale 'Remaining' con cuántos ejercicios y cuánto tiempo falta, y las tarjetas de cada workout abiertas. En el último ejercicio no hay Next y no se abre nada."
+    },
+    {
+      "id": "TD-209",
+      "title": "Una nota por ejercicio, escrita en el momento durante el training",
+      "category": "Feature",
+      "status": "done",
+      "manual": "PEDIDO el 8-nov. Le ha pasado más de una vez querer apuntar algo de un ejercicio: 'no usé la mancuerna de 10k, usé el kettlebell de 12k', 'sentí dolor con la mancuerna pero no con el kettlebell'. La nota del final del training es general y llega cuando ya se olvidó.\n\nDECIDIDO con él: una nota por ejercicio (y por lado cuando va por lados), con un globito en la franja de arriba del player, que sale siempre, también en lo asignado.\n\nProbar: en el player, tocar la pantalla y el globito; se abre la hoja con el nombre del ejercicio y el teclado; escribir y cerrar. El globito queda relleno. Pasar al siguiente ejercicio: vuelve a estar vacío. Volver a abrir la nota escrita: se ve sin teclado. Al terminar: Historial, en la sesión, debajo del ejercicio."
+    },
+    {
+      "id": "TD-208",
+      "title": "Player: el porcentaje del training se va con el contador, lejos de los iconos",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO el 8-nov: el porcentaje no es accionable pero estaba junto al lápiz, la cámara y la lista, 'de entrada como que algo anda mal'. Además saltaba: en un ejercicio sin instrucciones la lista no se dibuja y el porcentaje se corría. Ahora va a la izquierda, junto al contador de ejercicios. Probar: en el player, tocar la pantalla para que salga la franja de arriba; debe decir '3 / 12  ·  47%' a la izquierda y solo los iconos a la derecha, y al pasar de ejercicio nada cambia de sitio."
+    },
+    {
       "id": "TD-203",
       "title": "La pantalla principal cambia de día sola: el calendario marcaba ayer como hoy",
       "category": "Fix",

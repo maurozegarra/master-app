@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **182 / 207** hechos, 24 pendientes, 1 descartados.
+Progreso: **186 / 211** hechos, 24 pendientes, 1 descartados.
 
 ## Pendientes
 
@@ -182,6 +182,8 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 
 ### Feature
 
+- [x] **TD-210** Player: tocar el Next abre lo que falta, con las tarjetas de la previa abiertas
+- [x] **TD-209** Una nota por ejercicio, escrita en el momento durante el training
 - [x] **TD-200** Rediseño de la alarma desechable: separar timer y alarma (pestañas o algo así) y poner una hora sin calcular
 - [x] **TD-195** Timer en el tablero: potty fijo, desechables con Ends at, y que suene como alarma
 - [x] **TD-194** Pantalla principal con tablero: reloj animado, próxima alarma, agua y hora de dormir
@@ -356,6 +358,8 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 
 ### UI
 
+- [x] **TD-211** Hoja del timer: vuelve Ends at, fuera Custom, recientes que se borran y el mismo alto que Alarm
+- [x] **TD-208** Player: el porcentaje del training se va con el contador, lejos de los iconos
 - [x] **TD-201** Fin de sesión: Close con fondo, switch del app, y con dolor 0 no se preguntan los minutos (ni en la sesión ni en la alarma)
 - [x] **TD-198** Timer del tablero: el + dentro de la tarjeta, en una franja fija al pie
 - [x] **TD-189** Start de 40 dp y solo con borde, y la pantalla previa con barra: la prueba como ojo y el resumen como subtítulo
