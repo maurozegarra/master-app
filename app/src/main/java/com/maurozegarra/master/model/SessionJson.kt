@@ -44,6 +44,7 @@ object SessionJson {
                     .put("totalExercisesInWorkout", er.totalExercisesInWorkout)
                     .put("exerciseStatus", er.status.name)
                 if (er.feedbackDeltaKg != null) erObj.put("feedbackDeltaKg", er.feedbackDeltaKg)
+                if (er.note.isNotBlank()) erObj.put("note", er.note)
                 exercises.put(erObj)
             }
             arr.put(JSONObject()
@@ -117,6 +118,7 @@ object SessionJson {
                             eo.optDouble("feedbackDeltaKg", 0.0) else null,
                         status = runCatching { ExerciseStatus.valueOf(eo.optString("exerciseStatus")) }
                             .getOrDefault(ExerciseStatus.COMPLETED),
+                        note = eo.optString("note", ""),
                     ))
                 }
             }

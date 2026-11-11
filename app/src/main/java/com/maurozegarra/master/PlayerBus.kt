@@ -17,6 +17,7 @@ sealed class PlayerCommand {
     data class FEEDBACK(val exerciseId: String, val workoutIndex: Int, val setIndex: Int, val deltaKg: Double, val side: String = "") : PlayerCommand()
     data class EFFORT(val exerciseId: String, val workoutIndex: Int, val setIndex: Int, val effort: Int, val repsDone: Int?, val side: String = "") : PlayerCommand()
     data class SPEED(val exerciseId: String, val workoutIndex: Int, val setIndex: Int, val kmh: Double, val side: String = "") : PlayerCommand()
+    data class NOTE(val step: com.maurozegarra.master.model.PlayerStep, val text: String) : PlayerCommand()
 }
 
 /**

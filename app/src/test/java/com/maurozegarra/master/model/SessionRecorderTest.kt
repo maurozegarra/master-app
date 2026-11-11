@@ -8,6 +8,53 @@ import org.junit.Test
 
 class SessionRecorderTest {
 
+    @Test
+    fun `la nota sobrevive a las series siguientes y a escribirla antes de la primera`() {
+        val r = SessionRecorder()
+        r.setNote(workStep(setIndex = 0), "  usé el kettlebell de 12  ")
+        r.onWorkStepCompleted(workStep(setIndex = 0))
+        r.onWorkStepCompleted(workStep(setIndex = 1))
+        val er = r.build().single()
+        assertEquals("usé el kettlebell de 12", er.note)
+        assertEquals(2, er.sets.size)
+    }
+
+    @Test
+    fun `cada lado tiene su nota`() {
+        val r = SessionRecorder()
+        val izq = workStep().copy(side = "Left")
+        val der = workStep().copy(side = "Right")
+        r.onWorkStepCompleted(izq)
+        r.onWorkStepCompleted(der)
+        r.setNote(der, "dolor")
+        assertEquals(listOf("", "dolor"), r.build().sortedBy { it.side }.map { it.note })
+    }
+
+    @Test
+    fun `una nota sin series no se pierde, y borrarla no deja rastro`() {
+        val r = SessionRecorder()
+        r.setNote(workStep(), "no llegué a hacerlo")
+        val er = r.build().single()
+        assertEquals("no llegué a hacerlo", er.note)
+        assertEquals(0, er.setsCompleted)
+        assertEquals(ExerciseStatus.PARTIAL, er.status)
+        r.setNote(workStep(), "   ")
+        assertEquals(true, r.isEmpty())
+    }
+
+    @Test
+    fun `la nota vuelve al recuperar la corrida`() {
+        val r = SessionRecorder()
+        r.onWorkStepCompleted(workStep())
+        r.setNote(workStep(), "con dolor")
+        val guardado = r.build().single()
+
+        val nuevo = SessionRecorder()
+        nuevo.onWorkStepCompleted(workStep())
+        nuevo.restoreNote(guardado)
+        assertEquals("con dolor", nuevo.build().single().note)
+    }
+
     private fun workStep(
         exerciseId: String = "squat",
         ownerName: String = "Squat",

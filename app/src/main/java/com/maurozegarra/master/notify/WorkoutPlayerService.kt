@@ -151,6 +151,11 @@ class WorkoutPlayerService : Service() {
                     is PlayerCommand.FEEDBACK -> recorder.setFeedback(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.deltaKg, cmd.side)
                     is PlayerCommand.SPEED -> recorder.setSpeed(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.kmh, cmd.side)
                     is PlayerCommand.EFFORT -> recorder.setEffort(cmd.exerciseId, cmd.workoutIndex, cmd.setIndex, cmd.effort, cmd.repsDone, cmd.side)
+                    // Se persiste en el acto: un toque se repite, un texto escrito no.
+                    is PlayerCommand.NOTE -> {
+                        recorder.setNote(cmd.step, cmd.text)
+                        if (!finished) persist()
+                    }
                 }
             }
         }
@@ -694,6 +699,7 @@ class WorkoutPlayerService : Service() {
                     er.sets.forEachIndexed { setIdx, sr ->
                         refeed(er, setIdx, sr)
                     }
+                    recorder.restoreNote(er)
                 }
             }
             if (!recorder.isEmpty()) recordSession(SessionStatus.PARTIAL)
@@ -723,6 +729,7 @@ class WorkoutPlayerService : Service() {
                 er.sets.forEachIndexed { setIdx, sr ->
                     refeed(er, setIdx, sr)
                 }
+                recorder.restoreNote(er)
             }
         }
         val step = steps[index]

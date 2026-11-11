@@ -726,6 +726,7 @@ data class MoreStrings(
     val preview: PreviewStrings,
     val testRun: TestRunStrings,
     val workouts: String = "Workouts",
+    val exerciseNote: String = "Note",
     val body: BodyStrings = BodyStrings(),
     val water: WaterStrings = WaterStrings(),
     val coach: CoachStrings = CoachStrings(),

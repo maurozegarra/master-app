@@ -7,6 +7,17 @@ import org.junit.Test
 
 class SessionJsonTest {
 
+    @Test
+    fun `la nota del ejercicio viaja, y sin nota no se escribe`() {
+        val conNota = sampleSession(exercises = listOf(sampleExercise().copy(note = "kettlebell de 12")))
+        val encoded = SessionJson.encode(listOf(conNota))
+        assertEquals("kettlebell de 12", SessionJson.decode(encoded).single().exercises.single().note)
+
+        val sinNota = SessionJson.encode(listOf(sampleSession(exercises = listOf(sampleExercise()))))
+        assertTrue(!sinNota.contains("\"note\""))
+        assertEquals("", SessionJson.decode(sinNota).single().exercises.single().note)
+    }
+
     private fun sampleSession(
         id: Long = 1000L,
         status: SessionStatus = SessionStatus.COMPLETED,

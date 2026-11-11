@@ -146,6 +146,9 @@ class MasterViewModel(
     var playerStep by mutableStateOf<PlayerStep?>(null)
         private set
 
+    /** Las notas de esta corrida (TD-209). Antes del `init`: lo usa [restorePlayerState]. */
+    val exerciseNotes = mutableStateMapOf<String, String>()
+
     /**
      * OSD: si las dos franjas de arriba del player están visibles.
      *
@@ -738,6 +741,12 @@ class MasterViewModel(
         playerTotalSteps = steps.size
         val step = steps[playerIndex]
         playerStep = step
+        exerciseNotes.clear()
+        prefs.getString("recorderJson", null)?.let { rj ->
+            com.maurozegarra.master.model.SessionJson.decode(rj).firstOrNull()?.exercises?.forEach { er ->
+                if (er.note.isNotBlank()) exerciseNotes[noteKey(er.exerciseId, er.workoutIndex, er.side)] = er.note
+            }
+        }
         val endAt = prefs.getLong("endAt", 0L)
         playerRemainingMs = if (step.manual) {
             0L
@@ -2335,6 +2344,41 @@ class MasterViewModel(
         sendFeedback(exerciseId, workoutIndex, setIndex, deltaKg, side)
     }
 
+    private fun noteKey(exerciseId: String, workoutIndex: Int, side: String) = "$exerciseId:$workoutIndex:$side"
+
+    fun exerciseNote(step: PlayerStep): String =
+        exerciseNotes[noteKey(step.ownerExerciseId, step.workoutIndex, step.side)].orEmpty()
+
+    /**
+     * Guarda la nota del ejercicio de [step] (TD-209).
+     *
+     * Si el training terminó con la hoja abierta el recorder ya no está, y la nota va directa
+     * a la sesión recién guardada, como [markFinishedFeedback].
+     */
+    fun saveExerciseNote(step: PlayerStep, text: String) {
+        val limpio = text.trim()
+        if (limpio == exerciseNote(step)) return
+        val key = noteKey(step.ownerExerciseId, step.workoutIndex, step.side)
+        if (limpio.isEmpty()) exerciseNotes.remove(key) else exerciseNotes[key] = limpio
+        if (!playerFinished) {
+            PlayerBus.command.tryEmit(PlayerCommand.NOTE(step, limpio))
+            return
+        }
+        val sesion = sessions.firstOrNull()?.takeIf { it.trainingId == playerTrainingId } ?: return
+        val ejercicios = sesion.exercises.map { er ->
+            if (er.exerciseId == step.ownerExerciseId && er.workoutIndex == step.workoutIndex && er.side == step.side) {
+                er.copy(note = limpio)
+            } else {
+                er
+            }
+        }
+        if (ejercicios == sesion.exercises) return
+        sessions[0] = sesion.copy(exercises = ejercicios)
+        store.saveSessions(sessions.toList())
+        snapshot()
+        syncSessions()
+    }
+
     /**
      * Las series con peso de esta corrida que se quedaron SIN marcar (TD-122).
      *
@@ -2459,6 +2503,7 @@ class MasterViewModel(
         sessionReloaded = false
         weightFeedback.clear()
         effortMarks.clear()
+        exerciseNotes.clear()
         playerTest = false
         playerSteps = steps
         playerTrainingId = trainingId

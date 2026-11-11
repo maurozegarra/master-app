@@ -44,6 +44,12 @@ class SessionRecorder {
      * DESPUES de que su serie se registro.
      */
     private val rest = mutableMapOf<ExerciseKey, MutableMap<Int, Int>>()
+
+    /**
+     * Lo apuntado de cada ejercicio (TD-209). Aparte por la misma razón que [feedback]: el
+     * registro se reconstruye entero en cada serie.
+     */
+    private val notes = mutableMapOf<ExerciseKey, String>()
     private var totalExercisesByWorkout = mutableMapOf<Int, Int>()
 
     /**
@@ -164,6 +170,48 @@ class SessionRecorder {
         )
     }
 
+    /**
+     * La nota del ejercicio de [step]; en blanco la borra.
+     *
+     * Si todavía no hay ninguna serie registrada se crea el registro sin series: lo escrito en
+     * la primera serie no se pierde aunque la sesión se corte antes de terminarla. Si la serie
+     * llega, [putSet] lo reemplaza por el de verdad.
+     */
+    fun setNote(step: PlayerStep, text: String) {
+        val key = ExerciseKey(step.ownerExerciseId, step.workoutIndex, step.side)
+        val limpio = text.trim()
+        if (limpio.isEmpty()) {
+            notes.remove(key)
+            if (records[key]?.sets?.isEmpty() == true) records.remove(key)
+            return
+        }
+        notes[key] = limpio
+        if (key !in records) {
+            records[key] = ExerciseRecord(
+                exerciseId = step.ownerExerciseId,
+                name = step.ownerName,
+                workoutName = step.workoutName,
+                workoutIndex = step.workoutIndex,
+                exerciseIndex = step.exerciseIndex,
+                side = step.side,
+                setsCompleted = 0,
+                totalSets = step.totalSets,
+                sets = emptyList(),
+                timeBased = step.timeBased,
+                totalExercisesInWorkout = totalExercisesByWorkout[step.workoutIndex] ?: 0,
+                status = ExerciseStatus.PARTIAL,
+            )
+        }
+    }
+
+    /** Devuelve su nota a un registro recuperado tras la muerte del proceso. */
+    fun restoreNote(er: ExerciseRecord) {
+        if (er.note.isBlank()) return
+        val key = ExerciseKey(er.exerciseId, er.workoutIndex, er.side)
+        notes[key] = er.note
+        records.getOrPut(key) { er }
+    }
+
     /** Lo marcado en la serie [setIndex]; si se vuelve a tocar, gana el último toque. */
     fun setFeedback(exerciseId: String, workoutIndex: Int, setIndex: Int, deltaKg: Double, side: String = "") {
         feedback.getOrPut(ExerciseKey(exerciseId, workoutIndex, side)) { mutableMapOf() }[setIndex] = deltaKg
@@ -249,6 +297,7 @@ class SessionRecorder {
                 feedbackDeltaKg = orderedSets.lastOrNull { it.feedbackDeltaKg != null }?.feedbackDeltaKg
                     ?: er.feedbackDeltaKg,
                 status = deriveStatus(orderedSets, er.totalSets),
+                note = notes[key].orEmpty(),
             )
         }.sortedWith(compareBy({ it.workoutIndex }, { it.exerciseIndex }))
 
@@ -275,5 +324,6 @@ class SessionRecorder {
         speed.clear()
         effort.clear()
         rest.clear()
+        notes.clear()
     }
 }

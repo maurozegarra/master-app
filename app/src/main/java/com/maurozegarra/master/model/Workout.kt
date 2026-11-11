@@ -512,6 +512,12 @@ data class ExerciseRecord(
      */
     val feedbackDeltaKg: Double? = null,
     val status: ExerciseStatus = ExerciseStatus.COMPLETED,
+    /**
+     * Lo que el usuario apuntó de este ejercicio mientras lo hacía (TD-209): "usé el kettlebell
+     * de 12", "con la mancuerna me dolió". Va por registro, o sea por ejercicio y lado. La nota
+     * de [SessionLog] es de la sesión entera y se escribe al final, cuando ya se olvidó.
+     */
+    val note: String = "",
 )
 
 /** Registro de una sesión de entrenamiento (completa o parcial). */

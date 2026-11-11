@@ -561,6 +561,10 @@ private fun ExerciseDetailRow(er: ExerciseRecord, accent: Color, t: Strings, onC
         }
         Spacer(Modifier.height(4.dp))
         SetLines(er, t, 12.sp)
+        if (er.note.isNotBlank()) {
+            Spacer(Modifier.height(2.dp))
+            Text(er.note, color = AppTheme.colors.textPrimary, fontSize = 13.sp, fontStyle = FontStyle.Italic)
+        }
         // Solo para registros de antes de TD-117, que guardaban uno por ejercicio. Los de
         // ahora ya lo dicen serie a serie arriba, y repetirlo aqui seria contarlo dos veces.
         if (er.sets.none { it.feedbackDeltaKg != null } && er.feedbackDeltaKg != null && er.feedbackDeltaKg != 0.0) {

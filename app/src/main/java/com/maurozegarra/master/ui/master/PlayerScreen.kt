@@ -47,6 +47,8 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.SkipNext
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -136,6 +138,8 @@ import com.maurozegarra.master.ui.theme.TRACK
 import com.maurozegarra.master.util.formatPlayerClock
 import com.maurozegarra.master.util.formatRemaining
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import androidx.compose.ui.focus.focusRequester
 
 @Composable
 fun PlayerScreen(vm: MasterViewModel, accent: Color, t: Strings, onStart: () -> Unit = { vm.startPlayerRun() }) {
@@ -506,6 +510,7 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
     // franjas se vayan. Guarda el contenido, no el id: se captura al abrirlo, y si el
     // training avanza de ejercicio mientras lees no se te cambia el texto por debajo.
     var sheetTarget by remember { mutableStateOf<InstructionsTarget?>(null) }
+    var noteTarget by remember { mutableStateOf<NoteTarget?>(null) }
     // Color de fase completo, oscurecido 12% para legibilidad del texto blanco.
     // En pausa se oscurece adicionalmente como indicador visual.
     val isPaused = !step.manual && !vm.playerRunning
@@ -640,6 +645,11 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
                             title = ownerNameFor(step, t),
                             steps = vm.mediaFor(step.ownerExerciseId)?.instructions.orEmpty(),
                         )
+                        vm.hidePlayerControls()
+                    }
+                    NoteButton(vm, step, t) {
+                        val lado = step.side.takeIf { it.isNotBlank() }?.let { " · $it" }.orEmpty()
+                        noteTarget = NoteTarget(step, ownerNameFor(step, t) + lado, vm.exerciseNote(step))
                         vm.hidePlayerControls()
                     }
                     EditExerciseButton(vm, step, t)
@@ -832,18 +842,22 @@ private fun RunningView(vm: MasterViewModel, accent: Color, t: Strings) {
         // Hermano del chrome, no hijo suyo: por eso sigue abierto cuando las franjas ya se
         // fueron. Solo lo cierra el usuario.
         sheetTarget?.let { InstructionsSheet(it) { sheetTarget = null } }
+        noteTarget?.let { ExerciseNoteSheet(it, vm, accent, t) { noteTarget = null } }
         // La marca de prueba (TD-174), SIEMPRE visible: tiene que saberse de un vistazo que
-        // esta corrida no se va a registrar. Superpuesta y en el hueco central de la franja
-        // de arriba -entre el "3 / 10" y el porcentaje-, asi no mueve nada de sitio.
+        // esta corrida no se va a registrar. Superpuesta en la franja de arriba, asi no mueve
+        // nada de sitio. Va justo despues del contador, y su hueco lo reserva una copia
+        // invisible del texto mas largo: centrada caia encima de los iconos (TD-209).
         if (vm.playerTest) {
-            Box(
+            Row(
                 Modifier
-                    .align(Alignment.TopCenter)
+                    .align(Alignment.TopStart)
                     .windowInsetsPadding(WindowInsets.systemBars)
-                    .padding(top = 6.dp)
+                    .padding(start = 20.dp, top = 6.dp)
                     .height(36.dp),
-                contentAlignment = Alignment.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                Text("00 / 00  ·  100%", color = Color.Transparent, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                Spacer(Modifier.width(8.dp))
                 Text(
                     t.more.testRun.badge,
                     color = Color.White,
@@ -1231,6 +1245,77 @@ private fun InstructionsButton(vm: MasterViewModel, exerciseId: String, t: Strin
         )
     }
 
+}
+
+/**
+ * La nota del ejercicio (TD-209). Sale siempre, también en lo asignado, y va antes del lápiz
+ * para no mover nada cuando la lista no se dibuja. Con nota, relleno y sin transparencia: en el
+ * color de cada etapa es lo único que se lee igual de bien.
+ */
+@Composable
+private fun NoteButton(vm: MasterViewModel, step: PlayerStep, t: Strings, onOpen: () -> Unit) {
+    val hayNota = vm.exerciseNote(step).isNotEmpty()
+    Box(
+        modifier = Modifier
+            .padding(start = 12.dp)
+            .size(36.dp)
+            .clip(CircleShape)
+            .clickable(onClick = onOpen),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            if (hayNota) Icons.Filled.ChatBubble else Icons.Outlined.ChatBubbleOutline,
+            contentDescription = t.more.exerciseNote,
+            tint = Color.White.copy(alpha = if (hayNota) 1f else 0.7f),
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+/** El paso se captura al abrir: si el training avanza mientras escribes, la nota no cambia de ejercicio. */
+private data class NoteTarget(val step: PlayerStep, val title: String, val text: String)
+
+/**
+ * La nota se guarda al cerrar la hoja, por el camino que sea, sin botón de guardar. Sin nota,
+ * abre con el teclado listo porque se viene a escribir; con nota, sin teclado, para leerla y
+ * tocar donde se quiera corregir.
+ */
+@Composable
+private fun ExerciseNoteSheet(target: NoteTarget, vm: MasterViewModel, accent: Color, t: Strings, onDismiss: () -> Unit) {
+    val text = remember { mutableStateOf(target.text) }
+    DisposableEffect(Unit) {
+        onDispose { vm.saveExerciseNote(target.step, text.value) }
+    }
+    val pedir = remember { androidx.compose.ui.focus.FocusRequester() }
+    val ventana = androidx.compose.ui.platform.LocalWindowInfo.current
+    val teclado = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    if (target.text.isEmpty()) {
+        LaunchedEffect(Unit) {
+            // La hoja es otra ventana: el foco pedido antes de que ella lo tenga no abre el teclado.
+            androidx.compose.runtime.snapshotFlow { ventana.isWindowFocused }.first { it }
+            pedir.requestFocus()
+            teclado?.show()
+        }
+    }
+    com.maurozegarra.master.ui.AppSheet(onDismiss = onDismiss) {
+        Column(
+            Modifier
+                .navigationBarsPadding()
+                .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
+        ) {
+            Text(target.title, color = AppTheme.colors.textPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+            Spacer(Modifier.height(16.dp))
+            AppTextField(
+                value = text.value,
+                onValueChange = { text.value = it },
+                label = t.more.exerciseNote,
+                singleLine = false,
+                maxLines = 6,
+                modifier = Modifier.fillMaxWidth().focusRequester(pedir),
+                accent = accent,
+            )
+        }
+    }
 }
 
 /** Lo que se enseña en el sheet, capturado al abrirlo. Ver [InstructionsSheet]. */
