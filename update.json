@@ -1,7 +1,7 @@
 {
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.475/master-1.0.475.apk",
-  "changelog": "release: TD-205 el coach anota el pesaje de un atleta, y el atleta lo ve",
-  "minVersionCode": 1,
-  "versionCode": 475,
-  "versionName": "1.0.475"
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.499/master-1.0.499.apk",
+  "changelog": "release: TD-208 a TD-211 nota por ejercicio, el Next abre lo que falta, porcentaje con el contador y la hoja del timer con Ends at",
+  "versionName": "1.0.499",
+  "versionCode": 499,
+  "minVersionCode": 1
 }
