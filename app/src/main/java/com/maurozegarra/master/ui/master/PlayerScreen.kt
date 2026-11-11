@@ -450,19 +450,16 @@ private fun RoutineProgressBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // El porcentaje va con el contador y no junto a los iconos (TD-208): a la izquierda
+            // lo que se lee, a la derecha lo que se toca. Junto a ellos parecía un botón más, y
+            // saltaba de sitio en los ejercicios sin instrucciones.
             Text(
-                if (totalExercises > 0) "$curExercise / $totalExercises" else "",
+                if (totalExercises > 0) "$curExercise / $totalExercises  ·  $percent%" else "$percent%",
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "$percent%",
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                )
                 trailing()
             }
         }
