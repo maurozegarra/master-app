@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **186 / 212** hechos, 25 pendientes, 1 descartados.
+Progreso: **187 / 213** hechos, 25 pendientes, 1 descartados.
 
 ## Pendientes
 
@@ -278,6 +278,7 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 
 ### Fix
 
+- [x] **TD-213** Hoja del timer: un Ends at no se guarda en los recientes
 - [x] **TD-203** La pantalla principal cambia de día sola: el calendario marcaba ayer como hoy
 - [x] **TD-191** Sign out del coach con confirmación, y el historial avisa cuando está fuera de sesión
 - [x] **TD-186** Fix: el aviso para ir a dormir salía aunque ya se hubiera tocado "Going to bed"

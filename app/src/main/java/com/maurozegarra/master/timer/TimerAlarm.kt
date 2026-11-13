@@ -30,11 +30,15 @@ object TimerAlarm {
     const val NOTIF_RING = 4301
     private const val NOTIF_BASE = 4400
 
-    fun start(context: Context, name: String, durationMs: Long, alarm: Boolean) {
+    /**
+     * [recent] en falso no lo anota en los recientes (TD-213): un Ends at es una HORA, y como
+     * reciente quedaba una duración suelta (3:47) que no se vuelve a usar.
+     */
+    fun start(context: Context, name: String, durationMs: Long, alarm: Boolean, recent: Boolean = true) {
         val store = TimerStore(context)
         val run = TimerPlan.start(UUID.randomUUID().toString(), name, durationMs, alarm, System.currentTimeMillis())
         store.saveRuns(store.runs() + run)
-        store.saveRecents(TimerPlan.addRecent(store.recents(), RecentTimer(run.name, durationMs, alarm)))
+        if (recent) store.saveRecents(TimerPlan.addRecent(store.recents(), RecentTimer(run.name, durationMs, alarm)))
         schedule(context, run)
     }
 

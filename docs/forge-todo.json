@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-213",
+      "title": "Hoja del timer: un Ends at no se guarda en los recientes",
+      "category": "Fix",
+      "status": "done",
+      "manual": "PEDIDO el 12-nov: 'los timers Ends at no deben guardarse en recientes'. Un Ends at es una hora, y como reciente quedaba la duración que faltaba en ese momento (por ejemplo 3:47), que no se vuelve a usar. Los presets y los recientes se siguen guardando.\n\nProbar: el + del tablero, tocar un Ends at; al volver a abrir la hoja, en Recent no aparece. Los que ya se guardaron se borran deslizando."
+    },
+    {
       "id": "TD-212",
       "title": "Publicar sin GitHub: que MASTER se actualice como watchwall",
       "category": "Mantenimiento",

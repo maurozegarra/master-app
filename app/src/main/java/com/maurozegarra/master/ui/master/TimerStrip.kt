@@ -302,8 +302,8 @@ private fun TimerTab(accent: Color, t: Strings, onStarted: () -> Unit) {
     val ahora by produceState(System.currentTimeMillis()) { while (true) { delay(15_000); value = System.currentTimeMillis() } }
     val swipe = rememberSwipeRowsController()
 
-    fun arrancar(ms: Long, suNombre: String = "") {
-        TimerAlarm.start(ctx, nombre.trim().ifBlank { suNombre }, ms, pantalla)
+    fun arrancar(ms: Long, suNombre: String = "", reciente: Boolean = true) {
+        TimerAlarm.start(ctx, nombre.trim().ifBlank { suNombre }, ms, pantalla, recent = reciente)
         onStarted()
     }
 
@@ -332,7 +332,7 @@ private fun TimerTab(accent: Color, t: Strings, onStarted: () -> Unit) {
     Text(w.endsAtLabel, color = c.textDim, fontSize = 13.sp)
     Row(Modifier.toSheetEdge().horizontalScroll(rememberScrollState()).padding(horizontal = SHEET_PAD), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         TimerPlan.endsAtChips(ahora).forEach { fin ->
-            OutlineChip(TimerPlan.clock12(fin, zone), accent) { arrancar(fin - System.currentTimeMillis()) }
+            OutlineChip(TimerPlan.clock12(fin, zone), accent) { arrancar(fin - System.currentTimeMillis(), reciente = false) }
         }
     }
 
