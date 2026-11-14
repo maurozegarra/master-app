@@ -458,7 +458,7 @@ private fun DaySessionsSheet(
             items(sessions, key = { it.id }) { s ->
                 SessionRow(
                     session = s,
-                    time = Instant.ofEpochMilli(s.completedAt).atZone(zone).format(timeFmt),
+                    zone = zone,
                     accent = accent,
                     t = t,
                     swipeController = sheetSwipeController,

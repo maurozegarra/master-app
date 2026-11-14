@@ -62,7 +62,9 @@ import com.maurozegarra.master.model.SessionStatus
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.ui.theme.STATUS_DONE
-import com.maurozegarra.master.model.hasFeedback
+import com.maurozegarra.master.model.durationMinutes
+import com.maurozegarra.master.model.showsFeedback
+import com.maurozegarra.master.model.wakingPainShown
 import androidx.compose.ui.text.font.FontStyle
 import com.maurozegarra.master.ui.theme.STATUS_SKIPPED
 import java.time.Instant
@@ -174,7 +176,6 @@ private fun HistoryBody(vm: MasterViewModel, sessions: List<SessionLog>, ajeno: 
     }
 
     val zone = remember { ZoneId.systemDefault() }
-    val timeFmt = remember { DateTimeFormatter.ofPattern("h:mm a") }
     // Se reagrupa cuando cambia la lista (snapshot inmutable como key).
     // Con .toList() y no la lista: el historial propio es SIEMPRE la misma lista mutable, y
     // como clave no cambiaba al borrar -la sesion borrada seguia en pantalla hasta salir y
@@ -232,7 +233,7 @@ private fun HistoryBody(vm: MasterViewModel, sessions: List<SessionLog>, ajeno: 
                 items(items, key = { it.id }) { s ->
                     SessionRow(
                         session = s,
-                        time = Instant.ofEpochMilli(s.completedAt).atZone(zone).format(timeFmt),
+                        zone = zone,
                         accent = accent,
                         t = t,
                         swipeController = swipeController,
@@ -248,7 +249,7 @@ private fun HistoryBody(vm: MasterViewModel, sessions: List<SessionLog>, ajeno: 
 @Composable
 fun SessionRow(
     session: SessionLog,
-    time: String,
+    zone: ZoneId,
     accent: Color,
     t: Strings,
     swipeController: SwipeRowsController,
@@ -259,6 +260,12 @@ fun SessionRow(
 ) {
     var expanded by remember { mutableStateOf(initiallyExpanded) }
     var confirmDelete by remember { mutableStateOf(false) }
+    // TD-214: cerrada, cuánto duró; la hora de fin sola no decía cuánto se entrenó. Las horas
+    // van al abrirla. Sin duración conocida queda la hora de fin, que es lo que había.
+    val timeFmt = remember { DateTimeFormatter.ofPattern("h:mm a") }
+    fun clock(ms: Long) = Instant.ofEpochMilli(ms).atZone(zone).format(timeFmt)
+    val time = session.durationMinutes()?.let { com.maurozegarra.master.util.formatMinutes(it) } ?: clock(session.completedAt)
+    val range = if (session.startedAt > 0) "${clock(session.startedAt)} – ${clock(session.completedAt)}" else null
 
     // Una sola acción: una sesión no se duplica ni se edita, solo se borra. El menú
     // desplegable que había aquí gastaba 48dp en ofrecer exactamente eso mismo.
@@ -361,8 +368,18 @@ fun SessionRow(
             }
         }
 
+        if (range != null) {
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically(),
+                exit = shrinkVertically(),
+            ) {
+                Text(range, color = AppTheme.colors.textDim, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
+            }
+        }
+
         AnimatedVisibility(
-            visible = expanded && session.hasFeedback(),
+            visible = expanded && session.showsFeedback(),
             enter = expandVertically(),
             exit = shrinkVertically(),
         ) {
@@ -433,15 +450,16 @@ private fun SessionFeedback(session: SessionLog, t: Strings) {
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         listOfNotNull(
-            session.painOnWaking?.let {
-                "${t.painOnWaking}: $it · ${t.painScale.getOrElse(it) { "" }}" +
+            session.wakingPainShown()?.let {
+                "${t.more.onWakingShort}: $it · ${t.painScale.getOrElse(it) { "" }}" +
                     (session.painFadeMin?.let { m -> "  ·  ${if (m >= 60) "60+" else "$m"} min" } ?: "")
             },
             session.painBefore?.let { "${t.painBefore}: $it · ${t.painScale.getOrElse(it) { "" }}" },
             session.painAfter?.let { "${t.painAfter}: $it · ${t.painScale.getOrElse(it) { "" }}" },
             session.radiating?.let { if (it) t.painRadiating else t.painCentered },
         ).forEach {
-            Text(it, color = AppTheme.colors.textDim, fontSize = 13.sp)
+            // Una línea: lo que no cabe se acorta, la tarjeta no crece (TD-214).
+            Text(it, color = AppTheme.colors.textDim, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         if (session.note.isNotBlank()) {
             Text(

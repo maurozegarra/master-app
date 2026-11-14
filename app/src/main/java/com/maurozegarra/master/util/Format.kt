@@ -39,6 +39,20 @@ fun formatPlayerClock(ms: Long): String {
 }
 
 /**
+ * Una duración en minutos, como la del Now Bar pero sin segundos: "45 m", "1 h 39 m", "2 h"
+ * (TD-214, la duración de una sesión en el historial).
+ */
+fun formatMinutes(minutes: Int): String {
+    val h = minutes / 60
+    val m = minutes % 60
+    return when {
+        h == 0 -> "$m m"
+        m == 0 -> "$h h"
+        else -> "$h h $m m"
+    }
+}
+
+/**
  * Duración compacta para el Now Bar: "10 m", "1 h 30 m", "1 m 30 s", "45 s".
  * Solo incluye las unidades distintas de cero.
  */

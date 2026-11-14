@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **187 / 213** hechos, 25 pendientes, 1 descartados.
+Progreso: **188 / 214** hechos, 25 pendientes, 1 descartados.
 
 ## Pendientes
 
@@ -367,6 +367,7 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 
 ### UI
 
+- [x] **TD-214** Historial: la duración de la sesión en la tarjeta, las horas al abrirla y el despertar solo con dolor
 - [x] **TD-211** Hoja del timer: vuelve Ends at, fuera Custom, recientes que se borran y el mismo alto que Alarm
 - [x] **TD-208** Player: el porcentaje del training se va con el contador, lejos de los iconos
 - [x] **TD-201** Fin de sesión: Close con fondo, switch del app, y con dolor 0 no se preguntan los minutos (ni en la sesión ni en la alarma)

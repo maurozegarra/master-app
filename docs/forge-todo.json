@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-214",
+      "title": "Historial: la duración de la sesión en la tarjeta, las horas al abrirla y el despertar solo con dolor",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO el 14-nov, con captura del historial. (1) Cerrada, la tarjeta enseña cuánto duró ('1 h 39 m'), no la hora de fin. (2) Al abrirla, primero la hora de inicio y la de fin ('11:28 AM – 1:07 PM'), y debajo lo de siempre. (3) 'On waking, before moving: 0 · No pain · 0 min' no suma: la línea del despertar solo sale cuando hubo dolor (decidido con él). El cero se sigue guardando.\n\nProbar: historial, la sesión de hoy: cerrada dice la duración; abierta, las dos horas y sin la línea del despertar. Una sesión con dolor al despertar (el 9-nov) sí la enseña."
+    },
+    {
       "id": "TD-213",
       "title": "Hoja del timer: un Ends at no se guarda en los recientes",
       "category": "Fix",

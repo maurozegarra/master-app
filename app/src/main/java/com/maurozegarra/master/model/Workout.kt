@@ -570,6 +570,35 @@ fun SessionLog.hasFeedback(): Boolean =
         painOnWaking != null || painFadeMin != null
 
 /**
+ * El dolor de la mañana que se ENSEÑA en el historial: solo si hubo (TD-214).
+ *
+ * El dato se guarda igual con cero —un cero es un dato, ver [hasFeedback]—, pero en la tarjeta
+ * "0 · No pain · 0 min" no decía nada que no dijera su ausencia (14-nov), y la serie entera ya
+ * vive en el despertador. Con dolor sí se queda: explica una sesión difícil.
+ */
+fun SessionLog.wakingPainShown(): Int? = painOnWaking?.takeIf { it > 0 }
+
+/** Lo que la tarjeta del historial enseña al abrirse, debajo de las horas. */
+fun SessionLog.showsFeedback(): Boolean =
+    painBefore != null || painAfter != null || radiating != null || note.isNotBlank() ||
+        wakingPainShown() != null
+
+/**
+ * Cuánto duró, en minutos (TD-214): lo que el historial enseña con la tarjeta cerrada. Null si
+ * no se sabe; las sesiones viejas o reconstruidas pueden no traer ni duración ni inicio.
+ */
+fun SessionLog.durationMinutes(): Int? {
+    val sec = when {
+        durationSec > 0 -> durationSec.toLong()
+        startedAt > 0 && completedAt > startedAt -> (completedAt - startedAt) / 1000
+        else -> return null
+    }
+    // Corta el minuto, como un cronómetro: redondeado, 99:50 salía "1 h 40 m" junto a
+    // "11:28 AM – 1:07 PM", que son 99 (14-nov).
+    return (sec / 60).toInt().coerceAtLeast(1)
+}
+
+/**
  * Los `exerciseId` que aparecen en algun training, variantes incluidas.
  *
  * Sirve para saber si un ejercicio propio esta en uso antes de tocarlo: borrar uno que
