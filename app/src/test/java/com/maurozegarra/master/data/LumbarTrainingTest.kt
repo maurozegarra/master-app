@@ -247,7 +247,8 @@ class LumbarTrainingTest {
         // Revision 32 (10-oct): 16 · 21 · 26, propuesto por el (discos de 5 en 5).
         // Revision 35 (17-oct): 21 · 26 · 31, ligero las tres dos sesiones seguidas.
         // Revision 39 (24-oct): 26 · 31 · 36, lo que ya hacia por su cuenta, ligero dos veces.
-        assertEquals(listOf(20.0, 25.0, 30.0), puente.setList.map { it.weight })
+        // Revision 47 (14-nov): la de arriba a 38.5, ligera el 28-oct, el 31-oct y el 8-nov.
+        assertEquals(listOf(20.0, 25.0, 32.5), puente.setList.map { it.weight })
         assertEquals(3, puente.sets)
         assertEquals(10, puente.workValue)
         // Revision 39: 14 · 16 · 20, como lo hizo el 24-oct ("salio facil").

@@ -5,6 +5,39 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-11-14 — sexta revisión semanal: la muñeca y el box squat
+
+**La semana (8 al 13): cuatro sesiones de seis.** El domingo 8, el completo (revisión 46); lunes,
+miércoles y jueves, el corto. **El martes no entrenó a propósito**: *"el trabajo estaba exigente y
+necesitaba revisar temas"*. **El viernes, cansancio**: una discusión la noche anterior y se durmió
+tarde. Ninguna de las dos es la rutina pesando, así que no se baja nada.
+
+- **El box squat, saltado entero el 8:** *"No pude hacer, la muñeca duele al agarrar la
+  mancuerna"*. No es el agarre: el carry con 22.5 en la derecha va *bien*. Es la posición. Al
+  pecho la muñeca va doblada hacia atrás, y él lo confirma: *"es justamente la posición hacia
+  atrás que me hace doler, en el carry la muñeca está recta, no hay dolor"*.
+- **Puente 26 · 31 · 36:** el 36, *ligero* por tercera vez (28-oct, 31-oct y 8-nov).
+- **Dominadas 4 × 2**, completas. **Carry 16 · 20 · 22.5**, *bien* todas, de los dos lados.
+- **La caminata del cierre del corto**, cortada el miércoles y el jueves a propósito. Ya era así
+  desde la revisión 43: opcional, y él decide. No cambia.
+- **Mañanas:** 1 (12 min), 1 (15 min) y del martes al sábado **cinco seguidas en 0**.
+- **La muñeca con el gel:** *"calma en el momento, como es de esperar"*.
+
+**Pesaje del 14:** 84 kg, 94 cm y 34.3 kg de músculo (el 7: 83.5, 93.5 y 34.2). NIKO: 50.2 kg, 67
+cm y 18.4 kg de músculo (50.1, 67 y 18.8).
+
+**NIKO, cinco de cinco** (NIKO 6, 1, 2, 3 y 4), todo *bien* salvo la búlgara: **7.5 y 10 por
+mancuerna, *ligero***. El peso muerto a una pierna con 12.5 (revisión 27), la cosaca con 10 y la
+llanta de 40 s, *bien*. Por fuera del app no dijo nada: *"modifica según lo que haya marcado en el
+app"*.
+
+**Lo que cambia:**
+- **Lumbar revisión 47:** el box squat con la **mancuerna colgando al costado**, la muñeca recta,
+  cambiando de mano en cada serie (17.5 · 20 · 20). Y el puente **26 · 31 · 38.5**.
+- **NIKO revisión 28:** la búlgara de **5 · 7.5 · 10 a 5 · 10 · 12.5** por mancuerna.
+
+---
+
 ## 2026-11-08 — la muñeca: contusión, y quinta revisión semanal
 
 **Sábado 7, sin sesión:** fue al traumatólogo. Radiografía de la muñeca derecha, de frente y de

@@ -469,8 +469,13 @@ object MasterDefaults {
      *
      * Revision 46 (8-nov): hoy domingo toca el corto, pero pidió el completo: el bloque de cadera
      * lleva desde el 31-oct sin hacerse. Va por fecha y solo este día; la semana no cambia.
+     *
+     * Revision 47 (14-nov, sexta revisión semanal): el box squat, con la mancuerna colgando al
+     * costado. El 8-nov lo saltó entero: al pecho la muñeca va doblada hacia atrás, que es justo
+     * lo que le duele; en el carry va recta y no duele. Y el puente, la última serie de 36 a 38.5:
+     * ligera el 28-oct, el 31-oct y el 8-nov.
      */
-    const val LUMBAR_REVISION = 46
+    const val LUMBAR_REVISION = 47
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -879,8 +884,12 @@ object MasterDefaults {
      *
      * Revision 27 (8-nov): el peso muerto a una pierna de NIKO 4 pasa de 10 a 12.5 kg. Las seis
      * series del 6-nov salieron ligeras.
+     *
+     * Revision 28 (14-nov, sexta revisión semanal): la búlgara de NIKO 1 pasa de 5 · 7.5 · 10 a
+     * 5 · 10 · 12.5 kg por mancuerna. El 10-nov marcó ligeras la segunda y la tercera; la
+     * primera, bien, se queda.
      */
-    const val NIKO_REVISION = 27
+    const val NIKO_REVISION = 28
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -984,7 +993,7 @@ object MasterDefaults {
                     exercises = listOf(
                         b.ex(
                             "ex_bulgarian_split_squat", "PECHO ADELANTE y paso largo. Cada pierna", 10, rest = 90,
-                            weightType = WeightType.DUMBBELL, weights = listOf(5.0, 7.5, 10.0),
+                            weightType = WeightType.DUMBBELL, weights = listOf(5.0, 10.0, 12.5),
                         ),
                         // A 45 grados: la banca es regulable, y el usuario pidio que ella lo
                         // tenga presente al armarla.
@@ -2314,7 +2323,8 @@ object MasterDefaults {
                 // Revision 32 (10-oct): 16 · 21 · 26 (discos 10, 15 y 20), ver [LUMBAR_REVISION].
                 // Revision 35 (17-oct): 21 · 26 · 31 (discos 15, 20 y 25).
                 // Revision 39 (24-oct): 26 · 31 · 36 (discos 20, 25 y 30), lo que ya hacia.
-                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(20.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0)
+                // Revision 47 (14-nov): la de arriba a 38.5, ver [LUMBAR_REVISION].
+                if (eased) loaded("ex_glute_bridge", 10, "EZ bar. 2 s pause at the top. Ribs down, don't arch", listOf(20.0, 25.0, 32.5), WeightType.BARBELL, barWeight = 6.0)
                 else loaded("ex_hip_thrust", 10, "2 s pause at the top. Ribs down, don't arch", listOf(15.0, 25.0, 30.0), WeightType.BARBELL, barWeight = 6.0),
                 // Las tres "ligero" el 17-sep y la de arriba otra vez el 18: sube entera.
                 // UNA mancuerna (TD-130): iba como TOTAL, que es tambien como van las maquinas,
@@ -2338,8 +2348,11 @@ object MasterDefaults {
                 // ultima serie a 20 para tantear.
                 // Revision 32 (10-oct): tres sesiones "bien" sin malestar; sube la del medio.
                 // Revision 33: con el tobillo, las tres en 17.5. No es semana de subir.
+                // Revision 47: con la muñeca, la mancuerna colgando al costado (ver [LUMBAR_REVISION]).
                 loaded(
-                    "ex_box_squat", 8, "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor",
+                    "ex_box_squat", 8,
+                    if (wrist) "Plyobox (51 cm). Dumbbell hanging at your side, wrist straight. Switch hands each set"
+                    else "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor",
                     if (ankle) listOf(17.5, 17.5, 17.5) else listOf(17.5, 20.0, 20.0), WeightType.DUMBBELL,
                 ).copy(dumbbellCount = 1),
             ),
@@ -2478,12 +2491,13 @@ object MasterDefaults {
                 "Mild discomfort is fine. If it hurts, make the circle smaller.",
             ),
         ),
-        // Revision 24: la plyobox y la mancuerna en el step.
+        // Revision 24: la plyobox y la mancuerna en el step. Revision 47: al costado, por la muñeca.
         "ex_box_squat" to ExerciseMedia(
             listOf(
                 "Box: the plyobox on its 51 cm side, not the 45 cm bench.",
                 "Before sitting, put the dumbbell on the step (20 cm) right next to the box. It never goes to or comes from the floor.",
-                "Sit, pick it up from the step with your back straight and bring it to your chest. Then stand up.",
+                "Sit, pick it up from the step with your back straight and let it hang at your side, arm long and wrist straight. Then stand up. Switch hands each set.",
+                "While the wrist hurts, never at your chest: there the wrist bends back, which is what hurts.",
                 "Controlled on the way down until you touch, then stand up. Chest up.",
                 "To finish, sit and put the dumbbell back on the step.",
             ),
@@ -2538,6 +2552,16 @@ object MasterDefaults {
                     "Controlled on the way down until you touch, then stand up. Chest up.",
                     "To finish, sit and lower the dumbbell to your thighs. It never goes to or comes from the floor.",
                     "Without weight, the same: to a box or a chair.",
+                ),
+            ),
+            // Revision 24 a 46: la mancuerna al pecho.
+            ExerciseMedia(
+                listOf(
+                    "Box: the plyobox on its 51 cm side, not the 45 cm bench.",
+                    "Before sitting, put the dumbbell on the step (20 cm) right next to the box. It never goes to or comes from the floor.",
+                    "Sit, pick it up from the step with your back straight and bring it to your chest. Then stand up.",
+                    "Controlled on the way down until you touch, then stand up. Chest up.",
+                    "To finish, sit and put the dumbbell back on the step.",
                 ),
             ),
         ),
