@@ -28,17 +28,18 @@ class LumbarTrainingTest {
     private val steps = StepEngine.buildSteps(training.copy(workouts = training.workouts))
 
     @Test
-    fun `tiene los cinco bloques de la rutina`() {
-        // Revision 38: el tren superior, despues de la cadera.
+    fun `tiene los seis bloques de la rutina`() {
+        // Revision 38: el tren superior, despues de la cadera. Revision 48: las flexiones sobre
+        // los puños, detrás de McGill.
         assertEquals(
             // Revision 43: sin caminata de cierre (va los dias en casa).
-            listOf("Warm Walk", "Mobility", "McGill Big 3", "Hip & Glute", "Upper Body"),
+            listOf("Warm Walk", "Mobility", "McGill Big 3", "Push-ups", "Hip & Glute", "Upper Body"),
             training.workouts.map { it.name },
         )
         // 3 en McGill y no 4 desde TD-147: la plancha lateral era dos ejercicios clonados y
         // ahora es uno con sus dos lados declarados. 3 en la movilidad desde la revision 35:
         // el equilibrio en una pierna.
-        assertEquals(listOf(1, 3, 3, 3, 3), training.workouts.map { it.exercises.size })
+        assertEquals(listOf(1, 3, 3, 1, 3, 3), training.workouts.map { it.exercises.size })
     }
 
     @Test
@@ -126,7 +127,7 @@ class LumbarTrainingTest {
 
     @Test
     fun `el bloque de cadera va por repeticiones con un minuto de descanso`() {
-        training.workouts[3].exercises.forEach { e ->
+        training.workouts.single { it.name == "Hip & Glute" }.exercises.forEach { e ->
             assertEquals(3, e.sets)
             assertEquals(60, e.restSec)
         }
@@ -325,7 +326,8 @@ class LumbarTrainingTest {
     @Test
     fun `el corto camina, hace McGill completo y solo carga el carry`() {
         assertEquals(
-            listOf("Warm Walk", "Mobility", "McGill Big 3", "Carry", "Cool Walk"),
+            // Revision 48: las flexiones sobre los puños, sin carga.
+            listOf("Warm Walk", "Mobility", "McGill Big 3", "Push-ups", "Carry", "Cool Walk"),
             short.workouts.map { it.name },
         )
         // Revision 27 (3-oct): completo, a pedido suyo (iba a la mitad por el tiempo).
@@ -358,7 +360,8 @@ class LumbarTrainingTest {
         // Revision 42: +50 s de preparacion antes de las flexiones (10 -> 60) y -180 s en los
         // tres descansos entre dominadas (120 -> 60).
         // Revision 43: -310 s de la caminata de cierre (300 y 10 de preparacion).
-        assertEquals(2508, steps.sumOf { it.durationSec })
+        // Revision 48: +30 s, el descanso antes de las flexiones sobre los puños.
+        assertEquals(2538, steps.sumOf { it.durationSec })
     }
 
     @Test
@@ -509,7 +512,7 @@ class LumbarTrainingTest {
 
         assertEquals(4, out.size)
         assertEquals(MasterDefaults.LUMBAR_ID, out[0].id)
-        assertEquals(5, out[0].workouts.size)
+        assertEquals(6, out[0].workouts.size)
         assertEquals(master, out[1])
     }
 
@@ -523,7 +526,7 @@ class LumbarTrainingTest {
 
         assertEquals("uid-de-siempre", out.uid)
         assertEquals(111L, out.createdAt)
-        assertEquals(5, out.workouts.size)
+        assertEquals(6, out.workouts.size)
     }
 
     @Test
@@ -607,7 +610,8 @@ class LumbarTrainingTest {
         // equilibrio en una pierna, uno por pie. 17 desde la 38, con el tren superior: la
         // reconstruccion sale de la rutina de hoy, pero se guardo una sola vez en su telefono
         // (seedFirstSession) y lo que quedo ahi no cambia. 16 desde la 43, sin la caminata de cierre.
-        assertEquals(16, session.exercises.size)
+        // 17 desde la 48, con las flexiones sobre los puños.
+        assertEquals(17, session.exercises.size)
         assertTrue(session.exercises.all { it.setsCompleted == it.totalSets })
         assertTrue(session.exercises.none { r -> r.sets.any { it.skipped } })
         assertEquals(com.maurozegarra.master.model.SessionStatus.COMPLETED, session.status)
@@ -692,7 +696,7 @@ class LumbarTrainingTest {
             assertEquals(listOf(10.0, 10.0, 10.0), carry.setList.map { it.weight })
             assertTrue(carry.note.contains("turns"))
         }
-        assertEquals(listOf("Warm Walk", "Mobility", "McGill Big 3", "Carry", "Cool Walk"), tobilloCorto.workouts.map { it.name })
+        assertEquals(listOf("Warm Walk", "Mobility", "McGill Big 3", "Push-ups", "Carry", "Cool Walk"), tobilloCorto.workouts.map { it.name })
     }
 
     @Test
@@ -739,9 +743,17 @@ class LumbarTrainingTest {
         val arriba = completo.workouts.first { it.name == "Upper Body" }.exercises.map { it.exerciseId }
         // Colgar no dobla la muñeca: la dominada se queda.
         assertEquals(listOf("ex_pull_ups"), arriba)
+        // Revision 48: las únicas flexiones son las de los puños, 1 x 8, en el completo y el
+        // corto. El día malo no las lleva.
+        listOf(completo, corto).forEach { t ->
+            val flexiones = t.workouts.flatMap { it.exercises }.filter { it.exerciseId in setOf("ex_pushups", "ex_knee_pushups") }
+            assertEquals(1, flexiones.size)
+            assertTrue(flexiones.single().note.startsWith("On your fists"))
+            assertEquals(30, flexiones.single().prepareSec)
+        }
+        assertTrue(malo.workouts.flatMap { it.exercises }.none { it.exerciseId in setOf("ex_pushups", "ex_knee_pushups") })
         listOf(completo, corto, malo).forEach { t ->
             val todos = t.workouts.flatMap { it.exercises }
-            assertTrue(todos.none { it.exerciseId in setOf("ex_pushups", "ex_knee_pushups") })
             listOf("ex_cat_cow", "ex_bird_dog").forEach { id ->
                 assertTrue("${t.name} $id", todos.single { it.exerciseId == id }.note.startsWith("On your fists"))
             }
@@ -755,6 +767,7 @@ class LumbarTrainingTest {
     fun `sin la muñeca vuelven las flexiones y las notas de siempre`() {
         val arriba = training.workouts.first { it.name == "Upper Body" }.exercises.map { it.exerciseId }
         assertEquals(listOf("ex_knee_pushups", "ex_pushups", "ex_pull_ups"), arriba)
-        assertTrue(training.workouts.flatMap { it.exercises }.none { it.note.startsWith("On your fists") })
+        // Las flexiones de después de McGill van sobre los puños siempre (revision 48).
+        assertTrue(training.workouts.filter { it.name != "Push-ups" }.flatMap { it.exercises }.none { it.note.startsWith("On your fists") })
     }
 }

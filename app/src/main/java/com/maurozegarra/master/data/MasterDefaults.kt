@@ -474,8 +474,15 @@ object MasterDefaults {
      * costado. El 8-nov lo saltó entero: al pecho la muñeca va doblada hacia atrás, que es justo
      * lo que le duele; en el carry va recta y no duele. Y el puente, la última serie de 36 a 38.5:
      * ligera el 28-oct, el 31-oct y el 8-nov.
+     *
+     * Revision 48 (14-nov): el box squat al costado no sirvió: *"el peso jala por un sólo lado y
+     * adicional la mancuerna choca con la PlyoBox"*. Lo hizo **tipo sumo**, la mancuerna colgando
+     * entre las piernas con las dos manos, y la muñeca no le dolió: queda así. Y entran
+     * oficialmente las **flexiones sobre los puños**, 1 x 8 a los 30 s de terminar McGill, en
+     * el completo y en el corto: las venía haciendo por su cuenta. El día malo no las lleva:
+     * en crisis no se estrena nada.
      */
-    const val LUMBAR_REVISION = 47
+    const val LUMBAR_REVISION = 48
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -607,6 +614,8 @@ object MasterDefaults {
                 b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
                 b.mobility(ankle = easedAnkle),
                 b.mcgill(),
+                // Revision 48: con ids propios, como el tren superior, para no correr los de detrás.
+                LumbarBlocks(lang, seqStart = 950200L, wrist = easedWrist).fistPushups(),
                 b.hipGlute(eased = easedHip, bandWalk = bandWalk, ankle = easedAnkle),
                 // Revision 38: despues de la cadera, que llega fresca y tiene la prioridad. Con
                 // ids propios: LUMBAR_ID (950016) cae dentro de la secuencia de este training, y
@@ -710,6 +719,8 @@ object MasterDefaults {
                 // mitad por el tiempo de los dias presenciales; el lo pidio completo porque lo
                 // alivia, a prueba esta semana: son unos 6 minutos mas.
                 b.mcgill(),
+                // Revision 48: ver el completo.
+                LumbarBlocks(lang, seqStart = 952200L, wrist = easedWrist).fistPushups(),
                 b.carryOnly(ankle = easedAnkle),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
@@ -2271,6 +2282,23 @@ object MasterDefaults {
             ),
         )
 
+        /**
+         * Revision 48 (14-nov): flexiones sobre los puños, 1 x 8, a los 30 s de terminar McGill.
+         * Pedido suyo: las venía haciendo por su cuenta y quería que fueran oficiales. Sobre los
+         * puños la muñeca va recta, que es lo que la deja fuera del dolor (ver [LUMBAR_WRIST_EASED]).
+         *
+         * No es para músculo: ocho lejos del fallo, todos los días, es práctica del patrón (la
+         * flexión es una plancha en movimiento, lo que McGill entrena quieto) y mantenimiento.
+         * Si un día quiere resistencia de verdad, lo que sube son las repeticiones.
+         */
+        fun fistPushups(): Workout = Workout(
+            id = id(),
+            name = if (lang == "es") "Flexiones" else "Push-ups",
+            exercises = listOf(
+                reps("ex_pushups", 8, "On your fists, wrist straight. Body straight from head to heels", prep = 30),
+            ),
+        )
+
         fun hipGlute(eased: Boolean = false, bandWalk: Boolean = false, ankle: Boolean = false): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Cadera y gluteo" else "Hip & Glute",
@@ -2348,10 +2376,11 @@ object MasterDefaults {
                 // ultima serie a 20 para tantear.
                 // Revision 32 (10-oct): tres sesiones "bien" sin malestar; sube la del medio.
                 // Revision 33: con el tobillo, las tres en 17.5. No es semana de subir.
-                // Revision 47: con la muñeca, la mancuerna colgando al costado (ver [LUMBAR_REVISION]).
+                // Revision 47: con la muñeca, la mancuerna colgando al costado. Revision 48: tipo
+                // sumo, entre las piernas; al costado chocaba con la plyobox (ver [LUMBAR_REVISION]).
                 loaded(
                     "ex_box_squat", 8,
-                    if (wrist) "Plyobox (51 cm). Dumbbell hanging at your side, wrist straight. Switch hands each set"
+                    if (wrist) "Plyobox (51 cm). Sumo: dumbbell hanging between your legs, both hands, wrist straight"
                     else "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor",
                     if (ankle) listOf(17.5, 17.5, 17.5) else listOf(17.5, 20.0, 20.0), WeightType.DUMBBELL,
                 ).copy(dumbbellCount = 1),
@@ -2491,12 +2520,12 @@ object MasterDefaults {
                 "Mild discomfort is fine. If it hurts, make the circle smaller.",
             ),
         ),
-        // Revision 24: la plyobox y la mancuerna en el step. Revision 47: al costado, por la muñeca.
+        // Revision 24: la plyobox y la mancuerna en el step. Revision 48: tipo sumo, por la muñeca.
         "ex_box_squat" to ExerciseMedia(
             listOf(
                 "Box: the plyobox on its 51 cm side, not the 45 cm bench.",
                 "Before sitting, put the dumbbell on the step (20 cm) right next to the box. It never goes to or comes from the floor.",
-                "Sit, pick it up from the step with your back straight and let it hang at your side, arm long and wrist straight. Then stand up. Switch hands each set.",
+                "Sumo stance, feet a bit wider than the shoulders. Sit, pick it up from the step with your back straight and let it hang between your legs with both hands, arms long and wrists straight. Then stand up.",
                 "While the wrist hurts, never at your chest: there the wrist bends back, which is what hurts.",
                 "Controlled on the way down until you touch, then stand up. Chest up.",
                 "To finish, sit and put the dumbbell back on the step.",
@@ -2552,6 +2581,17 @@ object MasterDefaults {
                     "Controlled on the way down until you touch, then stand up. Chest up.",
                     "To finish, sit and lower the dumbbell to your thighs. It never goes to or comes from the floor.",
                     "Without weight, the same: to a box or a chair.",
+                ),
+            ),
+            // Revision 47: al costado; chocaba con la plyobox.
+            ExerciseMedia(
+                listOf(
+                    "Box: the plyobox on its 51 cm side, not the 45 cm bench.",
+                    "Before sitting, put the dumbbell on the step (20 cm) right next to the box. It never goes to or comes from the floor.",
+                    "Sit, pick it up from the step with your back straight and let it hang at your side, arm long and wrist straight. Then stand up. Switch hands each set.",
+                    "While the wrist hurts, never at your chest: there the wrist bends back, which is what hurts.",
+                    "Controlled on the way down until you touch, then stand up. Chest up.",
+                    "To finish, sit and put the dumbbell back on the step.",
                 ),
             ),
             // Revision 24 a 46: la mancuerna al pecho.

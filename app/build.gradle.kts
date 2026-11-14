@@ -13,8 +13,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // Versionado: +1 por cada APK generado. Primer APK: 1.0.1 (Fase 7).
-        versionCode = 501
-        versionName = "1.0.501"
+        versionCode = 502
+        versionName = "1.0.502"
     }
 
     buildTypes {

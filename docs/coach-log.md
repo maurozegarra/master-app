@@ -36,6 +36,22 @@ app"*.
   cambiando de mano en cada serie (17.5 · 20 · 20). Y el puente **26 · 31 · 38.5**.
 - **NIKO revisión 28:** la búlgara de **5 · 7.5 · 10 a 5 · 10 · 12.5** por mancuerna.
 
+**Sábado 14, el completo a las 11:28 (99 min).** Mañana en 0. Puente 26 · 31 · **38.5**, *bien*
+las tres; carry y dominadas 4 × 2, *bien*. **El box squat al costado no sirvió**: *"Fue imposible
+hacer con la mancuerna a un lado, se siente raro porque el peso jala por un sólo lado y adicional
+la mancuerna choca con la PlyoBox. Hice tipo sumo."* Con la mancuerna entre las piernas, 17.5 · 20
+· 20, *bien*, y la muñeca **no le dolió**. El fallo fue del diseño: en el carry se camina
+compensando; sentado, un peso de un solo lado tuerce, y el cajón estorba.
+
+**Revisión 48:**
+- **Box squat tipo sumo** mientras dure lo de la muñeca, la solución que encontró él.
+- **Flexiones sobre los puños, 1 × 8, a los 30 s de terminar McGill**, en el completo y en el corto.
+  Las venía haciendo por su cuenta y pidió hacerlas oficiales. Preguntó qué gana haciéndolas a
+  diario: ocho lejos del fallo no dan músculo ni mucha resistencia; es práctica del patrón (una
+  plancha en movimiento, lo que McGill entrena quieto) y mantenimiento del empuje mientras las
+  flexiones del completo siguen fuera por la muñeca. Si quiere resistencia, suben las
+  repeticiones. El día malo no las lleva.
+
 ---
 
 ## 2026-11-08 — la muñeca: contusión, y quinta revisión semanal
