@@ -54,6 +54,8 @@ object ExerciseCatalog {
         Triple("ex_nordic_curl", "Curl nórdico", "Nordic Curl"),
         Triple("ex_seated_calf", "Pantorrilla sentado", "Seated Calf"),
         Triple("ex_donkey_calf", "Pantorrilla burro", "Donkey Calf"),
+        // NIKO 1, revision 29 de NIKO: la pantorrilla de pie, a una pierna y sin maquina.
+        Triple("ex_standing_calf", "Pantorrilla de pie", "Standing Calf Raise"),
         Triple("ex_deadlift", "Peso muerto", "Deadlift"),
         Triple("ex_zercher_squat", "Sentadilla Zercher", "Zercher Squat"),
         // Upper

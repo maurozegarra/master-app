@@ -56,8 +56,13 @@ class EffortTest {
     fun `McGill y el calentamiento no preguntan, el resto de NIKO si`() {
         // Del lumbar normal pregunta la caminata lateral (revision 23), que es lo que dira si la
         // banda le va, y desde la 38 las flexiones y las dominadas. Su calentamiento de
-        // rodillas no.
-        val arriba = setOf("ex_pushups", "ex_pull_ups")
+        // rodillas no. Desde la 49 las dominadas van en LUMBAR (upper): en el completo pregunta
+        // solo la flexion sobre los puños.
+        val arriba = setOf("ex_pushups")
+        assertEquals(
+            setOf("ex_pushups", "ex_pull_ups"),
+            StepEngine.buildSteps(MasterDefaults.lumbarUpperTraining("en", easedWrist = false)).filter(Effort::asks).map { it.ownerExerciseId }.toSet(),
+        )
         val lumbar = MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = true, easedWrist = false)
         assertEquals(setOf("ex_lateral_band_walk") + arriba, StepEngine.buildSteps(lumbar).filter(Effort::asks).map { it.ownerExerciseId }.toSet())
         assertEquals(arriba, StepEngine.buildSteps(MasterDefaults.lumbarTraining("en", easedHip = false, bandWalk = false, easedWrist = false)).filter(Effort::asks).map { it.ownerExerciseId }.toSet())

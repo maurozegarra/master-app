@@ -25,27 +25,49 @@ class LumbarTrainingTest {
     // El bloque de cadera de siempre, sin el alivio de la revision 22.
     private val normal = MasterDefaults.lumbarTraining("en", easedHip = false, easedAnkle = false, easedWrist = false)
     private val short = MasterDefaults.lumbarShortTraining("en", easedAnkle = false, easedWrist = false)
+    private val upper = MasterDefaults.lumbarUpperTraining("en", easedAnkle = false, easedWrist = false)
     private val steps = StepEngine.buildSteps(training.copy(workouts = training.workouts))
 
     @Test
-    fun `tiene los seis bloques de la rutina`() {
+    fun `tiene los cinco bloques de la rutina`() {
         // Revision 38: el tren superior, despues de la cadera. Revision 48: las flexiones sobre
-        // los puños, detrás de McGill.
+        // los puños, detrás de McGill. Revision 49: el tren superior se va a LUMBAR (upper).
         assertEquals(
             // Revision 43: sin caminata de cierre (va los dias en casa).
-            listOf("Warm Walk", "Mobility", "McGill Big 3", "Push-ups", "Hip & Glute", "Upper Body"),
+            listOf("Warm Walk", "Mobility", "McGill Big 3", "Push-ups", "Hip & Glute"),
             training.workouts.map { it.name },
         )
         // 3 en McGill y no 4 desde TD-147: la plancha lateral era dos ejercicios clonados y
         // ahora es uno con sus dos lados declarados. 3 en la movilidad desde la revision 35:
         // el equilibrio en una pierna.
-        assertEquals(listOf(1, 3, 3, 1, 3, 3), training.workouts.map { it.exercises.size })
+        assertEquals(listOf(1, 3, 3, 1, 3), training.workouts.map { it.exercises.size })
+    }
+
+    @Test
+    fun `el de arriba es el corto con las dominadas, viernes y domingo`() {
+        // Revision 49 (19-nov), propuesta suya: el completo se parte en piernas (martes y
+        // sábado) y arriba (viernes y domingo). Las dominadas, detrás de las flexiones.
+        assertEquals(
+            listOf("Warm Walk", "Mobility", "McGill Big 3", "Push-ups", "Upper Body", "Carry", "Cool Walk"),
+            upper.workouts.map { it.name },
+        )
+        assertEquals(
+            short.workouts.map { it.name },
+            upper.workouts.map { it.name }.filter { it != "Upper Body" },
+        )
+        assertEquals(setOf(java.time.DayOfWeek.FRIDAY, java.time.DayOfWeek.SUNDAY), upper.scheduleDays)
+        assertTrue(upper.tracksPain)
+        // Ningun dia de la semana queda en dos trainings a la vez.
+        val dias = listOf(training, short, upper).flatMap { it.scheduleDays }
+        assertEquals(dias.size, dias.toSet().size)
+        assertEquals(7, dias.size)
     }
 
     @Test
     fun `el tren superior empuja y jala con el cuerpo`() {
         // Revision 38 (24-oct): flexiones y dominadas, sin montaje y cargables con el chaleco.
-        val arriba = training.workouts.first { it.name == "Upper Body" }.exercises
+        // Revision 49: en LUMBAR (upper), viernes y domingo.
+        val arriba = upper.workouts.first { it.name == "Upper Body" }.exercises
         assertEquals(listOf("ex_knee_pushups", "ex_pushups", "ex_pull_ups"), arriba.map { it.exerciseId })
         assertTrue(arriba.all { it.weightType == WeightType.NONE })
         // El calentamiento no pregunta; las flexiones y las dominadas, cada serie.
@@ -55,8 +77,9 @@ class LumbarTrainingTest {
         assertEquals(listOf(12), listOf(arriba[0].workValue))
         assertEquals(3 to 8, arriba[1].sets to arriba[1].workValue)
         assertEquals(4 to 2, arriba[2].sets to arriba[2].workValue)
-        // No esta en el corto ni en el dia malo: va dos dias, martes y sabado.
+        // No esta en el corto ni en el completo: va dos dias, viernes y domingo.
         assertFalse(short.workouts.any { it.name == "Upper Body" })
+        assertFalse(training.workouts.any { it.name == "Upper Body" })
         // Las instrucciones en ingles le llegan aunque el catalogo ya haya sembrado las de NIKO.
         val catalogo = MasterDefaults.catalogInstructions().getValue("ex_pushups")
         assertEquals(
@@ -256,7 +279,8 @@ class LumbarTrainingTest {
         // Revision 40: la de arriba a 22.5, tras cuatro sesiones con el 20 en "bien".
         // Revision 41: 16 · 20 · 22.5, las de abajo marcaban ligero.
         assertEquals(listOf(16.0, 20.0, 22.5), c.getValue("ex_suitcase_carry").setList.map { it.weight })
-        assertEquals(listOf(17.5, 20.0, 20.0), c.getValue("ex_box_squat").setList.map { it.weight })
+        // Revision 49: 20 · 22.5 · 25 (ver el test de la sentadilla).
+        assertEquals(listOf(20.0, 22.5, 25.0), c.getValue("ex_box_squat").setList.map { it.weight })
         // El corto no se toca: el alivio es del bloque de cadera, no del carry.
         assertEquals(listOf(16.0, 20.0, 22.5), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
     }
@@ -275,7 +299,8 @@ class LumbarTrainingTest {
         // mancuerna del piso y en la mitad de abajo.
         // Revision 30 (8-oct): dos sesiones "bien" sin malestar; la ultima tantea 20.
         // Revision 32 (10-oct): tres "bien"; sube la del medio.
-        assertEquals(listOf(17.5, 20.0, 20.0), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
+        // Revision 49 (19-nov): sumo, ligero las tres el 17-nov. Hasta 25, su mancuerna mas pesada.
+        assertEquals(listOf(20.0, 22.5, 25.0), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
         assertTrue(cadera(normal).getValue("ex_box_squat").note.contains("51 cm"))
         // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
         // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el
@@ -361,7 +386,8 @@ class LumbarTrainingTest {
         // tres descansos entre dominadas (120 -> 60).
         // Revision 43: -310 s de la caminata de cierre (300 y 10 de preparacion).
         // Revision 48: +30 s, el descanso antes de las flexiones sobre los puños.
-        assertEquals(2538, steps.sumOf { it.durationSec })
+        // Revision 49: -385 s, el tren superior se va a LUMBAR (upper) (515 + 50 - 180).
+        assertEquals(2153, steps.sumOf { it.durationSec })
     }
 
     @Test
@@ -485,7 +511,7 @@ class LumbarTrainingTest {
         fun ids(t: com.maurozegarra.master.model.Training) =
             listOf(t.id) + t.workouts.flatMap { w -> listOf(w.id) + w.exercises.map { it.id } }
 
-        val todos = listOf(ids(training), ids(short), ids(badDay))
+        val todos = listOf(ids(training), ids(short), ids(upper), ids(badDay))
         assertEquals(todos.flatten().size, todos.flatten().toSet().size)
     }
 
@@ -497,9 +523,11 @@ class LumbarTrainingTest {
 
         val out = MasterDefaults.withLumbarRevision(otros, "en")
 
-        assertEquals(4, out.size)
+        // Revision 49: cuatro lumbares, con LUMBAR (upper).
+        assertEquals(5, out.size)
         assertTrue(out.any { it.id == MasterDefaults.LUMBAR_ID })
         assertTrue(out.any { it.id == MasterDefaults.LUMBAR_SHORT_ID })
+        assertTrue(out.any { it.id == MasterDefaults.LUMBAR_UPPER_ID })
         assertTrue(out.any { it.id == MasterDefaults.LUMBAR_BAD_DAY_ID })
     }
 
@@ -510,9 +538,9 @@ class LumbarTrainingTest {
 
         val out = MasterDefaults.withLumbarRevision(listOf(viejo, master), "en")
 
-        assertEquals(4, out.size)
+        assertEquals(5, out.size)
         assertEquals(MasterDefaults.LUMBAR_ID, out[0].id)
-        assertEquals(6, out[0].workouts.size)
+        assertEquals(5, out[0].workouts.size)
         assertEquals(master, out[1])
     }
 
@@ -526,7 +554,7 @@ class LumbarTrainingTest {
 
         assertEquals("uid-de-siempre", out.uid)
         assertEquals(111L, out.createdAt)
-        assertEquals(6, out.workouts.size)
+        assertEquals(5, out.workouts.size)
     }
 
     @Test
@@ -610,8 +638,9 @@ class LumbarTrainingTest {
         // equilibrio en una pierna, uno por pie. 17 desde la 38, con el tren superior: la
         // reconstruccion sale de la rutina de hoy, pero se guardo una sola vez en su telefono
         // (seedFirstSession) y lo que quedo ahi no cambia. 16 desde la 43, sin la caminata de cierre.
-        // 17 desde la 48, con las flexiones sobre los puños.
-        assertEquals(17, session.exercises.size)
+        // 17 desde la 48, con las flexiones sobre los puños. 14 desde la 49: el tren superior se
+        // fue a LUMBAR (upper).
+        assertEquals(14, session.exercises.size)
         assertTrue(session.exercises.all { it.setsCompleted == it.totalSets })
         assertTrue(session.exercises.none { r -> r.sets.any { it.skipped } })
         assertEquals(com.maurozegarra.master.model.SessionStatus.COMPLETED, session.status)
@@ -740,16 +769,18 @@ class LumbarTrainingTest {
         val completo = MasterDefaults.lumbarTraining("en", easedAnkle = false, easedWrist = true)
         val corto = MasterDefaults.lumbarShortTraining("en", easedAnkle = false, easedWrist = true)
         val malo = MasterDefaults.lumbarBadDayTraining("en", easedWrist = true)
-        val arriba = completo.workouts.first { it.name == "Upper Body" }.exercises.map { it.exerciseId }
+        val arribaT = MasterDefaults.lumbarUpperTraining("en", easedAnkle = false, easedWrist = true)
+        val arriba = arribaT.workouts.first { it.name == "Upper Body" }.exercises.map { it.exerciseId }
         // Colgar no dobla la muñeca: la dominada se queda.
         assertEquals(listOf("ex_pull_ups"), arriba)
-        // Revision 48: las únicas flexiones son las de los puños, 1 x 8, en el completo y el
-        // corto. El día malo no las lleva.
-        listOf(completo, corto).forEach { t ->
+        // Revision 48: las únicas flexiones son las de los puños, en el completo y el corto; desde
+        // la 49 también en el de arriba, y 1 x 10. El día malo no las lleva.
+        listOf(completo, corto, arribaT).forEach { t ->
             val flexiones = t.workouts.flatMap { it.exercises }.filter { it.exerciseId in setOf("ex_pushups", "ex_knee_pushups") }
             assertEquals(1, flexiones.size)
             assertTrue(flexiones.single().note.startsWith("On your fists"))
             assertEquals(30, flexiones.single().prepareSec)
+            assertEquals(1 to 10, flexiones.single().sets to flexiones.single().workValue)
         }
         assertTrue(malo.workouts.flatMap { it.exercises }.none { it.exerciseId in setOf("ex_pushups", "ex_knee_pushups") })
         listOf(completo, corto, malo).forEach { t ->
@@ -765,7 +796,7 @@ class LumbarTrainingTest {
 
     @Test
     fun `sin la muñeca vuelven las flexiones y las notas de siempre`() {
-        val arriba = training.workouts.first { it.name == "Upper Body" }.exercises.map { it.exerciseId }
+        val arriba = upper.workouts.first { it.name == "Upper Body" }.exercises.map { it.exerciseId }
         assertEquals(listOf("ex_knee_pushups", "ex_pushups", "ex_pull_ups"), arriba)
         // Las flexiones de después de McGill van sobre los puños siempre (revision 48).
         assertTrue(training.workouts.filter { it.name != "Push-ups" }.flatMap { it.exercises }.none { it.note.startsWith("On your fists") })

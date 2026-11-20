@@ -112,17 +112,23 @@ destapó un olvido —ocho días entrenando sin que nadie mencionara el descanso
 | Día | Qué | Lleva carga de cadera |
 |---|---|---|
 | Lunes | **LUMBAR (short)** | no |
-| Martes | **LUMBAR**, con flexiones y dominadas | **sí** |
+| Martes | **LUMBAR**: piernas (puente, carry y box squat) | **sí** |
 | Miércoles | **LUMBAR (short)** | no |
 | Jueves | **LUMBAR (short)** | no |
-| Viernes | **LUMBAR (short)** (desde el 24-oct, revisión 38) | no |
-| Sábado | **LUMBAR**, con flexiones y dominadas | **sí** |
-| Domingo | **LUMBAR (short)** | no |
+| Viernes | **LUMBAR (upper)**: el corto con las dominadas (revisión 49) | no |
+| Sábado | **LUMBAR**: piernas (puente, carry y box squat) | **sí** |
+| Domingo | **LUMBAR (upper)**: el corto con las dominadas (revisión 49) | no |
 | Cuando la espalda mande | **LUMBAR (bad day)**, en lugar del que tocaba | no |
 
 **Caminar y McGill van los siete días.** En esta fase el descanso no es dejar de moverse:
 su dolor de la mañana aparece por estar quieto, y McGill es resistencia a baja carga, no
 fuerza.
+
+**Desde la revisión 49 (19-nov), propuesta suya, el completo se parte en dos:** piernas el
+martes y el sábado, y las dominadas el viernes y el domingo, en **LUMBAR (upper)**. El completo
+del 14-nov tomó 99 min y el 17 las dominadas se cayeron por tiempo; separadas llegan frescas y
+cada grupo sigue dos veces por semana. Las flexiones sobre los puños (1 x 10) van todos los días
+menos el malo. Lo de abajo cuenta cómo era antes.
 
 **Desde la revisión 38 (24-oct) el completo va dos días, martes y sábado**, y lleva el tren
 superior: flexiones y dominadas. El viernes pasó al corto para que las dominadas no caigan dos

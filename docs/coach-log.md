@@ -5,6 +5,47 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-11-19 — el completo se parte en dos (revisión 49)
+
+**Del sábado 14 al jueves 19, seis de seis:** el completo el sábado y el martes, el corto los
+demás días.
+
+- **Box squat sumo 17.5 · 20 · 20:** *bien* el sábado; el martes, ***ligero* las tres**. La
+  muñeca no se quejó del agarre.
+- **Puente 26 · 31 · 38.5:** el 38.5, *bien* el sábado y *ligero* el martes. Una sola vez: se
+  queda (el 36 esperó a tres).
+- **Flexiones sobre los puños 1 x 8:** *bien* cuatro días; hoy *fácil*, y *"Hice 10"*.
+- **Carry 16 · 20 · 22.5:** *bien* todas. **Dominadas:** el martes saltadas, *"Lo hacemos el
+  viernes"*.
+- **Mañanas:** en 0 del sábado al miércoles; hoy 1, y se le pasó rápido, como siempre.
+
+**Error del coach:** le pregunté cuál era su mancuerna más pesada. Está en `equipo.md` (25 kg):
+*"tú lo sabes, sólo que no haz revisado tus memorias"*.
+
+**Revisión 49, propuesta suya:** *"martes: glute bridge y box squat, viernes: pushups y
+dominadas, sábado: glute bridge y box squat, domingo: pushups y dominadas. Así los tiempos se
+distribuyen mejor"*. El completo del sábado tomó 99 min y el martes las dominadas se cayeron por
+tiempo. Queda así:
+- **Martes y sábado, LUMBAR:** piernas (puente, carry y box squat), sin tren superior.
+- **Viernes y domingo, LUMBAR (upper):** el corto con las dominadas 4 x 2 detrás de las
+  flexiones (~44 min). El corto queda para lunes, miércoles y jueves.
+- **Las flexiones de esos días:** preguntó si pasar a 3 x 8. Él dudaba por la muñeca, y el coach
+  recomendó que no todavía: van las mismas 1 x 10 de todos los días, y las series se prueban
+  cuando las 10 salgan *fácil* varios días seguidos sin molestia.
+- **Box squat sumo 20 · 22.5 · 25** y **flexiones sobre los puños 1 x 10**.
+
+**NIKO, cinco de cinco** (NIKO 5, 6, 1, 2 y 3), todo *bien*. La búlgara a 5 · 10 · 12.5 (revisión
+28), justa. Por fuera del app le dijo que **quiere pantorrillas al menos dos veces por semana,
+para ganar músculo**. Ya las hace una vez, sentada en NIKO 4 (5 · 5 · 7.5 · 7.5, *bien* siete
+semanas seguidas); el coach no lo había visto al proponer.
+
+**NIKO revisión 29 (con su OK):** **NIKO 1 suma la pantorrilla de pie** (`ex_standing_calf`, nueva
+en el catálogo y con instrucciones en español): a una pierna en el borde de la plyobox, 3 x 12
+por pierna, pausa de 2 s abajo, sin peso hasta que la marque *fácil*. De pie trabaja el gemelo;
+la sentada de NIKO 4, el sóleo. **La sentada sube a 7.5 · 7.5 · 10 · 10.**
+
+---
+
 ## 2026-11-14 — sexta revisión semanal: la muñeca y el box squat
 
 **La semana (8 al 13): cuatro sesiones de seis.** El domingo 8, el completo (revisión 46); lunes,

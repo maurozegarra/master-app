@@ -77,4 +77,19 @@ class NikoTrainingTest {
         val llanta = ex(MasterDefaults.NIKO_MUAY_THAI_ID, "ex_tire_jumping")
         assertEquals(listOf(40, 6), listOf(llanta.workValue, llanta.sets))
     }
+
+    @Test
+    fun `revision 29 pantorrillas dos veces por semana, de pie y sentada`() {
+        // Pedido de ella (19-nov): quiere ganar musculo en la pantorrilla.
+        val dePie = ex(MasterDefaults.NIKO_GLUTE_ID, "ex_standing_calf")
+        assertEquals(listOf(3, 12), listOf(dePie.sets, dePie.workValue))
+        assertEquals(listOf("Izquierda", "Derecha"), dePie.sides)
+        assertEquals(true, dePie.note.contains("PAUSA de 2 s abajo"))
+        // Viaja con sus instrucciones: asignar un training no las manda.
+        assertEquals(true, MasterDefaults.catalogInstructions().containsKey("ex_standing_calf"))
+        assertEquals("Pantorrilla de pie", ExerciseCatalog.name("ex_standing_calf", "es"))
+        // La sentada de NIKO 4 sube: siete semanas "bien" con 5 · 5 · 7.5 · 7.5.
+        val sentada = ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_seated_calf")
+        assertEquals(listOf(7.5, 7.5, 10.0, 10.0), sentada.setList.map { it.weight })
+    }
 }

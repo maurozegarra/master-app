@@ -662,6 +662,7 @@ class MasterViewModel(
         val ajenos = setOf(
             MasterDefaults.LUMBAR_ID,
             MasterDefaults.LUMBAR_SHORT_ID,
+            MasterDefaults.LUMBAR_UPPER_ID,
             MasterDefaults.LUMBAR_BAD_DAY_ID,
         )
         val usados = store.loadSessions().map { it.trainingId }.toSet()

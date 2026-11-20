@@ -481,8 +481,17 @@ object MasterDefaults {
      * oficialmente las **flexiones sobre los puños**, 1 x 8 a los 30 s de terminar McGill, en
      * el completo y en el corto: las venía haciendo por su cuenta. El día malo no las lleva:
      * en crisis no se estrena nada.
+     *
+     * Revision 49 (19-nov, propuesta suya): el completo se parte en dos. **Martes y sábado,
+     * piernas** (puente, carry y box squat) y **viernes y domingo, LUMBAR (upper)**: el corto más
+     * las dominadas. El sábado 14 el completo tomó 99 min y el martes 17 las dominadas se
+     * cayeron por tiempo (*"Lo hacemos el viernes"*); separadas llegan frescas y cada grupo se
+     * sigue haciendo dos veces por semana. El corto queda para lunes, miércoles y jueves.
+     * Mientras dure lo de la muñeca, el día de arriba no suma flexiones: van las 1 x 10 de todos
+     * los días. El box squat sumo sube a **20 · 22.5 · 25** (ligero las tres el 17-nov) y las
+     * flexiones sobre los puños a **1 x 10** (*fácil* el 19-nov, e hizo 10).
      */
-    const val LUMBAR_REVISION = 48
+    const val LUMBAR_REVISION = 49
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -581,6 +590,11 @@ object MasterDefaults {
     const val LUMBAR_SHORT_ID = 952016L
 
     /**
+     * "LUMBAR (upper)", viernes y domingo (revision 49). Rango 953000.., como los otros tres.
+     */
+    const val LUMBAR_UPPER_ID = 953016L
+
+    /**
      * Training "LUMBAR": la rutina de columna lumbar (McGill Big 3 + trabajo de cadera).
      *
      * Se siembra una vez, como Friki Niki, y a partir de ahi es del usuario: editarlo no
@@ -617,10 +631,8 @@ object MasterDefaults {
                 // Revision 48: con ids propios, como el tren superior, para no correr los de detrás.
                 LumbarBlocks(lang, seqStart = 950200L, wrist = easedWrist).fistPushups(),
                 b.hipGlute(eased = easedHip, bandWalk = bandWalk, ankle = easedAnkle),
-                // Revision 38: despues de la cadera, que llega fresca y tiene la prioridad. Con
-                // ids propios: LUMBAR_ID (950016) cae dentro de la secuencia de este training, y
-                // los cuatro ids nuevos llegaban justo a el.
-                LumbarBlocks(lang, seqStart = 950100L, wrist = easedWrist).upperBody(),
+                // Revision 49: el tren superior se va a LUMBAR (upper), viernes y domingo. Iba aqui
+                // desde la revision 38, con ids propios desde 950100.
                 // Revision 43: sin caminata de cierre. Va los dias en casa, y ahi no viene detras
                 // lo que la justificaba: dos horas sentado en el camino (ver LUMBAR_REVISION).
             ),
@@ -709,7 +721,8 @@ object MasterDefaults {
             tracksPain = true,
             // Su semana (ver docs/coach.md, La semana): lo que decide cual va primero (TD-167).
             // Revision 38: y el viernes, que deja el completo (ver LUMBAR_REVISION).
-            scheduleDays = setOf(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.WEDNESDAY, java.time.DayOfWeek.THURSDAY, java.time.DayOfWeek.FRIDAY, java.time.DayOfWeek.SUNDAY),
+            // Revision 49: el viernes y el domingo pasan a LUMBAR (upper).
+            scheduleDays = setOf(java.time.DayOfWeek.MONDAY, java.time.DayOfWeek.WEDNESDAY, java.time.DayOfWeek.THURSDAY),
             // Revision 29: el viernes 9, cambiado con el jueves feriado (ver LUMBAR_REVISION).
             scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 9)),
             workouts = listOf(
@@ -723,6 +736,37 @@ object MasterDefaults {
                 LumbarBlocks(lang, seqStart = 952200L, wrist = easedWrist).fistPushups(),
                 b.carryOnly(ankle = easedAnkle),
                 b.walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
+            ),
+            createdAt = now,
+            updatedAt = now,
+        )
+    }
+
+    /**
+     * Training "LUMBAR (upper)": viernes y domingo (revision 49, propuesta suya).
+     *
+     * El corto con las dominadas detras de las flexiones. Salen del completo, donde llegaban
+     * despues de las piernas y con el reloj encima: el 17-nov se cayeron por tiempo. Asi el
+     * completo se queda en piernas y cada grupo sigue dos veces por semana.
+     */
+    fun lumbarUpperTraining(lang: String, easedAnkle: Boolean = LUMBAR_ANKLE_EASED, easedWrist: Boolean = LUMBAR_WRIST_EASED): Training {
+        val b = LumbarBlocks(lang, seqStart = 953000L, wrist = easedWrist)
+        val now = System.currentTimeMillis()
+        return Training(
+            id = LUMBAR_UPPER_ID,
+            name = "LUMBAR (upper)",
+            tracksPain = true,
+            scheduleDays = setOf(java.time.DayOfWeek.FRIDAY, java.time.DayOfWeek.SUNDAY),
+            workouts = listOf(
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = 6.0),
+                b.mobility(ankle = easedAnkle),
+                b.mcgill(),
+                // Con ids propios, como en el completo: LUMBAR_UPPER_ID (953016) cae dentro de la
+                // secuencia de este training.
+                LumbarBlocks(lang, seqStart = 953200L, wrist = easedWrist).fistPushups(),
+                LumbarBlocks(lang, seqStart = 953100L, wrist = easedWrist).upperBody(),
+                LumbarBlocks(lang, seqStart = 953300L, wrist = easedWrist).carryOnly(ankle = easedAnkle),
+                LumbarBlocks(lang, seqStart = 953400L, wrist = easedWrist).walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
             ),
             createdAt = now,
             updatedAt = now,
@@ -899,8 +943,14 @@ object MasterDefaults {
      * Revision 28 (14-nov, sexta revisión semanal): la búlgara de NIKO 1 pasa de 5 · 7.5 · 10 a
      * 5 · 10 · 12.5 kg por mancuerna. El 10-nov marcó ligeras la segunda y la tercera; la
      * primera, bien, se queda.
+     *
+     * Revision 29 (19-nov): pantorrillas dos veces por semana. Se lo pidió ella por fuera del
+     * app: quiere ganar músculo ahí. NIKO 1 suma la pantorrilla DE PIE, a una pierna en el borde
+     * de la plyobox (3 x 12 por pierna, sin peso al inicio; con la rodilla recta trabaja el
+     * gemelo). NIKO 4 conserva la de máquina SENTADA (el sóleo, debajo), que sube de 5 · 5 · 7.5
+     * · 7.5 a 7.5 · 7.5 · 10 · 10: siete semanas seguidas "bien" con lo mismo.
      */
-    const val NIKO_REVISION = 28
+    const val NIKO_REVISION = 29
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1013,6 +1063,11 @@ object MasterDefaults {
                         // thrust hasta 71 es suyo, no una plantilla- y no hay respuesta que pida
                         // cambiarlos (entonces el app aun no preguntaba).
                         b.ex("ex_back_extension", "Banca a 45°. Aprieta los glúteos arriba, sin arquear la espalda baja", 10, sets = 3, rest = 60),
+                        // Revision 29: la pantorrilla de pie, la segunda vez de la semana (la otra es
+                        // la sentada de NIKO 4). Sin peso al inicio: cuando la marque facil, entra
+                        // una mancuerna en la mano libre.
+                        b.ex("ex_standing_calf", "Una pierna, en el borde del cajón, agarrada del rack. Baja lento y PAUSA de 2 s abajo, estirada", 12, sets = 3, rest = 45)
+                            .copy(sides = listOf("Izquierda", "Derecha")),
                     ),
                 ),
                 Workout(
@@ -1257,7 +1312,8 @@ object MasterDefaults {
                         b.ex(
                             "ex_seated_calf", "Sube lento y baja más lento. Rango completo", 12, rest = 45,
                             // Revision 18: 7.5, 7.5 y 10 fueron pesadas el 24-sep.
-                            weightType = WeightType.TOTAL, weights = listOf(5.0, 5.0, 7.5, 7.5),
+                            // Revision 29: 7.5 · 7.5 · 10 · 10, siete semanas "bien" con lo mismo.
+                            weightType = WeightType.TOTAL, weights = listOf(7.5, 7.5, 10.0, 10.0),
                         ),
                     ),
                 ),
@@ -1492,7 +1548,7 @@ object MasterDefaults {
     /**
      * Revision de las instrucciones del catalogo. Subirla vuelve a sembrar las que falten.
      */
-    const val CATALOG_INSTRUCTIONS_REVISION = 13
+    const val CATALOG_INSTRUCTIONS_REVISION = 14
 
     /**
      * Como se hace cada ejercicio del catalogo, para TODOS los telefonos (TD-131).
@@ -1688,6 +1744,17 @@ object MasterDefaults {
                 "Baja los talones todo lo que puedas y siente el estiramiento abajo.",
                 "Sube hasta la punta de los pies y aprieta un segundo arriba.",
                 "Lento en las dos direcciones. Rebotar no entrena la pantorrilla, la castiga.",
+            ),
+        ),
+        // Revision 14: NIKO 1, revision 29 de NIKO.
+        "ex_standing_calf" to ExerciseMedia(
+            listOf(
+                "De pie en el borde del cajón, sobre la parte de adelante de un pie y con el talón en el aire. La otra pierna, doblada atrás.",
+                "Agárrate del rack con una mano, solo para el equilibrio: no te ayudes a subir.",
+                "La rodilla recta, sin trabarla. Así trabaja el gemelo.",
+                "Baja el talón lo más que puedas y quédate 2 s abajo, estirada. Esa pausa es la que hace crecer la pantorrilla.",
+                "Sube hasta la punta del pie y aprieta un segundo arriba. Lento en las dos direcciones, sin rebotar.",
+                "Cuando 12 te salgan fáciles, toma una mancuerna con la mano libre.",
             ),
         ),
         "ex_burpees" to ExerciseMedia(
@@ -2003,7 +2070,7 @@ object MasterDefaults {
     }
 
     fun withLumbarRevision(trainings: List<Training>, lang: String): List<Training> {
-        val nuevos = listOf(lumbarTraining(lang), lumbarShortTraining(lang), lumbarBadDayTraining(lang))
+        val nuevos = listOf(lumbarTraining(lang), lumbarShortTraining(lang), lumbarUpperTraining(lang), lumbarBadDayTraining(lang))
         val out = trainings.toMutableList()
         nuevos.forEach { nuevo ->
             val i = out.indexOfFirst { it.id == nuevo.id }
@@ -2290,12 +2357,15 @@ object MasterDefaults {
          * No es para músculo: ocho lejos del fallo, todos los días, es práctica del patrón (la
          * flexión es una plancha en movimiento, lo que McGill entrena quieto) y mantenimiento.
          * Si un día quiere resistencia de verdad, lo que sube son las repeticiones.
+         *
+         * Revision 49 (19-nov): 1 x 10. Fácil el 19-nov, e hizo 10. Series de verdad (3 x 8) no
+         * todavía: la muñeca sigue recuperándose.
          */
         fun fistPushups(): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Flexiones" else "Push-ups",
             exercises = listOf(
-                reps("ex_pushups", 8, "On your fists, wrist straight. Body straight from head to heels", prep = 30),
+                reps("ex_pushups", 10, "On your fists, wrist straight. Body straight from head to heels", prep = 30),
             ),
         )
 
@@ -2378,11 +2448,12 @@ object MasterDefaults {
                 // Revision 33: con el tobillo, las tres en 17.5. No es semana de subir.
                 // Revision 47: con la muñeca, la mancuerna colgando al costado. Revision 48: tipo
                 // sumo, entre las piernas; al costado chocaba con la plyobox (ver [LUMBAR_REVISION]).
+                // Revision 49: 20 · 22.5 · 25, ligero las tres el 17-nov. La de 25 es la mas pesada.
                 loaded(
                     "ex_box_squat", 8,
                     if (wrist) "Plyobox (51 cm). Sumo: dumbbell hanging between your legs, both hands, wrist straight"
                     else "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor",
-                    if (ankle) listOf(17.5, 17.5, 17.5) else listOf(17.5, 20.0, 20.0), WeightType.DUMBBELL,
+                    if (ankle) listOf(17.5, 17.5, 17.5) else listOf(20.0, 22.5, 25.0), WeightType.DUMBBELL,
                 ).copy(dumbbellCount = 1),
             ),
         )
