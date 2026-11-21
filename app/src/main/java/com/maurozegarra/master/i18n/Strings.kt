@@ -729,6 +729,8 @@ data class MoreStrings(
     val exerciseNote: String = "Note",
     /** El dolor de la mañana en el historial (TD-214): "before moving" es para cuando se contesta. */
     val onWakingShort: String = "On waking",
+    /** La tarjeta de arriba cuando hoy ya entrenó (TD-215): "Done · 52 m". */
+    val doneToday: String = "Done",
     val body: BodyStrings = BodyStrings(),
     val water: WaterStrings = WaterStrings(),
     val coach: CoachStrings = CoachStrings(),

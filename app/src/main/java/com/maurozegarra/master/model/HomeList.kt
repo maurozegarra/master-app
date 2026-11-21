@@ -9,7 +9,10 @@ import java.time.temporal.TemporalAdjusters
 /**
  * Qué se ve en la pantalla principal (8-oct-2026, pedido suyo).
  *
- * **Uno solo arriba:** el training de hoy o, si ya entrenó, el que sigue ([NextTraining]).
+ * **Uno solo arriba:** el training de hoy. Si ya entrenó, el que hizo, en estado *Done*
+ * (TD-215): hasta entonces subía el de mañana, y parecía que hoy faltaba algo. Si hoy no toca
+ * nada, el que sigue ([NextTraining]). Los días que vienen se miran tocándolos en el
+ * calendario ([on]).
  * Todo lo demás va plegado en la fila de abajo, y el gesto de archivar se quitó: con un solo
  * training a la vista no hay nada que sacar de en medio.
  *
@@ -34,11 +37,55 @@ object HomeList {
     /** El lunes de la semana de [today]: donde empieza el calendario de arriba. */
     fun weekStart(today: LocalDate): LocalDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
 
-    /** El de arriba: el de hoy o el que sigue. Null si nada lleva programa. */
+    /** El de arriba: el que hizo hoy, el de hoy o el que sigue. Null si nada lleva programa. */
     fun main(trainings: List<Training>, sessions: List<SessionLog>, today: LocalDate, zone: ZoneId): Training? {
         val visibles = shown(trainings)
+        doneToday(trainings, sessions, today, zone)?.let { s -> visibles.firstOrNull { it.id == s.trainingId } }?.let { return it }
         val id = NextTraining.of(visibles, sessions, today, zone) ?: return null
         return visibles.firstOrNull { it.id == id }
+    }
+
+    /**
+     * La sesión completa de hoy de un training de la lista (TD-215), la última si hay varias.
+     * Una a medias no cuenta, como en [NextTraining]: si la cortó, lo de hoy sigue pendiente.
+     * Vale cualquiera de la lista, no solo el programado: si cambió el corto por el día malo, lo
+     * hecho es el día malo.
+     */
+    fun doneToday(trainings: List<Training>, sessions: List<SessionLog>, today: LocalDate, zone: ZoneId): SessionLog? {
+        val programables = shown(trainings).filter { it.scheduleDays.isNotEmpty() || it.scheduleDates.isNotEmpty() || it.cycleDay != null }
+        if (programables.isEmpty()) return null
+        val ids = shown(trainings).map { it.id }.toSet()
+        return sessions
+            .filter { it.trainingId in ids && it.status == SessionStatus.COMPLETED && Instant.ofEpochMilli(it.completedAt).atZone(zone).toLocalDate() == today }
+            .maxByOrNull { it.completedAt }
+    }
+
+    /**
+     * Lo que toca un día que viene (TD-215), para verlo tocándolo en el calendario.
+     *
+     * - **Por día de la semana:** la fecha puntual manda sobre el día, como en [NextTraining].
+     * - **Por número (NIKO):** supone que entrena todos los días. Si un día no entrena, lo que
+     *   viene se corre solo, porque se cuenta desde lo último que completó: así funciona su
+     *   programa, decidido con él el 20-nov.
+     *
+     * Null si [date] no es posterior a [today] o si ese día no toca nada.
+     */
+    fun on(trainings: List<Training>, sessions: List<SessionLog>, date: LocalDate, today: LocalDate, zone: ZoneId): Training? {
+        if (!date.isAfter(today)) return null
+        val visibles = shown(trainings)
+        val programados = visibles.filter { it.scheduleDays.isNotEmpty() || it.scheduleDates.isNotEmpty() }
+        if (programados.isNotEmpty()) {
+            return programados.firstOrNull { date in it.scheduleDates }
+                ?: programados.firstOrNull { date.dayOfWeek in it.scheduleDays }
+        }
+        val ciclo = visibles.filter { it.cycleDay != null }.sortedBy { it.cycleDay }
+        if (ciclo.isEmpty()) return null
+        // El siguiente que le toca: hoy si todavía no entrenó, mañana si ya.
+        val siguiente = NextTraining.of(ciclo, sessions, today, zone) ?: return null
+        val desde = if (doneToday(ciclo, sessions, today, zone) != null) today.plusDays(1) else today
+        val pasos = java.time.temporal.ChronoUnit.DAYS.between(desde, date).toInt()
+        val i = ciclo.indexOfFirst { it.id == siguiente }
+        return ciclo[(i + pasos) % ciclo.size]
     }
 
     /** Lo de abajo, en orden: el de NIKO de hoy, el resto de NIKO por número y lo demás. */

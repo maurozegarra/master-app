@@ -102,6 +102,10 @@ import com.maurozegarra.master.ui.rememberDragDropState
 import com.maurozegarra.master.ui.theme.Dims
 import com.maurozegarra.master.ui.theme.AppTheme
 import com.maurozegarra.master.util.formatRemaining
+import com.maurozegarra.master.util.formatMinutes
+import com.maurozegarra.master.model.durationMinutes
+import androidx.compose.ui.draw.alpha
+import androidx.compose.material.icons.outlined.Check
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -156,6 +160,22 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
     }
 
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    // El día que viene que se está mirando (TD-215): la tarjeta de arriba muestra lo que toca
+    // ese día, sin play. Al cambiar de día se suelta: el de mañana pasa a ser hoy.
+    var previewDate by remember { mutableStateOf<LocalDate?>(null) }
+    LaunchedEffect(today) { previewDate = null }
+    val canSelectDay: (LocalDate) -> Boolean = { d ->
+        (d.isAfter(today) && vm.trainingOn(d) != null) || (d == today && previewDate != null)
+    }
+    // Un día que viene se mira y se suelta con otro toque; hoy suelta lo que se miraba; los
+    // demás abren sus sesiones, como siempre.
+    val onDayClick: (LocalDate) -> Unit = { d ->
+        when {
+            d.isAfter(today) -> previewDate = if (previewDate == d) null else d
+            previewDate != null && d == today -> previewDate = null
+            else -> { previewDate = null; selectedDate = d }
+        }
+    }
     val timeFmt = remember { java.time.format.DateTimeFormatter.ofPattern("h:mm a") }
     val swipeController = rememberSwipeRowsController()
 
@@ -254,7 +274,7 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
             // La tarjeta de un training visible, con todas sus acciones. Una sola definicion
             // para el que va fijo arriba y para los que se arrastran.
             @Composable
-            fun VisibleCard(tr: Training, isNext: Boolean) {
+            fun VisibleCard(tr: Training, isNext: Boolean, done: SessionLog? = null, previewDay: LocalDate? = null) {
                 TrainingCard(
                             training = tr,
                             accent = accent,
@@ -283,7 +303,11 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                             // o el que sigue, y lo demás baja solo (ver HomeList).
                             onArchive = null,
                     minutos = TrainingDuration.minutes(tr, vm.sessions),
-                    isNext = isNext,
+                    // El destello marca lo pendiente: hecho o solo mirado, no lo lleva.
+                    isNext = isNext && done == null,
+                    done = done != null,
+                    doneMinutes = done?.durationMinutes(),
+                    previewDay = previewDay?.dayOfWeek?.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.ENGLISH),
                 )
             }
             LazyColumn(
@@ -297,12 +321,19 @@ private fun TrainingsList(vm: MasterViewModel, accent: Color, t: Strings, onStar
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item(key = "week_calendar") {
-                    WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- }, onDayClick = { selectedDate = it })
+                    WeekCalendar(weekStart, today, sessionDates, accent, onSwipeLeft = { weekOffset++ }, onSwipeRight = { weekOffset-- }, onDayClick = onDayClick, selected = previewDate, canSelect = canSelectDay)
                 }
                 if (proximo != null) {
                     // Con su propio tipo: no se arrastra ni recibe arrastres, va fijo arriba.
-                    item(key = proximo.id, contentType = "next_training") {
-                        VisibleCard(proximo, isNext = true)
+                    // Mirando un día que viene, la misma tarjeta con lo de ese día (TD-215).
+                    val dia = previewDate
+                    val vista = dia?.let { vm.trainingOn(it) }
+                    item(key = "top_training", contentType = "next_training") {
+                        if (dia != null && vista != null) {
+                            VisibleCard(vista, isNext = false, previewDay = dia)
+                        } else {
+                            VisibleCard(proximo, isNext = true, done = vm.doneToday?.takeIf { it.trainingId == proximo.id })
+                        }
                     }
                 }
                 itemsIndexed(
@@ -480,6 +511,10 @@ private fun WeekCalendar(
     onSwipeLeft: () -> Unit = {},
     onSwipeRight: () -> Unit = {},
     onDayClick: (LocalDate) -> Unit = {},
+    /** El día que viene que se está mirando (TD-215): lleva un aro. */
+    selected: LocalDate? = null,
+    /** Si un día sin sesiones se puede tocar: los que vienen con algo programado (TD-215). */
+    canSelect: (LocalDate) -> Boolean = { false },
 ) {
     val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     var dragAccum by remember { mutableStateOf(0f) }
@@ -521,7 +556,7 @@ private fun WeekCalendar(
             Column(
                 modifier = Modifier
                     .wrapContentSize()
-                    .then(if (hasSessions) Modifier.clickable { onDayClick(date) } else Modifier),
+                    .then(if (hasSessions || canSelect(date)) Modifier.clickable { onDayClick(date) } else Modifier),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 // Medidas copiadas de TickTick (24-oct, con captura suya): sin aros en los
@@ -544,7 +579,9 @@ private fun WeekCalendar(
                         }
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(if (isToday) accent else Color.Transparent),
+                        .background(if (isToday) accent else Color.Transparent)
+                        // Outline, como el play de la tarjeta (TD-215).
+                        .border(1.dp, if (date == selected) AppTheme.colors.textPrimary else Color.Transparent, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -640,6 +677,12 @@ private fun TrainingCard(
     minutos: Int = 0,
     /** El que sigue (TD-167): lleva el destello que recorre el borde. */
     isNext: Boolean = false,
+    /** Hoy ya está hecho (TD-215): el check ocupa el sitio del play y la línea dice "Done". */
+    done: Boolean = false,
+    /** Lo que duró lo de hoy, para "Done · 52 m". */
+    doneMinutes: Int? = null,
+    /** Mirando un día que viene (TD-215): su nombre corto delante, y sin play. */
+    previewDay: String? = null,
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
     // Los de la corrida que viene: en un workout rotativo, los de la variante ACTIVA. Antes
@@ -719,31 +762,39 @@ private fun TrainingCard(
             Text(
                 // Cuantos ejercicios y cuanto dura. El numero de workouts se fue: es como
                 // esta ORGANIZADO el training, no lo que vas a hacer con el.
-                listOfNotNull(
-                    t.exerciseCount(exercises),
-                    "~$minutos ${t.minShort}".takeIf { minutos > 0 },
-                ).joinToString(" · "),
+                if (done) {
+                    listOfNotNull(t.more.doneToday, doneMinutes?.let { formatMinutes(it) }).joinToString(" · ")
+                } else {
+                    listOfNotNull(
+                        previewDay,
+                        t.exerciseCount(exercises),
+                        "~$minutos ${t.minShort}".takeIf { minutos > 0 },
+                    ).joinToString(" · ")
+                },
                 color = AppTheme.colors.textDim,
                 fontSize = 13.sp,
             )
         }
 
+        // Mirando un día que viene, el botón no se ve pero sigue ocupando su sitio: la tarjeta
+        // mide lo mismo en los tres estados (TD-215).
         Box(
             modifier = Modifier
                 .size(48.dp)
+                .alpha(if (previewDay != null) 0f else 1f)
                 .clip(CircleShape)
                 .border(1.dp, accent, CircleShape)
                 // Con otra fila abierta, el tap solo descarta: arrancar un training por
                 // accidente al intentar cerrar un panel es de lo peor que puede pasar aqui.
-                .clickable(enabled = canPlay) {
+                .clickable(enabled = canPlay && !done && previewDay == null) {
                     if (!swipeController.consumeTapIfOpen()) onPlay()
                 },
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                Icons.Filled.PlayArrow,
-                contentDescription = t.start,
-                tint = if (canPlay) accent else AppTheme.colors.textDim,
+                if (done) Icons.Outlined.Check else Icons.Filled.PlayArrow,
+                contentDescription = if (done) t.more.doneToday else t.start,
+                tint = if (canPlay || done) accent else AppTheme.colors.textDim,
             )
         }
 

@@ -2015,12 +2015,20 @@ class MasterViewModel(
     }
 
     /**
-     * El training que sigue (TD-167): el de hoy si todavia no entreno, el de mañana si ya.
-     * Va primero en la lista y lleva el destello. Solo entre lo visible: lo archivado no se
-     * propone. Ver [NextTraining].
+     * El training de arriba (TD-167): el de hoy, hecho o no (TD-215), o el que sigue si hoy no
+     * toca nada. Va primero en la lista. Solo entre lo visible: lo archivado no se propone.
+     * Ver [HomeList.main].
      */
     val nextTrainingId: Long?
         get() = HomeList.main(trainings, sessions, today, java.time.ZoneId.systemDefault())?.id
+
+    /** La sesión con la que hoy quedó hecho (TD-215): la tarjeta de arriba pasa a *Done*. */
+    val doneToday: SessionLog?
+        get() = HomeList.doneToday(trainings, sessions, today, java.time.ZoneId.systemDefault())
+
+    /** Lo que toca un día que viene, para verlo desde el calendario (TD-215). */
+    fun trainingOn(date: java.time.LocalDate): Training? =
+        HomeList.on(trainings, sessions, date, today, java.time.ZoneId.systemDefault())
 
     /**
      * Mover por identidad y no por posicion (TD-167): en la lista, el siguiente va arriba

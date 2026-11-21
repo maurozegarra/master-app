@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-215",
+      "title": "Inicio: lo de hoy queda hecho en la tarjeta, y los días que vienen se miran tocándolos",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO el 19-nov: 'si hice la rutina que me muestre que ya lo hice; hoy no debería mostrarme la rutina de mañana, pero si entro al día 20 veo lo que me toca'. Investigado en apps parecidas (Calisteniapp, Gymkee, Everfit, TrainingPeaks): hoy se marca hecho y los días que vienen se miran en el calendario. Boceto aprobado el 20-nov (1A, con el círculo sin relleno).\n\n(1) Hoy hecho: la misma tarjeta, con un check dentro del círculo en vez del play, y la línea 'Done · 52 m'. Sin la siguiente ni el destello. Cuenta la sesión completa de cualquier training de la lista: si hizo el día malo, sale el día malo. A medias no cuenta. (2) Tocar un día que viene: aro en el día y la tarjeta con lo que toca ('Fri · 11 Exercises · ~44 min'), sin play: solo para verla. Otro toque en ese día o tocar hoy lo suelta. Los días pasados siguen abriendo sus sesiones. (3) NIKO, por número: supone que entrena todos los días y, si falla uno, lo que viene se corre solo.\n\nProbar: hoy, si ya entrenaste, la tarjeta con el check y 'Done · N m'. Tocar mañana: el aro y LUMBAR (upper) o lo que toque, sin play. Tocar hoy: vuelve. Tocar un día pasado: la hoja de sesiones como siempre."
+    },
+    {
       "id": "TD-214",
       "title": "Historial: la duración de la sesión en la tarjeta, las horas al abrirla y el despertar solo con dolor",
       "category": "UI",

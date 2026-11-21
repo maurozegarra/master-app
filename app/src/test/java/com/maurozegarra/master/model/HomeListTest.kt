@@ -2,6 +2,7 @@ package com.maurozegarra.master.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -41,10 +42,58 @@ class HomeListTest {
     }
 
     @Test
-    fun `arriba solo el que sigue, y ya entreno el de hoy`() {
-        // El jueves feriado hizo el completo: arriba va el corto del viernes, solo.
+    fun `ya entreno hoy, arriba sigue el de hoy y hecho`() {
+        // TD-215 (20-nov): hasta aqui subia el de mañana, y parecia que hoy faltaba algo. Ahora
+        // se queda el que hizo, y la tarjeta lo muestra hecho.
         val hoy = listOf(hecha("LUMBAR", at(jueves, 9)).copy(trainingId = 2L))
-        assertEquals(corto, HomeList.main(todos, hoy, jueves, lima))
+        assertEquals(completo, HomeList.main(todos, hoy, jueves, lima))
+        assertEquals(hoy.single(), HomeList.doneToday(todos, hoy, jueves, lima))
+        // Al dia siguiente, el de ese dia, pendiente.
+        assertEquals(corto, HomeList.main(todos, hoy, jueves.plusDays(1), lima))
+        assertNull(HomeList.doneToday(todos, hoy, jueves.plusDays(1), lima))
+    }
+
+    @Test
+    fun `lo hecho es lo que hizo, aunque no fuera lo programado`() {
+        // Cambio el completo por el dia malo: lo hecho es el dia malo.
+        val hoy = listOf(hecha("LUMBAR (bad day)", at(jueves, 9)).copy(trainingId = 3L))
+        assertEquals(malo, HomeList.main(todos, hoy, jueves, lima))
+    }
+
+    @Test
+    fun `a medias no esta hecho`() {
+        val hoy = listOf(hecha("LUMBAR", at(jueves, 9)).copy(trainingId = 2L, status = SessionStatus.PARTIAL))
+        assertNull(HomeList.doneToday(todos, hoy, jueves, lima))
+        assertEquals(completo, HomeList.main(todos, hoy, jueves, lima))
+    }
+
+    @Test
+    fun `un dia que viene muestra lo que le toca`() {
+        // TD-215: tocando el viernes en el calendario, el corto; el jueves siguiente, el completo.
+        assertEquals(corto, HomeList.on(todos, emptyList(), jueves.plusDays(1), jueves, lima))
+        assertEquals(completo, HomeList.on(todos, emptyList(), jueves.plusDays(7), jueves, lima))
+        // El sabado no toca nada; hoy y lo pasado no se miran asi.
+        assertNull(HomeList.on(todos, emptyList(), jueves.plusDays(2), jueves, lima))
+        assertNull(HomeList.on(todos, emptyList(), jueves, jueves, lima))
+        assertNull(HomeList.on(todos, emptyList(), jueves.minusDays(1), jueves, lima))
+        // La fecha puntual manda sobre el dia de la semana.
+        val cambiado = corto.copy(scheduleDates = setOf(jueves.plusDays(7)))
+        assertEquals(cambiado, HomeList.on(listOf(completo, cambiado), emptyList(), jueves.plusDays(7), jueves, lima))
+    }
+
+    @Test
+    fun `NIKO cuenta los dias que vienen desde lo ultimo que hizo`() {
+        // Su telefono: solo rutinas numeradas. El miercoles hizo NIKO 3.
+        val suyo = niko
+        val ayer = listOf(hecha("NIKO 3", at(jueves.minusDays(1), 9)).copy(trainingId = 103L))
+        // Hoy le toca NIKO 4 y no entreno todavia: mañana NIKO 5, pasado NIKO 6, despues NIKO 1.
+        assertEquals("NIKO 5", HomeList.on(suyo, ayer, jueves.plusDays(1), jueves, lima)?.name)
+        assertEquals("NIKO 6", HomeList.on(suyo, ayer, jueves.plusDays(2), jueves, lima)?.name)
+        assertEquals("NIKO 1", HomeList.on(suyo, ayer, jueves.plusDays(3), jueves, lima)?.name)
+        // Si hoy hizo NIKO 4, arriba queda NIKO 4 hecho y mañana sigue NIKO 5.
+        val hoy = ayer + hecha("NIKO 4", at(jueves, 9)).copy(trainingId = 104L)
+        assertEquals("NIKO 4", HomeList.main(suyo, hoy, jueves, lima)?.name)
+        assertEquals("NIKO 5", HomeList.on(suyo, hoy, jueves.plusDays(1), jueves, lima)?.name)
     }
 
     @Test
