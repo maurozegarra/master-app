@@ -2,6 +2,13 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-216",
+      "title": "Hoja del timer: fuera Recent de la pestaña Timer",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO el 22-nov: 'usándolo me di cuenta que no tiene sentido Recent, con el Presets es suficiente'. Sale la sección Recent de la pestaña Timer, de raíz: el app deja de guardar los timers recientes y borra la lista que ya estaba guardada. La pestaña Alarm conserva su Recent (decidido con él): ahí no hay presets y una hora sí se repite. El nombre de '+ Name' sigue valiendo para el preset que se toque. Ajuste del mismo día: 'End full screen' y '+ Name' pasan al pie, después de Presets.\n\nProbar: el + del tablero, pestaña Timer: Ends at, Presets y al pie 'End full screen' y '+ Name', sin Recent. Escribir un nombre y tocar un preset: el timer sale con ese nombre. Pestaña Alarm: su Recent sigue ahí."
+    },
+    {
       "id": "TD-215",
       "title": "Inicio: lo de hoy queda hecho en la tarjeta, y los días que vienen se miran tocándolos",
       "category": "UI",

@@ -58,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maurozegarra.master.R
 import com.maurozegarra.master.i18n.Strings
-import com.maurozegarra.master.timer.RecentTimer
 import com.maurozegarra.master.timer.TimerAlarm
 import com.maurozegarra.master.timer.TimerPlan
 import com.maurozegarra.master.timer.TimerRun
@@ -288,6 +287,9 @@ private fun NewTimerSheet(accent: Color, t: Strings, onDismiss: () -> Unit) {
  * La pestaña Timer (TD-211): todo arranca de un toque, y lo de arriba -cómo termina y el
  * nombre- vale para lo que se toque debajo. Fuera "+ Custom" con su rueda: para él bastaba
  * con que volviera "Ends at", y las duraciones las cubren los presets.
+ *
+ * Sin recientes (TD-216, 22-nov): usándolo, repetían lo que ya está en los presets. Los de la
+ * pestaña Alarm se quedan: ahí no hay presets, y una hora sí se repite.
  */
 @Composable
 private fun TimerTab(accent: Color, t: Strings, onStarted: () -> Unit) {
@@ -295,66 +297,20 @@ private fun TimerTab(accent: Color, t: Strings, onStarted: () -> Unit) {
     val w = t.more.timer
     val c = AppTheme.colors
     val zone = remember { ZoneId.systemDefault() }
-    val store = remember { TimerStore(ctx) }
-    var recientes by remember { mutableStateOf(store.recents()) }
     var pantalla by remember { mutableStateOf(false) }
     var nombre by remember { mutableStateOf("") }
     val ahora by produceState(System.currentTimeMillis()) { while (true) { delay(15_000); value = System.currentTimeMillis() } }
-    val swipe = rememberSwipeRowsController()
 
-    fun arrancar(ms: Long, suNombre: String = "", reciente: Boolean = true) {
-        TimerAlarm.start(ctx, nombre.trim().ifBlank { suNombre }, ms, pantalla, recent = reciente)
+    fun arrancar(ms: Long) {
+        TimerAlarm.start(ctx, nombre.trim(), ms, pantalla)
         onStarted()
     }
 
-    // Un switch y no el selector de pestañas (TD-211, 10-nov): con el mismo selector que
-    // Timer | Alarm, "Notification" competía con "Timer". Es un sí o no; apagado, notificación.
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { pantalla = !pantalla }
-            .padding(top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(w.endFullScreen, color = c.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
-        // Sin la zona mínima de 48 dp del switch: aquí la fila entera es la que se toca, y esos
-        // 48 dp eran casi todo el aire que sobraba (10-nov).
-        @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-        androidx.compose.runtime.CompositionLocalProvider(
-            androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement provides false,
-        ) {
-            com.maurozegarra.master.ui.AppSwitch(pantalla, accent, outlined = true) { pantalla = it }
-        }
-    }
-    NameField(nombre, { nombre = it }, accent, t)
-
-    Text(w.endsAtLabel, color = c.textDim, fontSize = 13.sp)
+    // Ends at y los presets arriba, el switch y el nombre al pie (TD-216, 22-nov, a pedido suyo).
+    Text(w.endsAtLabel, color = c.textDim, fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
     Row(Modifier.toSheetEdge().horizontalScroll(rememberScrollState()).padding(horizontal = SHEET_PAD), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         TimerPlan.endsAtChips(ahora).forEach { fin ->
-            OutlineChip(TimerPlan.clock12(fin, zone), accent) { arrancar(fin - System.currentTimeMillis(), reciente = false) }
-        }
-    }
-
-    if (recientes.isNotEmpty()) {
-        Spacer(Modifier.height(8.dp))
-        Text(w.recent, color = c.textDim, fontSize = 13.sp)
-        // Borrar es deslizar, como un timer de la franja (TD-211).
-        recientes.forEach { r ->
-            key(r) {
-                SwipeActionsRow(
-                    actions = listOf(
-                        SwipeAction(Icons.Outlined.Delete, t.delete) {
-                            recientes = recientes - r
-                            store.saveRecents(recientes)
-                        },
-                    ),
-                    controller = swipe,
-                    outlined = false,
-                ) {
-                    RecentRow(r, accent, t) { arrancar(r.durationMs, r.name) }
-                }
-            }
+            OutlineChip(TimerPlan.clock12(fin, zone), accent) { arrancar(fin - System.currentTimeMillis()) }
         }
     }
 
@@ -377,6 +333,29 @@ private fun TimerTab(accent: Color, t: Strings, onStarted: () -> Unit) {
             }
         }
     }
+
+    Spacer(Modifier.height(8.dp))
+    // Un switch y no el selector de pestañas (TD-211, 10-nov): con el mismo selector que
+    // Timer | Alarm, "Notification" competía con "Timer". Es un sí o no; apagado, notificación.
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { pantalla = !pantalla }
+            .padding(top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(w.endFullScreen, color = c.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f))
+        // Sin la zona mínima de 48 dp del switch: aquí la fila entera es la que se toca, y esos
+        // 48 dp eran casi todo el aire que sobraba (10-nov).
+        @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+        androidx.compose.runtime.CompositionLocalProvider(
+            androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement provides false,
+        ) {
+            com.maurozegarra.master.ui.AppSwitch(pantalla, accent, outlined = true) { pantalla = it }
+        }
+    }
+    NameField(nombre, { nombre = it }, accent, t)
 }
 
 /**
@@ -461,28 +440,6 @@ private fun OutlineChip(text: String, accent: Color, onDelete: (() -> Unit)? = n
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun RecentRow(r: RecentTimer, accent: Color, t: Strings, onClick: () -> Unit) {
-    val c = AppTheme.colors
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(end = 4.dp, top = 10.dp, bottom = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (r.alarm) {
-            Icon(Icons.Outlined.Alarm, contentDescription = null, tint = accent, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(6.dp))
-        }
-        Text(r.name.ifBlank { t.more.timer.timer }, color = c.textPrimary, fontSize = 15.sp, modifier = Modifier.weight(1f), maxLines = 1)
-        Text(TimerPlan.format(r.durationMs), color = c.textPrimary, fontSize = 16.sp, fontFamily = TimerMono)
-        Spacer(Modifier.width(8.dp))
-        Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = accent)
     }
 }
 

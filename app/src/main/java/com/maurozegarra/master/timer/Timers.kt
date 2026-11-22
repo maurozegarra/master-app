@@ -24,9 +24,6 @@ data class TimerRun(
     val paused: Boolean get() = pausedLeftMs != null
 }
 
-/** Uno de los últimos usados, para arrancarlo otra vez de un toque. */
-data class RecentTimer(val name: String, val durationMs: Long, val alarm: Boolean)
-
 /**
  * Una alarma reciente de la pestaña Alarm (TD-200), por HORA del día y no por duración: "la
  * siesta de la 1:30" es la 1:30 todos los días, y una duración guardada sonaría a otra hora.
@@ -39,7 +36,7 @@ object TimerPlan {
     /** Los presets de su Galaxy Watch8 (9-oct), en segundos. */
     val PRESETS_SEC: List<Int> = listOf(30, 60, 120, 180, 240, 300, 600, 900, 1200, 1500, 1800, 3600)
 
-    /** Cuántos recientes se guardan: los de su reloj. */
+    /** Cuántas alarmas recientes se guardan: los recientes de su reloj. */
     const val RECENT_MAX = 5
 
     /** Lo que suma "Snooze" en la pantalla de alarma del timer. */
@@ -69,10 +66,6 @@ object TimerPlan {
      */
     fun stripOrder(runs: List<TimerRun>): List<TimerRun> = runs.asReversed()
 
-    /** Lo último arriba, sin repetir el mismo timer, y solo [RECENT_MAX]. */
-    fun addRecent(list: List<RecentTimer>, r: RecentTimer): List<RecentTimer> =
-        (listOf(r) + list.filter { it != r }).take(RECENT_MAX)
-
     /**
      * Los chips de "Ends at" de su mini-timer: las seis horas siguientes múltiplos de 5
      * minutos, a un minuto o más de ahora. A las 23:22 son 23:25, 23:30... A las 23:24:30 la
@@ -87,7 +80,7 @@ object TimerPlan {
         return (0 until count).map { primero + it * paso }
     }
 
-    /** Lo mismo para las alarmas por hora (TD-200). */
+    /** Lo último arriba, sin repetir la misma alarma, y solo [RECENT_MAX] (TD-200). */
     fun addAlarmRecent(list: List<RecentAlarm>, r: RecentAlarm): List<RecentAlarm> =
         (listOf(r) + list.filter { it != r }).take(RECENT_MAX)
 
@@ -210,18 +203,6 @@ object TimerPlan {
                 alarm = o.optBoolean("alarm"),
                 pausedLeftMs = if (o.has("pausedLeftMs")) o.optLong("pausedLeftMs") else null,
             )
-        }
-    }.getOrDefault(emptyList())
-
-    fun encodeRecents(list: List<RecentTimer>): String = JSONArray().apply {
-        list.forEach { put(JSONObject().put("name", it.name).put("durationMs", it.durationMs).put("alarm", it.alarm)) }
-    }.toString()
-
-    fun decodeRecents(json: String): List<RecentTimer> = runCatching {
-        val a = JSONArray(json)
-        (0 until a.length()).mapNotNull { i ->
-            val o = a.optJSONObject(i) ?: return@mapNotNull null
-            RecentTimer(o.optString("name"), o.optLong("durationMs").takeIf { it > 0 } ?: return@mapNotNull null, o.optBoolean("alarm"))
         }
     }.getOrDefault(emptyList())
 

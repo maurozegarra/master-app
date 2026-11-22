@@ -15,17 +15,16 @@ class TimerStore(context: Context) {
 
     private val prefs = context.applicationContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
+    init {
+        // Los recientes del timer se fueron (TD-216): lo que quedó guardado no lo lee nadie.
+        if (prefs.contains(KEY_OLD_RECENTS)) prefs.edit().remove(KEY_OLD_RECENTS).apply()
+    }
+
     fun runs(): List<TimerRun> = TimerPlan.decodeRuns(prefs.getString(KEY_RUNS, "[]") ?: "[]")
 
     fun saveRuns(list: List<TimerRun>) {
         prefs.edit().putString(KEY_RUNS, TimerPlan.encodeRuns(list)).apply()
         state.value = list
-    }
-
-    fun recents(): List<RecentTimer> = TimerPlan.decodeRecents(prefs.getString(KEY_RECENTS, "[]") ?: "[]")
-
-    fun saveRecents(list: List<RecentTimer>) {
-        prefs.edit().putString(KEY_RECENTS, TimerPlan.encodeRecents(list)).apply()
     }
 
     fun alarmRecents(): List<RecentAlarm> = TimerPlan.decodeAlarmRecents(prefs.getString(KEY_ALARM_RECENTS, "[]") ?: "[]")
@@ -42,7 +41,7 @@ class TimerStore(context: Context) {
     companion object {
         private const val FILE = "timers"
         private const val KEY_RUNS = "runs"
-        private const val KEY_RECENTS = "recents"
+        private const val KEY_OLD_RECENTS = "recents"
         private const val KEY_ALARM_RECENTS = "alarm_recents"
         private const val KEY_ALARM_TAB = "alarm_tab"
 

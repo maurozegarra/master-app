@@ -50,15 +50,17 @@ class TimerPlanTest {
     }
 
     @Test
-    fun `los recientes van arriba, sin repetir, y son cinco`() {
-        var r = emptyList<RecentTimer>()
-        (1..7).forEach { r = TimerPlan.addRecent(r, RecentTimer("", it * 60_000L, false)) }
+    fun `las alarmas recientes van arriba, sin repetir, y son cinco`() {
+        // Hasta TD-216 (22-nov) esto lo probaban los recientes del timer, que se fueron: en la
+        // pestaña Timer repetían los presets. Las alarmas conservan los suyos.
+        var r = emptyList<RecentAlarm>()
+        (1..7).forEach { r = TimerPlan.addAlarmRecent(r, RecentAlarm("", it * 60)) }
         assertEquals(5, r.size)
-        assertEquals(7 * 60_000L, r.first().durationMs)
-        r = TimerPlan.addRecent(r, RecentTimer("", 4 * 60_000L, false))
-        assertEquals(4 * 60_000L, r.first().durationMs)
+        assertEquals(7 * 60, r.first().minuteOfDay)
+        r = TimerPlan.addAlarmRecent(r, RecentAlarm("", 4 * 60))
+        assertEquals(4 * 60, r.first().minuteOfDay)
         assertEquals(5, r.size)
-        assertEquals(1, r.count { it.durationMs == 4 * 60_000L })
+        assertEquals(1, r.count { it.minuteOfDay == 4 * 60 })
     }
 
     @Test
@@ -95,8 +97,6 @@ class TimerPlanTest {
             TimerPlan.pause(TimerPlan.start("b", "nap", 1_800_000, true, at(13, 30)), at(13, 31)),
         )
         assertEquals(runs, TimerPlan.decodeRuns(TimerPlan.encodeRuns(runs)))
-        val rec = listOf(RecentTimer("disconnect heater", 1_200_000, false))
-        assertEquals(rec, TimerPlan.decodeRecents(TimerPlan.encodeRecents(rec)))
     }
 
     @Test
