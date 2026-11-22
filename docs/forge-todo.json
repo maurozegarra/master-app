@@ -5,7 +5,7 @@
       "id": "TD-218",
       "title": "Hoja del timer: '+ Name' abre un campo; que sea el campo directo",
       "category": "UI",
-      "status": "pending",
+      "status": "done",
       "manual": "APUNTADO el 22-nov, al revisar el flujo del agua (TD-217): en la hoja del timer, '+ Name' es un texto que al tocarlo abre el campo del nombre, en Timer y en Alarm. Es el mismo paso de más que tenía 'Custom' en el agua. Por proponer: el campo directo, sin el paso intermedio. No tocar sin su OK."
     },
     {

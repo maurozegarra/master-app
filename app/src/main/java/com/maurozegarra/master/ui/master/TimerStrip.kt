@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -359,40 +360,39 @@ private fun TimerTab(accent: Color, t: Strings, onStarted: () -> Unit) {
 }
 
 /**
- * El nombre, que se usa poco (TD-211): un "+ Name" chico, y el campo solo cuando se toca. Con
- * algo escrito se queda abierto.
+ * El nombre, que se usa poco: el campo directo, de un toque (TD-218, 22-nov). Era un "+ Name"
+ * que al tocarlo abría el campo (TD-211): el mismo paso de más que el "Custom" del agua. Con el
+ * riel gris de la barra de cantidad del agua y su alto, no el del campo con etiqueta: la hoja
+ * mide lo que la pestaña Alarm, y ese habría crecido las dos.
  */
 @Composable
 private fun NameField(value: String, onChange: (String) -> Unit, accent: Color, t: Strings) {
     val w = t.more.timer
-    var abierto by remember { mutableStateOf(value.isNotEmpty()) }
-    if (!abierto) {
-        // El "+" como texto y no como ícono: el ícono trae margen propio y el + quedaba más
-        // adentro que los títulos de la hoja (10-nov).
-        Text(
-            androidx.compose.ui.text.buildAnnotatedString {
-                pushStyle(androidx.compose.ui.text.SpanStyle(color = accent, fontWeight = FontWeight.Bold, fontSize = 18.sp))
-                append("+  ")
-                pop()
-                append(w.nameShort)
-            },
-            color = AppTheme.colors.textPrimary,
-            fontSize = 15.sp,
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .clickable { abierto = true }
-                .padding(end = 8.dp, top = 8.dp, bottom = 8.dp),
-        )
-        return
-    }
-    val pedir = remember { androidx.compose.ui.focus.FocusRequester() }
-    LaunchedEffect(Unit) { pedir.requestFocus() }
-    com.maurozegarra.master.ui.AppTextField(
+    val c = AppTheme.colors
+    androidx.compose.foundation.text.BasicTextField(
         value = value,
         onValueChange = { onChange(it.take(40)) },
-        label = w.name,
-        modifier = Modifier.fillMaxWidth().focusRequester(pedir),
-        accent = accent,
+        singleLine = true,
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+            capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences,
+            imeAction = androidx.compose.ui.text.input.ImeAction.Done,
+        ),
+        cursorBrush = androidx.compose.ui.graphics.SolidColor(accent),
+        textStyle = androidx.compose.ui.text.TextStyle(color = c.textPrimary, fontSize = 15.sp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(c.track),
+        decorationBox = { campo ->
+            // El campo siempre en la composición y "Name" encima mientras está vacío: así se
+            // aprendió en el agua (TD-217), donde el texto en su lugar dejaba el teclado sin
+            // dónde escribir.
+            Box(Modifier.fillMaxSize().padding(horizontal = 14.dp), contentAlignment = Alignment.CenterStart) {
+                campo()
+                if (value.isEmpty()) Text(w.nameShort, color = c.textDim, fontSize = 15.sp)
+            }
+        },
     )
 }
 

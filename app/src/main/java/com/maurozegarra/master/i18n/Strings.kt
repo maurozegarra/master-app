@@ -745,8 +745,7 @@ data class TimerStrings(
     val newTimer: String = "New timer",
     val recent: String = "Recent",
     val presets: String = "Presets",
-    val name: String = "Name (optional)",
-    /** El "+ Name" que abre el campo (TD-211). */
+    /** Lo que dice el campo del nombre vacío (TD-218). */
     val nameShort: String = "Name",
     // TD-200: las pestañas, las ruedas y cómo termina un timer.
     val alarm: String = "Alarm",
