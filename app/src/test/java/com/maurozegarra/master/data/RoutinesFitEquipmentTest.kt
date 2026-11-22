@@ -43,10 +43,11 @@ class RoutinesFitEquipmentTest {
     fun `cada peso con mancuerna es una mancuerna que existe`() {
         // Los que van con PESA RUSA, que el app carga como mancuerna (una, por serie). Su nota
         // lo dice, y sus pesos tienen que ser pesas rusas que existen (revision 35, el carry).
-        val pesasRusas = setOf("ex_suitcase_carry")
+        // Revision 50: el box squat, con la de 24.
+        val pesasRusas = setOf("ex_suitcase_carry", "ex_box_squat")
         rutinas.forEach { t ->
             t.workouts.flatMap { it.exercises }.filter { it.weightType == WeightType.DUMBBELL }.forEach { e ->
-                val rusa = e.exerciseId in pesasRusas && e.note.startsWith("Kettlebell")
+                val rusa = e.exerciseId in pesasRusas && e.note.contains("kettlebell", ignoreCase = true)
                 (0 until e.sets).forEach { i ->
                     val kg = e.setAt(i).weight
                     // Revision 40: la serie de arriba del carry va con la mancuerna de 22.5, y

@@ -490,8 +490,14 @@ object MasterDefaults {
      * Mientras dure lo de la muñeca, el día de arriba no suma flexiones: van las 1 x 10 de todos
      * los días. El box squat sumo sube a **20 · 22.5 · 25** (ligero las tres el 17-nov) y las
      * flexiones sobre los puños a **1 x 10** (*fácil* el 19-nov, e hizo 10).
+     *
+     * Revision 50 (22-nov, séptima revisión semanal): el box squat pasa a la **kettlebell de 24**,
+     * 3 x 8 con la misma: el 21-nov lo hizo así por su cuenta, recién comprada, y la mancuerna de
+     * 25 era el techo. En LUMBAR (upper) las flexiones van **2 x 10**: hoy hizo dos series por su
+     * cuenta y la muñeca respondió bien. Y la caminata de entrada de piernas baja de 12 a **10
+     * min**, como las demás: lo pidió en la nota del 21-nov.
      */
-    const val LUMBAR_REVISION = 49
+    const val LUMBAR_REVISION = 50
 
     /**
      * El tobillo izquierdo torcido el sabado 10-oct, al bajar de la vereda.
@@ -625,7 +631,8 @@ object MasterDefaults {
             // Revision 46: el domingo 8-nov, a pedido suyo (ver LUMBAR_REVISION).
             scheduleDates = setOf(java.time.LocalDate.of(2026, 10, 8), java.time.LocalDate.of(2026, 11, 8)),
             workouts = listOf(
-                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 720, note = "Arms loose", kmh = 6.0),
+                // Revision 50: 10 min, como el corto y el upper (la pidió así el 21-nov).
+                b.walk(if (lang == "es") "Caminata de entrada" else "Warm Walk", sec = 600, note = "Arms loose", kmh = 6.0),
                 b.mobility(ankle = easedAnkle),
                 b.mcgill(),
                 // Revision 48: con ids propios, como el tren superior, para no correr los de detrás.
@@ -763,7 +770,8 @@ object MasterDefaults {
                 b.mcgill(),
                 // Con ids propios, como en el completo: LUMBAR_UPPER_ID (953016) cae dentro de la
                 // secuencia de este training.
-                LumbarBlocks(lang, seqStart = 953200L, wrist = easedWrist).fistPushups(),
+                // Revision 50: 2 x 10 en este día; el resto de la semana sigue en 1 x 10.
+                LumbarBlocks(lang, seqStart = 953200L, wrist = easedWrist).fistPushups(sets = 2),
                 LumbarBlocks(lang, seqStart = 953100L, wrist = easedWrist).upperBody(),
                 LumbarBlocks(lang, seqStart = 953300L, wrist = easedWrist).carryOnly(ankle = easedAnkle),
                 LumbarBlocks(lang, seqStart = 953400L, wrist = easedWrist).walk(if (lang == "es") "Caminata de cierre" else "Cool Walk", sec = 300, note = "No toe-touch stretching after", kmh = 5.0),
@@ -949,8 +957,12 @@ object MasterDefaults {
      * de la plyobox (3 x 12 por pierna, sin peso al inicio; con la rodilla recta trabaja el
      * gemelo). NIKO 4 conserva la de máquina SENTADA (el sóleo, debajo), que sube de 5 · 5 · 7.5
      * · 7.5 a 7.5 · 7.5 · 10 · 10: siete semanas seguidas "bien" con lo mismo.
+     *
+     * Revision 30 (22-nov, séptima revisión semanal): el puente de NIKO 4 pasa de 2 x 15 a **2 x
+     * 20, con 3 s arriba**. Fácil las dos series el 20-nov, y ya va con la banda fuerte: no hay
+     * banda a la que subir.
      */
-    const val NIKO_REVISION = 29
+    const val NIKO_REVISION = 30
 
     /** Id fijo del dia de gluteo pesado. Ver [LUMBAR_ID] para por que va escrito. */
     const val NIKO_GLUTE_ID = 960001L
@@ -1270,7 +1282,9 @@ object MasterDefaults {
                         // las rodillas -lo marco facil-, y la abduccion de lado con tobillera pasa a
                         // caminata lateral con banda, que trabaja lo mismo de pie.
                         // Revision 24: la banda FUERTE. Fáciles las dos cosas con la media el 16-oct.
-                        b.ex("ex_glute_bridge", "Banda FUERTE sobre las rodillas, sin dejar que se junten. Aprieta 2 s arriba", 15, sets = 2, rest = 30),
+                        // Revision 30 (22-nov): fácil las dos series el 20-nov, y ya es la banda más
+                        // fuerte. Sube lo que queda: 20 repeticiones y 3 s arriba.
+                        b.ex("ex_glute_bridge", "Banda FUERTE sobre las rodillas, sin dejar que se junten. Aprieta 3 s arriba", 20, sets = 2, rest = 30),
                         b.ex("ex_lateral_band_walk", "Banda FUERTE sobre las rodillas. 15 pasos a cada lado", 15, sets = 2, rest = 30)
                             .copy(sides = listOf("Izquierda", "Derecha"), alternateSides = true),
                     ),
@@ -2360,12 +2374,14 @@ object MasterDefaults {
          *
          * Revision 49 (19-nov): 1 x 10. Fácil el 19-nov, e hizo 10. Series de verdad (3 x 8) no
          * todavía: la muñeca sigue recuperándose.
+         *
+         * Revision 50 (22-nov): [sets] para LUMBAR (upper), que va 2 x 10.
          */
-        fun fistPushups(): Workout = Workout(
+        fun fistPushups(sets: Int = 1): Workout = Workout(
             id = id(),
             name = if (lang == "es") "Flexiones" else "Push-ups",
             exercises = listOf(
-                reps("ex_pushups", 10, "On your fists, wrist straight. Body straight from head to heels", prep = 30),
+                reps("ex_pushups", 10, "On your fists, wrist straight. Body straight from head to heels", sets = sets, rest = if (sets > 1) 60 else 0, prep = 30),
             ),
         )
 
@@ -2449,11 +2465,12 @@ object MasterDefaults {
                 // Revision 47: con la muñeca, la mancuerna colgando al costado. Revision 48: tipo
                 // sumo, entre las piernas; al costado chocaba con la plyobox (ver [LUMBAR_REVISION]).
                 // Revision 49: 20 · 22.5 · 25, ligero las tres el 17-nov. La de 25 es la mas pesada.
+                // Revision 50: la kettlebell de 24 en las tres, como lo hizo el 21-nov.
                 loaded(
                     "ex_box_squat", 8,
-                    if (wrist) "Plyobox (51 cm). Sumo: dumbbell hanging between your legs, both hands, wrist straight"
+                    if (wrist) "Plyobox (51 cm). Sumo: 24 kg kettlebell hanging between your legs, both hands on the handle, wrist straight"
                     else "Plyobox (51 cm). Dumbbell on the step at your side, never on the floor",
-                    if (ankle) listOf(17.5, 17.5, 17.5) else listOf(20.0, 22.5, 25.0), WeightType.DUMBBELL,
+                    if (ankle) listOf(17.5, 17.5, 17.5) else listOf(24.0, 24.0, 24.0), WeightType.DUMBBELL,
                 ).copy(dumbbellCount = 1),
             ),
         )

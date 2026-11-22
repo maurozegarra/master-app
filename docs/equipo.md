@@ -59,9 +59,9 @@ La de 22.5 no entro en el inventario del 18-sep; la agrego el 19.
 
 ### Otros pesos
 
-- **Kettlebells (pesas rusas), en pares:** 4 · 6 · 8 · 10 · 12 · 14 · 16 · 20 kg. Hasta el
-  16-oct-2026 eran solo las 2 de 4; ese día ya estaban las demás. Falta la de 18, y piensa
-  comprar más de 20 más adelante.
+- **Kettlebells (pesas rusas), en pares:** 4 · 6 · 8 · 10 · 12 · 14 · 16 · 20 · **24** kg. Hasta el
+  16-oct-2026 eran solo las 2 de 4; ese día ya estaban las demás. El par de **24 entró el
+  22-nov-2026**: el 21 ya hizo con una el box squat, 3 x 8. Falta la de 18.
 - **Chaleco lastrado:** hasta 10 kg, de kilo en kilo.
 - **Tobilleras:** pares de 0.5, 1, 2 y 4 kg.
 - **Banda elástica:** una sola, ligera, en uso para manguito rotador.
@@ -152,6 +152,8 @@ sentadilla.
   carry de 15 y la sentadilla de 17.5 existen como mancuerna fija.
 - **El puente tiene recorrido largo por delante**: 41, 46 y más con la misma barra.
 - **El techo de las mancuernas es 25 kg**, con saltos de 2.5 hasta ahí.
+- **Las kettlebells llegan a 24**, con un salto de 20 a 24 de golpe. Para el box squat
+  rinde igual que la mancuerna de 25, y el asa le deja la muñeca recta.
 - **La caminadora no es el límite**: 18 km/h contra los 6 que camina hoy.
 - **Bandas: compradas y en casa.** Las dos power bands el 26-sep y el set de tela el 27-28
   (ver la lista de arriba). Esta tabla es lo que se pidió el 21-sep, cuando faltaban; se

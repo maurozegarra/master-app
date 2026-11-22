@@ -5,6 +5,36 @@ Lo más reciente arriba.
 
 ---
 
+## 2026-11-22 — séptima revisión semanal: la kettlebell de 24 (revisión 50)
+
+**Del jueves 19 al domingo 22, cuatro de cuatro:** el corto el jueves, LUMBAR (upper) el viernes
+y el domingo, y piernas el sábado. Es la primera semana con la partición.
+
+- **Mañanas:** el jueves en 1, que se pasó en 12 min; los otros tres días en 0.
+- **Dominadas 4 x 2:** *bien* el viernes y el domingo. Ya no se caen por tiempo. Siguen igual
+  otra semana, porque dos sesiones no hacen un patrón.
+- **Flexiones sobre los puños:** el domingo, por su cuenta, *"Hice 2 x 10"*. La muñeca, bien.
+- **Puente 26 · 31 · 38.5:** marcó la del medio *ligera*, una vez. Se queda.
+- **Carry 16 · 20 · 22.5:** *bien* todo.
+- **Box squat:** el app registró 20 · 22.5 · 25, pero la nota dice *"Box squat con kettlebell
+  3x8 24kg"*. Se compró **un par de kettlebells de 24** (al principio dijo 25 y luego lo corrigió).
+- **Caminata de entrada de piernas:** *"Modifica a sólo 10 minutos"*.
+- **Pesaje 21-nov:** 84.1 kg, cintura 93.5, músculo 34.5 (sube).
+
+**Revisión 50 (con su OK):**
+- Box squat con la **kettlebell de 24, 3 x 8**.
+- Flexiones **2 x 10 en LUMBAR (upper)**; el resto de días sigue 1 x 10.
+- Caminata de entrada de piernas a **10 min**.
+
+**NIKO, cuatro de cuatro** (NIKO 2, 3, 4 y 5), todo *bien*. La pantorrilla sentada en 7.5 · 10,
+sin queja. El **puente con banda fuerte, *fácil* las dos series**. Fuera del app no comentó
+nada. **Su músculo baja tres sábados seguidos (18.8 → 18.4 → 17.8)** con el peso en 50; se le
+dio el dato a él una vez.
+
+**NIKO revisión 30:** el puente de NIKO 4 pasa a **2 x 20 con 3 s arriba**.
+
+---
+
 ## 2026-11-19 — el completo se parte en dos (revisión 49)
 
 **Del sábado 14 al jueves 19, seis de seis:** el completo el sábado y el martes, el corto los

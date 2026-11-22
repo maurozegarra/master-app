@@ -37,7 +37,7 @@ class TrainingPreviewTest {
     @Test
     fun `la caminata dice cuanto y a que ritmo, con el formato de todo el app`() {
         // El 1-oct la previa decia "5 min" y el historial "5:00 · 5.5 km/h".
-        assertEquals("12 min · 6 km/h", TrainingPreview.describe(item(lumbar, "ex_walk")))
+        assertEquals("10 min · 6 km/h", TrainingPreview.describe(item(lumbar, "ex_walk")))
         assertEquals("45 s", TrainingPreview.duration(45))
         assertEquals("5 min", TrainingPreview.duration(300))
     }

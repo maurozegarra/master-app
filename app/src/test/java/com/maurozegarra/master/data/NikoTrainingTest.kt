@@ -92,4 +92,12 @@ class NikoTrainingTest {
         val sentada = ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_seated_calf")
         assertEquals(listOf(7.5, 7.5, 10.0, 10.0), sentada.setList.map { it.weight })
     }
+
+    @Test
+    fun `revision 30 el puente con banda fuerte sube a 20 y 3 s arriba`() {
+        // Fácil las dos series el 20-nov, y no hay banda más fuerte: suben reps y pausa.
+        val puente = ex(MasterDefaults.NIKO_SINGLE_LEG_ID, "ex_glute_bridge")
+        assertEquals(listOf(2, 20), listOf(puente.sets, puente.workValue))
+        assertEquals(true, puente.note.contains("Aprieta 3 s arriba"))
+    }
 }

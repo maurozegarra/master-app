@@ -89,8 +89,9 @@ class LumbarTrainingTest {
     }
 
     @Test
-    fun `las caminatas son de 12 y de 5 minutos`() {
-        assertEquals(720, training.workouts.first().exercises.single().workValue)
+    fun `las caminatas son de 10 y de 5 minutos`() {
+        // Revision 50 (22-nov): la de entrada de piernas, de 12 a 10, como las otras. La pidió así.
+        assertEquals(600, training.workouts.first().exercises.single().workValue)
         // La de 5, la de cierre, solo en el corto desde la revision 43.
         assertEquals(300, short.workouts.last().exercises.single().workValue)
     }
@@ -279,8 +280,8 @@ class LumbarTrainingTest {
         // Revision 40: la de arriba a 22.5, tras cuatro sesiones con el 20 en "bien".
         // Revision 41: 16 · 20 · 22.5, las de abajo marcaban ligero.
         assertEquals(listOf(16.0, 20.0, 22.5), c.getValue("ex_suitcase_carry").setList.map { it.weight })
-        // Revision 49: 20 · 22.5 · 25 (ver el test de la sentadilla).
-        assertEquals(listOf(20.0, 22.5, 25.0), c.getValue("ex_box_squat").setList.map { it.weight })
+        // Revision 49: 20 · 22.5 · 25. Revision 50: la kettlebell de 24 (ver el test de la sentadilla).
+        assertEquals(listOf(24.0, 24.0, 24.0), c.getValue("ex_box_squat").setList.map { it.weight })
         // El corto no se toca: el alivio es del bloque de cadera, no del carry.
         assertEquals(listOf(16.0, 20.0, 22.5), short.workouts.flatMap { it.exercises }.first { it.exerciseId == "ex_suitcase_carry" }.setList.map { it.weight })
     }
@@ -300,7 +301,8 @@ class LumbarTrainingTest {
         // Revision 30 (8-oct): dos sesiones "bien" sin malestar; la ultima tantea 20.
         // Revision 32 (10-oct): tres "bien"; sube la del medio.
         // Revision 49 (19-nov): sumo, ligero las tres el 17-nov. Hasta 25, su mancuerna mas pesada.
-        assertEquals(listOf(20.0, 22.5, 25.0), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
+        // Revision 50 (22-nov): la kettlebell de 24 en las tres, recién comprada; así lo hizo el 21.
+        assertEquals(listOf(24.0, 24.0, 24.0), cadera(normal).getValue("ex_box_squat").setList.map { it.weight })
         assertTrue(cadera(normal).getValue("ex_box_squat").note.contains("51 cm"))
         // UNA mancuerna desde la revision 8 (TD-130). Iban como TOTAL, que es tambien como
         // van las maquinas, y el player no podia decir "1 de 10". El numero por serie es el
@@ -387,7 +389,8 @@ class LumbarTrainingTest {
         // Revision 43: -310 s de la caminata de cierre (300 y 10 de preparacion).
         // Revision 48: +30 s, el descanso antes de las flexiones sobre los puños.
         // Revision 49: -385 s, el tren superior se va a LUMBAR (upper) (515 + 50 - 180).
-        assertEquals(2153, steps.sumOf { it.durationSec })
+        // Revision 50: -120 s, la caminata de entrada de 12 a 10.
+        assertEquals(2033, steps.sumOf { it.durationSec })
     }
 
     @Test
@@ -480,10 +483,10 @@ class LumbarTrainingTest {
         // falta es movimiento.
         val malo = badDay.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
         assertEquals(listOf(600, 300), malo.map { it.workValue })
-        // 15 minutos de caminata frente a los 12 del dia bueno (17 hasta la revision 43, que
-        // le quito la de cierre), y sin nada de carga.
+        // 15 minutos de caminata frente a los 10 del dia bueno (17 hasta la revision 43, que
+        // le quito la de cierre; 12 hasta la 50), y sin nada de carga.
         val bueno = training.workouts.flatMap { it.exercises }.filter { it.exerciseId == "ex_walk" }
-        assertEquals(listOf(720), bueno.map { it.workValue })
+        assertEquals(listOf(600), bueno.map { it.workValue })
     }
 
     @Test
@@ -775,12 +778,14 @@ class LumbarTrainingTest {
         assertEquals(listOf("ex_pull_ups"), arriba)
         // Revision 48: las únicas flexiones son las de los puños, en el completo y el corto; desde
         // la 49 también en el de arriba, y 1 x 10. El día malo no las lleva.
-        listOf(completo, corto, arribaT).forEach { t ->
+        // Revision 50 (22-nov): en el de arriba, 2 x 10 con un minuto entre series.
+        listOf(completo to 1, corto to 1, arribaT to 2).forEach { (t, series) ->
             val flexiones = t.workouts.flatMap { it.exercises }.filter { it.exerciseId in setOf("ex_pushups", "ex_knee_pushups") }
             assertEquals(1, flexiones.size)
             assertTrue(flexiones.single().note.startsWith("On your fists"))
             assertEquals(30, flexiones.single().prepareSec)
-            assertEquals(1 to 10, flexiones.single().sets to flexiones.single().workValue)
+            assertEquals(series to 10, flexiones.single().sets to flexiones.single().workValue)
+            if (series > 1) assertEquals(60, flexiones.single().restSec)
         }
         assertTrue(malo.workouts.flatMap { it.exercises }.none { it.exerciseId in setOf("ex_pushups", "ex_knee_pushups") })
         listOf(completo, corto, malo).forEach { t ->
