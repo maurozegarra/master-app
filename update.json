@@ -1,7 +1,7 @@
 {
   "minVersionCode": 1,
-  "versionCode": 508,
-  "versionName": "1.0.508",
-  "changelog": "release: TD-215 lo de hoy hecho en la tarjeta y los dias que vienen; lumbar 49 y NIKO 29",
-  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.508/master-1.0.508.apk"
+  "versionName": "1.0.521",
+  "changelog": "release: TD-216 TD-217 TD-218 timer sin Recent, bebida generica Other con Strawberry y More, nombre directo en la hoja del timer; lumbar 50 y NIKO 30",
+  "apkUrl": "https://github.com/maurozegarra/master-app/releases/download/v1.0.521/master-1.0.521.apk",
+  "versionCode": 521
 }
