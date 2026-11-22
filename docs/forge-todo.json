@@ -2,6 +2,20 @@
   "_comment": "Fuente de verdad del to-do de MASTER. Editar este archivo y regenerar to-do.md con forge-status.ps1. Convencion de commits: 'feat: TD-XXX ...' o 'fix: TD-XXX ...'. Orden: items mas recientes primero (TD mas alto arriba).",
   "items": [
     {
+      "id": "TD-218",
+      "title": "Hoja del timer: '+ Name' abre un campo; que sea el campo directo",
+      "category": "UI",
+      "status": "pending",
+      "manual": "APUNTADO el 22-nov, al revisar el flujo del agua (TD-217): en la hoja del timer, '+ Name' es un texto que al tocarlo abre el campo del nombre, en Timer y en Alarm. Es el mismo paso de más que tenía 'Custom' en el agua. Por proponer: el campo directo, sin el paso intermedio. No tocar sin su OK."
+    },
+    {
+      "id": "TD-217",
+      "title": "Agua: una bebida genérica, Other, con su nombre escrito",
+      "category": "UI",
+      "status": "done",
+      "manual": "PEDIDO el 22-nov: 'en Water falta una opción para registrar una bebida nueva, por ejemplo hoy tomé Jugo de Fresa'. Decidido con él: como los ejercicios, las bebidas nuevas no se crean en el app. Hay una genérica, Other (vaso gris, al final de la cuadrícula), que pide el nombre; sin nombre no se guarda. Suma para la meta como cualquiera, y el respaldo lleva el nombre. Cuando dice 'revisa el registro de bebidas', el coach busca los nombres nuevos y los que valen la pena entran al código con su ícono y su color. Va a todos los teléfonos. La cantidad a mano del diálogo pasa de 'Other' a 'Custom', para no repetir la palabra. Encontrado en el ensayo: anotar una bebida no escribía el respaldo de Documents/MASTER (solo un cambio de MASTER lo hacía), así que el coach no veía el jugo. Ahora anotar, corregir o borrar una toma lo escribe. Primera revisión del registro, el mismo 22-nov: 'strawberry juice' pasa a ser Strawberry, con una fresa outline dibujada (Material no tiene) en rojo fresa; las tomas con ese nombre se leen como la bebida nueva. Ajuste del flujo, el mismo día: al abrir, solo las diez de siempre y un cuadro More que despliega las raras (Strawberry y Other) y pasa a Less; corregir una rara abre desplegado. Other pide solo Drink name y Amount (ml), sin 200/600/Custom. El campo de Custom dice Amount (ml). El botón Other de la pantalla del agua pasa a More. Segundo ajuste: Custom abría un campo aparte, un paso de más que hacía crecer la ventana. Ahora el tercer espacio de la barra de cantidad ES el campo (200 ml | 600 ml | ___ ml): escribir lo elige, tocar un atajo lo deja en gris. Other usa la misma barra debajo del nombre, sin campo de cantidad aparte.\n\nProbar: la gota, More (el botón de abajo), More en la cuadrícula, el cuadro Other: 'Drink name' y la barra de cantidad; sin nombre, Save apagado. Escribir 'Strawberry juice', 200 ml, Save: en Today's water sale 'Strawberry juice · 200 ml' con el vaso gris, y suma al total. La cantidad: '200 ml | 600 ml | Custom'."
+    },
+    {
       "id": "TD-216",
       "title": "Hoja del timer: fuera Recent de la pestaña Timer",
       "category": "UI",

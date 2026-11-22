@@ -23,6 +23,8 @@ import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Grass
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material.icons.outlined.LocalDrink
+import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.SoupKitchen
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -37,6 +39,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +52,6 @@ import com.maurozegarra.master.i18n.I18n
 import com.maurozegarra.master.i18n.WaterStrings
 import com.maurozegarra.master.ui.AppTextField
 import com.maurozegarra.master.ui.master.ClockTimeDialog
-import com.maurozegarra.master.ui.master.SegmentToggle
 import com.maurozegarra.master.ui.master.STAGE_COLORS
 import com.maurozegarra.master.ui.theme.AppTheme
 import java.time.Instant
@@ -72,6 +76,8 @@ internal fun drinkIcon(type: String): ImageVector = when (type) {
     Drinks.COFFEE -> Icons.Outlined.Coffee
     Drinks.MACA -> Icons.Outlined.Grass
     Drinks.LEMONADE -> Icons.Outlined.WbSunny
+    Drinks.STRAWBERRY_JUICE -> Strawberry
+    // La genérica (TD-217) comparte el vaso con el agua; la distingue el gris.
     else -> Icons.Outlined.LocalDrink
 }
 
@@ -87,6 +93,10 @@ internal fun drinkColor(type: String): Color = when (type) {
     Drinks.SODA -> Color(0xFF8C7CF0)
     Drinks.COFFEE -> Color(0xFFB07A50)
     Drinks.MACA -> Color(0xFFD65BB5)
+    // Gris (TD-217): es la que todavía no tiene color propio.
+    Drinks.OTHER -> Color(0xFFBEBEC6)
+    // Rojo fresa, más rosado que el rojo del app para no confundirse con él.
+    Drinks.STRAWBERRY_JUICE -> Color(0xFFFF5C7A)
     else -> paletteColor(type)
 }
 
@@ -113,8 +123,14 @@ internal fun drinkName(type: String, w: WaterStrings): String = when (type) {
     Drinks.COFFEE -> w.coffee
     Drinks.MACA -> w.maca
     Drinks.LEMONADE -> w.lemonade
+    Drinks.OTHER -> w.otherDrink
+    Drinks.STRAWBERRY_JUICE -> w.strawberryJuice
     else -> w.water
 }
+
+/** Lo que dice una toma: el nombre escrito si es [Drinks.OTHER] (TD-217), si no el de su bebida. */
+internal fun logName(l: WaterLog, w: WaterStrings): String =
+    l.name.takeIf { l.type == Drinks.OTHER && it.isNotBlank() } ?: drinkName(l.type, w)
 
 /** El ícono de una bebida en su recuadro de color, con la misma receta que el de un ejercicio (ExerciseGlyph). */
 @Composable
@@ -128,7 +144,125 @@ internal fun DrinkGlyph(type: String, sizeDp: Int = 40) {
     }
 }
 
-private const val OTHER = "other"
+private const val MORE = "more"
+private const val LESS = "less"
+
+/**
+ * La cantidad (TD-217, 22-nov): los dos atajos y, en el tercer espacio, el campo mismo. Era un
+ * "Custom" que abría un campo debajo: *"un paso innecesario"*, y la ventana crecía. Escribir
+ * lo elige; tocar un atajo suelta el teclado y lo deja en gris. Mide siempre lo mismo.
+ */
+@Composable
+private fun AmountBar(
+    medidas: List<Int>,
+    ml: Int,
+    otra: String,
+    otraSel: Boolean,
+    accent: Color,
+    w: WaterStrings,
+    onPick: (Int) -> Unit,
+    onCustom: (String) -> Unit,
+) {
+    val foco = androidx.compose.ui.platform.LocalFocusManager.current
+    // Con el foco, el campo está elegido aunque una bebida acabe de volver la cantidad a 200
+    // (22-nov): el cursor quedaba debajo de "Custom", con el teclado abierto.
+    var enfocado by remember { mutableStateOf(false) }
+    val c = AppTheme.colors
+    val forma = RoundedCornerShape(10.dp)
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(c.track).padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        medidas.forEach { m ->
+            val activo = !otraSel && m == ml
+            Box(
+                Modifier
+                    .weight(1f)
+                    .height(40.dp)
+                    .clip(forma)
+                    .then(if (activo) Modifier.border(1.dp, accent, forma) else Modifier)
+                    .clickable { foco.clearFocus(); onPick(m) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "$m ml",
+                    color = if (activo) accent else c.textDim,
+                    fontWeight = if (activo) FontWeight.Bold else FontWeight.Medium,
+                    fontSize = 14.sp,
+                )
+            }
+        }
+        val vacio = otra.isEmpty() && !otraSel && !enfocado
+        androidx.compose.foundation.text.BasicTextField(
+            value = otra,
+            onValueChange = { s -> onCustom(s.filter { it.isDigit() }.take(4)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            cursorBrush = androidx.compose.ui.graphics.SolidColor(accent),
+            textStyle = androidx.compose.ui.text.TextStyle(
+                color = if (otraSel) accent else c.textDim,
+                fontWeight = if (otraSel) FontWeight.Bold else FontWeight.Medium,
+                fontSize = 14.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            ),
+            // " ml" como parte del texto que se ve, no como otra pieza al lado (22-nov): con el
+            // campo midiéndose a lo justo, los números no se veían al escribir.
+            visualTransformation = if (vacio) androidx.compose.ui.text.input.VisualTransformation.None else MlSuffix,
+            modifier = Modifier
+                .weight(1f)
+                .height(40.dp)
+                .clip(forma)
+                .then(if (otraSel) Modifier.border(1.dp, accent, forma) else Modifier)
+                // Tocarlo ya lo elige, aunque todavía no tenga número.
+                .onFocusChanged {
+                    enfocado = it.isFocused
+                    if (it.isFocused && !otraSel) onCustom(otra)
+                },
+            decorationBox = { campo ->
+                // El campo va SIEMPRE en la composición (22-nov): vacío se dibujaba solo "Custom" en
+                // su lugar, y el teclado se abría sin tener dónde escribir. "Custom" va encima.
+                Box(Modifier.fillMaxWidth().padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
+                    campo()
+                    if (vacio) Text(w.custom, color = c.textDim, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                }
+            },
+        )
+    }
+}
+
+/** "350" se ve "350 ml"; el cursor no pasa del último número. */
+private val MlSuffix = androidx.compose.ui.text.input.VisualTransformation { texto ->
+    androidx.compose.ui.text.input.TransformedText(
+        androidx.compose.ui.text.AnnotatedString(texto.text + " ml"),
+        object : androidx.compose.ui.text.input.OffsetMapping {
+            override fun originalToTransformed(offset: Int) = offset
+            override fun transformedToOriginal(offset: Int) = minOf(offset, texto.text.length)
+        },
+    )
+}
+
+/** El cuadro que despliega o esconde las bebidas raras (TD-217), del tamaño de una bebida. */
+@Composable
+private fun MoreTile(more: Boolean, w: WaterStrings, modifier: Modifier, onClick: () -> Unit) {
+    Column(
+        modifier
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, AppTheme.colors.track, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+            Icon(
+                if (more) Icons.Outlined.MoreHoriz else Icons.Outlined.ExpandLess,
+                contentDescription = null,
+                tint = AppTheme.colors.textDim,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(if (more) w.more else w.less, color = AppTheme.colors.textDim, fontSize = 12.sp)
+    }
+}
 
 private val HORA = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)
 
@@ -157,18 +291,22 @@ internal fun DrinkDialog(
     val accent = AppTheme.colors.accent
     val ahora = remember { System.currentTimeMillis() }
     var tipo by remember { mutableStateOf(editing?.type ?: drinkAt(ahora)) }
+    var nombre by remember { mutableStateOf(editing?.name ?: "") }
+    // Las raras, desplegadas (TD-217). Corregir una toma rara abre ya con ellas a la vista.
+    var mas by remember { mutableStateOf(tipo in Drinks.RARE) }
     // Una toma nueva sigue a su hora mientras no se elija la bebida a mano.
     var tipoElegido by remember { mutableStateOf(editing != null) }
     // Con la botella sin gas el atajo es 500 y no 600 (8-oct): es la que compra en la tarde.
     val medidas = listOf(WaterPlan.GLASS_ML, if (tipo == Drinks.BOTTLE) WaterPlan.STILL_BOTTLE_ML else WaterPlan.BOTTLE_ML)
     var ml by remember { mutableStateOf(editing?.ml ?: defaultMl(tipo)) }
+    // La cantidad a mano, escrita en el tercer espacio de la barra (TD-217).
     var otra by remember { mutableStateOf(editing?.ml?.takeIf { it !in medidas }?.toString() ?: "") }
-    // El campo de otra cantidad solo se enseña al elegir "Other": casi siempre es 200 o 600.
     var otraSel by remember { mutableStateOf(otra.isNotEmpty()) }
     var hora by remember { mutableStateOf(Instant.ofEpochMilli(editing?.at ?: ahora).atZone(zone).toLocalTime().withSecond(0).withNano(0)) }
     var reloj by remember { mutableStateOf(false) }
     val dia = editing?.let { Instant.ofEpochMilli(it.at).atZone(zone).toLocalDate() } ?: LocalDate.now(zone)
-    val cantidad = if (otraSel) otra.toIntOrNull()?.takeIf { it > 0 } ?: ml else ml
+    // Con el campo elegido y vacío no hay cantidad: Save se apaga en vez de guardar otra cosa.
+    val cantidad = if (otraSel) otra.toIntOrNull()?.takeIf { it > 0 } else ml
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -190,11 +328,19 @@ internal fun DrinkDialog(
             }
         },
         text = {
+            // Tocar una bebida, More o Less suelta el campo de la cantidad y su teclado (22-nov).
+            // El de DENTRO del diálogo: es otra ventana, y el de fuera no suelta nada aquí.
+            val foco = androidx.compose.ui.platform.LocalFocusManager.current
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Las bebidas, con su ícono: dos filas de cuatro.
-                Drinks.ALL.chunked(4).forEach { fila ->
+                // Las bebidas, con su ícono, de cuatro en cuatro. Al final More, que despliega las
+                // raras y pasa a Less (TD-217); cae en el hueco de la tercera fila.
+                ((if (mas) Drinks.ALL else Drinks.USUAL) + (if (mas) LESS else MORE)).chunked(4).forEach { fila ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         fila.forEach { d ->
+                            if (d == MORE || d == LESS) {
+                                MoreTile(d == MORE, w, Modifier.weight(1f)) { foco.clearFocus(); mas = !mas }
+                                return@forEach
+                            }
                             val sel = d == tipo
                             Column(
                                 Modifier
@@ -204,6 +350,7 @@ internal fun DrinkDialog(
                                     // Cada botella trae su cantidad (8-oct): con gas 600, sin gas
                                     // 500; las de vaso, 200.
                                     .clickable {
+                                        foco.clearFocus()
                                         tipo = d
                                         tipoElegido = true
                                         ml = defaultMl(d)
@@ -223,26 +370,33 @@ internal fun DrinkDialog(
                         repeat(4 - fila.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }
-                SegmentToggle(
-                    options = medidas.map { "$it" to "$it ml" } + (OTHER to w.other),
-                    selected = if (otraSel) OTHER else "$ml",
-                    accent = accent,
-                ) { if (it == OTHER) otraSel = true else { ml = it.toInt(); otraSel = false } }
-                if (otraSel) {
+                // La genérica pide su nombre (TD-217): sin él no hay nada que revisar después.
+                if (tipo == Drinks.OTHER) {
                     AppTextField(
-                        value = otra,
-                        onValueChange = { s -> otra = s.filter { it.isDigit() }.take(4) },
-                        label = w.otherAmount,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        value = nombre,
+                        onValueChange = { nombre = it.take(40) },
+                        label = w.drinkName,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
+                AmountBar(
+                    medidas, ml, otra, otraSel, accent, w,
+                    onPick = { ml = it; otraSel = false },
+                    onCustom = { otra = it; otraSel = true },
+                )
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                onSave(WaterLog(dia.atTime(hora).atZone(zone).toInstant().toEpochMilli(), cantidad, tipo))
-            }) { Text(w.save, color = accent, fontWeight = FontWeight.Bold) }
+            // Sin cantidad, o en Other sin nombre, no hay qué guardar.
+            val sinNombre = cantidad == null || (tipo == Drinks.OTHER && nombre.isBlank())
+            TextButton(enabled = !sinNombre, onClick = {
+                onSave(
+                    WaterLog(
+                        dia.atTime(hora).atZone(zone).toInstant().toEpochMilli(), cantidad ?: return@TextButton, tipo,
+                        name = if (tipo == Drinks.OTHER) nombre.trim() else "",
+                    ),
+                )
+            }) { Text(w.save, color = if (sinNombre) AppTheme.colors.textDim else accent, fontWeight = FontWeight.Bold) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(t.cancel, color = AppTheme.colors.textDim) }
@@ -307,6 +461,37 @@ private val SparklingBottle: ImageVector by lazy {
             "M9.4,21.5m-0.9,0a0.9,0.9 0 1,0 1.8,0a0.9,0.9 0 1,0 -1.8,0",
         insideIsStroke = false,
     )
+}
+
+/**
+ * La fresa del jugo (TD-217): Material no tiene una. Outline como los demás íconos -cuerpo,
+ * hojas y semillas-, en el lienzo de 24 de Material.
+ */
+private val Strawberry: ImageVector by lazy {
+    val negro = androidx.compose.ui.graphics.SolidColor(Color.Black)
+    ImageVector.Builder(name = "Strawberry", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f)
+        .addPath(
+            pathData = androidx.compose.ui.graphics.vector.addPathNodes(
+                // El cuerpo, ancho arriba y en punta abajo.
+                "M12,21C8,19.2 4.8,15.2 4.8,11.2C4.8,8.6 6.8,7.1 9.3,7.5C10.4,7.7 11.2,8.1 12,8.1" +
+                    "C12.8,8.1 13.6,7.7 14.7,7.5C17.2,7.1 19.2,8.6 19.2,11.2C19.2,15.2 16,19.2 12,21Z" +
+                    // El tallo y las dos hojas.
+                    "M12,8.1L12,3.5M12,6.6C10.6,4.9 8.7,4.7 7.4,5.6M12,6.6C13.4,4.9 15.3,4.7 16.6,5.6",
+            ),
+            stroke = negro,
+            strokeLineWidth = 1.8f,
+            strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+            strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
+        )
+        .addPath(
+            // Las semillas.
+            pathData = androidx.compose.ui.graphics.vector.addPathNodes(
+                listOf(9.5f to 11.2f, 14.5f to 11.2f, 12f to 13.6f, 9.6f to 15.4f, 14.4f to 15.4f, 12f to 17.8f)
+                    .joinToString("") { (x, y) -> "M$x,${y}m-0.85,0a0.85,0.85 0 1,0 1.7,0a0.85,0.85 0 1,0 -1.7,0" },
+            ),
+            fill = negro,
+        )
+        .build()
 }
 
 private val StillBottle: ImageVector by lazy {

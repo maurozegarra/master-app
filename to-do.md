@@ -4,7 +4,7 @@
 > No editar directamente; actualizar el JSON y regenerar con `.\forge-status.ps1`.
 > Convencion de commits: `feat: TD-XXX ...` / `fix: TD-XXX ...`.
 
-Progreso: **190 / 216** hechos, 25 pendientes, 1 descartados.
+Progreso: **191 / 218** hechos, 26 pendientes, 1 descartados.
 
 ## Pendientes
 
@@ -153,6 +153,8 @@ A DEFINIR: dónde vive el apk -el server de watchwall (llega afuera por el mismo
 
 ### UI
 
+- [ ] **TD-218** Hoja del timer: '+ Name' abre un campo; que sea el campo directo
+  - APUNTADO el 22-nov, al revisar el flujo del agua (TD-217): en la hoja del timer, '+ Name' es un texto que al tocarlo abre el campo del nombre, en Timer y en Alarm. Es el mismo paso de más que tenía 'Custom' en el agua. Por proponer: el campo directo, sin el paso intermedio. No tocar sin su OK.
 - [ ] **TD-192** La semana de la pantalla principal marca qué training toca cada día
   - PEDIDO el 5-oct, mirando la pantalla principal. Los días futuros de la semana son círculos vacíos: el martes no dice que va LUMBAR, ni el miércoles que va el short. El puntito de abajo solo marca lo ya entrenado. La información ya existe: scheduleDays y scheduleDates de cada training (TD-167, TD-178), que es lo que decide el orden de la lista.
 
@@ -367,6 +369,7 @@ DESCARTADO el 6-oct-2026, decisión suya: "el tema de los videos, cero ganas de 
 
 ### UI
 
+- [x] **TD-217** Agua: una bebida genérica, Other, con su nombre escrito
 - [x] **TD-216** Hoja del timer: fuera Recent de la pestaña Timer
 - [x] **TD-215** Inicio: lo de hoy queda hecho en la tarjeta, y los días que vienen se miran tocándolos
 - [x] **TD-214** Historial: la duración de la sesión en la tarjeta, las horas al abrirla y el despertar solo con dolor

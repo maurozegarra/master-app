@@ -205,7 +205,8 @@ private fun WaterHome(onBack: () -> Unit) {
                         WaterAlarm.add(ctx, ml, tipo)
                         vuelta++
                     }
-                    AppOutlineButton(w.other, accent, Modifier.weight(1f)) { dialogo = Dialogo(null) }
+                    // "More" y no "Other" (TD-217): Other es la bebida genérica del diálogo.
+                    AppOutlineButton(w.more, accent, Modifier.weight(1f)) { dialogo = Dialogo(null) }
                 }
             }
             if (hoy.start == null) {
@@ -259,7 +260,7 @@ private fun LogRow(l: WaterLog, zone: ZoneId, swipe: SwipeRowsController, onEdit
                 DrinkGlyph(l.type)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("${drinkName(l.type, w)} · ${l.ml} ml", color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    Text("${logName(l, w)} · ${l.ml} ml", color = AppTheme.colors.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                     Text(hora, color = AppTheme.colors.textDim, fontSize = 13.sp)
                 }
             }

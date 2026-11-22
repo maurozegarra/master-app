@@ -848,10 +848,17 @@ data class WaterStrings(
     val remindTitle: String = "Time for water",
     val remindText: String = "%1\$d of %2\$d ml · %3\$s behind",
     val channel: String = "Water",
-    val other: String = "Other",
     val addTitle: String = "Add a drink",
     val editTitle: String = "Edit drink",
-    val otherAmount: String = "Other amount (ml)",
+    /** El tercer espacio de la barra de cantidad, vacío: es el campo mismo (TD-217). */
+    val custom: String = "Custom",
+    /** La bebida genérica (TD-217) y su campo. */
+    val otherDrink: String = "Other",
+    val drinkName: String = "Drink name",
+    /** El botón de la pantalla y el cuadro que despliega las raras (TD-217). */
+    val more: String = "More",
+    val less: String = "Less",
+    val strawberryJuice: String = "Strawberry",
     val time: String = "Time",
     val save: String = "Save",
     val water: String = "Water",

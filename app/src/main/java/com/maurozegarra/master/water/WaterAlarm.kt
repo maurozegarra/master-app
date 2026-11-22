@@ -81,6 +81,7 @@ object WaterAlarm {
         store.saveLogs(WaterPlan.add(store.logs(), WaterLog(now, ml, type ?: drinkAt(context, now)), LocalDate.now(zone), zone))
         context.getSystemService(NotificationManager::class.java).cancel(NOTIF)
         reschedule(context)
+        backup()
     }
 
     /** Una toma con su hora, su bebida y su cantidad: una nueva, o corregir la toma [replacing]. */
@@ -92,12 +93,34 @@ object WaterAlarm {
             else WaterPlan.add(store.logs(), entry, LocalDate.now(zone), zone),
         )
         reschedule(context)
+        backup()
     }
 
     fun remove(context: Context, id: String) {
         val store = WaterStore(context)
         store.saveLogs(WaterPlan.remove(store.logs(), id))
         reschedule(context)
+        backup()
+    }
+
+    /**
+     * El respaldo de Documents/MASTER al día con lo que se toma (TD-217, 22-nov). Solo lo
+     * escribía un cambio de MASTER -una sesión, un training-, así que el agua iba atrasada, y
+     * "revisa el registro de bebidas" lee de ahí. Las tres puertas de arriba son por donde pasa
+     * toda toma: el +, el botón del aviso y el diálogo.
+     *
+     * Con el mismo guardia que el snapshot del ViewModel: sin trainings ni sesiones es una
+     * instalación vacía, y escribirla taparía un respaldo bueno.
+     */
+    private fun backup() {
+        kotlin.concurrent.thread(name = "water-backup") {
+            runCatching {
+                val koin = org.koin.core.context.GlobalContext.get()
+                val store = koin.get<com.maurozegarra.master.data.WorkoutStore>()
+                if (store.loadTrainings().isEmpty() && store.loadSessions().isEmpty()) return@runCatching
+                koin.get<com.maurozegarra.master.data.AutoBackup>().write(store.exportJson())
+            }
+        }
     }
 
     /** El próximo recordatorio de hoy, si hay. */

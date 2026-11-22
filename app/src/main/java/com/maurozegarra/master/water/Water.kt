@@ -33,6 +33,11 @@ data class WaterLog(
      * una se llevaba las dos. Anotar dos veces seguidas es normal; la hora no es un DNI.
      */
     val id: String = java.util.UUID.randomUUID().toString(),
+    /**
+     * Lo que se tomó, escrito a mano, cuando es [Drinks.OTHER] (TD-217): "Strawberry juice". El
+     * coach revisa estos nombres y los que se repiten pasan a ser una bebida con su ícono.
+     */
+    val name: String = "",
 )
 
 /**
@@ -54,7 +59,38 @@ object Drinks {
     const val SPARKLING = "sparkling"
     /** La de la tarde: agua sin gas, 500 ml (8-oct). La misma agua que [WATER], en botella. */
     const val BOTTLE = "bottle"
-    val ALL = listOf(WATER, SPARKLING, BOTTLE, CREATINE, QUINOA, MACA, COFFEE, SOUP, LEMONADE, SODA)
+    /**
+     * Cualquier otra, con su nombre escrito (TD-217, 22-nov): el jugo de fresa no es agua. Va
+     * al final. Como los ejercicios, las bebidas nuevas no se crean en el app: el coach revisa
+     * el registro y la que vale la pena entra en el código con su ícono y su color.
+     */
+    const val OTHER = "other"
+    /** La primera que salió de [OTHER] (TD-217, 22-nov): el jugo de fresa del ensayo. */
+    const val STRAWBERRY_JUICE = "strawberry_juice"
+    /**
+     * Las de siempre (TD-217, 22-nov): las diez de su horario, todas usadas en los últimos 50
+     * días. Son las que se ven al abrir el diálogo.
+     */
+    val USUAL = listOf(WATER, SPARKLING, BOTTLE, CREATINE, QUINOA, MACA, COFFEE, SOUP, LEMONADE, SODA)
+
+    /**
+     * Las raras, detrás de More (TD-217): *"no me parece bien mostrar una opción para algo que
+     * pasa cada 3 meses"*. Las que salgan de [OTHER] entran aquí; si una se vuelve de todos los
+     * días, el coach la pasa a [USUAL]. [OTHER] siempre al final.
+     */
+    val RARE = listOf(STRAWBERRY_JUICE, OTHER)
+
+    val ALL = USUAL + RARE
+
+    /**
+     * Los nombres escritos en [OTHER] que ya tienen bebida propia (TD-217), en minúsculas. Al
+     * leer, una toma vieja con ese nombre pasa a ser esa bebida: así las de antes de crearla
+     * -y las de un respaldo- se ven con su ícono, sin migrar nada a mano.
+     */
+    val PROMOTED: Map<String, String> = mapOf(
+        "strawberry juice" to STRAWBERRY_JUICE,
+        "jugo de fresa" to STRAWBERRY_JUICE,
+    )
 }
 
 object WaterPlan {
@@ -332,7 +368,11 @@ object WaterPlan {
 
     fun encode(logs: List<WaterLog>): String =
         JSONArray().apply {
-            logs.forEach { put(JSONObject().put("id", it.id).put("at", it.at).put("ml", it.ml).put("type", it.type)) }
+            logs.forEach {
+                val o = JSONObject().put("id", it.id).put("at", it.at).put("ml", it.ml).put("type", it.type)
+                if (it.name.isNotEmpty()) o.put("name", it.name)
+                put(o)
+            }
         }.toString()
 
     /**
@@ -346,8 +386,12 @@ object WaterPlan {
             val o = a.optJSONObject(i) ?: return@mapNotNull null
             val at = o.optLong("at", 0L).takeIf { it > 0 } ?: return@mapNotNull null
             val ml = o.optInt("ml", 0).takeIf { it > 0 } ?: return@mapNotNull null
-            val type = o.optString("type").takeIf { it in Drinks.ALL } ?: Drinks.WATER
-            o.optString("id").takeIf { it.isNotBlank() }?.let { WaterLog(at, ml, type, it) } ?: WaterLog(at, ml, type)
+            val escrita = o.optString("type").takeIf { it in Drinks.ALL } ?: Drinks.WATER
+            val nombre = if (escrita == Drinks.OTHER) o.optString("name") else ""
+            val ascendida = Drinks.PROMOTED[nombre.trim().lowercase()]
+            val type = ascendida ?: escrita
+            val name = if (ascendida != null) "" else nombre
+            o.optString("id").takeIf { it.isNotBlank() }?.let { WaterLog(at, ml, type, it, name) } ?: WaterLog(at, ml, type, name = name)
         }.sortedBy { it.at }
     }.getOrDefault(emptyList())
 

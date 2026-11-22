@@ -277,6 +277,34 @@ class WaterPlanTest {
     }
 
     @Test
+    fun `la bebida generica guarda su nombre, y el respaldo lo lleva`() {
+        // TD-217 (22-nov): el jugo de fresa no es agua. Va como Other con su nombre, que el coach
+        // revisa para convertirlo en bebida.
+        // Con un nombre que no tiene bebida propia: el de fresa ya la tiene (ver el test siguiente).
+        val jugo = WaterLog(at(16, 12), 200, Drinks.OTHER, name = "Mango juice")
+        val leida = WaterPlan.decode(WaterPlan.encode(listOf(jugo))).single()
+        assertEquals(jugo, leida)
+        assertEquals("Mango juice", leida.name)
+        // Las de siempre no llevan nombre, ni aunque el archivo traiga uno.
+        assertEquals("", WaterPlan.decode("""[{"at":1,"ml":200,"type":"water","name":"x"}]""").single().name)
+        // Cuenta para la meta como cualquiera.
+        assertEquals(400, WaterPlan.total(listOf(jugo, WaterLog(at(17, 0), 200))))
+    }
+
+    @Test
+    fun `una bebida escrita que ya tiene la suya se lee como esa`() {
+        // TD-217: el 22-nov anotó "strawberry juice" en Other; el coach le dio bebida propia. La
+        // toma de antes se ve como el jugo, sin nombre suelto. Sin importar mayúsculas.
+        val viejo = """[{"at":1,"ml":200,"type":"other","name":"strawberry juice"},{"at":2,"ml":200,"type":"other","name":" Jugo de Fresa "}]"""
+        WaterPlan.decode(viejo).forEach {
+            assertEquals(Drinks.STRAWBERRY_JUICE, it.type)
+            assertEquals("", it.name)
+        }
+        // Lo que no está en la lista sigue como Other con su nombre.
+        assertEquals("mango juice", WaterPlan.decode("""[{"at":1,"ml":200,"type":"other","name":"mango juice"}]""").single().name)
+    }
+
+    @Test
     fun `las tomas del 4-oct de su app de antes, con su bebida y todas cuentan`() {
         val dia = WaterPlan.seed4Oct(lima)
         assertEquals(8, dia.size)
